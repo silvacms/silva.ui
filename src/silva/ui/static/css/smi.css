@@ -1,0 +1,285 @@
+* { cursor:default; -webkit-tap-highlight-color: rgba(0,0,0,0); }
+html { background:#577086 url(../img/bg.png) repeat-x top; overflow:hidden; }
+a { text-decoration:none; cursor:pointer; color:inherit; }
+a ins { cursor:pointer; margin:0 2px 0 0; }
+a.button {
+  display:block; float:left; border:1px #999 solid;
+  line-height:20px; margin-left:5px; padding:0 6px;
+  background:#eee url(../img/gradient25.png) repeat-x top;
+  -khtml-border-radius:3px; -moz-border-radius:3px;
+  -ms-border-radius:3px; -o-border-radius:3px;
+  -webkit-border-radius:3px; border-radius:3px;
+}
+a.button:hover { background-image:url(../img/gradient20m.png); color:#222; }
+a.button:active { background-image:url(../img/gradient25.png); }
+a.button ins { margin-left:-3px; }
+
+input, textarea { cursor:text; }
+
+.loading { background:#fff url(../img/loading.gif) no-repeat center center!important; }
+
+#overlay { position:absolute; top:0; bottom:0; left:0; right:0; z-index:100; background:url(../img/overlay.png); }
+#dialog {
+  position:absolute; top:50%; left:50%; height:250px; width:400px; background:#fff;
+  -khtml-border-radius:5px; -moz-border-radius:5px;
+  -ms-border-radius:5px; -o-border-radius:5px;
+  -webkit-border-radius:5px; border-radius:5px;
+  -khtml-box-shadow:#333 0 0 3px; -moz-box-shadow:#333 0 0 3px;
+  -ms-box-shadow:#333 0 0 3px; -o-box-shadow:#333 0 0 3px;
+  -webkit-box-shadow:#333 0 0 3px; box-shadow:#333 0 0 3px;
+}
+#dialog h2 { margin:8px; }
+#dialog p { margin:8px; }
+#dialog input { margin:2px 0;}
+#dialog_actions { position:absolute; bottom:0; left:0; right:0; height:22px; padding:5px; }
+#dialog_actions div.actions_left { float:left; }
+#dialog_actions div.actions_right { float:right; }
+
+#header { height:60px; overflow:hidden; }
+#header h1 {
+  width:200px; height:50px; line-height:50px; overflow:hidden;
+  float:left; margin:5px 20px; font-size:2em;
+}
+#header ol { float:right; list-style:none; margin:0 20px; line-height:22px; }
+#header ol li { float:left; }
+#header ol li a {
+  display:block; margin:18px 0 0 10px; padding:2px 15px;
+  background:#fff url(../img/gradient25.png) repeat-x bottom; color:#222;
+  -khtml-border-radius:5px; -moz-border-radius:5px;
+  -ms-border-radius:5px; -o-border-radius:5px;
+  -webkit-border-radius:5px; border-radius:5px;
+  -khtml-box-shadow:#1c2e3d 0 1px 4px; -moz-box-shadow:#1c2e3d 0 1px 4px;
+  -ms-box-shadow:#1c2e3d 0 1px 4px; -o-box-shadow:#1c2e3d 0 1px 4px;
+  -webkit-box-shadow:#1c2e3d 0 1px 4px; box-shadow:#1c2e3d 0 1px 4px;
+}
+#header ol li a:hover { color:#000; border-color:#555; }
+#main { position:absolute; top:65px; bottom:20px; left:20px; right:20px; }
+
+#tree {
+  position:absolute; top:0; bottom:0; left:0; width:280px; background:#fff;
+  -khtml-box-shadow:#1c2e3d 0 3px 10px; -moz-box-shadow:#1c2e3d 0 3px 10px;
+  -ms-box-shadow:#1c2e3d 0 3px 10px; -o-box-shadow:#1c2e3d 0 3px 10px;
+  -webkit-box-shadow:#1c2e3d 0 3px 10px; box-shadow:#1c2e3d 0 3px 10px;
+}
+#tree h2 { height:30px; line-height:30px; background:#a3d042 url(../img/green30.png) repeat-x bottom; color:#fff; padding:0 8px; text-shadow:#305c00 1px 1px 0; }
+#SMITree { position:absolute; top:30px; bottom:0; left:0; right:0; overflow:auto; -ms-overflow-x:hidden; overflow-x:hidden; }
+#SMITree ul { list-style:none; margin:0; padding:3px 0 3px 3px; width:999px; }
+#SMITree ul li a { display:block; height:20px; line-height:20px; color:#111; padding:0; }
+#SMITree ul li a:hover { background-color:#d2e5f9; }
+#SMITree ul li a.selected { background-color:#4d96e6; color:#fff; }
+#SMITree ins { float:left; width:20px; height:20px; }
+
+#contents {
+  position:absolute; top:0px; bottom:0px; left:300px; right:0px; background:#fff;
+  -khtml-box-shadow:#1c2e3d 0 3px 10px; -moz-box-shadow:#1c2e3d 0 3px 10px;
+  -ms-box-shadow:#1c2e3d 0 3px 10px; -o-box-shadow:#1c2e3d 0 3px 10px;
+  -webkit-box-shadow:#1c2e3d 0 3px 10px; box-shadow:#1c2e3d 0 3px 10px;
+}
+
+#SMIInfo {
+  height:50px; background:url(../img/gradient50.png) repeat-x bottom;
+  padding:10px; line-height:24px; overflow:hidden; color:#111;
+}
+#SMIInfo a { color:#111; }
+#SMIInfo h3 { font-size:1.3em; white-space:nowrap; margin-bottom:5px; }
+#SMIInfo h3 ins.icon {
+  display:block; float:left; width:20px; height:20px; margin-right:4px;
+  background-image:url(../img/sprite.png); background-repeat:no-repeat; background-color:transparent;
+}
+
+#SMIInfo_tabs { position:absolute; z-index:99; float:left; list-style:none; margin:0; padding:0; }
+#SMIInfo_tabs li { float:left; display:block; }
+#SMIInfo_tabs li a {
+  display:block; margin-top:5px; padding:0 11px; height:27px;
+  line-height:26px; color:#222;
+}
+#SMIInfo_tabs li a:hover { text-decoration:underline; }
+#SMIInfo_tabs li a.active {
+  height:26px; line-height:24px; padding:0 10px; background:#fff;
+  border:1px #999 solid; border-bottom:0; text-decoration:none;
+  -khtml-border-radius:3px 3px 0 0; -moz-border-radius:3px 3px 0 0;
+  -ms-border-radius:3px 3px 0 0; -o-border-radius:3px 3px 0 0;
+  -webkit-border-radius:3px 3px 0 0; border-radius:3px 3px 0 0;
+}
+
+#SMIInfo_actions { float:right; list-style:none; margin:0; padding:0; }
+#SMIInfo_actions li { float:left; margin-left:8px; }
+#SMIInfo_actions li a {
+  display:block; line-height:22px; padding:0 8px; border:1px #999 solid;
+  background:#fff; color:#222;
+  -khtml-border-radius:5px; -moz-border-radius:5px;
+  -ms-border-radius:5px; -o-border-radius:5px;
+  -webkit-border-radius:5px; border-radius:5px;
+  -khtml-box-shadow:0 0 2px #aaa; -moz-box-shadow:0 0 2px #aaa;
+  -ms-box-shadow:0 0 2px #aaa; -o-box-shadow:0 0 2px #aaa;
+  -webkit-box-shadow:0 0 2px #aaa; box-shadow:0 0 2px #aaa;
+}
+#SMIInfo_actions li a:hover { border-color:#555; background:#fff url(../img/gradient25.png) repeat-x bottom; }
+
+#SMIContents table { width:100%; border-collapse:collapse; }
+#SMIContents td, #SMIContents th { padding:0 10px 0 0; line-height:22px; text-align:left; white-space:nowrap; overflow:hidden; }
+#SMIContents th.centered, td.centered { text-align:center; }
+#SMIContents th.dragHandle { background-image:url(../img/sprite.png); background-position:-101px -59px; }
+#SMIContents th.col_title { padding-left:15px; }
+
+#SMIContents td.dragHandle { cursor:move; padding:0 8px; width:20px; }
+#SMIContents td.dragHandle ins { display:block; float:left; width:20px; height:20px; margin:1px 0; background-image:url(../img/sprite.png); cursor:move; }
+#SMIContents td ins.state { display:block; float:left; background-image:url(../img/sprite.png); margin-top:6px; margin-right:5px; }
+
+#SMIContents_head {
+  background:#eee url(../img/gradient25.png) repeat-x bottom; border-top:1px #999 solid; border-bottom:1px #999 solid;
+  padding-right:17px; overflow:hidden;
+}
+#SMIContents_rows {
+  position:absolute; top:94px; bottom:25px; left:0; right:0; overflow:scroll; -ms-overflow-x:hidden; overflow-x:hidden;
+}
+#SMIContents_rows .rowbg tr.even { background-color:#f3f7fb; }
+#SMIContents_rows .rowbg tr:hover { background-color:#d2e5f9; }
+#SMIContents_rows .rowbg tr.selected { background-color:#4d96e6; color:#fff; }
+#SMIContents_rows .rowbg tr:active { background-color:#4d96e6!important; color:#fff; }
+#SMIContents_rows .dragging { background-color:#4d96e6!important; color:#fff; }
+#SMIContents_foot {
+  position:absolute; bottom:0; left:0; right:0; height:25px; overflow:hidden; font-size:0.8em; line-height:25px;
+  border-top:1px #999 solid; background:#fff url(../img/gradient25.png) repeat-x top; color:#333;
+}
+#SMIContents_foot div.left { float:left; }
+#SMIContents_foot div.right { float:right; }
+#SMIContents_selecter { margin:2px 7px; }
+#SMIContents_foot a { 
+  display:block; float:left; margin:3px 2px; padding:0 4px; line-height:17px;
+  background:#fff url(../img/gradient20m.png) repeat-x top; border:1px #777 solid;
+  -khtml-border-radius:3px; -moz-border-radius:3px;
+  -ms-border-radius:3px; -o-border-radius:3px;
+  -webkit-border-radius:3px; border-radius:3px;
+}
+#SMIContents_foot a:hover { background:#fff; border-color:#888; color:#222; }
+#SMIContents_foot a.disabled {
+  background:#fff url(../img/gradient20m.png) repeat-x top;
+  border-color:#ccc; color:#999; cursor:default;
+}
+#SMIContents_foot a.hidden { display:none; }
+
+#SMIEditor, #SMIProperties, #SMIHistory, #SMIAccess {
+  position:absolute; top:70px; bottom:0; left:0; right:0;
+  border-top:1px #999 solid; overflow:hidden;
+}
+
+#SMIEditor textarea {
+  position:absolute; top:0; bottom:0; left:0; right:0;
+  border:0; margin:0; padding:0;
+  khtml-border-radius:0; -moz-border-radius:0;
+  -ms-border-radius:0; -o-border-radius:0;
+  -webkit-border-radius:0; border-radius:0;
+}
+
+/*
+ * Portait mode for iPad removes tree
+ */
+@media screen and (orientation: portrait) {
+  #tree { display:none; }
+  #contents { left:0; }
+}
+
+/*
+ * Sprite icons
+ */
+ins.icon { width:20px; height:20px; display:block; float:left; background-image:url(../img/sprite.png); }
+
+ins.arrow.up { background-position:-0px -20px; }
+ins.arrow.down { background-position:-20px -20px; }
+ins.arrow.left { background-position:-40px -20px; }
+ins.arrow.right { background-position:-60px -20px; }
+ins.arrow.top { background-position:-80px -20px; }
+ins.arrow.bottom { background-position:-1000px -20px; }
+ins.arrow.first { background-position:-120px -20px; }
+ins.arrow.last { background-position:-140px -20px; }
+ins.arrow.reload { background-position:-160px -20px; }
+
+ins.action.confirm { background-position:-0px -40px; }
+ins.action.cancel { background-position:-20px -40px; }
+ins.action.add { background-position:-40px -40px; }
+ins.action.remove { background-position:-60px -40px; }
+ins.action.plus { background-position:-80px -40px; }
+ins.action.minus { background-position:-100px -40px; }
+
+ins.sort.asc { background-position:-120px -40px; }
+ins.sort.desc { background-position:-140px -40px; }
+
+ins.checkbox.none { background-position:-0px -60px; }
+ins.checkbox.all { background-position:-20px -60px; }
+ins.checkbox.partial { background-position:-40px -60px; }
+ins.checkbox.disabled { background-position:-60px -60px; }
+
+/* Silva Content Types - uses !important to override default jstree-icon */
+ins.agenda_filter { background-position:-60px -80px!important; }
+ins.agenda_viewer { background-position:-80px -80px!important; }
+ins.autotoc { background-position:-100px -80px!important; }
+ins.category_filter { background-position:-160px -80px!important; }
+ins.csvsource { background-position:-40px -120px!important; }
+ins.link { background-position:-120px -80px!important; }
+ins.news_filter { background-position:-60px -100px!important; }
+ins.news_source { background-position:-160px -100px!important; }
+ins.news_viewer { background-position:-80px -100px!important; }
+ins.rss_aggregator { background-position:-100px -120px!important; }
+ins.silvadoc { background-position:-0px -100px!important; }
+ins.silvafile { background-position:-80px -120px!important; }
+ins.silvafind { background-position:-140px -80px!important; }
+ins.silvafolder { background-position:-20px -100px!important; }
+ins.silvaghost { background-position:-0px -120px!important; }
+ins.silvaghost_folder { background-position:-20px -120px!important; }
+ins.silvaimage { background-position:-40px -100px!important; }
+ins.silvaindexer { background-position:-120px -120px!important; }
+ins.silvalogo { background-position:-160px -60px!important; }
+ins.silvapublication { background-position:-20px -80px!important; }
+ins.software_group { background-position:-140px -120px!important; }
+ins.software_package { background-position:-120px -100px!important; }
+ins.software_release { background-position:-140px -100px!important; }
+
+/* Silva publication states */
+ins.state { width:10px!important; height:10px!important; }
+ins.state.draft { background-position:-5px -145px; }
+ins.state.pending { background-position:-25px -145px; }
+ins.state.approved { background-position:-45px -145px; }
+ins.state.published { background-position:-65px -145px; }
+ins.state.expired { background-position:-85px -145px; }
+
+/*
+ * jsTree theme
+ */
+.jstree li,
+.jstree ins { background-image:url(../img/sprite.png); background-repeat:no-repeat; background-color:transparent; }
+.jstree li { background-position:-180px 0; background-repeat:repeat-y; }
+.jstree li.jstree-last { background:transparent; }
+.jstree > ul > li.jstree-open > ins { background-position:-120px 0!important; }
+.jstree > ul > li.jstree-closed > ins { background-position:-100px 0!important; }
+.jstree .jstree-open > ins { background-position:-80px 0; cursor:pointer; }
+.jstree .jstree-closed > ins { background-position:-60px 0; cursor:pointer; }
+.jstree .jstree-leaf > ins { background-position:-140px 0; }
+
+.jstree .jstree-hovered { background:#e7f4f9; border:1px solid #d8f0fa; padding:0 2px 0 1px; }
+.jstree .jstree-clicked { background:#beebff; border:1px solid #99defd; padding:0 2px 0 1px; }
+.jstree a ins.jstree-icon { background-position:-160px 0; }
+.jstree a.jstree-loading .icon { background:url("../img/loading.gif") center center no-repeat!important; }
+
+.jstree .jstree-no-icons .jstree-checkbox { display:inline-block; }
+.jstree .jstree-no-checkboxes .jstree-checkbox { display:none !important; }
+.jstree .jstree-checked > a > .jstree-checkbox { background-position:-20px -60px; }
+.jstree .jstree-unchecked > a > .jstree-checkbox { background-position:0 -60px; }
+.jstree .jstree-undetermined > a > .jstree-checkbox { background-position:-40px -60px; }
+.jstree .jstree-checked > a > .jstree-checkbox:hover { background-position:-20px -60px; }
+.jstree .jstree-unchecked > a > .jstree-checkbox:hover { background-position:0 -60px; }
+.jstree .jstree-undetermined > a > .jstree-checkbox:hover { background-position:-40px -60px; }
+
+.jstree li, .jstree ins,
+#vakata-dragged.jstree .jstree-invalid,
+#vakata-dragged.jstree .jstree-ok,
+#jstree-marker.jstree { _background-image:url(../img/sprite.png); }
+.jstree .jstree-open ins { _background-position:-80px 0; }
+.jstree .jstree-closed ins { _background-position:-60px 0; }
+.jstree .jstree-leaf ins { _background-position:-140px 0; }
+.jstree a ins.jstree-icon { _background-position:-60px -20px; }
+#vakata-contextmenu.jstree-context ins { _display:none; }
+#vakata-contextmenu.jstree-context li { _zoom:1; }
+.jstree .jstree-undetermined a .jstree-checkbox { _background-position:-40px -60px; }
+.jstree .jstree-checked a .jstree-checkbox { _background-position:-20px -60px; }
+.jstree .jstree-unchecked a .jstree-checkbox { _background-position:0 -60px; }
