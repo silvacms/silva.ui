@@ -5,7 +5,7 @@
   $.fn.SMI = function(method) {
     var $SMI = this;
     $SMI.find('#header').disableTextSelect();
-    
+
     var methods = {
       init: function(options) {
         // Check required options
@@ -19,12 +19,12 @@
         } else {
           $SMI.find(options.tree.container).SMITree(options.tree.data);
         }
-        
+
         // Load SMIMain
         if (typeof options.main.container == 'object') {
-          $(options.main.container).SMIMain('init', options.main.data);
+          $(options.main.container).SMIMain('init', options.main.data, options.main.configuration);
         } else {
-          $SMI.find(options.main.container).SMIMain('init', options.main.data);
+          $SMI.find(options.main.container).SMIMain('init', options.main.data, options.main.configuration);
         }
 
         $('#contents').addClass('focus');
@@ -48,7 +48,7 @@
           if (e.keyCode == 16 || e.keyCode == 17) {
             $('.focus').removeClass('highlight');
           }
-        })
+        });
       },
       clipboard: function(action) {
         // Global clipboard
@@ -129,7 +129,7 @@
             if (oldfn) {
               $SMI.SMI('keybind', trigger, oldfn);
             }
-          }
+          };
           $SMI.SMI('keybind', trigger, newfn);
         });
       },

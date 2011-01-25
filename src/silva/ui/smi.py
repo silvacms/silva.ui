@@ -39,6 +39,7 @@ class ISMIResources(IJQueryResources):
 class SMI(grok.View):
     grok.name('smi.html')
     grok.context(ISilvaObject)
+    grok.require('silva.ReadSilvaContent')
 
     def update(self):
         applySkin(self.request, ISMIResources)

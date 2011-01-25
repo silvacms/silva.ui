@@ -52,7 +52,7 @@
       triggers: ['single', 'partial', 'all'],
       handler: function(source, rows){
         if (rows.length == 1) {
-          var oldtitle = $(rows[0]).data('data').title.caption
+          var oldtitle = $(rows[0]).data('data').title.caption;
           $('body').SMIDialog({
             css: {
               'width': '300px',
@@ -214,10 +214,10 @@
       keybind: ['f1']
     }
   };
-  
+
   var methods = {
-    init: function(data_url) { // Load root
-      $(this).SMIMain('contents', 'folder', '<ins class="icon silvalogo"></ins>Infrae', data_url);
+    init: function(data_url, configuration_url) { // Load root
+      $(this).SMIMain('contents', 'folder', '<ins class="icon silvalogo"></ins>Infrae', data_url, configuration_url);
       $('body').live('smi.contents.blur', function() {
         var keybinds = $.extend(true, {}, $('body').SMI('getbinds'));
         $('#contents').data('keybinds', keybinds);
@@ -234,7 +234,7 @@
         }
       });
     },
-    contents: function(type, title, data_url) {
+    contents: function(type, title, data_url, configuration_url) {
       $(this).trigger('smimain.load', 'contents');
       $(this).live('smimain.load', function(){
         $("#SMIContents").die();
@@ -298,16 +298,16 @@
         });
         // Create footer
         $("#SMIContents").append('<div id="SMIContents_foot"></div>');
-        
+
         $('#SMIContents_head table').fixColWidths({source: '#SMIContents_rows table'});
         $('#SMIContents_foot').prepend('<ins id="SMIContents_selecter" class="icon checkbox"></ins>');
         $('#SMIContents_selecter').Selecter($('#SMIContents_rows').find('table'));
         $('#SMIContents_foot').append('<div id="SMIContents_actions"></div>');
         $('#SMIContents_actions').ActionButtons({actions: actions, source: $('#SMIContents_rows').find('table')});
-        
+
         // Add event listeners to keep table layout/design in sync when changing its contents
         $("#SMIContents").live('smarttable.row.build.done', function(){
-          $("#SMIContents_rows table").fixColWidths({fixedColumns: {0:32}})
+          $("#SMIContents_rows table").fixColWidths({fixedColumns: {0:32}});
           $('#SMIContents_head table').fixColWidths({source: '#SMIContents_rows table'});
         });
         $("#SMIContents").live('smarttable.row.move', function(){
@@ -364,7 +364,7 @@
       });
       // Finally, create the actual table
       $("#SMIContents").SmartTable({
-        data_url: data_url, columns_url: 'data/columns.json'
+        data_url: data_url, columns_url: configuration_url
       });
       $(this).trigger('smimain.contents.done', $(this).data());
     },

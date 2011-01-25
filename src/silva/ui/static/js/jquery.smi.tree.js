@@ -18,26 +18,30 @@
         $('#SMITree').scrollLeft(indent_size * depth);
       });
     };
-    
+
     // Disable text selection on tree
     $SMITree.disableTextSelect();
 
     // Load tree from JSON and set autoScroll triggers
-    $SMITree.html('<h2>Structure</h2><div id="SMITree"></div>')
-    .find('#SMITree').bind("open_node.jstree", function(e,data) {
+    $SMITree.find('#SMITree').bind("open_node.jstree", function(e,data) {
       $(this).autoScroll(data.rslt.obj.parents('ul').length - 2);
     }).bind("close_node.jstree", function(e,data) {
       $(this).autoScroll(data.rslt.obj.parents('ul').length - 3);
     }).jstree({
-      core: {
-        animation: anim_time
-      },
-      plugins: ["json_data", "ui", "hotkeys"],
-      "json_data": {
-        "ajax": {
-          "url": json_url
+        core: {
+            animation: anim_time
+        },
+        plugins: ["json_data", "ui", "hotkeys"],
+        "json_data": {
+            "ajax": {
+                "url": function (node) {
+                    if (node == -1) {
+                        return json_url;
+                    };
+                    return node.data('jstree').url + '/' + json_url;
+                }
+            }
         }
-      }
     }).jstree("disable_hotkeys");
 
     $('body').live('smi.tree.blur', function() {

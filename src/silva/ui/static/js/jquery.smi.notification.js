@@ -1,4 +1,4 @@
-(function($) {  
+(function($) {
   /**
    * Dialog screens for SMI
    */
@@ -26,7 +26,7 @@
         $self.click(function() {
           $self.trigger('notification.close');
         });
-        
+
         // Setup autoclose timeout
         if(typeof options.autoclose == 'number') {
           $self.data('closetimer', setTimeout(function(){
