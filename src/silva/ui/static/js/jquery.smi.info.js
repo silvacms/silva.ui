@@ -8,10 +8,10 @@
     var $SMIInfo = this;
     var methods = {
       init: function(options) {
+        $SMIInfo.disableTextSelect();
         $SMIInfo.html('<h3>'+options.title+'</h3>');
         $SMIInfo.append('<ol id="SMIInfo_tabs"></ol>');
         $SMIInfo.append('<ol id="SMIInfo_actions"></ol>');
-
         for(var tab in options.tabs){
           if (options.tabs[tab] == null) continue;
           var active = (tab == options.mode) ? ' class="active"' : '';
