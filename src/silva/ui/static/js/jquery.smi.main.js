@@ -16,6 +16,7 @@
         $(this).trigger('actionbuttons.cut.done');
       },
       keybind: 'ctrl+x'
+      
     },
     copy: {
       caption: 'Copy',

@@ -71,44 +71,99 @@ input, textarea { cursor:text; }
 #header ol li a:hover { color:#000; border-color:#555; }
 #main { position:absolute; top:65px; bottom:20px; left:20px; right:20px; }
 
-#tree {
+#navigation {
   position:absolute; top:0; bottom:0; left:0; width:280px; background:#fff;
   -khtml-box-shadow:#1c2e3d 0 3px 10px; -moz-box-shadow:#1c2e3d 0 3px 10px;
   -ms-box-shadow:#1c2e3d 0 3px 10px; -o-box-shadow:#1c2e3d 0 3px 10px;
   -webkit-box-shadow:#1c2e3d 0 3px 10px; box-shadow:#1c2e3d 0 3px 10px;
 }
-#tree h2 { 
+#navigation h2 {
   height:30px; line-height:30px;
   background:#a3d042 url(../img/green30.png) repeat-x bottom;
   color:#fff; padding:0 8px; text-shadow:#305c00 1px 1px 0;
 }
 
-#contents {
+#workspace {
   position:absolute; top:0px; bottom:0px; left:300px; right:0px; background:#fff;
   -khtml-box-shadow:#1c2e3d 0 3px 10px; -moz-box-shadow:#1c2e3d 0 3px 10px;
   -ms-box-shadow:#1c2e3d 0 3px 10px; -o-box-shadow:#1c2e3d 0 3px 10px;
   -webkit-box-shadow:#1c2e3d 0 3px 10px; box-shadow:#1c2e3d 0 3px 10px;
 }
-#tree.focus.highlight, #contents.focus.highlight { outline: 2px #fb0 solid; }
 
-#SMITree { position:absolute; top:30px; bottom:0; left:0; right:0; overflow:auto; -ms-overflow-x:hidden; overflow-x:hidden; }
-#SMITree ul { list-style:none; margin:0; padding:3px 0 3px 3px; width:999px; }
-#SMITree ul li a { display:block; height:20px; line-height:20px; color:#111; padding:0; }
-#SMITree ins { float:left; width:20px; height:20px; }
+#navigation .focus .highlight,
+#workspace.focus.highlight {
+  outline: 2px #fb0 solid;
+}
+
+#navigation .tree {
+  position:absolute;
+  top:30px;
+  bottom:0;
+  left:0;
+  right:0;
+  overflow:auto;
+  -ms-overflow-x:hidden;
+  overflow-x:hidden;
+}
+
+#navigation .tree ul {
+  list-style:none;
+  margin:0;
+  padding:3px 0 3px 3px;
+  width:999px;
+}
+
+#navigation .tree ul li a {
+  display:block;
+  height:20px;
+  line-height:20px;
+  color:#111;
+  padding:0;
+}
+
+#navigation .tree ins {
+  float:left;
+  width:20px;
+  height:20px;
+}
+
 @-moz-document url-prefix() {
-  #SMITree { overflow-x:auto; }
-  #SMITree ul { width:auto; }
+  #navigation .tree {
+    overflow-x:auto;
+  }
+  #navigation .tree ul {
+    width:auto;
+  }
 }
 
-#SMIInfo {
-  height:49px; background:url(../img/gradient50.png) repeat-x bottom;
-  padding:10px; line-height:24px; overflow:hidden; color:#111; border-bottom:1px #999 solid;
+#workspace .info {
+  background:url(../img/gradient50.png) repeat-x bottom;
+  border-bottom:1px #999 solid;
+  color:#111;
+  height:49px;
+  line-height:24px;
+  overflow:hidden;
+  padding:10px;
 }
-#SMIInfo a { color:#111; }
-#SMIInfo h3 { height:24px; overflow:hidden; font-size:1.3em; white-space:nowrap; margin-bottom:5px; }
-#SMIInfo h3 ins.icon {
-  display:block; float:left; width:20px; height:20px; margin-right:4px;
-  background-image:url(../img/sprite.png); background-repeat:no-repeat; background-color:transparent;
+#workspace .info a {
+  color:#111;
+}
+#workspace .info h3 {
+  font-size:1.3em;
+  height:24px;
+  margin-bottom:5px;
+  overflow:hidden;
+  white-space:nowrap;
+}
+#workspace .info h3 ins.icon {
+  background-color:transparent;
+  background-image:url(../img/sprite.png);
+  background-repeat:no-repeat;
+  display:block;
+  float:left;
+  height:20px;
+  margin-right:4px;
+  width:20px;
 }
 
 #SMIInfo_tabs { position:absolute; z-index:99; float:left; list-style:none; margin:0; padding:0; }
@@ -140,15 +195,51 @@ input, textarea { cursor:text; }
 }
 #SMIInfo_actions li a:hover { border-color:#555; background:#fff url(../img/gradient25.png) repeat-x bottom; }
 
-#SMIContents table { width:100%; border-collapse:collapse; }
-#SMIContents td, #SMIContents th { padding:0 10px 0 0; line-height:22px; text-align:left; white-space:nowrap; overflow:hidden; }
-#SMIContents th.centered, td.centered { text-align:center; }
-#SMIContents th.dragHandle { background-image:url(../img/sprite.png); background-position:-101px -59px; }
-#SMIContents th.col_title { padding-left:15px; }
+#workspace .content table {
+  width:100%;
+  border-collapse:collapse;
+}
+#workspace .content td,
+#workspace .content th {
+  padding:0 10px 0 0;
+  line-height:22px;
+  text-align:left;
+  white-space:nowrap;
+  overflow:hidden;
+}
+#workspace .content th.centered,
+#workspace .content td.centered {
+  text-align:center;
+}
+#workspace .content th.dragHandle {
+  background-image:url(../img/sprite.png);
+  background-position:-101px -59px;
+}
+#workspace .content th.col_title {
+  padding-left:15px;
+}
 
-#SMIContents td.dragHandle { cursor:move; padding:0 8px; width:20px; }
-#SMIContents td.dragHandle ins { display:block; float:left; width:20px; height:20px; margin:1px 0; background-image:url(../img/sprite.png); cursor:move; }
-#SMIContents td ins.state { display:block; float:left; background-image:url(../img/sprite.png); margin-top:6px; margin-right:5px; }
+#workspace .content td.dragHandle {
+  cursor:move;
+  padding:0 8px;
+  width:20px;
+}
+#workspace .content td.dragHandle ins {
+  display:block;
+  float:left;
+  width:20px;
+  height:20px;
+  margin:1px 0;
+  background-image:url(../img/sprite.png);
+  cursor:move;
+}
+#workspace .content td ins.state {
+  background-image:url(../img/sprite.png);
+  display:block;
+  float:left;
+  margin-right:5px;
+  margin-top:6px;
+}
 
 #SMIContents_head {
   height:24px; background:#eee url(../img/gradient25.png) repeat-x bottom;
@@ -201,8 +292,8 @@ input, textarea { cursor:text; }
  * Portait mode for iPad removes tree
  */
 @media screen and (orientation: portrait) {
-  #tree { display:none; }
-  #contents { left:0; }
+  #navigation { display:none; }
+  #workspace { left:0; }
 }
 
 /*

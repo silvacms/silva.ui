@@ -6,37 +6,62 @@
 
 from five import grok
 from infrae import rest
-from silva.core.interfaces import IContainer
-from zope.traversing.browser import absoluteURL
+from silva.core.interfaces import IContainer, ISilvaObject
 from zope.intid.interfaces import IIntIds
 from zope.component import getUtility
 
+from silva.ui.icon import get_icon
 from Products.Silva.ExtensionRegistry import meta_types_for_interface
 
 
-class TreeContentListing(rest.REST):
+class NavigationListing(rest.REST):
     grok.context(IContainer)
-    grok.name('silva.ui.listing.tree')
+    grok.name('silva.ui.navigation')
     grok.require('silva.ReadSilvaContent')
 
-    def GET(self, identifier=None):
+    def GET(self):
+        root = self.context.get_root()
+        root_path = root.absolute_url_path()
+
+        def content_path(content):
+            return content.absolute_url_path()[len(root_path):]
+
         children = []
         service = getUtility(IIntIds)
-        container = self.context
-        if identifier is not None:
-            container = service.getObject(int(identifier))
         interfaces = meta_types_for_interface(IContainer)
-        for child in container.objectValues(interfaces):
+        for child in self.context.objectValues(interfaces):
             is_not_empty = len(child.objectValues(interfaces))
             info = {
                 'data': {
                     'title': child.get_title_or_id(),
-                    'icon': 'silvafolder'},
-                'metadata': {'url': absoluteURL(child, self.request)}}
+                    'icon': get_icon(child, self.request)},
+                'attr': {
+                    'id': 'nav' + str(service.register(child)),
+                    },
+                'metadata': {'path': content_path(child)}}
             if is_not_empty:
                 info['state'] = "closed"
             children.append(info)
         return self.json_response(children)
+
+
+class Content(rest.REST):
+    grok.context(ISilvaObject)
+    grok.name('silva.ui.content')
+    grok.require('silva.ReadSilvaContent')
+
+    def GET(self):
+        service = getUtility(IIntIds)
+        data = {
+            'ifaces': ['content'],
+            'id': str(service.register(self.context)),
+            'navigation': 'nav' + str(service.register(self.context.get_container())),
+            'info': {
+                'ifaces': ['title'],
+                'title': self.context.get_title_or_id(),
+                'icon': get_icon(self.context, self.request),
+                },}
+        return self.json_response(data)
 
 
 class ColumnsContainerListing(rest.REST):

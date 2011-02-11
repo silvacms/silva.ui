@@ -24,9 +24,6 @@
           event.preventDefault();
           $("#contents").SMIMain($(this).attr('rel'), options.type, $SMIInfo.find('h3').html(), options.data_url);
         });
-        if($('tr.selected').length > 0){
-          alert('asd');
-        }
       }
     };
     if(methods[method]) {
