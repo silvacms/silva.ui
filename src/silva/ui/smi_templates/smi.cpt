@@ -35,7 +35,8 @@
       </div>
       <div id="workspace">
         <div class="info">
-          <h3></h3>
+          <h3>Silva</h3>
+          <ol class="tabs"></ol>
         </div>
         <div class="content"></div>
       </div>

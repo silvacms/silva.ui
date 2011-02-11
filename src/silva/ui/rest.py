@@ -11,6 +11,7 @@ from zope.intid.interfaces import IIntIds
 from zope.component import getUtility
 
 from silva.ui.icon import get_icon
+from silva.ui.menu import get_menu_items
 from Products.Silva.ExtensionRegistry import meta_types_for_interface
 
 
@@ -52,15 +53,31 @@ class Content(rest.REST):
 
     def GET(self):
         service = getUtility(IIntIds)
+        tabs = []
+        default_tab = None
+        for tab in get_menu_items(self.context):
+            tabs.append({'name': unicode(tab.name),
+                         'action': tab.action})
+            if tab.default:
+                default_tab = tab.action
         data = {
             'ifaces': ['content'],
             'id': str(service.register(self.context)),
             'navigation': 'nav' + str(service.register(self.context.get_container())),
-            'info': {
-                'ifaces': ['title'],
-                'title': self.context.get_title_or_id(),
-                'icon': get_icon(self.context, self.request),
-                },}
+            'metadata': {
+                'ifaces': ['metadata'],
+                'title': {
+                    'ifaces': ['title'],
+                    'title': self.context.get_title_or_id(),
+                    'icon': get_icon(self.context, self.request),
+                    },
+                'tabs': {
+                    'ifaces': ['tabs'],
+                    'active': default_tab,
+                    'entries': tabs,
+                    }
+                }
+            }
         return self.json_response(data)
 
 

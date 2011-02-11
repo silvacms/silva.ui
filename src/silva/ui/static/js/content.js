@@ -15,6 +15,25 @@
             }
         })
     );
+    obviel.view(
+        new obviel.View({
+            iface: 'tabs',
+            render: function(element, data) {
+                var container = $(element);
+
+                container.empty();
+                for (var i=0; i< data.entries.length; i++) {
+                    var info = data.entries[i];
+                    var tab = $('<li><a>' + info.name + '</a></li>');
+
+                    if (info.action == data.active) {
+                        tab.children('a').addClass('active');
+                    }
+                    container.append(tab);
+                };
+            }
+        })
+    );
 
 
     var SMIContent = function(content, smi, options) {
@@ -22,8 +41,14 @@
         this.content = content;
         this.options = options;
 
+        // Disable text selection
+        content.children('.info').disableTextSelect();
+
+        // New content is loaded
         content.bind('smi.content', function (event, data) {
-            $(this).children('.info').children('h3').render(data.info);
+            $(this).children('.info').children('h3').render(data.metadata.title);
+            $(this).children('.info').children('.tabs').render(data.metadata.tabs);
+
         });
     };
 

@@ -166,19 +166,43 @@ input, textarea { cursor:text; }
   width:20px;
 }
 
-#SMIInfo_tabs { position:absolute; z-index:99; float:left; list-style:none; margin:0; padding:0; }
-#SMIInfo_tabs li { float:left; display:block; }
-#SMIInfo_tabs li a {
-  display:block; margin-top:4px; padding:0 11px; height:27px;
-  line-height:26px; color:#222;
+#workspace .info .tabs {
+  float:left;
+  list-style:none;
+  margin:0;
+  padding:0;
+  position:absolute;
+  z-index:99;
 }
-#SMIInfo_tabs li a:hover { text-decoration:underline; }
-#SMIInfo_tabs li a.active {
-  height:26px; line-height:24px; padding:0 10px; background:#fff;
-  border:1px #999 solid; border-bottom:0; text-decoration:none;
-  -khtml-border-radius:3px 3px 0 0; -moz-border-radius:3px 3px 0 0;
-  -ms-border-radius:3px 3px 0 0; -o-border-radius:3px 3px 0 0;
-  -webkit-border-radius:3px 3px 0 0; border-radius:3px 3px 0 0;
+#workspace .info .tabs li {
+  display:block;
+  float:left;
+}
+#workspace .info .tabs li a {
+  color:#222;
+  display:block;
+  height:27px;
+  line-height:26px;
+  margin-top:4px;
+  padding:0 11px;
+}
+#workspace .info .tabs li a:hover {
+  text-decoration:underline;
+}
+#workspace .info .tabs li a.active {
+  -khtml-border-radius:3px 3px 0 0;
+  -moz-border-radius:3px 3px 0 0;
+  -ms-border-radius:3px 3px 0 0;
+  -o-border-radius:3px 3px 0 0;
+  -webkit-border-radius:3px 3px 0 0;
+  background:#fff;
+  border-bottom:0;
+  border-radius:3px 3px 0 0;
+  border:1px #999 solid;
+  height:26px;
+  line-height:24px;
+  padding:0 10px;
+  text-decoration:none;
 }
 
 #SMIInfo_actions { float:right; list-style:none; margin:0; padding:0; }
