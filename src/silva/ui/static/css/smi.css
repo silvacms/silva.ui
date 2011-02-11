@@ -205,19 +205,39 @@ input, textarea { cursor:text; }
   text-decoration:none;
 }
 
-#SMIInfo_actions { float:right; list-style:none; margin:0; padding:0; }
-#SMIInfo_actions li { float:left; margin-left:8px; }
-#SMIInfo_actions li a {
-  display:block; line-height:22px; padding:0 8px; border:1px #999 solid;
-  background:#fff; color:#222;
-  -khtml-border-radius:5px; -moz-border-radius:5px;
-  -ms-border-radius:5px; -o-border-radius:5px;
-  -webkit-border-radius:5px; border-radius:5px;
-  -khtml-box-shadow:0 0 2px #aaa; -moz-box-shadow:0 0 2px #aaa;
-  -ms-box-shadow:0 0 2px #aaa; -o-box-shadow:0 0 2px #aaa;
-  -webkit-box-shadow:0 0 2px #aaa; box-shadow:0 0 2px #aaa;
+#workspace .info .actions {
+  float:right;
+  list-style:none;
+  margin:0;
+  padding:0;
 }
-#SMIInfo_actions li a:hover { border-color:#555; background:#fff url(../img/gradient25.png) repeat-x bottom; }
+#workspace .info .actions li {
+  float:left;
+  margin-left:8px;
+}
+#workspace .info .actions li a {
+  -khtml-border-radius:5px;
+  -khtml-box-shadow:0 0 2px #aaa;
+  -moz-border-radius:5px;
+  -moz-box-shadow:0 0 2px #aaa;
+  -ms-border-radius:5px;
+  -ms-box-shadow:0 0 2px #aaa;
+  -o-border-radius:5px;
+  -o-box-shadow:0 0 2px #aaa;
+  -webkit-border-radius:5px;
+  -webkit-box-shadow:0 0 2px #aaa;
+  background:#fff; color:#222;
+  border-radius:5px;
+  border:1px #999 solid;
+  box-shadow:0 0 2px #aaa;
+  display:block;
+  line-height:22px;
+  padding:0 8px;
+}
+#workspace .info .actions li a:hover {
+  background:#fff url(../img/gradient25.png) repeat-x bottom;
+  border-color:#555;
+}
 
 #workspace .content table {
   width:100%;

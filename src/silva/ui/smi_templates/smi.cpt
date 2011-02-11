@@ -37,6 +37,7 @@
         <div class="info">
           <h3>Silva</h3>
           <ol class="tabs"></ol>
+          <ol class="actions"></ol>
         </div>
         <div class="content"></div>
       </div>

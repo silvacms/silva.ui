@@ -22,12 +22,14 @@
                 var container = $(element);
 
                 container.empty();
-                for (var i=0; i< data.entries.length; i++) {
+                for (var i=0; i < data.entries.length; i++) {
                     var info = data.entries[i];
                     var tab = $('<li><a>' + info.name + '</a></li>');
+                    var link = tab.children('a');
 
+                    link.attr('rel', info.action);
                     if (info.action == data.active) {
-                        tab.children('a').addClass('active');
+                        link.addClass('active');
                     }
                     container.append(tab);
                 };

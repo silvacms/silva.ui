@@ -31,7 +31,6 @@ class ISMIResources(IJQueryResources):
     silvaconf.resource('js/jquery.smi.notification.js')
     silvaconf.resource('js/jquery.smi.selecter.js')
     silvaconf.resource('js/jquery.smi.main.js')
-    silvaconf.resource('js/jquery.smi.info.js')
     silvaconf.resource('js/jquery.smi.table.js')
     silvaconf.resource('js/jquery.smi.actionbuttons.js')
     silvaconf.resource('js/jquery.smi.editor.js')
