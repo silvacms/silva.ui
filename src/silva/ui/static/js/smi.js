@@ -1,67 +1,115 @@
 
 (function($) {
-    var HASH_REGEXP = /#(.*)/;
+    var HASH_REGEXP = /#([^!]*)!?(.*)/;
+
+    // Add a rescope method
+    if (Function.prototype.scope === undefined) {
+        Function.prototype.scope = function(scope) {
+            var _function = this;
+
+            return function() {
+                return _function.apply(scope, arguments);
+            };
+        };
+    }
 
     var SMI = function(options) {
         var navigation = $(options.navigation.selector);
-        var content = $(options.content.selector);
+        var workspace = $(options.workspace.selector);
         var header = $(options.header.selector);
-        var url = jsontemplate.Template(options.template, {});
 
+        this._ = {};
+        this._.url = jsontemplate.Template(options.url, {});
+        this._.workspace = workspace;
+        this._.navigation = navigation;
+
+        this.opened = {path: '', tab: ''};
         this.options = options;
         header.disableTextSelect();
         navigation.SMINavigation(this, options.navigation);
 
-        this.content = content.SMIContent(options.contents);
+        this.workspace = workspace.SMIWorkspace(options.workspaces);
 
-        // Bind keys to switch focus between navigation and content
+        // Bind keys to switch focus between navigation and workspace
         // XXX: doesn't work for Sylvain
         $(document).bind('keydown', function(e) {
             if (e.ctrlKey && e.shiftKey) {
                 navigation.addClass('highlight');
-                content.addClass('highlight');
+                workspace.addClass('highlight');
                 if (e.keyCode == 37) {
-                    content.trigger('smi.blur');
-                    navigation.trigger('smi.focus');
+                    workspace.trigger('blur.smi');
+                    navigation.trigger('focus.smi');
                 } else if (e.keyCode == 39) {
-                    navigation.trigger('smi.blur');
-                    content.trigger('smi.focus');
+                    navigation.trigger('blur.smi');
+                    workspace.trigger('focus.smi');
                 }
             }
         });
         $(document).bind('keyup', function(e) {
             if (e.keyCode == 16 || e.keyCode == 17) {
                 navigation.removeClass('highlight');
-                content.removeClass('highlight');
+                workspace.removeClass('highlight');
             }
         });
 
-        // By default, navigation is blue and content is focus
-        navigation.trigger('smi.blur');
-        content.trigger('smi.focus');
+        // By default, navigation is blue and workspace is focus
+        navigation.trigger('blur.smi');
+        workspace.trigger('focus.smi');
 
-        // Bind the hash change
-        $(window).hashchange(function(e, data) {
-            var parts = HASH_REGEXP.exec(data.after);
+        // Bind the hash change used by open
+        $(window).hashchange(function(event, data) {
+            this._load(data.after);
+        }.scope(this));
 
-            if (parts) {
-                $.getJSON(
-                    url.expand({path: parts[1]}),
-                    function(data) {
-                        content.trigger('smi.content', data);
-                        navigation.trigger('smi.content', data);
-                    });
-            };
-        });
+        // Bind event to open new tab
+        $('a.screen').live('click', function(event) {
+            var link = $(event.target);
+            var path = link.attr('href');
+
+            if (!path) {
+                path = this.opened.path;
+            }
+            this.open(path, link.attr('rel'));
+            return false;
+        }.scope(this));
+
+        // Bind click on header logo bring back to root
+        header.find('a.home').bind('click', function(event) {
+            this.open('/');
+        }.scope(this));
+
+        // Plugins initialization
+        $(document).trigger('load.smiplugins', this);
+
+        // Open the current location.
+        this._load(document.location.hash);
     };
 
+    // Official call to open a screen.
     SMI.prototype.open = function(path, tab) {
-        var hash = path;
-
-        if (tab != undefined) {
-            hash = hash + '|' + tab;
+        if (tab == undefined) {
+            tab = 'content';
         };
-        document.location.hash = hash;
+        document.location.hash = tab + '!' + path;
+    };
+
+    // Open a screen from a hash tag.
+    SMI.prototype._load = function(hash) {
+        var parts = HASH_REGEXP.exec(hash);
+
+        if (parts) {
+            this.opened = {tab: parts[1], path: parts[2]};
+        } else {
+            this.opened = {tab: '', path: ''};
+        }
+
+        if (!this.opened.tab.length) {
+            this.opened.tab = 'content';
+        };
+        $.getJSON(this._.url.expand(this.opened),function(data) {
+            this._.workspace.trigger('content.smi', data);
+            this._.navigation.trigger('content.smi', data);
+        }.scope(this));
     };
 
     /**

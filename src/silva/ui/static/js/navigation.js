@@ -5,7 +5,7 @@
     $.fn.SMINavigation = function(smi, options) {
         var navigation = this;
         var tree = navigation.children('.tree');
-        var url = new jsontemplate.Template(options.template, {});
+        var url = new jsontemplate.Template(options.url, {});
 
         /**
          * Scroll the tree container horizontally to allow for unlimited node depth.
@@ -52,7 +52,7 @@
         });
 
         // Listen to smi.blur and focus to activate/disable shortcuts.
-        navigation.bind('smi.blur', function() {
+        navigation.bind('blur.smi', function() {
             var keybinds = $.extend(true, {}, $('body').SMI('getbinds'));
 
             tree.data('keybinds', keybinds);
@@ -62,7 +62,7 @@
             tree.jstree("disable_hotkeys");
             navigation.removeClass("focus");
         });
-        navigation.bind('smi.focus', function() {
+        navigation.bind('focus.smi', function() {
             var keybinds = $('#tree').data('keybinds');
 
             if (keybinds) {
@@ -81,8 +81,13 @@
             return false;
         });
 
+        // Bind clik on view structure back to root
+        navigation.children('h2').bind('click', function(event) {
+            smi.open('/');
+        });
+
         // If a content is selected, try to select its container
-        navigation.bind('smi.content', function (event, data) {
+        navigation.bind('content.smi', function (event, data) {
             var node = $('#' + data.navigation);
 
             if (node.length) {

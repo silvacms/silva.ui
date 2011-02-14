@@ -29,7 +29,7 @@ class EditTabMenu(TabMenuItem):
 class ContainerTabMenu(TabMenuItem):
     grok.context(IContainer)
     name = _('Content')
-    action = 'content'
+    action = 'edit'
     default = True
 
 

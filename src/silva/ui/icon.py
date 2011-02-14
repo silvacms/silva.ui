@@ -8,6 +8,7 @@ from Products.Silva import icon
 
 ICON_SPRITE = {
     'Silva Folder': 'silvafolder',
+    'Silva Root': 'silvalogo',
     'Silva Publication': 'silvapublication',
     'Silva Image': 'silvaimage',
     'Silva Ghost': 'silvaghost',

@@ -18,7 +18,7 @@
 
   <body>
     <div id="header">
-      <h1><img src="${imgs_url}/silva.png" alt="Silva" /></h1>
+      <h1><a class="home"><img src="${imgs_url}/silva.png" alt="Silva" /></a></h1>
       <ol>
         <li><a href="${root_url}/manage_main"
                i18n:translate="">Manage</a></li>
@@ -45,19 +45,21 @@
     <script type="text/javascript">
       $(document).ready(function() {
       smi = $('body').SMI({
-        template: "${root_url}/{path}/++rest++silva.ui.content",
-        header: {
-            selector: "#header"
-        },
-        navigation: {
-            selector: "#navigation",
-            template: "${root_url}/{path}/++rest++silva.ui.navigation"
-        },
-        content: {
-            selector: "#workspace",
-            template: "${root_url}/{path}/++rest++silva.ui.{tab}",
-            columns: "${root_url}/++rest++silva.ui.listing.columns"
-         }
+          url: "${root_url}/{path}/++rest++silva.ui.{tab}",
+          header: {
+              selector: "#header"
+          },
+          navigation: {
+              selector: "#navigation",
+              url: "${root_url}/{path}/++rest++silva.ui.navigation"
+          },
+          workspace: {
+              selector: "#workspace",
+          },
+          listing: {
+              columns: "${root_url}/++rest++silva.ui.listing.columns",
+              template: "${root_url}/++rest++silva.ui.listing.template"
+          }
       });
       });
     </script>

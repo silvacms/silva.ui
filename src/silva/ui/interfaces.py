@@ -4,6 +4,36 @@
 # $Id$
 
 from zope.interface import Interface, Attribute
+from silva.core import conf as silvaconf
+from silva.core.editor.interfaces import ICKEditorResources
+
+
+# CKeditor already contains jquery and json-template
+class ISMIResources(ICKEditorResources):
+
+    silvaconf.resource('css/style.css')
+    silvaconf.resource('css/smi.css')
+
+    silvaconf.resource('js/thirdparty/obviel.js')
+    silvaconf.resource('js/thirdparty/shortcut.js')
+    silvaconf.resource('js/thirdparty/jquery.hotkeys.js')
+    silvaconf.resource('js/thirdparty/jquery.observehashchange.js')
+    silvaconf.resource('js/thirdparty/jquery.jstree.js')
+    silvaconf.resource('js/thirdparty/jquery.tablednd-0.5.min.js')
+
+    silvaconf.resource('js/jquery.smi.utils.js')
+    silvaconf.resource('js/jquery.smi.dialog.js')
+    silvaconf.resource('js/jquery.smi.notification.js')
+    silvaconf.resource('js/jquery.smi.selecter.js')
+    silvaconf.resource('js/jquery.smi.main.js')
+    silvaconf.resource('js/jquery.smi.table.js')
+    silvaconf.resource('js/jquery.smi.actionbuttons.js')
+    silvaconf.resource('js/jquery.smi.editor.js')
+
+    silvaconf.resource('js/content.js')
+    silvaconf.resource('js/content.listing.js')
+    silvaconf.resource('js/navigation.js')
+    silvaconf.resource('js/smi.js')
 
 
 class ITabMenuItem(Interface):

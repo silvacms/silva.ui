@@ -8,10 +8,12 @@ from five import grok
 from infrae import rest
 from silva.core.interfaces import IContainer, ISilvaObject
 from zope.intid.interfaces import IIntIds
-from zope.component import getUtility
+from zope.component import getUtility, getMultiAdapter
 
 from silva.ui.icon import get_icon
 from silva.ui.menu import get_menu_items
+
+from Products.SilvaMetadata.interfaces import IMetadataService
 from Products.Silva.ExtensionRegistry import meta_types_for_interface
 
 
@@ -78,7 +80,31 @@ class Content(rest.REST):
                     }
                 }
             }
+        if default_tab:
+            view = getMultiAdapter(
+                (self.context, self.request), name='silva.ui.' + default_tab)
+            data['content'] = view.data()
+        else:
+            data['content'] = {}
         return self.json_response(data)
+
+
+class TemplateContainerListing(rest.REST):
+    grok.context(IContainer)
+    grok.name('silva.ui.listing.template')
+    grok.require('silva.ReadSilvaContent')
+
+    template = grok.PageTemplate(filename="rest_templates/listing.pt")
+
+    def default_namespace(self):
+        return {}
+
+    def namespace(self):
+        return {'rest': self}
+
+    def GET(self):
+        return self.template.render(self)
+
 
 
 class ColumnsContainerListing(rest.REST):
@@ -88,19 +114,62 @@ class ColumnsContainerListing(rest.REST):
 
     def GET(self):
         return self.json_response([
+                {"name": "icon",},
+                {"name": "status",},
                 {"name": "title", "caption": "Title",},
                 {"name": "author", "caption": "Author",},
                 {"name": "modified", "caption": "Modified",}])
 
 
+
+def format_date(date):
+    if date is not None:
+        return date.ISO()
+    return ''
+
+
 class ContainerListing(rest.REST):
     grok.context(IContainer)
-    grok.name('silva.ui.listing.publishable')
+    grok.name('silva.ui.edit')
     grok.require('silva.ReadSilvaContent')
 
+    def data(self):
+        root = self.context.get_root()
+        root_path = root.absolute_url_path()
+
+        def content_path(content):
+            return content.absolute_url_path()[len(root_path):]
+
+
+        entries = []
+        service = getUtility(IMetadataService)
+        for entry in self.context.get_ordered_publishables():
+            path = content_path(entry)
+            content = entry.get_previewable()
+            metadata = service.getMetadata(content)
+            entries.append(
+                {"status": {
+                        "ifaces": ["workflow"],
+                        "value": "published"},
+                 "icon": {
+                        "ifaces": ["icon"],
+                        "value": get_icon(entry, self.request)},
+                 "title": {
+                        "ifaces": ["action"],
+                        "value": entry.get_title_or_id(),
+                        "path": path,
+                        "action": "content"},
+                 "author": {
+                        "ifaces": ["action"],
+                        "value": metadata.get('silva-extra', 'lastauthor'),
+                        "path": path,
+                        "action": "properties"},
+                 "modified": {
+                        "ifaces": ["text"],
+                        "value": format_date(metadata.get('silva-extra', 'modificationtime'))}
+                 })
+        return {"ifaces": ["listing"],
+                "entries": entries}
+
     def GET(self):
-        contents = []
-        for content in self.context.get_ordered_publishables():
-            contents.append(
-                {"title": {"caption": content.get_title_or_id()}})
-        return self.json_response(contents)
+        return self.json_response(self.data())

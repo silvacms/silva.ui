@@ -150,7 +150,7 @@
    * @param options: Object which can contain a 'source' jQuery object or a
    * 'fixedColumns' object containing columnindex:pixelwidth values
    */
-  $.fn.fixColWidths = function(options) {
+  $.fn.updateTableColumnsWidths = function(options) {
     return this.each(function() {
       var colWidths = {};
       var totalWidth = 0;
@@ -195,7 +195,7 @@
       }
     });
   };
-  
+
   $.fn.rangeFilter = function(elem, start, end) {
     if (typeof(start) == 'object') {
       return $(this).find(elem).filter(function(i) {

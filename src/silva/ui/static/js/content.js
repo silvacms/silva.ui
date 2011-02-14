@@ -15,6 +15,7 @@
             }
         })
     );
+    obviel.iface('tabs');
     obviel.view(
         new obviel.View({
             iface: 'tabs',
@@ -38,27 +39,28 @@
     );
 
 
-    var SMIContent = function(content, smi, options) {
+    var SMIWorkspace = function(workspace, smi, options) {
         this._ = smi;
-        this.content = content;
+        this.workspace = workspace;
         this.options = options;
 
         // Disable text selection
-        content.children('.info').disableTextSelect();
+        workspace.children('.info').disableTextSelect();
 
-        // New content is loaded
-        content.bind('smi.content', function (event, data) {
+        // New workspace is loaded
+        workspace.bind('content.smi', function (event, data) {
             $(this).children('.info').children('h3').render(data.metadata.title);
             $(this).children('.info').children('.tabs').render(data.metadata.tabs);
 
+            $(this).children('.content').render(data.content);
         });
     };
 
     /**
      * Folder navigation tree using JSTree plugin.
      */
-    $.fn.SMIContent = function(smi, options) {
-        return new SMIContent(this, smi, options);
+    $.fn.SMIWorkspace = function(smi, options) {
+        return new SMIWorkspace(this, smi, options);
     };
 
 })(jQuery, obviel);
