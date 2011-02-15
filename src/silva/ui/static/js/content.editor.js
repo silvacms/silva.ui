@@ -61,7 +61,7 @@
                     removePlugins: 'save,link,flash,image,filebrowser,iframe,forms',
                     skin: configuration['skin'],
                     toolbar: 'Silva',
-                    height: 'auto',
+                    height: '2000px',
                     toolbar_Silva: configuration['toolbars'],
                     resize_enabled: false
                 };
