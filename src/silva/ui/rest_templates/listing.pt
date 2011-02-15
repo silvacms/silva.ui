@@ -1,14 +1,27 @@
-<tal:listing>
+<tal:listing i18n:domain="silva">
   <div class="header">
     <table>
       <thead><tr></tr></thead>
     </table>
   </div>
-  <div class="listing">
-    <table>
-      <tbody></tbody>
-    </table>
-  </div>
+  <dl class="listing">
+    <dt class="publishables">
+      <ins></ins>Publishable
+    </dt>
+    <dd class="publishables">
+      <table class="static">
+        <tbody></tbody>
+      </table>
+    </dd>
+    <dt class="assets">
+      <ins></ins>Assets
+    </dt>
+    <dd class="assets">
+      <table class="static">
+        <tbody></tbody>
+      </table>
+    </dd>
+  </dl>
   <div class="footer">
     <ins id="selector" class="icon checkbox">
     </ins>

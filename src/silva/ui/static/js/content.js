@@ -7,7 +7,7 @@
             iface: 'title',
             render: function(element, data) {
                 var title = $(element);
-                var icon = $('<ins class="icon"></ins');
+                var icon = $('<ins class="icon"></ins>');
 
                 icon.addClass(data['icon']);
                 title.text(data['title']);

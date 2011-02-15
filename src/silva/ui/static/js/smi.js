@@ -1,4 +1,29 @@
 
+
+(function ($) {
+    $(document).ready(function () {
+        // Add a loading message on server request
+        var count = 0;
+        var message = $('div#loading-message');
+
+        if (message) {
+            $(document).ajaxSend(function() {
+                if (!count) {
+                    message.fadeIn('fast');
+                };
+                count += 1;
+            });
+            $(document).ajaxComplete(function() {
+                count -= 1;
+                if (!count) {
+                    message.fadeOut('fast');
+                };
+            });
+        };
+    });
+})(jQuery);
+
+
 (function($) {
     var HASH_REGEXP = /#([^!]*)!?(.*)/;
 
@@ -237,3 +262,4 @@
         }
     };
 })(jQuery);
+

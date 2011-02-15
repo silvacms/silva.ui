@@ -18,6 +18,9 @@
   </head>
 
   <body>
+    <div id="loading-message">
+      <p i18n:translate="">Loading ...</p>
+    </div>
     <div id="header">
       <h1><a class="home"><img src="${imgs_url}/silva.png" alt="Silva" /></a></h1>
       <ol>
@@ -64,7 +67,7 @@
               url: "${view.root_url}/{path}"
           },
           listing: {
-              columns: "${view.root_url}/++rest++silva.ui.listing.columns",
+              configuration: "${view.root_url}/++rest++silva.ui.listing.configuration",
               template: "${view.root_url}/++rest++silva.ui.listing.template"
           },
           editor: {

@@ -116,16 +116,28 @@ class TemplateContainerListing(rest.REST):
 
 class ColumnsContainerListing(rest.REST):
     grok.context(IContainer)
-    grok.name('silva.ui.listing.columns')
+    grok.name('silva.ui.listing.configuration')
     grok.require('silva.ReadSilvaContent')
 
     def GET(self):
         return self.json_response([
-                {"name": "icon",},
-                {"name": "status",},
-                {"name": "title", "caption": "Title",},
-                {"name": "author", "caption": "Author",},
-                {"name": "modified", "caption": "Modified",}])
+                {'name': 'publishables',
+                 'columns': [
+                        {'name': 'icon'},
+                        {'name': 'status'},
+                        {'name': 'title', 'caption': 'Title',},
+                        {'name': 'author', 'caption': 'Author',},
+                        {'name': 'modified', 'caption': 'Modified',}],
+                 'sortable': 'icon',
+                 'collapsed': False},
+                {'name': 'assets',
+                 'columns': [
+                        {'name': 'icon',},
+                        {'name': 'title', 'caption': 'Title',},
+                        {'name': 'author', 'caption': 'Author',},
+                        {'name': 'modified', 'caption': 'Modified',}],
+                 'collapsed': True},
+                ])
 
 
 
@@ -148,13 +160,13 @@ class ContainerListing(rest.REST):
             return content.absolute_url_path()[len(root_path):]
 
 
-        entries = []
+        publishables = []
         service = getUtility(IMetadataService)
         for entry in self.context.get_ordered_publishables():
             path = content_path(entry)
             content = entry.get_previewable()
             metadata = service.getMetadata(content)
-            entries.append(
+            publishables.append(
                 {"status": {
                         "ifaces": ["workflow"],
                         "value": "published"},
@@ -175,8 +187,31 @@ class ContainerListing(rest.REST):
                         "ifaces": ["text"],
                         "value": format_date(metadata.get('silva-extra', 'modificationtime'))}
                  })
+        assets = []
+        for entry in self.context.get_non_publishables():
+            path = content_path(entry)
+            metadata = service.getMetadata(entry)
+            assets.append(
+                {"icon": {
+                        "ifaces": ["icon"],
+                        "value": get_icon(entry, self.request)},
+                 "title": {
+                        "ifaces": ["action"],
+                        "value": entry.get_title_or_id(),
+                        "path": path,
+                        "action": "content"},
+                 "author": {
+                        "ifaces": ["action"],
+                        "value": metadata.get('silva-extra', 'lastauthor'),
+                        "path": path,
+                        "action": "properties"},
+                 "modified": {
+                        "ifaces": ["text"],
+                        "value": format_date(metadata.get('silva-extra', 'modificationtime'))}
+                 })
         return {"ifaces": ["listing"],
-                "entries": entries}
+                "publishables": publishables,
+                "assets": assets}
 
     def GET(self):
         return self.json_response(self.data())

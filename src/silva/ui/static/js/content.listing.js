@@ -73,11 +73,96 @@
         })
     );
 
-    var SMIListing = function(content, data, cfg, template) {
+    var SMIListing = function(header, content, data, configuration) {
+        this.header = header;
         this.content = content;
-        this.cfg = cfg;
+        this.configuration = configuration;
+
+        // Collapse feature
+        if (configuration.collapsed) {
+            header.addClass('collapsed');
+            content.addClass('collapsed');
+            header.one('uncollapse.smilisting', function() {
+                // On the first display, add the data.
+                this.add_lines(data);
+            }.scope(this));
+        } else {
+            // We are not collapsed, add data now.
+            this.add_lines(data);
+        };
+        header.bind('click', function() {
+            header.toggleClass('collapsed');
+            content.toggleClass('collapsed');
+            configuration.collapsed = !configuration.collapsed;
+            header.trigger('uncollapse.smilisting');
+        });
+
+
+        // Add the hover style
+        content.delegate('tbody tr', 'mouseenter', function() {
+            $(this).addClass("hover");
+        });
+        content.delegate('tbody tr', 'mouseleave', function() {
+            $(this).removeClass("hover");
+        });
+
+        if (configuration.sortable) {
+            // Add the sorting
+            content.find('table').tableDnD({
+                dragHandle: "dragHandle",
+                onDragClass: "dragging",
+                onDragStart: function(table, row) {
+                    $(row).removeClass('hover');
+                    $(table).removeClass('static');
+                },
+                onDrop: function(table, row) {
+                    // XXX Send new order to server
+                    //$("#SMIContents_rows").setClassSequence();
+                    $(table).addClass('static');
+                }
+            });
+        };
+    };
+
+    /**
+     * Add a list of lines to the listing.
+     * @param data: list of line data
+     */
+    SMIListing.prototype.add_lines = function(data) {
+        // Fill in table
+        $.each(data, function(i, line) {
+            this.add_line(line);
+        }.scope(this));
+    };
+
+    /**
+     * Add one line to the listing.
+     * @param data: line data.
+     */
+    SMIListing.prototype.add_line = function(data) {
+        // Add a data line to the table
+        var container = this.content.find('tbody');
+        var line = $('<tr></tr>');
+
+        $.each(this.configuration.columns, function(i, column) {
+            var cell = $('<td></td>');
+
+            if (this.configuration.sortable == column.name) {
+                cell.addClass('dragHandle');
+            };
+            cell.render(data[column.name], 'listing');
+            line.append(cell);
+        }.scope(this));
+        container.append(line);
+    };
+
+
+    var SMIComposedListing = function(content, data, configuration, template) {
+        this.content = content;
+        this.configuration = configuration;
         this.template = template;
         this.data = data;
+        this.listings = [];
 
         // Empty space on unload
         content.one('unload.smicontent', function(event) {
@@ -88,81 +173,56 @@
         this.content.html(this.template);
 
         // Fill in header
+        var first_cfg = configuration[0];
         var header = this.content.find('div.header tr');
-        $.each(this.cfg, function(i, column) {
+        $.each(first_cfg.columns, function(i, column) {
             var cell = $('<th></th>');
 
-            if (!i) {
+            if (first_cfg.sortable == column.name) {
                 cell.addClass('dragHandle');
             };
             if (column.caption) {
                 cell.text(column.caption);
-            }
+            };
             header.append(cell);
         });
 
-        // Fill in table
-        var self = this;
-        $.each(this.data.entries, function(i, line) {
-            self.add(line);
-        });
+        $.each(this.configuration, function(i, configuration) {
+            var content = $('dd.' + configuration.name);
+            var header = $('dt.' + configuration.name);
+            var listing = new SMIListing(
+                header, content, data[configuration.name], configuration);
 
-        var listing = this.content.find('div.listing table');
+            this.listings.push(listing);
+        }.scope(this));
 
-        // Initialize Drag and Drop
-        listing.tableDnD({
-            dragHandle: "dragHandle",
-            onDragClass: "dragging",
-            onDragStart: function(element) {
-                var table = $(element);
-                table.removeClass('static');
-            },
-            onDrop: function(element) {
-                var table = $(element);
-                // XXX Send new order to server
-                //$("#SMIContents_rows").setClassSequence();
-                element.addClass('static');
-            }
-        });
+        var listing = this.content.find('dd.publishables table');
 
         // Fix table widths
         listing.updateTableColumnsWidths({fixedColumns: {0:32, 1:16}});
         this.content.find('div.header table').updateTableColumnsWidths(
-            {source: '#workspace div.listing table'});
+            {source: '#workspace dd.publishables table'});
+        this.content.find('dd.assets table').updateTableColumnsWidths(
+            {source: '#workspace dd.publishables table',
+             skipColumns: {1:true}});
 
 
-    };
-
-    SMIListing.prototype.add = function(data) {
-        // Add a data line to the table
-        var container = this.content.find('div.listing tbody');
-        var line = $('<tr></tr>');
-
-        $.each(this.cfg, function(i, column) {
-            var cell = $('<td></td>');
-
-            if (!i) {
-                cell.addClass('dragHandle');
-            };
-            cell.render(data[column.name], 'listing');
-            line.append(cell);
-        });
-        container.append(line);
     };
 
     $(document).bind('load.smiplugins', function(event, smi) {
         $.ajax({
-            url: smi.options.listing.columns,
+            url: smi.options.listing.configuration,
             async: false,
             dataType: 'json',
-            success:function(cfg) {
+            success:function(configuration) {
                 $.ajax({
                     url: smi.options.listing.template,
                     async: false,
                     dataType: 'html',
                     success: function(template) {
                         $.fn.SMIContentListing = function(data) {
-                            return new SMIListing($(this), data, cfg, template);
+                            return new SMIComposedListing(
+                                $(this), data, configuration, template);
                         };
                     }});
             }});
