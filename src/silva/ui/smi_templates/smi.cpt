@@ -1,7 +1,8 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml"
-      tal:define="root_url context.get_root_url();
-                  imgs_url static.img()"
+      tal:attributes="lang view.lang | nothing;
+                      xml:lang view.lang | nothing"
+      tal:define="imgs_url static.img()"
       i18n:domain="silva">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
@@ -20,8 +21,12 @@
     <div id="header">
       <h1><a class="home"><img src="${imgs_url}/silva.png" alt="Silva" /></a></h1>
       <ol>
-        <li><a href="${root_url}/manage_main"
-               i18n:translate="">Manage</a></li>
+        <li tal:condition="view.can_manage">
+          <a href="${view.root_url}/manage_main"
+             i18n:translate="">
+            Manage
+          </a>
+        </li>
         <li><a href="#"
                i18n:translate="">Settings</a></li>
         <li><a href="#"
@@ -35,9 +40,10 @@
       </div>
       <div id="workspace">
         <div class="info">
-          <h3>Silva</h3>
+          <h3 i18n:translate="">Loading...</h3>
           <ol class="tabs"></ol>
           <ol class="actions"></ol>
+          <a href="#" id="content-url"></a>
         </div>
         <div class="content"></div>
       </div>
@@ -45,20 +51,24 @@
     <script type="text/javascript">
       $(document).ready(function() {
       smi = $('body').SMI({
-          url: "${root_url}/{path}/++rest++silva.ui.{tab}",
+          url: "${view.root_url}/{path}/++rest++silva.ui.{tab}",
           header: {
               selector: "#header"
           },
           navigation: {
               selector: "#navigation",
-              url: "${root_url}/{path}/++rest++silva.ui.navigation"
+              url: "${view.root_url}/{path}/++rest++silva.ui.navigation"
           },
           workspace: {
               selector: "#workspace",
+              url: "${view.root_url}/{path}"
           },
           listing: {
-              columns: "${root_url}/++rest++silva.ui.listing.columns",
-              template: "${root_url}/++rest++silva.ui.listing.template"
+              columns: "${view.root_url}/++rest++silva.ui.listing.columns",
+              template: "${view.root_url}/++rest++silva.ui.listing.template"
+          },
+          editor: {
+              configuration: "${view.root_url}/++rest++silva.core.editor.configuration"
           }
       });
       });

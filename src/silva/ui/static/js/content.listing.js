@@ -79,6 +79,12 @@
         this.template = template;
         this.data = data;
 
+        // Empty space on unload
+        content.one('unload.smicontent', function(event) {
+            content.empty();
+        });
+
+        // Set base template
         this.content.html(this.template);
 
         // Fill in header

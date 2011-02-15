@@ -6,10 +6,10 @@
 from zope.interface import Interface, Attribute
 from silva.core import conf as silvaconf
 from silva.core.editor.interfaces import ICKEditorResources
-
+from silva.core.references.widgets import IReferenceUIResources
 
 # CKeditor already contains jquery and json-template
-class ISMIResources(ICKEditorResources):
+class ISMIResources(ICKEditorResources, IReferenceUIResources):
 
     silvaconf.resource('css/style.css')
     silvaconf.resource('css/smi.css')
@@ -32,6 +32,7 @@ class ISMIResources(ICKEditorResources):
 
     silvaconf.resource('js/content.js')
     silvaconf.resource('js/content.listing.js')
+    silvaconf.resource('js/content.editor.js')
     silvaconf.resource('js/navigation.js')
     silvaconf.resource('js/smi.js')
 

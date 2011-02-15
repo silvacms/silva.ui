@@ -54,6 +54,12 @@ class Content(rest.REST):
     grok.require('silva.ReadSilvaContent')
 
     def GET(self):
+        root = self.context.get_root()
+        root_path = root.absolute_url_path()
+
+        def content_path(content):
+            return content.absolute_url_path()[len(root_path):]
+
         service = getUtility(IIntIds)
         tabs = []
         default_tab = None
@@ -77,7 +83,8 @@ class Content(rest.REST):
                     'ifaces': ['tabs'],
                     'active': default_tab,
                     'entries': tabs,
-                    }
+                    },
+                'path': content_path(self.context)
                 }
             }
         if default_tab:
@@ -170,6 +177,29 @@ class ContainerListing(rest.REST):
                  })
         return {"ifaces": ["listing"],
                 "entries": entries}
+
+    def GET(self):
+        return self.json_response(self.data())
+
+
+
+from silva.app.document.interfaces import IDocument
+from silva.core.editor.transform.interfaces import ITransformer
+from silva.core.editor.transform.interfaces import IInputEditorFilter
+
+class DocumentEdit(rest.REST):
+    grok.context(IDocument)
+    grok.name('silva.ui.edit')
+    grok.require('silva.ReadSilvaContent')
+
+    def data(self):
+        version = self.context.get_editable()
+        transformer = getMultiAdapter((version, self.request), ITransformer)
+        text = transformer.attribute('body', IInputEditorFilter)
+
+        return {"ifaces": ["editor"],
+                "name": "body",
+                "text": text}
 
     def GET(self):
         return self.json_response(self.data())

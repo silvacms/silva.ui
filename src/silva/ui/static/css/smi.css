@@ -35,6 +35,10 @@ input, textarea { cursor:text; }
 #dialog_actions div.actions_left { float:left; }
 #dialog_actions div.actions_right { float:right; }
 
+#content-url {
+  display: none;
+}
+
 #notifications {
   position:absolute; bottom:50px; right:40px;
   width:300px; background:#666;
@@ -393,16 +397,8 @@ input, textarea { cursor:text; }
   display:none;
 }
 
-#SMIEditor, #SMIProperties, #SMIHistory, #SMIAccess {
+#workspace .content-area {
   position:absolute; top:70px; bottom:0; left:0; right:0; overflow:hidden;
-}
-
-#SMIEditor textarea {
-  position:absolute; top:0; bottom:0; left:0; right:0;
-  border:0; margin:0; padding:0;
-  khtml-border-radius:0; -moz-border-radius:0;
-  -ms-border-radius:0; -o-border-radius:0;
-  -webkit-border-radius:0; border-radius:0;
 }
 
 /*

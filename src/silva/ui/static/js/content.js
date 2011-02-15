@@ -43,16 +43,32 @@
         this._ = smi;
         this.workspace = workspace;
         this.options = options;
+        var url = jsontemplate.Template(options.url, {});
+        var loaded = false;
 
         // Disable text selection
         workspace.children('.info').disableTextSelect();
 
         // New workspace is loaded
         workspace.bind('content.smi', function (event, data) {
-            $(this).children('.info').children('h3').render(data.metadata.title);
-            $(this).children('.info').children('.tabs').render(data.metadata.tabs);
+            var workspace = $(this);
+            var info = workspace.children('.info');
+            var content = workspace.children('.content');
 
-            $(this).children('.content').render(data.content);
+            // Send an unload event
+            if (loaded) {
+                content.trigger('unload.smicontent');
+            };
+            // Update header
+            info.children('h3').render(data.metadata.title);
+            info.children('.tabs').render(data.metadata.tabs);
+            info.children('#content-url').attr(
+                'href', url.expand({path: data.metadata.path}));
+
+            // Update content area
+            content.render(data.content);
+
+            loaded = true;
         });
     };
 

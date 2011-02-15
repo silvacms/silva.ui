@@ -28,7 +28,7 @@
         header.disableTextSelect();
         navigation.SMINavigation(this, options.navigation);
 
-        this.workspace = workspace.SMIWorkspace(options.workspaces);
+        this.workspace = workspace.SMIWorkspace(this, options.workspace);
 
         // Bind keys to switch focus between navigation and workspace
         // XXX: doesn't work for Sylvain
@@ -85,12 +85,30 @@
         this._load(document.location.hash);
     };
 
-    // Official call to open a screen.
+    /**
+     * Open a content tab for the content located on the given
+     * path. If tab is not provided, open the content tab.
+     *
+     * @param path: path to the content to open.
+     * @param tab: tab name to open on the content.
+     */
     SMI.prototype.open = function(path, tab) {
         if (tab == undefined) {
             tab = 'content';
         };
         document.location.hash = tab + '!' + path;
+    };
+
+    /**
+     * Retrieve the language used by the SMI.
+     */
+    SMI.prototype.get_language = function() {
+        var lang = $('html').attr('lang');
+
+        if (!lang) {
+            lang = 'en';
+        };
+        return lang;
     };
 
     // Open a screen from a hash tag.
@@ -113,7 +131,7 @@
     };
 
     /**
-     * Main SMI loader
+     * JQuery SMI loader
      */
     $.fn.SMI = function(method) {
 
