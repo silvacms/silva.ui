@@ -28,7 +28,6 @@ class ISMIResources(ICKEditorResources, IReferenceUIResources):
     silvaconf.resource('js/jquery.smi.main.js')
     silvaconf.resource('js/jquery.smi.table.js')
     silvaconf.resource('js/jquery.smi.actionbuttons.js')
-    silvaconf.resource('js/jquery.smi.editor.js')
 
     silvaconf.resource('js/content.js')
     silvaconf.resource('js/content.listing.js')
