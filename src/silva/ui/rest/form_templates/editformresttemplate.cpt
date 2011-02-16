@@ -1,0 +1,34 @@
+<form class="content-form" i18n:domain="silva">
+  <table>
+    <tbody>
+      <tal:repeat tal:repeat="widget view.fieldWidgets">
+        <tr>
+          <td class="label">
+            <label tal:attributes="for widget.htmlId()"
+                   tal:content="widget.title">
+              Field Name
+            </label>
+            <span class="required"
+                  tal:condition="widget.required">
+              *
+            </span>
+            <p tal:condition="widget.description"
+               tal:content="widget.description">
+              Description
+            </p>
+          </td>
+          <td class="element">
+            <div class="error"
+                 tal:condition="widget.error"
+                 tal:content="structure widget.error.title">
+              Validation error.
+            </div>
+            <tal:widget tal:content="structure widget.render()">
+              Widget.
+            </tal:widget>
+          </td>
+        </tr>
+      </tal:repeat>
+    </tbody>
+  </table>
+</form>

@@ -5,6 +5,8 @@
   <include package="five.grok" />
   <include package="silva.core.conf" />
   <include package="silva.core.layout" />
+  <include package="silva.core.editor" />
+  <include package="zeam.form.silva" />
 
   <grok:grok package="." />
 

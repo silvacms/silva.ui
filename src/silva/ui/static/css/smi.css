@@ -292,8 +292,8 @@ input, textarea { cursor:text; }
   width:100%;
   border-collapse:collapse;
 }
-#workspace .content td,
-#workspace .content th {
+#workspace .content .listing td,
+#workspace .content .header th {
   padding:0 10px 0 0;
   line-height:22px;
   text-align:left;
@@ -460,6 +460,21 @@ input, textarea { cursor:text; }
 
 #workspace .content-area {
   position:absolute; top:70px; bottom:0; left:0; right:0; overflow:hidden;
+}
+
+/* Form styling */
+
+#workspace .content-form td,
+#workspace .content-form th {
+  padding: 10px;
+}
+
+#workspace .content-form td.label {
+  width: 33%;
+}
+
+#workspace .content-form label {
+  font-weight: bold;
 }
 
 /*

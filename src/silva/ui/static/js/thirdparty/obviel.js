@@ -480,39 +480,6 @@ var obviel = {};
         module._views[viewobj.iface][viewobj.name] = viewobj;
     };
 
-    module.iface('form');
-    module.formView = function(options) {
-        /* register a form view
-
-           a form view is a lot higher-level than a normal one. it is
-           registered for the 'form' iface only and expects
-           the following options:
-
-             * name - the name of the view, optional, defaults to 'default'
-             * render - function that's called each time after the form
-               renders, can be used to attach event handlers, etc.
-
-           when the form is rendered, a 'form html structure' needs to be
-           provided, which is an object with at least an attribute 'html',
-           providing the html for the form, optionally a boolean 'iframe'
-           to make the form get rendered into an iframe, and an optional
-           string argument 'action' to override the form action. when the
-           view is rendered, the form is displayed in the view element,
-           and a submit event handler is hooked to the form. when the
-           form gets submitted, the form is serialized and sent to the server.
-           the server should then return a viewable structure, which is
-           displayed using $(element).render() automatically
-        */
-        var settings = {
-            name: 'default',
-            iface: 'form',
-            form: true,
-            render: function() {}
-        };
-        $.extend(settings, options);
-        module.view((new module.View(settings)));
-    };
-
     module.htmlView = function(options) {
         /* register a view to render a (relatively) simple HTML template
 
@@ -660,7 +627,7 @@ var obviel = {};
             throw(msg);
         };
     };
-    
+
     module._render_from_url = function(element, url, args, no_event) {
         $.ajax({
             type: 'GET',

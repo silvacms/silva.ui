@@ -52,9 +52,9 @@ class NavigationListing(UIREST):
 class DocumentEdit(PageREST):
     grok.context(IDocument)
     grok.name('silva.ui.content')
-    grok.require('silva.ReadSilvaContent')
+    grok.require('silva.ChangeSilvaContent')
 
-    def data(self):
+    def payload(self):
         version = self.context.get_editable()
         transformer = getMultiAdapter((version, self.request), ITransformer)
         text = transformer.attribute('body', IInputEditorFilter)

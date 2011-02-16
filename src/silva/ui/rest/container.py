@@ -102,7 +102,7 @@ class ContainerListing(PageREST):
         for content in self.context.get_non_publishables():
             yield content
 
-    def data(self):
+    def payload(self):
         publishables = []
         service = getUtility(IMetadataService)
         for entry in self.get_publishable_content():

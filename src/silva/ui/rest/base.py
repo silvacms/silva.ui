@@ -53,7 +53,8 @@ class PageREST(UIREST):
                          'action': tab.action})
             if tab.default:
                 default_tab = tab.action
-        data = {
+
+        return self.json_response({
             'ifaces': ['content'],
             'navigation': 'nav' + str(service.register(self.context.get_container())),
             'metadata': {
@@ -70,8 +71,7 @@ class PageREST(UIREST):
                     },
                 'path': self.get_content_path(self.context)
                 },
-            'content': self.data()
-            }
-        return self.json_response(data)
+            'content': self.payload()})
+
 
 
