@@ -10,7 +10,7 @@
                 'user-select': 'none'
             }).bind('selectstart', function() {
                 return false;
-            }).mousedown(function() {
+            }).bind('mousedown', function() {
                 return false;
             });
         });
@@ -21,9 +21,7 @@
                 '-moz-user-select': 'text',
                 '-webkit-user-select': 'text',
                 'user-select': 'text'
-            }).unbind('selectstart').mousedown(function() {
-                return true;
-            });
+            }).unbind('selectstart').unbind('mousedown');
         });
     };
 

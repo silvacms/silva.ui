@@ -73,7 +73,7 @@
         })
     );
 
-    var SMIListing = function(header, content, data, configuration) {
+    var SMIListing = function(header, content, smi, data, configuration) {
         this.header = header;
         this.content = content;
         this.configuration = configuration;
@@ -106,13 +106,44 @@
             $(this).removeClass("hover");
         });
 
+        // Row selection with mouse
+        var mouse_last_selected = null;
+        content.delegate('tbody tr', 'click', function(event) {
+            var row = $(this);
+
+            if (mouse_last_selected === null || !event.shiftKey) {
+                mouse_last_selected = row.index();
+                row.toggleClass('selected');
+            } else {
+                // Shift is pressed, and a column have been previously selected.
+                var current_selected = row.index();
+
+                if (current_selected != mouse_last_selected) {
+                    var start = 0;
+                    var end = 0;
+
+                    if (current_selected > mouse_last_selected) {
+                        start = mouse_last_selected + 1;
+                        end = current_selected + 1;
+                    } else {
+                        start = current_selected;
+                        end = mouse_last_selected;
+                    };
+                    row.parent().children().slice(start, end).toggleClass('selected');
+                };
+                mouse_last_selected = null;
+            };
+        });
+
         if (configuration.sortable) {
             // Add the sorting
             content.find('table').tableDnD({
                 dragHandle: "dragHandle",
                 onDragClass: "dragging",
                 onDragStart: function(table, row) {
+                    // Reset hover style and mouse mouse_last_selected
                     $(row).removeClass('hover');
+                    mouse_last_selected = null;
                     $(table).removeClass('static');
                 },
                 onDrop: function(table, row) {
@@ -122,6 +153,7 @@
                 }
             });
         };
+
     };
 
     /**
@@ -157,7 +189,7 @@
     };
 
 
-    var SMIComposedListing = function(content, data, configuration, template) {
+    var SMIComposedListing = function(content, data, smi, configuration, template) {
         this.content = content;
         this.configuration = configuration;
         this.template = template;
@@ -167,10 +199,12 @@
         // Empty space on unload
         content.one('unload.smicontent', function(event) {
             content.empty();
+            //content.enableTextSelect();
         });
 
         // Set base template
-        this.content.html(this.template);
+        content.disableTextSelect();
+        content.html(this.template);
 
         // Fill in header
         var first_cfg = configuration[0];
@@ -191,7 +225,7 @@
             var content = $('dd.' + configuration.name);
             var header = $('dt.' + configuration.name);
             var listing = new SMIListing(
-                header, content, data[configuration.name], configuration);
+                header, content, smi, data[configuration.name], configuration);
 
             this.listings.push(listing);
         }.scope(this));
@@ -222,7 +256,7 @@
                     success: function(template) {
                         $.fn.SMIContentListing = function(data) {
                             return new SMIComposedListing(
-                                $(this), data, configuration, template);
+                                $(this), data, smi, configuration, template);
                         };
                     }});
             }});

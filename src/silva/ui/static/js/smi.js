@@ -38,6 +38,85 @@
         };
     }
 
+    /**
+     * A ShortcutManager let you bind, unbind, rebind collection of
+     * shortcuts.
+     */
+    var ShortcutManager = function () {
+        this.shortcuts = {default: []};
+        this.current = 'default';
+        this.activated = true;
+    };
+
+    /**
+     * Bind a shortbut to a key.
+     * @param key: shortcut key
+     * @param callback: callback to execute
+     */
+    ShortcutManager.prototype.bind = function(key, callback) {
+        if (this.activated) {
+            shortcut.add(key, callback);
+        };
+        this.shortcuts[this.current][key] = callback;
+    };
+
+    /**
+     * Unbind a shortcut.
+     * @param key: shortcut key
+     */
+    ShortcutManager.prototype.unbind = function(key) {
+        if (this.shortcuts[this.current][key]) {
+            if (this.activated) {
+                shortcut.remove(key);
+            };
+            delete this.shortcuts[this.current][key];
+        }
+    };
+
+    /**
+     * Switch active shortcuts to a new or existing collection.
+     * @param name: shortcut collection
+     */
+    ShortcutManager.prototype.switch = function(name) {
+        if (name != this.current) {
+            this.disable();
+            this.current = name;
+            if (this.shortcuts[name] == undefined) {
+                this.shortcuts[name] = {};
+            };
+            this.activate();
+        }
+    };
+
+    /**
+     * Activate the current shortcut collection.
+     */
+    ShortcutManager.prototype.activate = function() {
+        if (!this.activated) {
+            var collection = this.shortcuts[this.current];
+
+            for (key in collection) {
+                shortcut.add(key, collection[key]);
+            };
+            this.activated = true;
+        };
+    };
+
+    /**
+     * Disable the current shortcut collection.
+     */
+    ShortcutManager.prototype.disable = function() {
+        if (this.activated) {
+            var collection = this.shortcuts[this.current];
+
+            for (key in collection) {
+                shortcut.remove(key);
+            };
+            this.activated = false;
+        };
+    };
+
+
     var SMI = function(options) {
         var navigation = $(options.navigation.selector);
         var workspace = $(options.workspace.selector);
@@ -50,6 +129,7 @@
 
         this.opened = {path: '', tab: ''};
         this.options = options;
+        this.shortcuts = new ShortcutManager();
         header.disableTextSelect();
         navigation.SMINavigation(this, options.navigation);
 
@@ -203,56 +283,6 @@
                 if(actions[action]) {
                     return actions[action].apply(this, Array.prototype.slice.call(arguments, 1));
                 }
-            },
-            keybind: function(triggers, fn) {
-                $SMI.SMI('unbind', triggers);
-                if (!window.hotkeys) {
-                    window.hotkeys = {};
-                }
-                if (typeof(triggers) == 'string') {
-                    triggers = [triggers];
-                }
-                $.each(triggers, function(i, trigger){
-                    if (typeof(window.hotkeys[trigger]) != 'function') {
-                        shortcut.add(trigger, fn);
-                        window.hotkeys[trigger] = fn;
-                    }
-                });
-            },
-            unbind: function(triggers) {
-                if (!window.hotkeys) return;
-                if (typeof(triggers) == 'string') {
-                    triggers = [triggers];
-                }
-                $.each(triggers, function(i, trigger){
-                    if (typeof(window.hotkeys[trigger]) == 'function') {
-                        shortcut.remove(trigger);
-                        window.hotkeys[trigger] = null;
-                    }
-                });
-            },
-            bindonce: function(triggers, fn) {
-                if (!window.hotkeys) return;
-                if (typeof(triggers) == 'string') {
-                    triggers = [triggers];
-                }
-                $.each(triggers, function(i, trigger){
-                    var oldfn = $SMI.SMI('getbind', trigger);
-                    var newfn = function() {
-                        fn();
-                        if (oldfn) {
-                            $SMI.SMI('keybind', trigger, oldfn);
-                        }
-                    };
-                    $SMI.SMI('keybind', trigger, newfn);
-                });
-            },
-            getbind: function(trigger) {
-                var fn = window.hotkeys[trigger];
-                return ($.isFunction(fn)) ? fn : null;
-            },
-            getbinds: function() {
-                return (window.hotkeys) ? window.hotkeys : {};
             }
         };
         if(methods[method]) {
@@ -261,5 +291,5 @@
             return methods.init.apply(this, arguments);
         }
     };
-})(jQuery);
+})(jQuery, shortcut);
 
