@@ -6,7 +6,7 @@
 
 from five import grok
 from infrae import rest
-from silva.core.interfaces import IContainer, ISilvaObject
+from silva.core.interfaces import IVersionedContent, IContainer, ISilvaObject
 from zope.intid.interfaces import IIntIds
 from zope.component import getUtility, getMultiAdapter
 from zope.cachedescriptors.property import CachedProperty
@@ -167,6 +167,24 @@ def format_date(date):
         return date.ISO()
     return ''
 
+def get_content_status(content):
+    if IVersionedContent.providedBy(content):
+        next_status = content.get_next_version_status()
+
+        if next_status == 'not_approved':
+            return 'draft'
+        elif next_status == 'request_pending':
+            return 'pending'
+        elif next_status == 'approved':
+            return 'approved'
+        else:
+            public = content.get_public_version_status()
+            if public == 'published':
+                return 'published'
+            elif public == 'closed':
+                return 'closed'
+    return None
+
 
 class ContainerListing(UIREST):
     grok.context(IContainer)
@@ -198,7 +216,7 @@ class ContainerListing(UIREST):
             publishables.append(
                 {"status": {
                         "ifaces": ["workflow"],
-                        "value": "published"},
+                        "value": get_content_status(entry)},
                  "icon": {
                         "ifaces": ["icon"],
                         "value": get_icon(entry, self.request)},

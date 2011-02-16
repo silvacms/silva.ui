@@ -57,7 +57,9 @@
             render: function(element, data) {
                 var icon = $('<ins class="state"></ins>');
 
-                icon.addClass(data.value);
+                if (data.value) {
+                    icon.addClass(data.value);
+                }
                 $(element).append(icon);
             }
         })

@@ -31,6 +31,7 @@ class ISMIResources(ICKEditorResources, IReferenceUIResources):
     silvaconf.resource('js/content.js')
     silvaconf.resource('js/content.listing.js')
     silvaconf.resource('js/content.editor.js')
+    silvaconf.resource('js/content.form.js')
     silvaconf.resource('js/navigation.js')
     silvaconf.resource('js/smi.js')
 
