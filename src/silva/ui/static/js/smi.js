@@ -116,6 +116,83 @@
         };
     };
 
+    /**
+     * Notification implement a notification.
+     * @param container: container to insert notification.
+     * @param messags: message used to render the notification.
+     */
+    var Notification = function(container, message) {
+        var notification = $('<div class="notification"></div>');
+        var timer = null;
+
+        if (typeof(message.title) == 'string') {
+            notification.prepend('<h3>' + message.title + '</h3>');
+        };
+        if (typeof(message.message) == 'string') {
+            notification.append('<p>' + message.message + '</p>');
+        };
+        if (typeof(message.category) == 'string') {
+            notification.addClass(message.category);
+        };
+
+        // Bind the close event
+        notification.bind('close.notification', function() {
+            // Disable timeout if dialog is closed
+            if (timer !== null) {
+                clearTimeout(timer);
+                timer = null;
+            };
+            notification.animate({ height:0, opacity:0 }, 'slow', function() {
+                notification.remove();
+            });
+        });
+
+        // Close and autoclose
+        notification.bind('click', function() {
+            notification.trigger('close.notification');
+        });
+        if(typeof message.autoclose == 'number') {
+            timer = setTimeout(function() {
+                notification.trigger('close.notification');
+            }, message.autoclose);
+        };
+
+        container.append(notification);
+    };
+
+    /**
+     * NotificationManager manage notifications
+     * @param options: configuration options.
+     */
+    var NotificationManager = function(options) {
+        this.container = $(options.selector);
+
+        // Listen to pull notification events.
+        $(document).bind('refresh-feedback.smi', function() {
+            $.getJSON(options.url, function(messages) {
+                this.notifies(messages);
+            }.scope(this));
+        }.scope(this));
+    };
+
+    /**
+     * Notify of a new notification
+     * @param message: message.
+     */
+    NotificationManager.prototype.notify = function(message) {
+        new Notification(this.container, message);
+    };
+
+    /**
+     * Notify a list of new notifications
+     * @param messages: list of messages.
+     */
+    NotificationManager.prototype.notifies = function(message) {
+        $.each(messages, function(i, message) {
+            this.notify(message);
+        }.scope(this));
+    };
+
 
     var SMI = function(options) {
         var navigation = $(options.navigation.selector);
@@ -130,6 +207,8 @@
         this.opened = {path: '', tab: ''};
         this.options = options;
         this.shortcuts = new ShortcutManager();
+        this.notifications = new NotificationManager(options.notifications);
+
         header.disableTextSelect();
         navigation.SMINavigation(this, options.navigation);
 

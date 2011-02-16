@@ -97,7 +97,6 @@
             header.trigger('uncollapse.smilisting');
         });
 
-
         // Add the hover style
         content.delegate('tbody tr', 'mouseenter', function() {
             $(this).addClass("hover");
@@ -136,7 +135,7 @@
         });
 
         if (configuration.sortable) {
-            // Add the sorting
+            // Add the sorting if the table is sortable
             content.find('table').tableDnD({
                 dragHandle: "dragHandle",
                 onDragClass: "dragging",
@@ -179,6 +178,9 @@
         $.each(this.configuration.columns, function(i, column) {
             var cell = $('<td></td>');
 
+            if (!i) {
+                cell.addClass('first');
+            };
             if (this.configuration.sortable == column.name) {
                 cell.addClass('dragHandle');
             };
@@ -212,6 +214,9 @@
         $.each(first_cfg.columns, function(i, column) {
             var cell = $('<th></th>');
 
+            if (!i) {
+                cell.addClass('first');
+            };
             if (first_cfg.sortable == column.name) {
                 cell.addClass('dragHandle');
             };
@@ -230,10 +235,10 @@
             this.listings.push(listing);
         }.scope(this));
 
+        // Fix table widths
         var listing = this.content.find('dd.publishables table');
 
-        // Fix table widths
-        listing.updateTableColumnsWidths({fixedColumns: {0:32, 1:16}});
+        listing.updateTableColumnsWidths({fixedColumns: {0:16, 1:16}});
         this.content.find('div.header table').updateTableColumnsWidths(
             {source: '#workspace dd.publishables table'});
         this.content.find('dd.assets table').updateTableColumnsWidths(

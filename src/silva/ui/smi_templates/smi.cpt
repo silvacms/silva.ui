@@ -21,6 +21,8 @@
     <div id="loading-message">
       <p i18n:translate="">Loading ...</p>
     </div>
+    <div id="notifications">
+    </div>
     <div id="header">
       <h1><a class="home"><img src="${imgs_url}/silva.png" alt="Silva" /></a></h1>
       <ol>
@@ -65,6 +67,10 @@
           workspace: {
               selector: "#workspace",
               url: "${view.root_url}/{path}"
+          },
+          notifications: {
+              selector: "#notifications",
+              url: "${view.root_url}/++rest++silva.ui.poll.notifications"
           },
           listing: {
               configuration: "${view.root_url}/++rest++silva.ui.listing.configuration",

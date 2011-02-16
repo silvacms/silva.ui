@@ -9,26 +9,53 @@ from infrae import rest
 from silva.core.interfaces import IContainer, ISilvaObject
 from zope.intid.interfaces import IIntIds
 from zope.component import getUtility, getMultiAdapter
+from zope.cachedescriptors.property import CachedProperty
 
 from silva.ui.icon import get_icon
 from silva.ui.menu import get_menu_items
+from silva.core.views.interfaces import IVirtualSite
+from silva.core.messages.interfaces import IMessageService
 
 from Products.SilvaMetadata.interfaces import IMetadataService
 from Products.Silva.ExtensionRegistry import meta_types_for_interface
 
 
-class NavigationListing(rest.REST):
-    grok.context(IContainer)
-    grok.name('silva.ui.navigation')
+class UIREST(rest.REST):
     grok.require('silva.ReadSilvaContent')
+    grok.baseclass()
+
+    @CachedProperty
+    def root_path(self):
+        root = IVirtualSite(self.request).get_root()
+        return root.absolute_url_path()
+
+    def get_content_path(self, content):
+            return content.absolute_url_path()[len(self.root_path):]
+
+    def get_notifications(self):
+        messages = []
+        service = getUtility(IMessageService)
+        for message in service.receive_all(self.request):
+            data = {'message': unicode(message),
+                    'category': message.namespace}
+            if message.namespace != 'error':
+                data['autoclose'] = 4000
+            messages.append(data)
+        return messages
+
+class NotificationPoll(UIREST):
+    grok.name('silva.ui.poll.notifications')
+    grok.context(IContainer)
 
     def GET(self):
-        root = self.context.get_root()
-        root_path = root.absolute_url_path()
+        return self.json_response(self.get_notifications())
 
-        def content_path(content):
-            return content.absolute_url_path()[len(root_path):]
 
+class NavigationListing(UIREST):
+    grok.context(IContainer)
+    grok.name('silva.ui.navigation')
+
+    def GET(self):
         children = []
         service = getUtility(IIntIds)
         interfaces = meta_types_for_interface(IContainer)
@@ -41,25 +68,19 @@ class NavigationListing(rest.REST):
                 'attr': {
                     'id': 'nav' + str(service.register(child)),
                     },
-                'metadata': {'path': content_path(child)}}
+                'metadata': {'path': self.get_content_path(child)}}
             if is_not_empty:
                 info['state'] = "closed"
             children.append(info)
         return self.json_response(children)
 
 
-class Content(rest.REST):
+class Content(UIREST):
     grok.context(ISilvaObject)
     grok.name('silva.ui.content')
     grok.require('silva.ReadSilvaContent')
 
     def GET(self):
-        root = self.context.get_root()
-        root_path = root.absolute_url_path()
-
-        def content_path(content):
-            return content.absolute_url_path()[len(root_path):]
-
         service = getUtility(IIntIds)
         tabs = []
         default_tab = None
@@ -84,7 +105,7 @@ class Content(rest.REST):
                     'active': default_tab,
                     'entries': tabs,
                     },
-                'path': content_path(self.context)
+                'path': self.get_content_path(self.context)
                 }
             }
         if default_tab:
@@ -147,23 +168,31 @@ def format_date(date):
     return ''
 
 
-class ContainerListing(rest.REST):
+class ContainerListing(UIREST):
     grok.context(IContainer)
     grok.name('silva.ui.edit')
     grok.require('silva.ReadSilvaContent')
 
+    def get_publishable_content(self):
+        """Return all the publishable content of the container.
+        """
+        default = self.context.get_default()
+        if default is not None:
+            yield default
+        for content in self.context.get_ordered_publishables():
+            yield content
+
+    def get_non_publishable_content(self):
+        """Return all the non-publishable content of the container.
+        """
+        for content in self.context.get_non_publishables():
+            yield content
+
     def data(self):
-        root = self.context.get_root()
-        root_path = root.absolute_url_path()
-
-        def content_path(content):
-            return content.absolute_url_path()[len(root_path):]
-
-
         publishables = []
         service = getUtility(IMetadataService)
-        for entry in self.context.get_ordered_publishables():
-            path = content_path(entry)
+        for entry in self.get_publishable_content():
+            path = self.get_content_path(entry)
             content = entry.get_previewable()
             metadata = service.getMetadata(content)
             publishables.append(
@@ -188,8 +217,8 @@ class ContainerListing(rest.REST):
                         "value": format_date(metadata.get('silva-extra', 'modificationtime'))}
                  })
         assets = []
-        for entry in self.context.get_non_publishables():
-            path = content_path(entry)
+        for entry in self.get_non_publishable_content():
+            path = self.get_content_path(entry)
             metadata = service.getMetadata(entry)
             assets.append(
                 {"icon": {
