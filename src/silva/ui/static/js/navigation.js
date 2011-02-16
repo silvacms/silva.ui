@@ -6,7 +6,7 @@
         var navigation = this;
         var tree = navigation.children('.tree');
         var url = new jsontemplate.Template(options.url, {});
-
+        var parents_url = new jsontemplate.Template(options.parents_url, {});
         /**
          * Scroll the tree container horizontally to allow for unlimited node depth.
          */
@@ -17,6 +17,35 @@
                 }
                 tree.scrollLeft(21 * depth);
             });
+        };
+
+        var uncollapse = function(data, node) {
+            var url = parents_url.expand(
+                    {'path': data.metadata.path});
+            var cached_data = node.data('parents.navigation.smi');
+            var process = function(data) {
+                var last = data.length - 1;
+                $.each(data, function(index, datum){
+                    if (datum['intid'] != 0) {
+                        var node = $('#nav' + datum['intid']);
+                        if (index == last) {
+                            tree.jstree(
+                                'open_node', node, function(){
+                                    tree.jstree('select_node', node);});
+                        } else {
+                            tree.jstree('open_node', node);
+                        }
+                    }
+                });
+            };
+            if (cached_data) {
+                process(cached_data);
+            } else {
+                $.getJSON(url, function(data){
+                    node.data('smi.navigation.parents', data);
+                    process(data);
+                });
+            }
         };
 
         // Disable text selection on tree
@@ -89,12 +118,9 @@
         // If a content is selected, try to select its container
         navigation.bind('content.smi', function (event, data) {
             var node = $('#' + data.navigation);
-
             if (node.length) {
-                tree.jstree('select_node', node, true);
+                uncollapse(data, node);
             };
         });
-
-
     };
 })(jQuery);
