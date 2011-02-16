@@ -56,7 +56,9 @@ class PageREST(UIREST):
 
         return self.json_response({
             'ifaces': ['content'],
+            'content': self.payload(),
             'navigation': 'nav' + str(service.register(self.context.get_container())),
+            'notifications': self.get_notifications(),
             'metadata': {
                 'ifaces': ['metadata'],
                 'title': {
@@ -71,7 +73,6 @@ class PageREST(UIREST):
                     },
                 'path': self.get_content_path(self.context)
                 },
-            'content': self.payload()})
+            })
 
-
-
+    POST = GET

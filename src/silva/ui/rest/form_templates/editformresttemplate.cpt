@@ -17,7 +17,7 @@
               Description
             </p>
           </td>
-          <td class="element">
+          <td class="field">
             <div class="error"
                  tal:condition="widget.error"
                  tal:content="structure widget.error.title">
@@ -30,5 +30,19 @@
         </tr>
       </tal:repeat>
     </tbody>
+    <tfoot>
+      <tr tal:condition="view.haveRequiredFields()">
+        <td i18n:translate="">
+          * required
+        </td>
+        <td>&nbsp;</td>
+      </tr>
+      <tr class="controls" tal:condition="view.actionWidgets">
+        <td colspan="2">
+          <input tal:repeat="widget view.actionWidgets"
+                 tal:replace="structure widget.render()" />
+        </td>
+      </tr>
+    </tfoot>
   </table>
 </form>

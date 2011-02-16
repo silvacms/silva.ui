@@ -193,6 +193,13 @@
         }.scope(this));
     };
 
+    /**
+     * Mark all notifications as seen.
+     */
+    NotificationManager.prototype.mark_as_seen = function() {
+        this.container.children().trigger('close.notification');
+    };
+
 
     var SMI = function(options) {
         var navigation = $(options.navigation.selector);
@@ -240,10 +247,25 @@
         navigation.trigger('blur.smi');
         workspace.trigger('focus.smi');
 
+        var process_hash = function(hash) {
+            var parts = HASH_REGEXP.exec(hash);
+
+            if (parts) {
+                this.opened = {tab: parts[1], path: parts[2]};
+            } else {
+                this.opened = {tab: '', path: ''};
+            }
+
+            if (!this.opened.tab.length) {
+                this.opened.tab = 'content';
+            };
+            this.send();
+        }.scope(this);
+
         // Bind the hash change used by open
         $(window).hashchange(function(event, data) {
-            this._load(data.after);
-        }.scope(this));
+            process_hash(data.after);
+        });
 
         // Bind event to open new tab
         $('a.screen').live('click', function(event) {
@@ -266,7 +288,7 @@
         $(document).trigger('load.smiplugins', this);
 
         // Open the current location.
-        this._load(document.location.hash);
+        process_hash(document.location.hash);
     };
 
     /**
@@ -284,6 +306,31 @@
     };
 
     /**
+     * Send data to the server corresponding to the currently opened
+     * tab.
+     * @param data: dictionnary to be posted to the server.
+     */
+    SMI.prototype.send = function(data) {
+        var query = {};
+
+        query['url'] = this._.url.expand(this.opened);
+        query['dataType'] = 'json';
+        query['success'] = function(data) {
+            this.notifications.mark_as_seen();
+            this._.workspace.trigger('content.smi', data);
+            this._.navigation.trigger('content.smi', data);
+            if (data.notifications) {
+                this.notifications.notifies(data.notifications);
+            }
+        }.scope(this);
+        if (data) {
+            query['type'] = 'POST';
+            query['data'] = data;
+        };
+        $.ajax(query);
+    };
+
+    /**
      * Retrieve the language used by the SMI.
      */
     SMI.prototype.get_language = function() {
@@ -293,25 +340,6 @@
             lang = 'en';
         };
         return lang;
-    };
-
-    // Open a screen from a hash tag.
-    SMI.prototype._load = function(hash) {
-        var parts = HASH_REGEXP.exec(hash);
-
-        if (parts) {
-            this.opened = {tab: parts[1], path: parts[2]};
-        } else {
-            this.opened = {tab: '', path: ''};
-        }
-
-        if (!this.opened.tab.length) {
-            this.opened.tab = 'content';
-        };
-        $.getJSON(this._.url.expand(this.opened),function(data) {
-            this._.workspace.trigger('content.smi', data);
-            this._.navigation.trigger('content.smi', data);
-        }.scope(this));
     };
 
     /**

@@ -67,19 +67,12 @@ class EditFormREST(SilvaFormData, PageREST, FormCanvas):
         convert_request_form_to_unicode(self.request.form)
         action, status = self.updateActions()
         self.updateWidgets()
-        data = {'ifaces': ['form']}
-        data['success'] = status == SUCCESS
-        if interfaces.IRESTRefreshAction.providedBy(action):
-            data['refresh'] = action.refresh
-        success_only = interfaces.IRESTSuccessAction.providedBy(action)
-        if not (success_only and status == SUCCESS):
-            actions = self.renderActions()
-            data.update(
-                {'form': self.render(),
-                 'actions': actions,
-                 'default': actions[0]['name'] if actions else None})
-
-        return data
+        actions = self.renderActions()
+        return {'ifaces': ['form'],
+                'success': status == SUCCESS,
+                'form': self.render(),
+                'actions': actions,
+                'default': actions[0]['name'] if actions else None}
 
 
 class EditFormRESTTemplate(pt.PageTemplate):
