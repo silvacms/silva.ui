@@ -9,6 +9,9 @@ from zope.cachedescriptors.property import CachedProperty
 from zope.component import getUtility
 from zope.intid.interfaces import IIntIds
 
+from Acquisition import aq_parent
+
+from silva.core.interfaces import IRoot
 from silva.core.messages.interfaces import IMessageService
 from silva.core.views.interfaces import IVirtualSite
 from silva.ui.icon import get_icon
@@ -44,6 +47,15 @@ class PageREST(UIREST):
     grok.baseclass()
     grok.require('silva.ReadSilvaContent')
 
+    def get_parents_nav(self, service):
+        items = []
+        content = self.context
+        while content and not IRoot.providedBy(content):
+            items.append('nav' + str(service.register(content)))
+            content = aq_parent(content)
+        items.reverse()
+        return items
+
     def GET(self):
         service = getUtility(IIntIds)
         tabs = []
@@ -57,8 +69,12 @@ class PageREST(UIREST):
         return self.json_response({
             'ifaces': ['content'],
             'content': self.payload(),
-            'navigation': 'nav' + str(service.register(self.context.get_container())),
             'notifications': self.get_notifications(),
+            'navigation': {
+                'selected': 'nav' + \
+                    str(service.register(self.context.get_container())),
+                'parents': self.get_parents_nav(service)
+            },
             'metadata': {
                 'ifaces': ['metadata'],
                 'title': {

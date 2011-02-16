@@ -19,33 +19,24 @@
             });
         };
 
-        var uncollapse = function(data, node) {
-            var url = parents_url.expand(
-                    {'path': data.metadata.path});
-            var cached_data = node.data('parents.navigation.smi');
-            var process = function(data) {
-                var last = data.length - 1;
-                $.each(data, function(index, datum){
-                    if (datum['intid'] != 0) {
-                        var node = $('#nav' + datum['intid']);
-                        if (index == last) {
-                            tree.jstree(
-                                'open_node', node, function(){
-                                    tree.jstree('select_node', node);});
-                        } else {
-                            tree.jstree('open_node', node);
-                        }
+        var uncollapse = function(parents) {
+            var last = parents.length - 1;
+
+            function openNode(remaining) {
+                var parentNode = $("#" + remaining[0]);
+                var left = remaining.slice(1);
+                if (parentNode.length) {
+                    if (left.length) {
+                        tree.jstree(
+                            'open_node',
+                            parentNode,
+                            function(){ openNode(left); });
+                    } else {
+                        tree.jstree('select_node', parentNode, true);
                     }
-                });
+                }
             };
-            if (cached_data) {
-                process(cached_data);
-            } else {
-                $.getJSON(url, function(data){
-                    node.data('smi.navigation.parents', data);
-                    process(data);
-                });
-            }
+            openNode(parents);
         };
 
         // Disable text selection on tree
@@ -117,10 +108,7 @@
 
         // If a content is selected, try to select its container
         navigation.bind('content.smi', function (event, data) {
-            var node = $('#' + data.navigation);
-            if (node.length) {
-                uncollapse(data, node);
-            };
+            uncollapse(data.navigation.parents);
         });
     };
 })(jQuery);
