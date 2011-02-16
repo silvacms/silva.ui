@@ -43,7 +43,7 @@
      * shortcuts.
      */
     var ShortcutManager = function () {
-        this.shortcuts = {default: []};
+        this.shortcuts = {'default': []};
         this.current = 'default';
         this.activated = true;
     };
@@ -77,7 +77,7 @@
      * Switch active shortcuts to a new or existing collection.
      * @param name: shortcut collection
      */
-    ShortcutManager.prototype.switch = function(name) {
+    ShortcutManager.prototype.use = function(name) {
         if (name != this.current) {
             this.disable();
             this.current = name;
@@ -187,7 +187,7 @@
      * Notify a list of new notifications
      * @param messages: list of messages.
      */
-    NotificationManager.prototype.notifies = function(message) {
+    NotificationManager.prototype.notifies = function(messages) {
         $.each(messages, function(i, message) {
             this.notify(message);
         }.scope(this));
