@@ -2,42 +2,35 @@
 (function($) {
 
     obviel.iface('title');
-    obviel.view(
-        new obviel.View({
-            iface: 'title',
-            render: function(element, data) {
-                var title = $(element);
-                var icon = $('<ins class="icon"></ins>');
+    obviel.view({
+        iface: 'title',
+        render: function(content, data) {
+            var icon = $('<ins class="icon"></ins>');
 
-                icon.addClass(data['icon']);
-                title.text(data['title']);
-                title.prepend(icon);
-            }
-        })
-    );
+            icon.addClass(data['icon']);
+            content.text(data['title']);
+            content.prepend(icon);
+        }
+    });
     obviel.iface('tabs');
-    obviel.view(
-        new obviel.View({
-            iface: 'tabs',
-            render: function(element, data) {
-                var container = $(element);
+    obviel.view({
+        iface: 'tabs',
+        render: function(content, data) {
 
-                container.empty();
-                for (var i=0; i < data.entries.length; i++) {
-                    var info = data.entries[i];
-                    var tab = $('<li><a>' + info.name + '</a></li>');
-                    var link = tab.children('a');
+            content.empty();
+            for (var i=0; i < data.entries.length; i++) {
+                var info = data.entries[i];
+                var tab = $('<li><a>' + info.name + '</a></li>');
+                var link = tab.children('a');
 
-                    link.attr('rel', info.action);
-                    if (info.action == data.active) {
-                        link.addClass('active');
-                    }
-                    container.append(tab);
-                };
-            }
-        })
-    );
-
+                link.attr('rel', info.action);
+                if (info.action == data.active) {
+                    link.addClass('active');
+                }
+                content.append(tab);
+            };
+        }
+    });
 
     var SMIWorkspace = function(workspace, smi, options) {
         this._ = smi;
@@ -60,13 +53,13 @@
                 content.trigger('unload.smicontent');
             };
             // Update header
-            info.children('h3').render(data.metadata.title);
-            info.children('.tabs').render(data.metadata.tabs);
+            info.children('h3').render({data: data.metadata.title});
+            info.children('.tabs').render({data: data.metadata.tabs});
             info.children('#content-url').attr(
                 'href', url.expand({path: data.metadata.path}));
 
             // Update content area
-            content.render(data.content);
+            content.render({data: data.content, name:'content', extra: {smi: smi}});
 
             loaded = true;
         });

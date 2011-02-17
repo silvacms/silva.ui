@@ -3,77 +3,68 @@
 (function($) {
 
     obviel.iface('action');
-    obviel.view(
-        new obviel.View({
-            iface: 'action',
-            name: 'listing',
-            render: function(element, data) {
-                var link = $('<a class="screen"></a>');
+    obviel.view({
+        iface: 'action',
+        name: 'listing',
+        render: function(content, data) {
+            var link = $('<a class="screen"></a>');
 
-                link.text(data.value);
-                link.attr('rel', data.action);
-                link.attr('href', data.path);
-                $(element).append(link);
-            }
-        })
-    );
+            link.text(data.value);
+            link.attr('rel', data.action);
+            link.attr('href', data.path);
+            content.append(link);
+        }
+    });
 
     obviel.iface('text');
-    obviel.view(
-        new obviel.View({
-            iface: 'text',
-            name: 'listing',
-            render: function(element, data) {
-                $(element).text(data.value);
-            }
-        })
-    );
+    obviel.view({
+        iface: 'text',
+        name: 'listing',
+        render: function(content, data) {
+            content.text(data.value);
+        }
+    });
 
     obviel.iface('icon');
-    obviel.view(
-        new obviel.View({
-            iface: 'icon',
-            name: 'listing',
-            render: function(element, data) {
-                var icon = $('<ins class="icon"></ins>');
+    obviel.view({
+        iface: 'icon',
+        name: 'listing',
+        render: function(content, data) {
+            var icon = $('<ins class="icon"></ins>');
 
-                if (data.value.indexOf('.') == -1) {
-                    icon.addClass(data.value);
-                } else {
-                    icon.attr(
-                        'style',
-                        'background:url(' + data.value + ') no-repeat center center;');
-                }
-                $(element).append(icon);
+            if (data.value.indexOf('.') == -1) {
+                icon.addClass(data.value);
+            } else {
+                icon.attr(
+                    'style',
+                    'background:url(' + data.value + ') no-repeat center center;');
             }
-        })
-    );
+            content.append(icon);
+        }
+    });
 
     obviel.iface('workflow');
-    obviel.view(
-        new obviel.View({
-            iface: 'workflow',
-            name: 'listing',
-            render: function(element, data) {
-                var icon = $('<ins class="state"></ins>');
+    obviel.view({
+        iface: 'workflow',
+        name: 'listing',
+        render: function(content, data) {
+            var icon = $('<ins class="state"></ins>');
 
-                if (data.value) {
-                    icon.addClass(data.value);
-                }
-                $(element).append(icon);
+            if (data.value) {
+                icon.addClass(data.value);
             }
-        })
-    );
+            content.append(icon);
+        }
+    });
 
     obviel.iface('listing');
-    obviel.view(
-        new obviel.View({
-            iface: 'listing',
-            render: function(element, data) {
-                $(element).SMIContentListing(data);
-            }
-        })
-    );
+    obviel.view({
+        iface: 'listing',
+        name: 'content',
+        render: function(content, data) {
+            content.SMIContentListing(data);
+        }
+    });
 
     var SMIListing = function(header, content, smi, data, configuration) {
         this.header = header;
@@ -186,7 +177,7 @@
             if (this.configuration.sortable == column.name) {
                 cell.addClass('dragHandle');
             };
-            cell.render(data[column.name], 'listing');
+            cell.render({data: data[column.name], name: 'listing'});
             line.append(cell);
         }.scope(this));
         container.append(line);

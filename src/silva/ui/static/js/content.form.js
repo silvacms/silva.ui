@@ -3,14 +3,13 @@
 (function($) {
 
     obviel.iface('form');
-    obviel.view(
-        new obviel.View({
-            iface: 'form',
-            render: function(element, data) {
-                $(element).SMIForm(data);
-            }
-        })
-    );
+    obviel.view({
+        iface: 'form',
+        name: 'content',
+        render: function(element, data) {
+            $(element).SMIForm(data);
+        }
+    });
 
     var SMIForm = function(content, data, smi) {
 

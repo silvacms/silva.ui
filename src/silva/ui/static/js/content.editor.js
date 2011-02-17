@@ -3,43 +3,6 @@
 (function($) {
 
     obviel.iface('editor');
-    obviel.view(
-        new obviel.View({
-            iface: 'editor',
-            render: function(element, data) {
-                $(element).SMIContentEditor(data);
-            }
-        })
-    );
-
-    var SMIEditor = function(content, data, settings) {
-        var textarea = $('<textarea></textarea>');
-        var editor = null;
-
-        content.one('unload.smicontent', function(event) {
-            content.empty();
-            content.removeClass('content-area');
-            if (editor) {
-                editor.destroy(true);
-            }
-        });
-
-        textarea.attr('name', data.name);
-        textarea.html(data.text);
-
-        content.addClass('content-area');
-        content.append(textarea);
-
-        editor = CKEDITOR.replace(textarea.get(0), settings);
-        editor.on('instanceReady', function (event) {
-            // XXX Where the hell comes from those 7 pixels ?
-            var height = content.height() - 7;
-
-            height -= $('#cke_top_body').outerHeight();
-            height -= $('#cke_bottom_body').outerHeight();
-            editor.resize(editor.container.getStyle('width'), height, true);
-        });
-    };
 
     $(document).bind('load.smiplugins', function(event, smi) {
         $.ajax({
@@ -66,10 +29,43 @@
                     resize_enabled: false
                 };
 
-                $.fn.SMIContentEditor = function(data) {
-                    return new SMIEditor($(this), data, settings);
-                };
-            }});
-    });
+                obviel.view({
+                    iface: 'editor',
+                    name: 'content',
+                    init: function() {
+                        this.editor = null;
+                    },
+                    render: function() {
+                        var textarea = $('<textarea></textarea>');
 
+                        textarea.attr('name', this.data.name);
+                        textarea.html(this.data.text);
+
+                        this.content.addClass('content-area');
+                        this.content.append(textarea);
+
+                        this.editor = CKEDITOR.replace(textarea.get(0), settings);
+                        this.editor.on('instanceReady', function (event) {
+                            // XXX Where the hell comes from those 7 pixels ?
+                            var height = this.content.height() - 7;
+
+                            height -= $('#cke_top_body').outerHeight();
+                            height -= $('#cke_bottom_body').outerHeight();
+                            this.editor.resize(
+                                this.editor.container.getStyle('width'),
+                                height,
+                                true);
+                        }.scope(this));
+                    },
+                    cleanup: function() {
+                        this.content.empty();
+                        this.content.removeClass('content-area');
+                        if (this.editor) {
+                            this.editor.destroy(true);
+                        }
+                    }
+                });
+            }
+        });
+    });
 })(jQuery, obviel, CKEDITOR);

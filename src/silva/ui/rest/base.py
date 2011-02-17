@@ -18,6 +18,24 @@ from silva.ui.icon import get_icon
 from silva.ui.menu import get_menu_items
 
 
+class PageException(Exception):
+
+    def payload(self, caller):
+        raise NotImplementedError
+
+
+class RedirectToPage(PageException):
+
+    def __init__(self, content, tab='content'):
+        self.content = content
+        self.tab = tab
+
+    def payload(self, caller):
+        return {'ifaces': ['redirect'],
+                'path': caller.get_content_path(self.content),
+                'tab': self.tab}
+
+
 class UIREST(rest.REST):
     grok.require('silva.ReadSilvaContent')
     grok.baseclass()
@@ -57,6 +75,11 @@ class PageREST(UIREST):
         return items
 
     def GET(self):
+        try:
+            payload = self.payload()
+        except PageException as error:
+            return self.json_response(error.payload(self))
+
         service = getUtility(IIntIds)
         tabs = []
         default_tab = None
@@ -68,7 +91,7 @@ class PageREST(UIREST):
 
         return self.json_response({
             'ifaces': ['content'],
-            'content': self.payload(),
+            'content': payload,
             'notifications': self.get_notifications(),
             'navigation': {
                 'selected': 'nav' + \
