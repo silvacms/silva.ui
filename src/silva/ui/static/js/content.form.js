@@ -1,6 +1,6 @@
 
 
-(function($) {
+(function($, obviel) {
 
     obviel.iface('form');
     obviel.view({

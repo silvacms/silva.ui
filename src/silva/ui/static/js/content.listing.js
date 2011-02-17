@@ -59,10 +59,48 @@
 
     obviel.iface('listing');
 
+    var SMISelection = function(header, listing) {
+        this.selector = header.find('.selector');
+        this.status = 'none';
+        this.listing = listing;
+
+        this.listing.container.bind('selectionchange.smilisting', function() {
+            var total = listing.container.children('tr').length;
+            var selected = listing.container.children('tr.selected').length;
+
+            if (selected == 0) {
+                this.set('none');
+            } else if (selected == total) {
+                this.set('all');
+            } else if (selected == 1) {
+                this.set('single');
+            } else {
+                this.set('partial');
+            };
+            return false;
+        }.scope(this));
+
+        this.selector.bind('click', function() {
+            if (this.status == 'none') {
+                this.listing.select_all();
+            } else {
+                this.listing.unselect_all();
+            };
+            return false;
+        }.scope(this));
+    };
+
+    SMISelection.prototype.set = function(status) {
+        this.selector.removeClass(this.status);
+        this.selector.addClass(status);
+        this.status = status;
+    };
+
     var SMIListing = function(header, content, smi, data, configuration) {
-        this.header = header;
-        this.content = content;
+        var container = content.find('tbody');
+        this.container = container;
         this.configuration = configuration;
+        this.selector = new SMISelection(header, this);
 
         // Collapse feature
         if (configuration.collapsed) {
@@ -84,21 +122,22 @@
         });
 
         // Add the hover style
-        content.delegate('tbody tr', 'mouseenter', function() {
+        container.delegate('tr', 'mouseenter', function() {
             $(this).addClass("hover");
         });
-        content.delegate('tbody tr', 'mouseleave', function() {
+        container.delegate('tr', 'mouseleave', function() {
             $(this).removeClass("hover");
         });
 
         // Row selection with mouse
         var mouse_last_selected = null;
-        content.delegate('tbody tr', 'click', function(event) {
+        container.delegate('tr', 'click', function(event) {
             var row = $(this);
 
             if (mouse_last_selected === null || !event.shiftKey) {
                 mouse_last_selected = row.index();
                 row.toggleClass('selected');
+                container.trigger('selectionchange.smilisting');
             } else {
                 // Shift is pressed, and a column have been previously selected.
                 var current_selected = row.index();
@@ -115,6 +154,7 @@
                         end = mouse_last_selected;
                     };
                     row.parent().children().slice(start, end).toggleClass('selected');
+                    container.trigger('selectionchange.smilisting');
                 };
                 mouse_last_selected = null;
             };
@@ -158,7 +198,6 @@
      */
     SMIListing.prototype.add_line = function(data) {
         // Add a data line to the table
-        var container = this.content.find('tbody');
         var line = $('<tr></tr>');
 
         $.each(this.configuration.columns, function(i, column) {
@@ -173,7 +212,23 @@
             cell.render({data: data[column.name], name: 'listing'});
             line.append(cell);
         }.scope(this));
-        container.append(line);
+        this.container.append(line);
+    };
+
+    /**
+     * Unselect all elements.
+     */
+    SMIListing.prototype.unselect_all = function() {
+        this.container.children('tr.selected').removeClass('selected');
+        this.container.trigger('selectionchange.smilisting');
+    };
+
+    /**
+     * Select all elements.
+     */
+    SMIListing.prototype.select_all = function() {
+        this.container.children().addClass('selected');
+        this.container.trigger('selectionchange.smilisting');
     };
 
     $(document).bind('load.smiplugins', function(event, smi) {

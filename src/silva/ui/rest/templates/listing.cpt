@@ -6,7 +6,10 @@
   </div>
   <dl class="listing">
     <dt class="publishables">
-      <ins></ins>Publishable
+      <ins class="handle"></ins>
+      Publishables
+      <ins class="selector none">
+      </ins>
     </dt>
     <dd class="publishables">
       <table class="static">
@@ -14,7 +17,10 @@
       </table>
     </dd>
     <dt class="assets">
-      <ins></ins>Assets
+      <ins class="handle"></ins>
+      Assets
+      <ins class="selector none">
+      </ins>
     </dt>
     <dd class="assets">
       <table class="static">
@@ -23,8 +29,6 @@
     </dd>
   </dl>
   <div class="footer">
-    <ins id="selector" class="icon checkbox">
-    </ins>
     <div class="actions">
     </div>
   </div>

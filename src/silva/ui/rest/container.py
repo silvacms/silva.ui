@@ -6,6 +6,7 @@
 from five import grok
 from infrae import rest
 from zope.component import getUtility
+from megrok.chameleon.components import ChameleonPageTemplate
 
 from silva.core.interfaces import IVersionedContent, IContainer
 from silva.ui.icon import get_icon
@@ -19,7 +20,7 @@ class TemplateContainerListing(rest.REST):
     grok.name('silva.ui.listing.template')
     grok.require('silva.ReadSilvaContent')
 
-    template = grok.PageTemplate(filename="templates/listing.pt")
+    template = ChameleonPageTemplate(filename="templates/listing.cpt")
 
     def default_namespace(self):
         return {}

@@ -24,7 +24,7 @@
 })(jQuery);
 
 
-(function($) {
+(function($, obviel, shortcut) {
     var HASH_REGEXP = /#([^!]*)!?(.*)/;
 
     // Add a rescope method
@@ -37,6 +37,27 @@
             };
         };
     }
+
+    obviel.iface('redirect');
+    obviel.view({
+        iface: 'redirect',
+        render: function() {
+            this.smi.open(this.data.path, this.data.tab);
+        }
+    });
+
+    obviel.iface('content');
+    obviel.view({
+        iface: 'content',
+        render: function() {
+            this.smi.notifications.mark_as_seen();
+            this.smi._.workspace.trigger('content.smi', this.data);
+            this.smi._.navigation.trigger('content.smi', this.data);
+            if (this.data.notifications) {
+                this.smi.notifications.notifies(this.data.notifications);
+            }
+        }
+    });
 
     /**
      * A ShortcutManager let you bind, unbind, rebind collection of
@@ -316,12 +337,7 @@
         query['url'] = this._.url.expand(this.opened);
         query['dataType'] = 'json';
         query['success'] = function(data) {
-            this.notifications.mark_as_seen();
-            this._.workspace.trigger('content.smi', data);
-            this._.navigation.trigger('content.smi', data);
-            if (data.notifications) {
-                this.notifications.notifies(data.notifications);
-            }
+            $(document).render({data: data, extra: {smi: this}});
         }.scope(this);
         if (data) {
             query['type'] = 'POST';
@@ -398,5 +414,5 @@
             return methods.init.apply(this, arguments);
         }
     };
-})(jQuery, shortcut);
+})(jQuery, obviel, shortcut);
 

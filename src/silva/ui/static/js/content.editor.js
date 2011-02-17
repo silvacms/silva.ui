@@ -1,6 +1,6 @@
 
 
-(function($) {
+(function($, obviel, CKEDITOR) {
 
     obviel.iface('editor');
 

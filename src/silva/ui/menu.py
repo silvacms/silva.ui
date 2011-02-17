@@ -21,26 +21,37 @@ class TabMenuItem(grok.Subscription):
 
 class EditTabMenu(TabMenuItem):
     grok.context(IContent)
+    grok.order(10)
     name = _('Edit')
-    action = 'edit'
+    action = 'content'
     default = True
 
 
 class ContainerTabMenu(TabMenuItem):
     grok.context(IContainer)
+    grok.order(10)
     name = _('Content')
-    action = 'edit'
+    action = 'content'
     default = True
+
+
+class AddTabMenu(TabMenuItem):
+    grok.context(IContainer)
+    grok.order(5)
+    name = _('Add')
+    action = 'add'
 
 
 class PropertiesTabMenu(TabMenuItem):
     grok.context(ISilvaObject)
+    grok.order(20)
     name = _('Properties')
     action = 'properties'
 
 
 class PublishTabMenu(TabMenuItem):
     grok.context(IVersionedContent)
+    grok.order(30)
     name = _('Publish')
     action = 'publish'
 

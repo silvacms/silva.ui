@@ -350,22 +350,32 @@ input, textarea { cursor:text; }
 
 #workspace .content .listing dt {
   padding-left: 8px;
+  padding-right: 8px;
   line-height: 24px;
   border-bottom: 1px solid #999999;
 }
 #workspace .content .listing dt h4{
   padding-left: 12px;
 }
-#workspace .content .listing dt ins {
+#workspace .content .listing dt ins.handle {
   width:20px;
   height:20px;
   display:block;
   float:left;
   margin-right: 4px;
+  margin-top: 2px;
   background-image:url(../img/sprite.png);
   background-position:-120px -140px;
 }
-#workspace .content .listing dt.collapsed ins {
+#workspace .content .listing dt ins.selector {
+  width:20px;
+  height:20px;
+  display:block;
+  float:right;
+  margin-top: 2px;
+  background-image:url(../img/sprite.png);
+}
+#workspace .content .listing dt.collapsed ins.handle {
   background-position:-100px -140px;
 }
 
@@ -424,9 +434,6 @@ input, textarea { cursor:text; }
 }
 #workspace .content .footer div.right {
   float:right;
-}
-#workspace .content .footer .selector {
-  margin:2px 7px;
 }
 #workspace .content .footer a {
   -khtml-border-radius:3px;
@@ -510,11 +517,11 @@ ins.action.minus { background-position:-100px -40px; }
 ins.sort.asc { background-position:-120px -40px; }
 ins.sort.desc { background-position:-140px -40px; }
 
-ins.checkbox.none { background-position:-0px -60px; }
-ins.checkbox.single { background-position:-40px -60px; }
-ins.checkbox.partial { background-position:-40px -60px; }
-ins.checkbox.all { background-position:-20px -60px; }
-ins.checkbox.disabled { background-position:-60px -60px; }
+ins.selector.none { background-position:-0px -60px; }
+ins.selector.single { background-position:-40px -60px; }
+ins.selector.partial { background-position:-40px -60px; }
+ins.selector.all { background-position:-20px -60px; }
+ins.selector.disabled { background-position:-60px -60px; }
 
 /* Silva Content Types - uses !important to override default jstree-icon */
 ins.agenda_filter { background-position:-60px -80px!important; }

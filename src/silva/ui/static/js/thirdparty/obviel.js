@@ -250,7 +250,6 @@ var obviel = {};
                     callback(template);
                     return;
                 };
-
             };
             $.ajax({
                 type: 'GET',
@@ -360,7 +359,6 @@ var obviel = {};
                only recognized properly if a 'callback' argument is provided
         */
         var element = $(this);
-        element.data('obviel.hasview', true);
         if (!args.name) {
             args.name = 'default';
         };
@@ -371,20 +369,6 @@ var obviel = {};
             module._render_from_url(element, args.url, args);
         } else {
             throw((new module.InvalidOptions(data)));
-        };
-    };
-
-    $.fn.viewParent = function() {
-        /* returns the nearest parent element that has a view registered
-
-            returns undefined if no parent was found
-        */
-        var current = this.parent();
-        while (current.length) {
-            if (current.data('obviel.hasview')) {
-                return current;
-            };
-            current = current.parent();
         };
     };
 
