@@ -45,7 +45,10 @@
       </div>
       <div id="workspace">
         <div class="info">
-          <h3 i18n:translate="">Loading...</h3>
+          <h3>
+            <ins class="icon loading"></ins>
+            <tal:msg i18n:translate="">Loading...</tal:msg>
+          </h3>
           <ol class="tabs"></ol>
           <ol class="actions"></ol>
           <a href="#" id="content-url"></a>

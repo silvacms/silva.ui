@@ -15,20 +15,43 @@
     obviel.iface('tabs');
     obviel.view({
         iface: 'tabs',
-        render: function(content, data) {
+        create: function(info) {
+            var tab = $('<li><a class="screen">' + info.name + '</a></li>');
+            var link = tab.children('a');
 
-            content.empty();
-            for (var i=0; i < data.entries.length; i++) {
-                var info = data.entries[i];
-                var tab = $('<li><a>' + info.name + '</a></li>');
-                var link = tab.children('a');
-
-                link.attr('rel', info.action);
-                if (info.action == data.active) {
-                    link.addClass('active');
-                }
-                content.append(tab);
+            link.attr('rel', info.action);
+            if (info.action == this.data.active) {
+                link.addClass('active');
             };
+            return tab;
+        },
+        render: function() {
+            $.each(this.data.entries, function(i, info) {
+                var tab = this.create(info);
+
+                if (info.entries) {
+                    var container = $('<ol class="subtabs"></ol>');
+                    var link = tab.children('a');
+
+                    $.each(info.entries, function(i, entry) {
+                        container.append(this.create(entry));
+                    }.scope(this));
+                    tab.addClass('openable');
+                    tab.append(container);
+                    link.prepend('<ins class="icon"></ins>');
+                    container.bind('mouseleave', function() {
+                        container.fadeOut();
+                    });
+                    link.bind('click', function () {
+                        container.fadeToggle();
+                        return false;
+                    });
+                };
+                this.content.append(tab);
+            }.scope(this));
+        },
+        cleanup: function() {
+            this.content.empty();
         }
     });
 

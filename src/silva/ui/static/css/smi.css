@@ -224,8 +224,13 @@ input, textarea { cursor:text; }
   z-index:99;
 }
 #workspace .info .tabs li {
+  position:relative;
   display:block;
   float:left;
+}
+#workspace .info .tabs li.openable ins {
+  background-position:-120px -140px;
+  margin-top: 2px;
 }
 #workspace .info .tabs li a {
   color:#222;
@@ -254,6 +259,30 @@ input, textarea { cursor:text; }
   text-decoration:none;
 }
 
+#workspace .info .tabs .subtabs {
+  -khtml-border-radius:0px 0px 3px 3px;
+  -moz-border-radius:0px 0px 3px 3px;
+  -ms-border-radius:0px 0px 3px 3px;
+  -o-border-radius:0px 0px 3px 3px;
+  -webkit-border-radius:0px 0px 3px 3px;
+  position:absolute;
+  width: 200px;
+  top: 30px;
+  display:block;
+  background:#fff;
+  border-radius:0px 0px 3px 3px;
+  border:1px #999 solid;
+  margin-left: 0px;
+  display: none;
+}
+
+#workspace .info .tabs .subtabs li {
+  float: none;
+}
+#workspace .info .tabs .subtabs li a {
+  line-height:20px;
+  height:20px
+}
 #workspace .info .actions {
   float:right;
   list-style:none;
@@ -388,7 +417,7 @@ input, textarea { cursor:text; }
   bottom:25px;
   left:0;
   overflow-x:hidden;
-  overflow:scroll;
+  overflow-y:scroll;
   position:absolute;
   right:0;
   top:95px;
@@ -466,7 +495,13 @@ input, textarea { cursor:text; }
 }
 
 #workspace .content-area {
-  position:absolute; top:70px; bottom:0; left:0; right:0; overflow:hidden;
+  position:absolute;
+  top:70px;
+  bottom:0;
+  left:0;
+  right:0;
+  overflow:hidden;
+  overflow-y:auto;
 }
 
 /* Form styling */

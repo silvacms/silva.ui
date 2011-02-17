@@ -65,14 +65,31 @@ class PageREST(UIREST):
     grok.baseclass()
     grok.require('silva.ReadSilvaContent')
 
-    def get_parents_nav(self, service):
-        items = []
-        content = self.context
+    def get_navigation(self):
+        service = getUtility(IIntIds)
+
+        def identifier(content):
+            return 'nav' + str(service.register(content))
+
+        parents = []
+        content = self.context.get_container()
         while content and not IRoot.providedBy(content):
-            items.append('nav' + str(service.register(content)))
+            parents.append(identifier(content))
             content = aq_parent(content)
-        items.reverse()
-        return items
+        parents.reverse()
+        return {'selected': identifier(self.context.get_container()),
+                'parents': parents}
+
+    def get_metadata_tabs(self):
+        tabs = []
+        default_tab = None
+        for tab in get_menu_items(self.context):
+            tabs.append(tab.describe(self))
+            if tab.default:
+                default_tab = tab.action
+        return {'ifaces': ['tabs'],
+                'active': default_tab,
+                'entries': tabs}
 
     def GET(self):
         try:
@@ -80,24 +97,11 @@ class PageREST(UIREST):
         except PageException as error:
             return self.json_response(error.payload(self))
 
-        service = getUtility(IIntIds)
-        tabs = []
-        default_tab = None
-        for tab in get_menu_items(self.context):
-            tabs.append({'name': unicode(tab.name),
-                         'action': tab.action})
-            if tab.default:
-                default_tab = tab.action
-
         return self.json_response({
             'ifaces': ['content'],
             'content': payload,
             'notifications': self.get_notifications(),
-            'navigation': {
-                'selected': 'nav' + \
-                    str(service.register(self.context.get_container())),
-                'parents': self.get_parents_nav(service)
-            },
+            'navigation': self.get_navigation(),
             'metadata': {
                 'ifaces': ['metadata'],
                 'title': {
@@ -105,11 +109,7 @@ class PageREST(UIREST):
                     'title': self.context.get_title_or_id(),
                     'icon': get_icon(self.context, self.request),
                     },
-                'tabs': {
-                    'ifaces': ['tabs'],
-                    'active': default_tab,
-                    'entries': tabs,
-                    },
+                'tabs': self.get_metadata_tabs(),
                 'path': self.get_content_path(self.context)
                 },
             })

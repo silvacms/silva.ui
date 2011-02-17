@@ -18,6 +18,10 @@ class TabMenuItem(grok.Subscription):
     action = None
     default = False
 
+    def describe(self, page):
+        return {'name': unicode(self.name),
+                'action': self.action}
+
 
 class EditTabMenu(TabMenuItem):
     grok.context(IContent)
@@ -37,9 +41,17 @@ class ContainerTabMenu(TabMenuItem):
 
 class AddTabMenu(TabMenuItem):
     grok.context(IContainer)
-    grok.order(5)
+    grok.order(15)
     name = _('Add')
     action = 'add'
+
+    def describe(self, page):
+        data = super(AddTabMenu, self).describe(page)
+        data['entries'] = entries = []
+        for addable in self.context.get_silva_addables():
+            entries.append({'name': addable['name'],
+                            'action': 'adding/' + addable['name']})
+        return data
 
 
 class PropertiesTabMenu(TabMenuItem):

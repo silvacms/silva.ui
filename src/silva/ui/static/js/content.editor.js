@@ -46,8 +46,8 @@
 
                         this.editor = CKEDITOR.replace(textarea.get(0), settings);
                         this.editor.on('instanceReady', function (event) {
-                            // XXX Where the hell comes from those 7 pixels ?
-                            var height = this.content.height() - 7;
+                            // XXX Where the hell comes from those 5 pixels ?
+                            var height = this.content.height() - 5;
 
                             height -= $('#cke_top_body').outerHeight();
                             height -= $('#cke_bottom_body').outerHeight();
