@@ -65,7 +65,7 @@ class FormREST(SilvaFormData, PageREST, FormCanvas):
         actions = self.renderActions()
         return {'ifaces': ['form'],
                 'success': status == SUCCESS,
-                'form': self.render(),
+                'html': self.render(),
                 'actions': actions,
                 'default': actions[0]['name'] if actions else None}
 

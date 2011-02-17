@@ -58,13 +58,6 @@
     });
 
     obviel.iface('listing');
-    obviel.view({
-        iface: 'listing',
-        name: 'content',
-        render: function(content, data) {
-            content.SMIContentListing(data);
-        }
-    });
 
     var SMIListing = function(header, content, smi, data, configuration) {
         this.header = header;
@@ -183,80 +176,67 @@
         container.append(line);
     };
 
-
-    var SMIComposedListing = function(content, data, smi, configuration, template) {
-        this.content = content;
-        this.configuration = configuration;
-        this.template = template;
-        this.data = data;
-        this.listings = [];
-
-        // Empty space on unload
-        content.one('unload.smicontent', function(event) {
-            content.empty();
-            //content.enableTextSelect();
-        });
-
-        // Set base template
-        content.disableTextSelect();
-        content.html(this.template);
-
-        // Fill in header
-        var first_cfg = configuration[0];
-        var header = this.content.find('div.header tr');
-        $.each(first_cfg.columns, function(i, column) {
-            var cell = $('<th></th>');
-
-            if (!i) {
-                cell.addClass('first');
-            };
-            if (first_cfg.sortable == column.name) {
-                cell.addClass('dragHandle');
-            };
-            if (column.caption) {
-                cell.text(column.caption);
-            };
-            header.append(cell);
-        });
-
-        $.each(this.configuration, function(i, configuration) {
-            var content = $('dd.' + configuration.name);
-            var header = $('dt.' + configuration.name);
-            var listing = new SMIListing(
-                header, content, smi, data[configuration.name], configuration);
-
-            this.listings.push(listing);
-        }.scope(this));
-
-        // Fix table widths
-        var listing = this.content.find('dd.publishables table');
-
-        listing.updateTableColumnsWidths({fixedColumns: {0:16, 1:16}});
-        this.content.find('div.header table').updateTableColumnsWidths(
-            {source: '#workspace dd.publishables table'});
-        this.content.find('dd.assets table').updateTableColumnsWidths(
-            {source: '#workspace dd.publishables table',
-             skipColumns: {1:true}});
-
-
-    };
-
     $(document).bind('load.smiplugins', function(event, smi) {
         $.ajax({
             url: smi.options.listing.configuration,
             async: false,
             dataType: 'json',
             success:function(configuration) {
-                $.ajax({
-                    url: smi.options.listing.template,
-                    async: false,
-                    dataType: 'html',
-                    success: function(template) {
-                        $.fn.SMIContentListing = function(data) {
-                            return new SMIComposedListing(
-                                $(this), data, smi, configuration, template);
-                        };
-                    }});
+                obviel.view({
+                    iface: 'listing',
+                    name: 'content',
+                    html_url: smi.options.listing.template,
+                    init: function() {
+                        this.configuration = configuration;
+                        this.listings = [];
+                    },
+                    render: function() {
+                        // Disable text selection
+                        this.content.disableTextSelect();
+
+                        // Fill in header
+                        var first_cfg = configuration[0];
+                        var header = this.content.find('div.header tr');
+                        $.each(first_cfg.columns, function(i, column) {
+                            var cell = $('<th></th>');
+
+                            if (!i) {
+                                cell.addClass('first');
+                            };
+                            if (first_cfg.sortable == column.name) {
+                                cell.addClass('dragHandle');
+                            };
+                            if (column.caption) {
+                                cell.text(column.caption);
+                            };
+                            header.append(cell);
+                        });
+
+                        $.each(this.configuration, function(i, configuration) {
+                            var content = $('dd.' + configuration.name);
+                            var header = $('dt.' + configuration.name);
+                            var listing = new SMIListing(
+                                header, content, smi, this.data[configuration.name], configuration);
+
+                            this.listings.push(listing);
+                        }.scope(this));
+
+                        // Fix table widths
+                        var listing = this.content.find('dd.publishables table');
+
+                        listing.updateTableColumnsWidths({fixedColumns: {0:16, 1:16}});
+                        this.content.find('div.header table').updateTableColumnsWidths(
+                            {source: '#workspace dd.publishables table'});
+                        this.content.find('dd.assets table').updateTableColumnsWidths(
+                            {source: '#workspace dd.publishables table',
+                             skipColumns: {1:true}});
+
+                    },
+                    cleanup: function() {
+                        this.content.empty();
+                    }
+                });
+
             }});
     });
 

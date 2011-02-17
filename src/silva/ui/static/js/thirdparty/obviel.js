@@ -207,7 +207,7 @@ var obviel = {};
             };
         } else {
             if (template) {
-                element.html(template);
+                this.content.html(template);
             };
             if (this.render) {
                 this.render(this.content, this.data);
@@ -215,50 +215,56 @@ var obviel = {};
         };
     };
 
-    module._jsont_cache = {}; // mapping url or html to template instance
+    module._template_cache = {}; // mapping url or html to template instance
     module.View.prototype._get_template = function(callback) {
         if (this.data.html || (this.html && !this.data.html_url) ||
-                this.data.jsont || (this.jsont && !this.data.jsont_url)) {
+            this.data.jsont || (this.jsont && !this.data.jsont_url)) {
             var jsont = (this.data.jsont || this.jsont);
             var html = null;
             if (jsont) {
-                var cached = module._jsont_cache[jsont];
-                var t = cached;
-                if (!cached) {
-                    t = new jsontemplate.Template(
-                        jsont, this.template_options);
-                    module._jsont_cache[jsont] = t;
+                var template = module._template_cache[jsont];
+                if (!template) {
+                    template = new jsontemplate.Template(jsont, this.template_options);
+                    module._template_cache[jsont] = template;
                 };
-                html = t.expand(this.data);
+                html = template.expand(this.data);
             } else {
                 html = this.data.html || this.html;
             };
             callback(html);
-        } else if (this.data.html_url || this.html_url || this.data.jsont_url ||
-                this.jsont_url) {
-            // deal with cached jsont
-            var jsonturl = (this.data.jsont_url || this.jsont_url);
-            var cached = module._jsont_cache[jsonturl];
-            if (cached) {
-                callback(cached.expand(this.data));
-                return;
+        } else if (this.data.html_url || this.html_url ||
+                   this.data.jsont_url || this.jsont_url) {
+            // First look in the cache for data.
+            var jsont = (this.data.jsont_url || this.jsont_url);
+            var url = jsont;
+            if (jsont) {
+                var template = module._template_cache[jsont];
+                if (template) {
+                    callback(template.expand(this.data));
+                    return;
+                };
+            } else {
+                url = (this.data.html_url || this.html_url);
+                var template = module._template_cache[url];
+                if (template) {
+                    callback(template);
+                    return;
+                };
+
             };
-            var url = (
-                this.data.html_url || this.html_url ||
-                this.data.jsont_url || this.jsont_url);
-            var self = this;
             $.ajax({
                 type: 'GET',
                 url: url,
                 success: function(data) {
-                    if (jsonturl) {
-                        var t = new jsontemplate.Template(
-                            data, self.template_options);
-                        module._jsont_cache[jsonturl] = t;
-                        data = t.expand(this.data);
+                    if (jsont) {
+                        var template = new jsontemplate.Template(data, this.template_options);
+                        module._template_cache[jsont] = template;
+                        data = template.expand(this.data);
+                    } else {
+                        module._template_cache[url] = data;
                     };
-                    callback.call(self, data);
-                }
+                    callback(data);
+                }.scope(this)
             });
         } else {
             // no explicit content, just call the callback
