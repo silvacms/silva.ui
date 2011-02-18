@@ -7,7 +7,7 @@
   <dl class="listing">
     <dt class="publishables">
       <ins class="handle"></ins>
-      Publishables
+      <tal:msg i18n:translate="">Publishable(s)</tal:msg>
       <ins class="selector none">
       </ins>
     </dt>
@@ -18,7 +18,7 @@
     </dd>
     <dt class="assets">
       <ins class="handle"></ins>
-      Assets
+      <tal:msg i18n:translate="">Asset(s)</tal:msg>
       <ins class="selector none">
       </ins>
     </dt>
@@ -29,12 +29,42 @@
     </dd>
   </dl>
   <div class="footer">
-    <span class="publishables counter">
-      n Publishables
-    </span>
-    /
-    <span class="assets counter">
-      n Assets
-    </span>
+    <p class="counters">
+      <span class="publishables total"
+            i18n:translate="">
+        <span class="count"
+              i18n:name="count">0</span>
+        publishable(s) content(s)
+      </span>
+      <span class="publishables selected"
+            i18n:translate="">
+        with
+        <span class="count"
+              i18n:name="count">0</span>
+        selected
+      </span>
+      <tal:msg i18n:translate="">and</tal:msg>
+      <span class="assets total"
+            i18n:translate="">
+        <span class="count"
+              i18n:name="count">0</span>
+        asset(s)
+      </span>
+      <span class="assets selected"
+            i18n:translate="">
+        with
+        <span class="count"
+              i18n:name="count">0</span>
+        selected
+      </span>
+      .
+    </p>
+
+    <p class="clipboard-info"
+       i18n:translate="">
+      <span class="count"
+            i18n:name="count">0</span>
+      item(s) in the clipboard.
+    </p>
   </div>
 </tal:listing>

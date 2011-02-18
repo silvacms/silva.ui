@@ -488,10 +488,12 @@ input, textarea { cursor:text; }
   position:absolute;
   right:0;
 }
-#workspace .content .footer div.left {
-  float:left;
+#workspace .content .footer p {
+  padding: 0px 15px;
+  display: inline;
 }
-#workspace .content .footer div.right {
+#workspace .content .footer p.clipboard-info {
+  padding: 0px 15px;
   float:right;
 }
 
