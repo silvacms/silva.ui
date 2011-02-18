@@ -29,7 +29,7 @@ class Adding(rest.REST):
             if factory is not None:
                 factory = factory(self.context, request)
                 # Set parent for security check.
-                factory.__name__ = name
+                factory.__name__ = '/'.join((self.__name__, name))
                 factory.__parent__ = self
                 return factory
         raise NotFound(name)

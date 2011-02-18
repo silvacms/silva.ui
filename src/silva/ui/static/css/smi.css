@@ -258,6 +258,12 @@ input, textarea { cursor:text; }
   padding:0 10px;
   text-decoration:none;
 }
+#workspace .info .tabs li.openable a {
+  padding:0 11px 0px 5px;
+}
+#workspace .info .tabs li.openable a.active {
+  padding:0 10px 0px 4px;
+}
 
 #workspace .info .tabs .subtabs {
   -khtml-border-radius:0px 0px 3px 3px;

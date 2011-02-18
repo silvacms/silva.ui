@@ -43,14 +43,15 @@ class AddTabMenu(TabMenuItem):
     grok.context(IContainer)
     grok.order(15)
     name = _('Add')
-    action = 'add'
+    action = 'adding'
 
     def describe(self, page):
         data = super(AddTabMenu, self).describe(page)
         data['entries'] = entries = []
         for addable in self.context.get_silva_addables():
-            entries.append({'name': addable['name'],
-                            'action': 'adding/' + addable['name']})
+            entries.append({
+                    'name': addable['name'],
+                    'action': '/'.join((self.action, addable['name']))})
         return data
 
 

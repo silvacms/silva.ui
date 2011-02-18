@@ -82,13 +82,18 @@ class PageREST(UIREST):
 
     def get_metadata_tabs(self):
         tabs = []
-        default_tab = None
+        active = None
+        current = self.__name__
+        if '/' in current:
+            current = current.split('/', 1)[0]
+        if current.startswith('silva.ui.'):
+            current = current[9:]
         for tab in get_menu_items(self.context):
             tabs.append(tab.describe(self))
-            if tab.default:
-                default_tab = tab.action
+            if tab.action == current:
+                active = tab.action
         return {'ifaces': ['tabs'],
-                'active': default_tab,
+                'active': active,
                 'entries': tabs}
 
     def GET(self):
