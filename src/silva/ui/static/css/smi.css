@@ -631,3 +631,8 @@ body .ui-widget {
 body .ui-widget .ui-button-text {
   line-height: inherit;
 }
+
+body .upload-file .upload-progress {
+  width: 200px;
+  height: 10px;
+}
