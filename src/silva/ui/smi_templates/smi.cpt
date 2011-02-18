@@ -19,7 +19,7 @@
 
   <body>
     <div id="loading-message">
-      <p i18n:translate="">Loading ...</p>
+      <p i18n:translate="">Loading...</p>
     </div>
     <div id="notifications">
     </div>

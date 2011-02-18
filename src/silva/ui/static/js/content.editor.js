@@ -39,7 +39,7 @@
                         var textarea = $('<textarea></textarea>');
 
                         textarea.attr('name', this.data.name);
-                        textarea.html(this.data.text);
+                        textarea.val(this.data.text);
 
                         this.content.addClass('content-area');
                         this.content.append(textarea);

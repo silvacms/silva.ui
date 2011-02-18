@@ -165,6 +165,9 @@
             };
             notification.animate({ height:0, opacity:0 }, 'slow', function() {
                 notification.remove();
+                if (!container.children().length) {
+                    container.hide();
+                }
             });
         });
 
@@ -179,6 +182,9 @@
         };
 
         container.append(notification);
+        if (!container.is(':visible')) {
+            container.show();
+        };
     };
 
     /**
