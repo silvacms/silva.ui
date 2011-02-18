@@ -289,6 +289,7 @@
                     },
                     cleanup: function() {
                         this.content.empty();
+                        this.content.enableTextSelect();
                     }
                 });
 
