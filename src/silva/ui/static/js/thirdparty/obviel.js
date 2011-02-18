@@ -1,24 +1,6 @@
 var obviel = {};
 
 (function($, module) {
-    // XXX use an error reporting system similar to what form.js uses...
-    module.onerror = function(e) {
-        if (window.console && console.log) {
-            console.log(e);
-        } else {
-            var msg;
-            if (e.message && e.name) {
-                msg = e.name + ': ' + e.message;
-            } else if (e.message) {
-                msg = e.message;
-            } else {
-                msg = e.toString();
-            };
-            alert(msg);
-        };
-        throw(e);
-    };
-
     // 'interface' implementation - interfaces are just strings that are
     // registered as a tree
     module._ifaces = {
@@ -126,7 +108,7 @@ var obviel = {};
     };
 
     // Registered views
-    module._views = {}; // name to dict {iface: name: view}
+    module._views = {}; // name to dict {name: iface: view}
 
     // Exceptions
     module.DuplicateInterfaces = function(name) {
@@ -301,63 +283,61 @@ var obviel = {};
         };
 
         // Registration
-        if (!module._views[definition.iface]) {
-            module._views[definition.iface] = {};
+        if (!module._views[definition.name]) {
+            module._views[definition.name] = {};
         };
-        if (!module._views[definition.iface][definition.name]) {
-            module._views[definition.iface][definition.name] = [];
+        if (!module._views[definition.name][definition.iface]) {
+            module._views[definition.name][definition.iface] = [];
         };
-        module._views[definition.iface][definition.name].unshift(definition);
+        module._views[definition.name][definition.iface].unshift(definition);
     };
 
     module._render_data = function(element, data, args) {
         var ifaces = module.ifaces(data);
+        var views = module._views[args.name];
+        var to_render = null;
 
         for (var i=0; i < ifaces.length; i++) {
-            var all_definitions = module._views[ifaces[i]];
-            if (all_definitions) {
-                var definitions = all_definitions[args.name];
-                if (definitions && definitions.length) {
-                    var view_definition = {};
-                    $.extend(view_definition, definitions[0]);
-                    if (args.extra) {
-                        $.extend(view_definition, args.extra);
-                    };
-                    var view = new obviel.View(view_definition, element, data);
-                    view.doRender(args.name, args.callback);
-                    return;
+            var definitions = views[ifaces[i]];
+            if (definitions && definitions.length) {
+                var view_definition = {};
+                $.extend(view_definition, definitions[0]);
+                if (args.extra) {
+                    $.extend(view_definition, args.extra);
                 };
+                to_render = new obviel.View(view_definition, element, data);
+                break;
             };
         };
-        if (window.console && console.log) {
+        if (to_render != null) {
+            to_render.doRender(args.name, args.callback);
+        } else if (window.console && console.log) {
             console.log('failed view lookup for args', args, 'and', data);
         };
     };
 
     module._render_every_data = function(element, data, args) {
         var ifaces = module.ifaces(data);
-        var views = [];
+        var views = module._views[args.name];
+        var to_render = [];
 
         $.each(ifaces, function (i, iface) {
-            var all_definitions = module._views[iface];
-            if (all_definitions) {
-                var definitions = all_definitions[args.name];
-                if (definitions) {
-                    $.each(definitions, function(e, definition) {
-                        var view_definition = {};
-                        $.extend(view_definition, definition);
-                        if (args.extra) {
-                            $.extend(view_definition, args.extra);
-                        };
-                        views.push(new obviel.View(view_definition, element, data));
-                    });
-                };
+            var definitions = views[iface];
+            if (definitions) {
+                $.each(definitions, function(e, definition) {
+                    var view_definition = {};
+                    $.extend(view_definition, definition);
+                    if (args.extra) {
+                        $.extend(view_definition, args.extra);
+                    };
+                    to_render.push(new obviel.View(view_definition, element, data));
+                });
             };
         });
-        views.sort(function (v1, v2) {
+        to_render.sort(function (v1, v2) {
             return v1.order - v2.order;
         });
-        $.each(views, function (i, view) {
+        $.each(to_render, function (i, view) {
             view.doRender(args.name, args.callback);
         });
     };
@@ -376,21 +356,17 @@ var obviel = {};
     $.fn.render = function(args) {
         /* render a view
 
-           look up the view by name, defaulting to 'default', and
-           obj.ifaces, defaulting to [<typeof object>]
-
            arguments supported are:
 
-             * obj - the context object
+             * data - the object to render using the view
+             * every - alternative object
+             * url - alternative url
              * name - the name of the view to render, optional, defaults to
                'default'
              * callback - optional, a function that is called after the
                rendering has completed, with args 'element' (the JQuery-wrapped
                element that the view is executed on), 'view' (the view
                instance) and 'context' (a reference to 'obj')
-             * errback - optional, a function that is called if an error
-               occurs, with as argument the error instance - note that this is
-               only recognized properly if a 'callback' argument is provided
         */
         var element = $(this);
         if (!args.name) {
