@@ -106,6 +106,48 @@
         this.status = status;
     };
 
+    var SMIActions = function(listing) {
+        this.listing = listing;
+
+        this.listing.container.bind('selectionchange.smilisting', function() {
+            this.listing.container.children('tr.actions').each(function (i, item){
+                var action = $(item);
+
+                if (!action.prev().is(':selected')) {
+                    action.remove();
+                };
+            });
+            var selected = this.listing.container.children('tr.item.selected:first');
+            while (selected.length) {
+                selected = selected.nextUntil(':not(.selected)').andSelf().last();
+                var next = selected.next();
+
+                if (next.is('.actions')) {
+                    // Next item is an action line.
+                    var next_actions = next.next();
+                    if (next_actions.is('.item.selected')) {
+                        next.remove();
+                        selected = next_actions;
+                        continue;
+                    };
+                } else {
+                    // Let's insert an action line here.
+                    var action_line = $('<tr class="actions"></tr>');
+                    var action_cell = $('<td>Actions</td>');
+
+                    action_cell.attr('colspan', this.listing.configuration.columns.length);
+                    action_line.append(action_cell);
+                    selected.after(action_line);
+                };
+                var following = next.nextUntil('.selected');
+                if (!following.length) {
+                    following = next;
+                }
+                selected = following.last().next();
+            };
+        }.scope(this));
+    };
+
     var SMIListing = function(header, content, smi, data, configuration) {
         var container = content.find('tbody');
         this.header = header;
@@ -132,6 +174,7 @@
         });
 
         this.selector = new SMISelection(this);
+        this.actions = new SMIActions(this);
 
         // Add the hover style
         container.delegate('tr.item', 'mouseenter', function() {
@@ -168,7 +211,7 @@
                     row.parent().children().slice(start, end).toggleClass('selected');
                     container.trigger('selectionchange.smilisting');
                 };
-                mouse_last_selected = null;
+                mouse_last_selected = current_selected;
             };
         });
 
@@ -187,6 +230,10 @@
                     // XXX Send new order to server
                     //$("#SMIContents_rows").setClassSequence();
                     $(table).addClass('static');
+                    // If you drag a selected row, trigger selection change
+                    if ($(row).is('.selected')) {
+                        container.trigger('selectionchange.smilisting');
+                    };
                 }
             });
         };

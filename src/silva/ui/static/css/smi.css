@@ -440,7 +440,7 @@ input, textarea { cursor:text; }
 #workspace .content .listing .static tr.selected.hover {
   background-color:#5fa2ea;
 }
-#workspace .content .listing .static tr:active {
+#workspace .content .listing .static tr.item:active {
   background-color:#4d96e6!important;
   color:#fff;
 }
