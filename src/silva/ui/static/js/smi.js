@@ -227,7 +227,30 @@
         this.container.children().trigger('close.notification');
     };
 
+    /**
+     * Clipboard used for listing content.
+     */
+    var ClipBoard = function () {
+        this.clear();
+    };
 
+    /**
+     * Clear the clipboard.
+     */
+    ClipBoard.prototype.clear = function() {
+        this.items = [];
+    };
+
+    /**
+     * Return the size of the clipboard.
+     */
+    ClipBoard.prototype.length = function() {
+        return this.items.length;
+    };
+
+    /**
+     * SMI object.
+     */
     var SMI = function(options) {
         var navigation = $(options.navigation.selector);
         var workspace = $(options.workspace.selector);
@@ -240,6 +263,7 @@
 
         this.opened = {path: '', tab: ''};
         this.options = options;
+        this.clipboard = new ClipBoard();
         this.shortcuts = new ShortcutManager();
         this.notifications = new NotificationManager(options.notifications);
 
@@ -295,7 +319,7 @@
         });
 
         // Bind event to open new tab
-        $('a.screen').live('click', function(event) {
+        $(document).delegate('a.screen', 'click', function(event) {
             var link = $(event.target);
             var path = link.attr('href');
 
@@ -367,58 +391,8 @@
     /**
      * JQuery SMI loader
      */
-    $.fn.SMI = function(method) {
-
-        var methods = {
-            init: function(options) {
-                return new SMI(options);
-            },
-            clipboard: function(action) {
-                // Global clipboard
-                var actions = {
-                    cut: function($items) {
-                        window.clipboard = $items;
-                        $(this).trigger('smi.clipboard.cut', $items);
-                        $SMI.SMINotification({
-                            title: "Cut " + window.clipboard.length + " item(s)",
-                            body: "The selected items are on the clipboard. Use the Paste action to paste the items from the clipboard. Cut items will not be moved until you paste them.",
-                            autoclose: 5000
-                        });
-                    },
-                    copy: function($items) {
-                        window.clipboard = $items.clone();
-                        $(this).trigger('smi.clipboard.copy', $items);
-                        $SMI.SMINotification({
-                            title: "Copied " + window.clipboard.length + " item(s)",
-                            body: "The selected items have been copied. Use the Paste action to paste the copied items.",
-                            autoclose: 5000
-                        });
-                    },
-                    paste: function() {
-                        var data = (window.clipboard) ? window.clipboard : [];
-                        window.clipboard = null;
-                        $(this).trigger('smi.clipboard.paste', data);
-                        return data;
-                    },
-                    clear: function() {
-                        window.clipboard = null;
-                        $(this).trigger('smi.clipboard.clear');
-                    },
-                    length: function() {
-                        $(this).trigger('smi.clipboard.length');
-                        return (window.clipboard && window.clipboard.length) ? window.clipboard.length : 0;
-                    }
-                };
-                if(actions[action]) {
-                    return actions[action].apply(this, Array.prototype.slice.call(arguments, 1));
-                }
-            }
-        };
-        if(methods[method]) {
-            return methods[method].apply(this, Array.prototype.slice.call(arguments, 1));
-        } else if(typeof method === 'object' || !method) {
-            return methods.init.apply(this, arguments);
-        }
+    $.fn.SMI = function(options) {
+        return new SMI(options);
     };
 })(jQuery, obviel, shortcut);
 
