@@ -448,6 +448,9 @@ input, textarea { cursor:text; }
   background-color:#4d96e6!important;
   color:#fff;
 }
+#workspace .content .listing tr.empty td {
+  padding: 0px 8px;
+}
 
 /* Table listing footer */
 #workspace .content .footer {
@@ -623,16 +626,3 @@ ins.state.expired { background-position:-85px -145px; }
 .jstree .jstree-unchecked > a > .jstree-checkbox:hover { background-position:0 -60px; }
 .jstree .jstree-undetermined > a > .jstree-checkbox:hover { background-position:-40px -60px; }
 
-.jstree li, .jstree ins,
-#vakata-dragged.jstree .jstree-invalid,
-#vakata-dragged.jstree .jstree-ok,
-#jstree-marker.jstree { _background-image:url(../img/sprite.png); }
-.jstree .jstree-open ins { _background-position:-80px 0; }
-.jstree .jstree-closed ins { _background-position:-60px 0; }
-.jstree .jstree-leaf ins { _background-position:-140px 0; }
-.jstree a ins.jstree-icon { _background-position:-60px -20px; }
-#vakata-contextmenu.jstree-context ins { _display:none; }
-#vakata-contextmenu.jstree-context li { _zoom:1; }
-.jstree .jstree-undetermined a .jstree-checkbox { _background-position:-40px -60px; }
-.jstree .jstree-checked a .jstree-checkbox { _background-position:-20px -60px; }
-.jstree .jstree-unchecked a .jstree-checkbox { _background-position:0 -60px; }

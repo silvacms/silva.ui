@@ -7,8 +7,14 @@
         render: function(content, data) {
             var icon = $('<ins class="icon"></ins>');
 
-            icon.addClass(data['icon']);
-            content.text(data['title']);
+            if (data.icon.indexOf('.') == -1) {
+                icon.addClass(data.icon);
+            } else {
+                icon.attr(
+                    'style',
+                    'background:url(' + data.icon + ') no-repeat center center;');
+            };
+            content.text(data.title);
             content.prepend(icon);
         }
     });

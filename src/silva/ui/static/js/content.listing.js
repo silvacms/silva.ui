@@ -59,14 +59,23 @@
 
     obviel.iface('listing');
 
-    var SMISelection = function(header, listing) {
-        this.selector = header.find('.selector');
+    var SMISelection = function(listing) {
+        this.selector = listing.header.find('.selector');
         this.status = 'none';
         this.listing = listing;
 
+        // Hide selector if the header is hidden.
+        this.listing.header.bind('collapsingchange.smilisting', function() {
+            this.selector.fadeToggle();
+        }.scope(this));
+        if (this.listing.header.is('.collapsed')) {
+            this.selector.hide();
+        };
+
+        // Update selector on selection change
         this.listing.container.bind('selectionchange.smilisting', function() {
-            var total = listing.container.children('tr').length;
-            var selected = listing.container.children('tr.selected').length;
+            var total = listing.container.children('tr.item').length;
+            var selected = listing.container.children('tr.item.selected').length;
 
             if (selected == 0) {
                 this.set('none');
@@ -80,6 +89,7 @@
             return false;
         }.scope(this));
 
+        // Clicking on the selector change the selection.
         this.selector.bind('click', function() {
             if (this.status == 'none') {
                 this.listing.select_all();
@@ -98,15 +108,15 @@
 
     var SMIListing = function(header, content, smi, data, configuration) {
         var container = content.find('tbody');
+        this.header = header;
         this.container = container;
         this.configuration = configuration;
-        this.selector = new SMISelection(header, this);
 
         // Collapse feature
         if (configuration.collapsed) {
             header.addClass('collapsed');
             content.addClass('collapsed');
-            header.one('uncollapse.smilisting', function() {
+            header.one('collapsingchange.smilisting', function() {
                 // On the first display, add the data.
                 this.add_lines(data);
             }.scope(this));
@@ -118,20 +128,22 @@
             header.toggleClass('collapsed');
             content.toggleClass('collapsed');
             configuration.collapsed = !configuration.collapsed;
-            header.trigger('uncollapse.smilisting');
+            header.trigger('collapsingchange.smilisting');
         });
 
+        this.selector = new SMISelection(this);
+
         // Add the hover style
-        container.delegate('tr', 'mouseenter', function() {
+        container.delegate('tr.item', 'mouseenter', function() {
             $(this).addClass("hover");
         });
-        container.delegate('tr', 'mouseleave', function() {
+        container.delegate('tr.item', 'mouseleave', function() {
             $(this).removeClass("hover");
         });
 
         // Row selection with mouse
         var mouse_last_selected = null;
-        container.delegate('tr', 'click', function(event) {
+        container.delegate('tr.item', 'click', function(event) {
             var row = $(this);
 
             if (mouse_last_selected === null || !event.shiftKey) {
@@ -186,10 +198,21 @@
      * @param data: list of line data
      */
     SMIListing.prototype.add_lines = function(data) {
-        // Fill in table
-        $.each(data, function(i, line) {
-            this.add_line(line);
-        }.scope(this));
+        if (data.length) {
+            // Fill in table
+            $.each(data, function(i, line) {
+                this.add_line(line);
+            }.scope(this));
+        } else {
+            // Add a message no lines.
+            // XXX should come from a template, i18n
+            var empty_line = $('<tr class="empty"></tr>');
+            var empty_cell = $('<td>There is no items here.</td>');
+
+            empty_cell.attr('colspan', this.configuration.columns.length);
+            empty_line.append(empty_cell);
+            this.container.append(empty_line);
+        };
     };
 
     /**
@@ -198,7 +221,7 @@
      */
     SMIListing.prototype.add_line = function(data) {
         // Add a data line to the table
-        var line = $('<tr></tr>');
+        var line = $('<tr class="item"></tr>');
 
         $.each(this.configuration.columns, function(i, column) {
             var cell = $('<td></td>');
@@ -219,7 +242,7 @@
      * Unselect all elements.
      */
     SMIListing.prototype.unselect_all = function() {
-        this.container.children('tr.selected').removeClass('selected');
+        this.container.children('tr.item.selected').removeClass('selected');
         this.container.trigger('selectionchange.smilisting');
     };
 
@@ -227,7 +250,7 @@
      * Select all elements.
      */
     SMIListing.prototype.select_all = function() {
-        this.container.children().addClass('selected');
+        this.container.children('tr.item').addClass('selected');
         this.container.trigger('selectionchange.smilisting');
     };
 
