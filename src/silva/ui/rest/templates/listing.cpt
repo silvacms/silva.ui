@@ -29,7 +29,12 @@
     </dd>
   </dl>
   <div class="footer">
-    <div class="actions">
-    </div>
+    <span class="publishables counter">
+      n Publishables
+    </span>
+    /
+    <span class="assets counter">
+      n Assets
+    </span>
   </div>
 </tal:listing>

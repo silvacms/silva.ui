@@ -287,7 +287,7 @@ var obviel = {};
 
            the view is registered by viewobj.name, defaulting to 'default',
            and viewobj.iface, defaulting to 'object' (which is implemented
-           by all JS objects)
+           by all JS objects), and order to 0 (used for multiple rendering).
         */
         // Default values.
         if (definition.name == undefined) {
@@ -296,24 +296,30 @@ var obviel = {};
         if (definition.iface == undefined) {
             definition.iface = 'object';
         };
+        if (definition.order == undefined) {
+            definition.order = 0;
+        };
 
         // Registration
         if (!module._views[definition.iface]) {
             module._views[definition.iface] = {};
         };
-        module._views[definition.iface][definition.name] = definition;
+        if (!module._views[definition.iface][definition.name]) {
+            module._views[definition.iface][definition.name] = [];
+        };
+        module._views[definition.iface][definition.name].unshift(definition);
     };
 
-    module._render_from_obj = function(element, data, args) {
+    module._render_data = function(element, data, args) {
         var ifaces = module.ifaces(data);
 
         for (var i=0; i < ifaces.length; i++) {
-            var definitions = module._views[ifaces[i]];
-            if (definitions) {
-                var definition = definitions[args.name];
-                if (definition) {
+            var all_definitions = module._views[ifaces[i]];
+            if (all_definitions) {
+                var definitions = all_definitions[args.name];
+                if (definitions && definitions.length) {
                     var view_definition = {};
-                    $.extend(view_definition, definition);
+                    $.extend(view_definition, definitions[0]);
                     if (args.extra) {
                         $.extend(view_definition, args.extra);
                     };
@@ -328,12 +334,40 @@ var obviel = {};
         };
     };
 
-    module._render_from_url = function(element, url, args) {
+    module._render_every_data = function(element, data, args) {
+        var ifaces = module.ifaces(data);
+        var views = [];
+
+        $.each(ifaces, function (i, iface) {
+            var all_definitions = module._views[iface];
+            if (all_definitions) {
+                var definitions = all_definitions[args.name];
+                if (definitions) {
+                    $.each(definitions, function(e, definition) {
+                        var view_definition = {};
+                        $.extend(view_definition, definition);
+                        if (args.extra) {
+                            $.extend(view_definition, args.extra);
+                        };
+                        views.push(new obviel.View(view_definition, element, data));
+                    });
+                };
+            };
+        });
+        views.sort(function (v1, v2) {
+            return v1.order - v2.order;
+        });
+        $.each(views, function (i, view) {
+            view.doRender(args.name, args.callback);
+        });
+    };
+
+    module._render_url = function(element, url, args) {
         $.ajax({
             type: 'GET',
             url: url,
             success: function(obj) {
-                module._render_from_obj(element, obj, args);
+                module._render_data(element, obj, args);
             },
             dataType: 'json'
         });
@@ -364,11 +398,13 @@ var obviel = {};
         };
 
         if (args.data) {
-            module._render_from_obj(element, args.data, args);
+            module._render_data(element, args.data, args);
+        } else if (args.every) {
+            module._render_every_data(element, args.every, args);
         } else if(args.url) {
-            module._render_from_url(element, args.url, args);
+            module._render_url(element, args.url, args);
         } else {
-            throw((new module.InvalidOptions(data)));
+            throw((new module.InvalidOptions(args)));
         };
     };
 

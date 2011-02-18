@@ -290,8 +290,8 @@ input, textarea { cursor:text; }
 }
 #workspace .info .actions {
   float:right;
-  list-style:none;
   margin:0;
+  list-style:none;
   padding:0;
 }
 #workspace .info .actions li {
@@ -451,6 +451,28 @@ input, textarea { cursor:text; }
 #workspace .content .listing tr.empty td {
   padding: 0px 8px;
 }
+#workspace .content .listing .actions a {
+  -khtml-border-radius:3px;
+  -moz-border-radius:3px;
+  -ms-border-radius:3px;
+  -o-border-radius:3px;
+  -webkit-border-radius:3px;
+  background:#fff url(../img/gradient20m.png) repeat-x top;
+  border-radius:3px;
+  border:1px #777 solid;
+  display:block;
+  float:left;
+  line-height:17px;
+  margin:5px 2px;
+  padding:0 4px;
+}
+#workspace .content .listing a.actions:hover {
+  background:#fff;
+  border-color:#888;
+  color:#222;
+}
+
+
 
 /* Table listing footer */
 #workspace .content .footer {
@@ -471,35 +493,6 @@ input, textarea { cursor:text; }
 }
 #workspace .content .footer div.right {
   float:right;
-}
-#workspace .content .footer a {
-  -khtml-border-radius:3px;
-  -moz-border-radius:3px;
-  -ms-border-radius:3px;
-  -o-border-radius:3px;
-  -webkit-border-radius:3px;
-  background:#fff url(../img/gradient20m.png) repeat-x top;
-  border-radius:3px;
-  border:1px #777 solid;
-  display:block;
-  float:left;
-  line-height:17px;
-  margin:3px 2px;
-  padding:0 4px;
-}
-#workspace .content .footer a:hover {
-  background:#fff;
-  border-color:#888;
-  color:#222;
-}
-#workspace .content .footer a.disabled {
-  background:#fff url(../img/gradient20m.png) repeat-x top;
-  border-color:#ccc;
-  color:#999;
-  cursor:default;
-}
-#workspace .content .footer a.hidden {
-  display:none;
 }
 
 #workspace .content-area {

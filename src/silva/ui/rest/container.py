@@ -9,8 +9,9 @@ from megrok.chameleon.components import ChameleonPageTemplate
 from zope.component import getUtility
 from zope.component import queryUtility
 from zope.component.interfaces import IFactory
+from zope.intid.interfaces import IIntIds
 
-from silva.core.interfaces import IVersionedContent, IContainer
+from silva.core import interfaces
 from silva.ui.icon import get_icon
 from silva.ui.rest.base import PageREST, UIREST
 
@@ -18,8 +19,15 @@ from Products.SilvaMetadata.interfaces import IMetadataService
 from zExceptions import NotFound
 
 
+CONTENT_IFACES = [
+    (interfaces.ISilvaObject, 'content'),
+    (interfaces.IAsset, 'asset'),
+    (interfaces.IContainer, 'container'),
+    (interfaces.IVersionedContent, 'versioned')]
+
+
 class Adding(rest.REST):
-    grok.context(IContainer)
+    grok.context(interfaces.IContainer)
     grok.name('silva.ui.adding')
     grok.require('silva.ChangeSilvaContent')
 
@@ -36,7 +44,7 @@ class Adding(rest.REST):
 
 
 class TemplateContainerListing(rest.REST):
-    grok.context(IContainer)
+    grok.context(interfaces.IContainer)
     grok.name('silva.ui.listing.template')
     grok.require('silva.ReadSilvaContent')
 
@@ -53,30 +61,55 @@ class TemplateContainerListing(rest.REST):
 
 
 class ColumnsContainerListing(UIREST):
-    grok.context(IContainer)
+    grok.context(interfaces.IContainer)
     grok.name('silva.ui.listing.configuration')
     grok.require('silva.ReadSilvaContent')
 
     def GET(self):
-        return self.json_response([
-                {'name': 'publishables',
-                 'columns': [
-                        {'name': 'icon'},
-                        {'name': 'status'},
-                        {'name': 'title', 'caption': 'Title',},
-                        {'name': 'author', 'caption': 'Author',},
-                        {'name': 'modified', 'caption': 'Modified',}],
-                 'sortable': 'icon',
-                 'collapsed': False},
-                {'name': 'assets',
-                 'columns': [
-                        {'name': 'icon',},
-                        {'name': 'title', 'caption': 'Title',},
-                        {'name': 'author', 'caption': 'Author',},
-                        {'name': 'modified', 'caption': 'Modified',}],
-                 'collapsed': True},
-                ])
-
+        return self.json_response({
+                'listing': [
+                    {'name': 'publishables',
+                     'columns': [
+                            {'name': 'icon'},
+                            {'name': 'status'},
+                            {'name': 'title', 'caption': 'Title',},
+                            {'name': 'author', 'caption': 'Author',},
+                            {'name': 'modified', 'caption': 'Modified',}],
+                     'sortable': 'icon',
+                     'collapsed': False},
+                    {'name': 'assets',
+                     'columns': [
+                            {'name': 'icon',},
+                            {'name': 'title', 'caption': 'Title',},
+                            {'name': 'author', 'caption': 'Author',},
+                            {'name': 'modified', 'caption': 'Modified',}],
+                     'collapsed': True},],
+                'actions': [
+                    {'name': 'cut',
+                     'title': 'Cut',
+                     'order': 5,
+                     'ifaces': ['content']},
+                    {'name': 'copy',
+                     'title': 'Copy',
+                     'order': 6,
+                     'ifaces': ['content']},
+                    {'name': 'paste',
+                     'title': 'Paste',
+                     'order': 7,
+                     'ifaces': ['content']},
+                    {'name': 'delete',
+                     'title': 'Delete',
+                     'order': 100,
+                     'ifaces': ['content']},
+                    {'name': 'publish',
+                     'title': 'Publish',
+                     'order': 51,
+                     'ifaces': ['container', 'versioned']},
+                    {'name': 'close',
+                     'title': 'Close',
+                     'order': 52,
+                     'ifaces': ['container', 'versioned']},
+                    ]})
 
 
 def format_date(date):
@@ -85,7 +118,7 @@ def format_date(date):
     return ''
 
 def get_content_status(content):
-    if IVersionedContent.providedBy(content):
+    if interfaces.IVersionedContent.providedBy(content):
         next_status = content.get_next_version_status()
 
         if next_status == 'not_approved':
@@ -102,9 +135,16 @@ def get_content_status(content):
                 return 'closed'
     return None
 
+def content_ifaces(content):
+    ifaces = []
+    for interface, iface in CONTENT_IFACES:
+        if interface.providedBy(content):
+            ifaces.append(iface)
+    return ifaces
+
 
 class ContainerListing(PageREST):
-    grok.context(IContainer)
+    grok.context(interfaces.IContainer)
     grok.name('silva.ui.content')
     grok.require('silva.ReadSilvaContent')
 
@@ -123,56 +163,69 @@ class ContainerListing(PageREST):
         for content in self.context.get_non_publishables():
             yield content
 
+    def get_content_data(self, intids, content):
+        return {
+            'ifaces': content_ifaces(content),
+            'id': intids.register(content)}
+
     def payload(self):
         publishables = []
-        service = getUtility(IMetadataService)
+        intids = getUtility(IIntIds)
+        metadata = getUtility(IMetadataService)
         for entry in self.get_publishable_content():
             path = self.get_content_path(entry)
             content = entry.get_previewable()
-            metadata = service.getMetadata(content)
-            publishables.append(
-                {"status": {
-                        "ifaces": ["workflow"],
-                        "value": get_content_status(entry)},
-                 "icon": {
-                        "ifaces": ["icon"],
-                        "value": get_icon(entry, self.request)},
-                 "title": {
-                        "ifaces": ["action"],
-                        "value": entry.get_title_or_id(),
-                        "path": path,
-                        "action": "content"},
-                 "author": {
-                        "ifaces": ["action"],
-                        "value": metadata.get('silva-extra', 'lastauthor'),
-                        "path": path,
-                        "action": "properties"},
-                 "modified": {
-                        "ifaces": ["text"],
-                        "value": format_date(metadata.get('silva-extra', 'modificationtime'))}
-                 })
+            content_metadata = metadata.getMetadata(content)
+            publishables.append({
+                    "data": self.get_content_data(intids, entry),
+                    "columns": {
+                        "status": {
+                            "ifaces": ["workflow"],
+                            "value": get_content_status(entry)},
+                        "icon": {
+                            "ifaces": ["icon"],
+                            "value": get_icon(entry, self.request)},
+                        "title": {
+                            "ifaces": ["action"],
+                            "value": entry.get_title_or_id(),
+                            "path": path,
+                            "action": "content"},
+                        "author": {
+                            "ifaces": ["action"],
+                            "value": content_metadata.get(
+                                'silva-extra', 'lastauthor'),
+                            "path": path,
+                            "action": "properties"},
+                        "modified": {
+                            "ifaces": ["text"],
+                            "value": format_date(content_metadata.get(
+                                    'silva-extra', 'modificationtime'))}
+                        }})
         assets = []
         for entry in self.get_non_publishable_content():
             path = self.get_content_path(entry)
-            metadata = service.getMetadata(entry)
-            assets.append(
-                {"icon": {
-                        "ifaces": ["icon"],
-                        "value": get_icon(entry, self.request)},
-                 "title": {
-                        "ifaces": ["action"],
-                        "value": entry.get_title_or_id(),
-                        "path": path,
-                        "action": "content"},
-                 "author": {
-                        "ifaces": ["action"],
-                        "value": metadata.get('silva-extra', 'lastauthor'),
-                        "path": path,
-                        "action": "properties"},
-                 "modified": {
-                        "ifaces": ["text"],
-                        "value": format_date(metadata.get('silva-extra', 'modificationtime'))}
-                 })
+            asset_metadata = metadata.getMetadata(entry)
+            assets.append({
+                    "data": self.get_content_data(intids, entry),
+                    "columns": {
+                        "icon": {
+                            "ifaces": ["icon"],
+                            "value": get_icon(entry, self.request)},
+                        "title": {
+                            "ifaces": ["action"],
+                            "value": entry.get_title_or_id(),
+                            "path": path,
+                            "action": "content"},
+                        "author": {
+                            "ifaces": ["action"],
+                            "value": asset_metadata.get('silva-extra', 'lastauthor'),
+                            "path": path,
+                            "action": "properties"},
+                        "modified": {
+                            "ifaces": ["text"],
+                            "value": format_date(asset_metadata.get(
+                                    'silva-extra', 'modificationtime'))}
+                        }})
         return {"ifaces": ["listing"],
                 "publishables": publishables,
                 "assets": assets}

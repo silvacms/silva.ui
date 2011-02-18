@@ -5,7 +5,7 @@
     obviel.iface('action');
     obviel.view({
         iface: 'action',
-        name: 'listing',
+        name: 'column.smilisting',
         render: function(content, data) {
             var link = $('<a class="screen"></a>');
 
@@ -19,7 +19,7 @@
     obviel.iface('text');
     obviel.view({
         iface: 'text',
-        name: 'listing',
+        name: 'column.smilisting',
         render: function(content, data) {
             content.text(data.value);
         }
@@ -28,7 +28,7 @@
     obviel.iface('icon');
     obviel.view({
         iface: 'icon',
-        name: 'listing',
+        name: 'column.smilisting',
         render: function(content, data) {
             var icon = $('<ins class="icon"></ins>');
 
@@ -46,7 +46,7 @@
     obviel.iface('workflow');
     obviel.view({
         iface: 'workflow',
-        name: 'listing',
+        name: 'column.smilisting',
         render: function(content, data) {
             var icon = $('<ins class="state"></ins>');
 
@@ -133,8 +133,11 @@
                 } else {
                     // Let's insert an action line here.
                     var action_line = $('<tr class="actions"></tr>');
-                    var action_cell = $('<td>Actions</td>');
+                    var action_cell = $('<td></td>');
 
+                    action_cell.render({
+                        every: selected.data('smilisting'),
+                        name: 'action.smilisting'});
                     action_cell.attr('colspan', this.listing.configuration.columns.length);
                     action_line.append(action_cell);
                     selected.after(action_line);
@@ -279,9 +282,10 @@
             if (this.configuration.sortable == column.name) {
                 cell.addClass('dragHandle');
             };
-            cell.render({data: data[column.name], name: 'listing'});
+            cell.render({data: data.columns[column.name], name: 'column.smilisting'});
             line.append(cell);
         }.scope(this));
+        line.data('smilisting', data.data);
         this.container.append(line);
     };
 
@@ -307,6 +311,22 @@
             async: false,
             dataType: 'json',
             success:function(configuration) {
+                $.each(configuration.actions, function(i, action) {
+                    $.each(action.ifaces, function (e, iface) {
+                        obviel.view({
+                            iface: iface,
+                            name: 'action.smilisting',
+                            order: action.order,
+                            render: function(content, data) {
+                                var link = $('<a class="action"></a>');
+
+                                link.text(action.title);
+                                content.append(link);
+                            }
+                        });
+                    });
+                });
+
                 obviel.view({
                     iface: 'listing',
                     name: 'content',
@@ -320,7 +340,7 @@
                         this.content.disableTextSelect();
 
                         // Fill in header
-                        var first_cfg = configuration[0];
+                        var first_cfg = configuration.listing[0];
                         var header = this.content.find('div.header tr');
                         $.each(first_cfg.columns, function(i, column) {
                             var cell = $('<th></th>');
@@ -337,7 +357,7 @@
                             header.append(cell);
                         });
 
-                        $.each(this.configuration, function(i, configuration) {
+                        $.each(this.configuration.listing, function(i, configuration) {
                             var content = $('dd.' + configuration.name);
                             var header = $('dt.' + configuration.name);
                             var listing = new SMIListing(
