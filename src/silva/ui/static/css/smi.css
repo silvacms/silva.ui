@@ -23,7 +23,6 @@
   position: fixed;
   right: 50%;
   top: 0px;
-  z-index: 200000;
 }
 
 html { background:#577086 url(../img/bg.png) repeat-x top; overflow:hidden; }
