@@ -73,15 +73,12 @@
         };
 
         // Update selector on selection change
-        this.listing.container.bind('selectionchange.smilisting', function() {
-            var total = listing.container.children('tr.item').length;
-            var selected = listing.container.children('tr.item.selected').length;
-
-            if (selected == 0) {
+        this.listing.container.bind('selectionchange.smilisting', function(event, changes) {
+            if (changes.selected == 0) {
                 this.set('none');
-            } else if (selected == total) {
+            } else if (changes.selected == changes.total) {
                 this.set('all');
-            } else if (selected == 1) {
+            } else if (changes.selected == 1) {
                 this.set('single');
             } else {
                 this.set('partial');
@@ -104,6 +101,39 @@
         this.selector.removeClass(this.status);
         this.selector.addClass(status);
         this.status = status;
+    };
+
+    var SMICounter = function(listing, name) {
+        this.listing = listing;
+        this.counter = $('p.' + name);
+        this.total = this.counter.find('span.total');
+        this.selected = this.counter.find('span.selected');
+        this.selected.hide();
+
+        // Hide counter on header collapse
+        this.listing.header.bind('collapsingchange.smilisting', function() {
+            this.counter.toggle();
+        }.scope(this));
+
+        // Bind selection change event
+        this.listing.container.bind('selectionchange.smilisting', function(event, changes) {
+            if (changes.selected) {
+                this.selected.find('.count').text(changes.selected.toString());
+                this.selected.show();
+            } else {
+                this.selected.hide();
+            };
+        }.scope(this));
+
+        // Bind content change event
+        this.listing.container.bind('contentchange.smilisting', function(event, changes) {
+            if (changes.total) {
+                this.total.find('.count').text(changes.total.toString());
+                this.total.show();
+            } else {
+                this.total.hide();
+            };
+        }.scope(this));
     };
 
     var SMIActions = function(listing) {
@@ -151,17 +181,23 @@
         }.scope(this));
     };
 
-    var SMIListing = function(header, content, smi, data, configuration) {
+    var SMIListing = function(name, smi, data, configuration) {
+        var content = $('dd.' + name);
         var container = content.find('tbody');
-        this.header = header;
+        this.header = $('dt.' + name);
         this.container = container;
         this.configuration = configuration;
 
+        this.selector = new SMISelection(this);
+        this.actions = new SMIActions(this);
+        this.counter = new SMICounter(this, name);
+
         // Collapse feature
         if (configuration.collapsed) {
-            header.addClass('collapsed');
+            this.header.addClass('collapsed');
             content.addClass('collapsed');
-            header.one('collapsingchange.smilisting', function() {
+            this.header.trigger('collapsingchange.smilisting');
+            this.header.one('collapsingchange.smilisting', function() {
                 // On the first display, add the data.
                 this.add_lines(data);
             }.scope(this));
@@ -169,33 +205,31 @@
             // We are not collapsed, add data now.
             this.add_lines(data);
         };
-        header.bind('click', function() {
-            header.toggleClass('collapsed');
+        this.header.bind('click', function() {
+            this.header.toggleClass('collapsed');
             content.toggleClass('collapsed');
             configuration.collapsed = !configuration.collapsed;
-            header.trigger('collapsingchange.smilisting');
-        });
-
-        this.selector = new SMISelection(this);
-        this.actions = new SMIActions(this);
+            this.header.trigger('collapsingchange.smilisting');
+        }.scope(this));
 
         // Add the hover style
-        container.delegate('tr.item', 'mouseenter', function() {
+        this.container.delegate('tr.item', 'mouseenter', function() {
             $(this).addClass("hover");
         });
-        container.delegate('tr.item', 'mouseleave', function() {
+        this.container.delegate('tr.item', 'mouseleave', function() {
             $(this).removeClass("hover");
         });
 
         // Row selection with mouse
         var mouse_last_selected = null;
-        container.delegate('tr.item', 'click', function(event) {
+        var trigger = this.trigger.scope(this);
+        this.container.delegate('tr.item', 'click', function(event) {
             var row = $(this);
 
             if (mouse_last_selected === null || !event.shiftKey) {
                 mouse_last_selected = row.index();
                 row.toggleClass('selected');
-                container.trigger('selectionchange.smilisting');
+                trigger('selectionchange.smilisting');
             } else {
                 // Shift is pressed, and a column have been previously selected.
                 var current_selected = row.index();
@@ -212,7 +246,7 @@
                         end = mouse_last_selected;
                     };
                     row.parent().children().slice(start, end).toggleClass('selected');
-                    container.trigger('selectionchange.smilisting');
+                    trigger('selectionchange.smilisting');
                 };
                 mouse_last_selected = current_selected;
             };
@@ -235,12 +269,22 @@
                     $(table).addClass('static');
                     // If you drag a selected row, trigger selection change
                     if ($(row).is('.selected')) {
-                        container.trigger('selectionchange.smilisting');
+                        this.trigger('selectionchange.smilisting');
                     };
-                }
+                }.scope(this)
             });
         };
 
+    };
+
+    /**
+     * Trigger an event on the listing data.
+     */
+    SMIListing.prototype.trigger = function (event_name) {
+        var total = this.container.children('tr.item').length;
+        var selected = this.container.children('tr.item.selected').length;
+
+        this.container.trigger(event_name, {total: total, selected: selected});
     };
 
     /**
@@ -263,6 +307,7 @@
             empty_line.append(empty_cell);
             this.container.append(empty_line);
         };
+        this.trigger('contentchange.smilisting');
     };
 
     /**
@@ -294,7 +339,7 @@
      */
     SMIListing.prototype.unselect_all = function() {
         this.container.children('tr.item.selected').removeClass('selected');
-        this.container.trigger('selectionchange.smilisting');
+        this.trigger('selectionchange.smilisting');
     };
 
     /**
@@ -302,7 +347,7 @@
      */
     SMIListing.prototype.select_all = function() {
         this.container.children('tr.item').addClass('selected');
-        this.container.trigger('selectionchange.smilisting');
+        this.trigger('selectionchange.smilisting');
     };
 
     $(document).bind('load.smiplugins', function(event, smi) {
@@ -358,10 +403,8 @@
                         });
 
                         $.each(this.configuration.listing, function(i, configuration) {
-                            var content = $('dd.' + configuration.name);
-                            var header = $('dt.' + configuration.name);
                             var listing = new SMIListing(
-                                header, content, smi, this.data[configuration.name], configuration);
+                                configuration.name, smi, this.data[configuration.name], configuration);
 
                             this.listings.push(listing);
                         }.scope(this));

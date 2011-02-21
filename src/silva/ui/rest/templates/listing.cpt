@@ -29,35 +29,35 @@
     </dd>
   </dl>
   <div class="footer">
-    <p class="counters">
-      <span class="publishables total"
+    <p class="counters publishables">
+      <span class="total"
             i18n:translate="">
         <span class="count"
               i18n:name="count">0</span>
         publishable(s) content(s)
       </span>
-      <span class="publishables selected"
+      <span class="selected"
             i18n:translate="">
         with
         <span class="count"
               i18n:name="count">0</span>
         selected
       </span>
-      <tal:msg i18n:translate="">and</tal:msg>
-      <span class="assets total"
+    </p>
+    <p class="counters assets">
+      <span class="total"
             i18n:translate="">
         <span class="count"
               i18n:name="count">0</span>
         asset(s)
       </span>
-      <span class="assets selected"
+      <span class="selected"
             i18n:translate="">
         with
         <span class="count"
               i18n:name="count">0</span>
         selected
       </span>
-      .
     </p>
 
     <p class="clipboard-info"
