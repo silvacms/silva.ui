@@ -330,7 +330,12 @@ var obviel = {};
                     if (args.extra) {
                         $.extend(view_definition, args.extra);
                     };
-                    to_render.push(new obviel.View(view_definition, element, data));
+                    var view = new obviel.View(view_definition, element, data);
+                    if (view.available != undefined)
+                        if (!view.available()) {
+                            return;
+                        };
+                    to_render.push(view);
                 });
             };
         });

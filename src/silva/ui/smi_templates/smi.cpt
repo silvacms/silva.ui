@@ -80,6 +80,7 @@
           },
           listing: {
               configuration: "${view.root_url}/++rest++silva.ui.listing.configuration",
+              action: "${view.root_url}/{path}/++rest++silva.ui.listing.{action}",
               template: "${view.root_url}/++rest++silva.ui.listing.template"
           },
           editor: {

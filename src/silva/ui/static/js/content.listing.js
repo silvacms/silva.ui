@@ -59,7 +59,7 @@
 
     obviel.iface('listing');
 
-    var SMISelection = function(listing) {
+    var SMIMultiSelector = function(listing) {
         this.selector = listing.header.find('.selector');
         this.status = 'none';
         this.listing = listing;
@@ -97,15 +97,19 @@
         }.scope(this));
     };
 
-    SMISelection.prototype.set = function(status) {
+    SMIMultiSelector.prototype.set = function(status) {
         this.selector.removeClass(this.status);
         this.selector.addClass(status);
         this.status = status;
     };
 
+
+    /**
+     * Manage element (and selected element) counter.
+     */
     var SMICounter = function(listing, name) {
         this.listing = listing;
-        this.counter = $('p.' + name);
+        this.counter = $('p.' + this.listing.name);
         this.total = this.counter.find('span.total');
         this.selected = this.counter.find('span.selected');
         this.selected.hide();
@@ -136,10 +140,47 @@
         }.scope(this));
     };
 
+    /**
+     * Represent a selection of multiple items in a listing.
+     * @param items: selected rows (must have the .item class).
+     */
+    var SMISelection = function(items) {
+        this.items = items;
+
+        this.length = items.length;
+        this.ifaces = [];
+        this.data = [];
+
+        $.each(this.items, function (i, item) {
+            var local_data = $(item).data('smilisting');
+
+            for (var e=0; e < local_data.ifaces.length; e++) {
+                if (this.ifaces.indexOf(local_data.ifaces[e])) {
+                    this.ifaces.push(local_data.ifaces[e]);
+                };
+            };
+            this.data.push(local_data);
+        }.scope(this));
+    };
+
+    /**
+     * Manage action buttons.
+     */
     var SMIActions = function(listing) {
         this.listing = listing;
 
-        this.listing.container.bind('selectionchange.smilisting', function() {
+        var render_actions = function(items, cell) {
+            var selection = new SMISelection(items);
+
+            cell.render({
+                every: selection,
+                name: 'action.smilisting',
+                extra: {listing: listing}});
+        };
+
+        this.listing.container.bind('selectionchange.smilisting', function(event, changes) {
+            // First remove, all action lines that are no longer below
+            // a selection
             this.listing.container.children('tr.actions').each(function (i, item){
                 var action = $(item);
 
@@ -147,36 +188,41 @@
                     action.remove();
                 };
             });
-            var selected = this.listing.container.children('tr.item.selected:first');
-            while (selected.length) {
-                selected = selected.nextUntil(':not(.selected)').andSelf().last();
-                var next = selected.next();
+            var last_selected = this.listing.container.children('tr.item.selected:first');
+            while (last_selected.length) {
+                var selected_items = last_selected.nextUntil(':not(.selected)').andSelf();
+                last_selected = selected_items.last();
+                var next = last_selected.next();
 
                 if (next.is('.actions')) {
                     // Next item is an action line.
                     var next_actions = next.next();
                     if (next_actions.is('.item.selected')) {
+                        // The after block is selected, remove the
+                        // action line and continue.
                         next.remove();
-                        selected = next_actions;
+                        last_selected = next_actions;
                         continue;
+                    } else {
+                        // The selection might have got bigger from
+                        // the top. Rerender actions.
+                        render_actions(selected_items, next_actions.find('td'));
                     };
                 } else {
                     // Let's insert an action line here.
                     var action_line = $('<tr class="actions"></tr>');
                     var action_cell = $('<td></td>');
 
-                    action_cell.render({
-                        every: selected.data('smilisting'),
-                        name: 'action.smilisting'});
+                    render_actions(selected_items, action_cell);
                     action_cell.attr('colspan', this.listing.configuration.columns.length);
                     action_line.append(action_cell);
-                    selected.after(action_line);
+                    last_selected.after(action_line);
                 };
                 var following = next.nextUntil('.selected');
                 if (!following.length) {
                     following = next;
                 }
-                selected = following.last().next();
+                last_selected = following.last().next();
             };
         }.scope(this));
     };
@@ -184,13 +230,14 @@
     var SMIListing = function(name, smi, data, configuration) {
         var content = $('dd.' + name);
         var container = content.find('tbody');
+        this.name = name;
         this.header = $('dt.' + name);
         this.container = container;
         this.configuration = configuration;
 
-        this.selector = new SMISelection(this);
+        this.selector = new SMIMultiSelector(this);
         this.actions = new SMIActions(this);
-        this.counter = new SMICounter(this, name);
+        this.counter = new SMICounter(this);
 
         // Collapse feature
         if (configuration.collapsed) {
@@ -330,8 +377,43 @@
             cell.render({data: data.columns[column.name], name: 'column.smilisting'});
             line.append(cell);
         }.scope(this));
+        line.attr('id', 'list' + data.data['id'].toString());
         line.data('smilisting', data.data);
         this.container.append(line);
+    };
+
+    /**
+     * Return the line associated to the given id.
+     * @param id: Line id
+     */
+    SMIListing.prototype.get_line = function(id) {
+        return this.container.children('#list' + id.toString());
+    };
+
+    /**
+     * Remove a list of lines.
+     */
+    SMIListing.prototype.remove_lines = function(ids) {
+        var is_selection_changed = false;
+        var is_content_changed = false;
+
+        $.each(ids, function(i, id) {
+            var line = this.get_line(id);
+
+            if (line.length) {
+                if (line.is('.selected')) {
+                    is_selection_changed = true;
+                };
+                is_content_changed = true;
+                line.remove();
+            };
+        }.scope(this));
+        if (is_content_changed) {
+            this.trigger('contentchange.smilisting');
+        };
+        if (is_selection_changed) {
+            this.trigger('selectionchange.smilisting');
+        };
     };
 
     /**
@@ -356,19 +438,68 @@
             async: false,
             dataType: 'json',
             success:function(configuration) {
+                var action_url = jsontemplate.Template(smi.options.listing.action, {});
                 $.each(configuration.actions, function(i, action) {
+                    // Each action gets changes and listing as extra
                     $.each(action.ifaces, function (e, iface) {
-                        obviel.view({
+                        var definition = {
                             iface: iface,
                             name: 'action.smilisting',
                             order: action.order,
-                            render: function(content, data) {
+                            render: function() {
                                 var link = $('<a class="action"></a>');
 
                                 link.text(action.title);
-                                content.append(link);
+                                if (this.action != undefined) {
+                                    link.bind('click', function() {
+                                        this.action();
+                                    }.scope(this));
+                                };
+
+                                this.content.append(link);
                             }
-                        });
+                        };
+                        for (var limiter in action.available) {
+                            switch(limiter) {
+                            case 'max_selected':
+                                definition['available'] = function() {
+                                    return this.data.length <= action.available.max_selected;
+                                };
+                            };
+                        };
+                        for (var action_type in action.action) {
+                            switch(action_type) {
+                            case 'rest':
+                                definition['action'] = function() {
+                                    var url = action_url.expand({
+                                            path: smi.opened.path,
+                                            action: action.name});
+                                    var ids = [];
+                                    $.each(this.data.data, function(i, item) {
+                                        ids.push({name: 'content', value:item.id});
+                                    });
+                                    $.ajax({
+                                        url: url,
+                                        type: 'POST',
+                                        dataType: 'json',
+                                        data: ids,
+                                        success: function(result) {
+                                            for (var post_action in result.post_actions) {
+                                                switch(post_action) {
+                                                case 'remove':
+                                                    this.listing.remove_lines(result.post_actions.remove);
+                                                    break;
+                                                };
+                                            };
+                                            if (result.notifications) {
+                                                smi.notifications.notifies(result.notifications);
+                                            };
+                                        }.scope(this)
+                                    });
+                                };
+                            };
+                        };
+                        obviel.view(definition);
                     });
                 });
 
@@ -404,7 +535,7 @@
 
                         $.each(this.configuration.listing, function(i, configuration) {
                             var listing = new SMIListing(
-                                configuration.name, smi, this.data[configuration.name], configuration);
+                                configuration.name, this.smi, this.data[configuration.name], configuration);
 
                             this.listings.push(listing);
                         }.scope(this));

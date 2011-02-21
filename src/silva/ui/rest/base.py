@@ -7,6 +7,8 @@ from five import grok
 from infrae import rest
 from zope.cachedescriptors.property import CachedProperty
 from zope.component import getUtility
+from zope.i18n import translate
+from zope.i18n.interfaces import IUserPreferredLanguages
 from zope.intid.interfaces import IIntIds
 
 from Acquisition import aq_parent
@@ -45,6 +47,18 @@ class UIREST(rest.REST):
         root = IVirtualSite(self.request).get_root()
         return root.absolute_url_path()
 
+    @CachedProperty
+    def language(self):
+        adapter = IUserPreferredLanguages(self.request)
+        languages = adapter.getPreferredLanguages()
+        if languages:
+            return languages[0]
+        return 'en'
+
+    def translate(self, message):
+        return translate(
+            message, target_language=self.language, context=self.request)
+
     def get_content_path(self, content):
             return content.absolute_url_path()[len(self.root_path):]
 
@@ -52,7 +66,7 @@ class UIREST(rest.REST):
         messages = []
         service = getUtility(IMessageService)
         for message in service.receive_all(self.request):
-            data = {'message': unicode(message),
+            data = {'message': self.translate(message.content),
                     'category': message.namespace}
             if message.namespace != 'error':
                 data['autoclose'] = 4000

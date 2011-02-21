@@ -12,8 +12,10 @@ from zope.component.interfaces import IFactory
 from zope.intid.interfaces import IIntIds
 
 from silva.core import interfaces
+from silva.core.messages.interfaces import IMessageService
 from silva.ui.icon import get_icon
 from silva.ui.rest.base import PageREST, UIREST
+from silva.translations import translate as _
 
 from Products.SilvaMetadata.interfaces import IMetadataService
 from zExceptions import NotFound
@@ -72,43 +74,57 @@ class ColumnsContainerListing(UIREST):
                      'columns': [
                             {'name': 'icon'},
                             {'name': 'status'},
-                            {'name': 'title', 'caption': 'Title',},
-                            {'name': 'author', 'caption': 'Author',},
-                            {'name': 'modified', 'caption': 'Modified',}],
+                            {'name': 'title',
+                             'caption': self.translate(_(u'Title')),},
+                            {'name': 'author',
+                             'caption': self.translate(_(u'Author')),},
+                            {'name': 'modified',
+                             'caption': self.translate(_(u'Modified')),}],
                      'sortable': 'icon',
                      'collapsed': False},
                     {'name': 'assets',
                      'columns': [
                             {'name': 'icon',},
-                            {'name': 'title', 'caption': 'Title',},
-                            {'name': 'author', 'caption': 'Author',},
-                            {'name': 'modified', 'caption': 'Modified',}],
+                            {'name': 'title',
+                             'caption': self.translate(_(u'Title')),},
+                            {'name': 'author',
+                             'caption': self.translate(_(u'Author')),},
+                            {'name': 'modified',
+                             'caption': self.translate(_(u'Modified')),}],
                      'collapsed': True},],
                 'actions': [
                     {'name': 'cut',
-                     'title': 'Cut',
+                     'title': self.translate(_(u'Cut')),
                      'order': 5,
                      'ifaces': ['content']},
                     {'name': 'copy',
-                     'title': 'Copy',
+                     'title': self.translate(_(u'Copy')),
                      'order': 6,
                      'ifaces': ['content']},
                     {'name': 'paste',
-                     'title': 'Paste',
+                     'title': self.translate(_(u'Paste')),
                      'order': 7,
                      'ifaces': ['content']},
-                    {'name': 'delete',
-                     'title': 'Delete',
-                     'order': 100,
+                    {'name': 'rename',
+                     'title': self.translate(_(u'Rename')),
+                     'order': 10,
+                     'available': {'max_selected': 1},
                      'ifaces': ['content']},
                     {'name': 'publish',
-                     'title': 'Publish',
+                     'title': self.translate(_(u'Publish')),
                      'order': 51,
+                     'action': {'rest': 'publish'},
                      'ifaces': ['container', 'versioned']},
                     {'name': 'close',
-                     'title': 'Close',
+                     'title': self.translate(_(u'Close')),
                      'order': 52,
+                     'action': {'rest': 'close'},
                      'ifaces': ['container', 'versioned']},
+                    {'name': 'delete',
+                     'title': self.translate(_(u'Delete')),
+                     'order': 100,
+                     'action': {'rest': 'delete'},
+                     'ifaces': ['content']},
                     ]})
 
 
@@ -229,3 +245,92 @@ class ContainerListing(PageREST):
         return {"ifaces": ["listing"],
                 "publishables": publishables,
                 "assets": assets}
+
+
+class ActionREST(UIREST):
+    """Base class for REST-based listing actions.
+    """
+    grok.baseclass()
+    grok.context(interfaces.IContainer)
+    grok.require('silva.ChangeSilvaContent')
+
+    def get_selected_content(self):
+        content = self.request.form.get('content')
+        if content is not None:
+            intids = getUtility(IIntIds)
+            if not isinstance(content, list):
+                # If only one item have been submitted we won't get a list
+                content = [content]
+            for intid in content:
+                try:
+                    yield intid, intids.getObject(int(intid))
+                except (KeyError, ValueError):
+                    pass
+
+    def payload(self):
+        raise NotImplementedError
+
+    def get_notification_elements(self, elements):
+
+        def quotify(element):
+            return '"%s"' % element
+
+        count = len(elements)
+        if count == 1:
+            return quotify(elements[0])
+        if count > 4:
+            what = _(
+                '${count} contents',
+                mapping={'count': count})
+        else:
+            what = _(
+                '${contents} and ${content}',
+                mapping={'contents': ', '.join(map(quotify, elements[:-1])),
+                         'content': quotify(elements[-1])})
+        return self.translate(what)
+
+    def notify(self, message, type=u""):
+        service = getUtility(IMessageService)
+        service.send(message, self.request, namespace=type)
+
+    def POST(self):
+        data = self.payload()
+        return self.json_response({
+                'ifaces': ['result_action'],
+                'post_actions': data,
+                'notifications': self.get_notifications()})
+
+
+class DeleteActionREST(ActionREST):
+    grok.name('silva.ui.listing.delete')
+
+    def payload(self):
+        removed = []
+        removed_titles = []
+        kept = []
+        kept_titles = []
+        for intid, content in self.get_selected_content():
+            if content.is_deletable():
+                removed.append(intid)
+                removed_titles.append(content.get_title_or_id())
+                self.context.manage_delObjects([content.getId()])
+            else:
+                kept.append(intid)
+                kept_titles.append(content.get_title_or_id())
+
+        elements = self.get_notification_elements
+        if removed_titles:
+            if kept_titles:
+                self.notify(
+                    _(u'Deleted ${deleted} but could not delete ${not_deleted}',
+                      mapping={'deleted': elements(removed_titles),
+                               'not_deleted': elements(kept_titles)}))
+            else:
+                self.notify(
+                    _(u'Deleted ${deleted}',
+                      mapping={'deleted': elements(removed_titles)}))
+        else:
+            self.notify(
+                _(u'Could not delete ${not_deleted}',
+                  mapping={'not_deleted': elements(kept_titles)}))
+        return {'remove': removed}
