@@ -22,11 +22,13 @@
                     silvaFormats: configuration['formats'],
                     extraPlugins: configuration['plugins'],
                     removePlugins: 'save,link,flash,image,filebrowser,iframe,forms',
-                    skin: configuration['skin'],
                     toolbar: 'Silva',
                     height: '2000px',
                     toolbar_Silva: configuration['toolbars'],
                     resize_enabled: false
+                };
+                if (configuration['skin']) {
+                    settings['skin'] = configuration['skin'];
                 };
 
                 obviel.view({
