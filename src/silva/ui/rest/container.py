@@ -95,16 +95,18 @@ class ColumnsContainerListing(UIREST):
                 'actions': [
                     {'name': 'cut',
                      'title': self.translate(_(u'Cut')),
+                     'action': {'cut': True},
                      'order': 5,
                      'ifaces': ['content']},
                     {'name': 'copy',
                      'title': self.translate(_(u'Copy')),
+                     'action': {'copy': True},
                      'order': 6,
                      'ifaces': ['content']},
                     {'name': 'paste',
                      'title': self.translate(_(u'Paste')),
                      'order': 7,
-                     'ifaces': ['content']},
+                     'ifaces': ['container']},
                     {'name': 'rename',
                      'title': self.translate(_(u'Rename')),
                      'order': 10,
@@ -322,15 +324,15 @@ class DeleteActionREST(ActionREST):
         if removed_titles:
             if kept_titles:
                 self.notify(
-                    _(u'Deleted ${deleted} but could not delete ${not_deleted}',
+                    _(u'Deleted ${deleted} but could not delete ${not_deleted}.',
                       mapping={'deleted': elements(removed_titles),
                                'not_deleted': elements(kept_titles)}))
             else:
                 self.notify(
-                    _(u'Deleted ${deleted}',
+                    _(u'Deleted ${deleted}.',
                       mapping={'deleted': elements(removed_titles)}))
         else:
             self.notify(
-                _(u'Could not delete ${not_deleted}',
+                _(u'Could not delete ${not_deleted}.',
                   mapping={'not_deleted': elements(kept_titles)}))
         return {'remove': removed}

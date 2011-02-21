@@ -391,7 +391,7 @@
     };
 
     /**
-     * Remove a list of lines.
+     * Remove a list of lines from their ids.
      */
     SMIListing.prototype.remove_lines = function(ids) {
         var is_selection_changed = false;
@@ -497,6 +497,11 @@
                                         }.scope(this)
                                     });
                                 };
+                                break;
+                            case 'cut':
+                                break;
+                            case 'copy':
+                                break;
                             };
                         };
                         obviel.view(definition);

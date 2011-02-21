@@ -19,7 +19,7 @@ class TabMenuItem(grok.Subscription):
     default = False
 
     def describe(self, page):
-        return {'name': unicode(self.name),
+        return {'name': page.translate(self.name),
                 'action': self.action}
 
 

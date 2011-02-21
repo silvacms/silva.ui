@@ -238,14 +238,33 @@
      * Clear the clipboard.
      */
     ClipBoard.prototype.clear = function() {
-        this.items = [];
+        this.cutted = [];
+        this.copied = [];
+    };
+
+    /**
+     * Store the given items as a cut in the clipboard.
+     * @param items: Cutted items.
+     */
+    ClipBoard.prototype.cut = function(items) {
+        this.cutted = this.cutted.concat(items);
+        $('body').trigger('contentchange.smiclipboard');
+    };
+
+    /**
+     * Store the given items as a copy in the clipboard.
+     * @param items: Copied items.
+     */
+    ClipBoard.prototype.copy = function(items) {
+        this.copied = this.copied.concat(items);
+        $('body').trigger('contentchange.smiclipboard');
     };
 
     /**
      * Return the size of the clipboard.
      */
     ClipBoard.prototype.length = function() {
-        return this.items.length;
+        return this.cutted.length + this.copied.length;
     };
 
     /**
