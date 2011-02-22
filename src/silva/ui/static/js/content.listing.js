@@ -7,11 +7,15 @@
         iface: 'action',
         name: 'column.smilisting',
         render: function(content, data) {
-            var link = $('<a class="screen"></a>');
+            var link = $('<a class="content-screen"></a>');
 
             link.text(data.value);
             link.attr('rel', data.action);
             link.attr('href', data.path);
+            link.bind('click', function(event) {
+                this.smi.open_link(link);
+                return false;
+            }.scope(this));
             content.append(link);
         }
     });
@@ -32,7 +36,7 @@
         render: function(content, data) {
             var icon = $('<ins class="icon"></ins>');
 
-            if (data.value.indexOf('.') == -1) {
+            if (data.value.indexOf('.') < 0) {
                 icon.addClass(data.value);
             } else {
                 icon.attr(
@@ -65,7 +69,7 @@
         this.listing = listing;
 
         // Hide selector if the header is hidden.
-        this.listing.header.bind('collapsingchange.smilisting', function() {
+        this.listing.header.bind('collapsingchange-smilisting', function() {
             this.selector.fadeToggle();
         }.scope(this));
         if (this.listing.header.is('.collapsed')) {
@@ -73,7 +77,7 @@
         };
 
         // Update selector on selection change
-        this.listing.container.bind('selectionchange.smilisting', function(event, changes) {
+        this.listing.container.bind('selectionchange-smilisting', function(event, changes) {
             if (changes.selected == 0) {
                 this.set('none');
             } else if (changes.selected == changes.total) {
@@ -103,11 +107,42 @@
         this.status = status;
     };
 
+    /**
+     * View clipboard data.
+     * @param container: container containing the info hook.
+     */
+    var SMIViewClipboard = function(container, clipboard) {
+        var content = container.find('.clipboard-info');
+        var actions = content.children('.actions');
+        var info = content.children('.stat');
+        var count = info.find('.count');
+
+        // Update count when clipboard is changed
+        $('body').bind('contentchange-smiclipboard', function() {
+            count.text(clipboard.length().toString());
+        });
+
+        // Show actions when you click on the info.
+        info.bind('click', function() {
+            actions.fadeToggle();
+            return false;
+        });
+        actions.bind('mouseleave', function() {
+            actions.fadeOut();
+        });
+
+        // Bind clear button
+        actions.find('#clear-clipboard').bind('click', function() {
+            clipboard.clear();
+        });
+
+    };
 
     /**
      * Manage element (and selected element) counter.
+     * @param listing: associated listing.
      */
-    var SMICounter = function(listing, name) {
+    var SMIViewCounter = function(listing) {
         this.listing = listing;
         this.counter = $('p.' + this.listing.name);
         this.total = this.counter.find('span.total');
@@ -115,12 +150,12 @@
         this.selected.hide();
 
         // Hide counter on header collapse
-        this.listing.header.bind('collapsingchange.smilisting', function() {
+        this.listing.header.bind('collapsingchange-smilisting', function() {
             this.counter.toggle();
         }.scope(this));
 
         // Bind selection change event
-        this.listing.container.bind('selectionchange.smilisting', function(event, changes) {
+        this.listing.container.bind('selectionchange-smilisting', function(event, changes) {
             if (changes.selected) {
                 this.selected.find('.count').text(changes.selected.toString());
                 this.selected.show();
@@ -130,7 +165,7 @@
         }.scope(this));
 
         // Bind content change event
-        this.listing.container.bind('contentchange.smilisting', function(event, changes) {
+        this.listing.container.bind('contentchange-smilisting', function(event, changes) {
             if (changes.total) {
                 this.total.find('.count').text(changes.total.toString());
                 this.total.show();
@@ -155,7 +190,7 @@
             var local_data = $(item).data('smilisting');
 
             for (var e=0; e < local_data.ifaces.length; e++) {
-                if (this.ifaces.indexOf(local_data.ifaces[e])) {
+                if (this.ifaces.indexOf(local_data.ifaces[e]) < 0) {
                     this.ifaces.push(local_data.ifaces[e]);
                 };
             };
@@ -165,6 +200,7 @@
 
     /**
      * Manage action buttons.
+     * @param listing: associated listing.
      */
     var SMIActions = function(listing) {
         this.listing = listing;
@@ -178,7 +214,7 @@
                 extra: {listing: listing}});
         };
 
-        this.listing.container.bind('selectionchange.smilisting', function(event, changes) {
+        this.listing.container.bind('selectionchange-smilisting', function(event, changes) {
             // First remove, all action lines that are no longer below
             // a selection
             this.listing.container.children('tr.actions').each(function (i, item){
@@ -234,17 +270,18 @@
         this.header = $('dt.' + name);
         this.container = container;
         this.configuration = configuration;
+        this.smi = smi;
 
         this.selector = new SMIMultiSelector(this);
         this.actions = new SMIActions(this);
-        this.counter = new SMICounter(this);
+        this.counter = new SMIViewCounter(this);
 
         // Collapse feature
         if (configuration.collapsed) {
             this.header.addClass('collapsed');
             content.addClass('collapsed');
-            this.header.trigger('collapsingchange.smilisting');
-            this.header.one('collapsingchange.smilisting', function() {
+            this.header.trigger('collapsingchange-smilisting');
+            this.header.one('collapsingchange-smilisting', function() {
                 // On the first display, add the data.
                 this.add_lines(data);
             }.scope(this));
@@ -256,7 +293,7 @@
             this.header.toggleClass('collapsed');
             content.toggleClass('collapsed');
             configuration.collapsed = !configuration.collapsed;
-            this.header.trigger('collapsingchange.smilisting');
+            this.header.trigger('collapsingchange-smilisting');
         }.scope(this));
 
         // Add the hover style
@@ -276,7 +313,7 @@
             if (mouse_last_selected === null || !event.shiftKey) {
                 mouse_last_selected = row.index();
                 row.toggleClass('selected');
-                trigger('selectionchange.smilisting');
+                trigger('selectionchange-smilisting');
             } else {
                 // Shift is pressed, and a column have been previously selected.
                 var current_selected = row.index();
@@ -293,7 +330,7 @@
                         end = mouse_last_selected;
                     };
                     row.parent().children().slice(start, end).toggleClass('selected');
-                    trigger('selectionchange.smilisting');
+                    trigger('selectionchange-smilisting');
                 };
                 mouse_last_selected = current_selected;
             };
@@ -316,7 +353,7 @@
                     $(table).addClass('static');
                     // If you drag a selected row, trigger selection change
                     if ($(row).is('.selected')) {
-                        this.trigger('selectionchange.smilisting');
+                        this.trigger('selectionchange-smilisting');
                     };
                 }.scope(this)
             });
@@ -354,7 +391,7 @@
             empty_line.append(empty_cell);
             this.container.append(empty_line);
         };
-        this.trigger('contentchange.smilisting');
+        this.trigger('contentchange-smilisting');
     };
 
     /**
@@ -374,7 +411,10 @@
             if (this.configuration.sortable == column.name) {
                 cell.addClass('dragHandle');
             };
-            cell.render({data: data.columns[column.name], name: 'column.smilisting'});
+            cell.render({
+                data: data.columns[column.name],
+                name: 'column.smilisting',
+                extra: {smi: this.smi}});
             line.append(cell);
         }.scope(this));
         line.attr('id', 'list' + data.data['id'].toString());
@@ -409,10 +449,10 @@
             };
         }.scope(this));
         if (is_content_changed) {
-            this.trigger('contentchange.smilisting');
+            this.trigger('contentchange-smilisting');
         };
         if (is_selection_changed) {
-            this.trigger('selectionchange.smilisting');
+            this.trigger('selectionchange-smilisting');
         };
     };
 
@@ -421,7 +461,7 @@
      */
     SMIListing.prototype.unselect_all = function() {
         this.container.children('tr.item.selected').removeClass('selected');
-        this.trigger('selectionchange.smilisting');
+        this.trigger('selectionchange-smilisting');
     };
 
     /**
@@ -429,10 +469,10 @@
      */
     SMIListing.prototype.select_all = function() {
         this.container.children('tr.item').addClass('selected');
-        this.trigger('selectionchange.smilisting');
+        this.trigger('selectionchange-smilisting');
     };
 
-    $(document).bind('load.smiplugins', function(event, smi) {
+    $(document).bind('load-smiplugins', function(event, smi) {
         $.ajax({
             url: smi.options.listing.configuration,
             async: false,
@@ -447,13 +487,19 @@
                             name: 'action.smilisting',
                             order: action.order,
                             render: function() {
-                                var link = $('<a class="action"></a>');
+                                var link = $('<a class="action ui-state-default"></a>');
 
                                 link.text(action.title);
                                 if (this.action != undefined) {
                                     link.bind('click', function() {
                                         this.action();
                                     }.scope(this));
+                                };
+                                if (action.icon) {
+                                    link.prepend(
+                                        '<ins class=" ui-icon  ui-icon-' +
+                                            action.icon +
+                                            '"></ins>');
                                 };
 
                                 this.content.append(link);
@@ -499,8 +545,14 @@
                                 };
                                 break;
                             case 'cut':
+                                definition['action'] = function () {
+                                    smi.clipboard.cut(this.data.data);
+                                };
                                 break;
                             case 'copy':
+                                definition['action'] = function () {
+                                    smi.clipboard.copy(this.data.data);
+                                };
                                 break;
                             };
                         };
@@ -520,6 +572,9 @@
                         // Disable text selection
                         this.content.disableTextSelect();
 
+                        // Bind clipboard info
+                        var clipboard_info = new SMIViewClipboard(this.content, this.smi.clipboard);
+
                         // Fill in header
                         var first_cfg = configuration.listing[0];
                         var header = this.content.find('div.header tr');
@@ -527,7 +582,8 @@
                             var cell = $('<th></th>');
 
                             if (!i) {
-                                cell.addClass('first');
+                                cell.addClass('ui-state-default');
+                                cell.append('<ins class="ui-icon ui-icon-triangle-2-n-s"></ins>');
                             };
                             if (first_cfg.sortable == column.name) {
                                 cell.addClass('dragHandle');

@@ -60,11 +60,22 @@
       </span>
     </p>
 
-    <p class="clipboard-info"
+    <div class="clipboard-info"
        i18n:translate="">
-      <span class="count"
-            i18n:name="count">0</span>
-      item(s) in the clipboard.
-    </p>
+      <ol class="actions">
+        <li>
+          <a class="action ui-state-default" id="clear-clipboard">
+            <ins class="ui-icon ui-icon-trash"></ins>
+            Clear clipboard
+          </a>
+        </li>
+      </ol>
+      <a class="stat ui-state-default">
+        <ins class="ui-icon ui-icon-triangle-1-n"></ins>
+        <span class="count"
+              i18n:name="count">0</span>
+        item(s) in the clipboard
+      </a>
+    </div>
   </div>
 </tal:listing>

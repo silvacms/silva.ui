@@ -7,7 +7,7 @@
         render: function(content, data) {
             var icon = $('<ins class="icon"></ins>');
 
-            if (data.icon.indexOf('.') == -1) {
+            if (data.icon.indexOf('.') < 0) {
                 icon.addClass(data.icon);
             } else {
                 icon.attr(
@@ -22,7 +22,7 @@
     obviel.view({
         iface: 'tabs',
         create: function(info) {
-            var tab = $('<li><a class="screen">' + info.name + '</a></li>');
+            var tab = $('<li><a class="screen ui-state-default">' + info.name + '</a></li>');
             var link = tab.children('a');
 
             link.attr('rel', info.action);
@@ -44,7 +44,7 @@
                     }.scope(this));
                     tab.addClass('openable');
                     tab.append(container);
-                    link.prepend('<ins class="icon"></ins>');
+                    link.prepend('<ins class="ui-icon ui-icon-triangle-1-s"></ins>');
                     container.bind('mouseleave', function() {
                         container.fadeOut();
                     });
@@ -66,21 +66,16 @@
         this.workspace = workspace;
         this.options = options;
         var url = jsontemplate.Template(options.url, {});
-        var loaded = false;
 
         // Disable text selection
         workspace.children('.info').disableTextSelect();
 
         // New workspace is loaded
-        workspace.bind('content.smi', function (event, data) {
+        workspace.bind('content-smi', function (event, data) {
             var workspace = $(this);
             var info = workspace.children('.info');
             var content = workspace.children('.content');
 
-            // Send an unload event
-            if (loaded) {
-                content.trigger('unload.smicontent');
-            };
             // Update header
             info.children('h3').render({data: data.metadata.title});
             info.children('.tabs').render({data: data.metadata.tabs});
@@ -89,8 +84,6 @@
 
             // Update content area
             content.render({data: data.content, name:'content', extra: {smi: smi}});
-
-            loaded = true;
         });
     };
 

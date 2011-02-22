@@ -4,7 +4,7 @@
 
     obviel.iface('editor');
 
-    $(document).bind('load.smiplugins', function(event, smi) {
+    $(document).bind('load-smiplugins', function(event, smi) {
         $.ajax({
             url: smi.options.editor.configuration,
             async: false,

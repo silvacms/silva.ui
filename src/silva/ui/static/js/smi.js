@@ -51,8 +51,8 @@
         iface: 'content',
         render: function() {
             this.smi.notifications.mark_as_seen();
-            this.smi._.workspace.trigger('content.smi', this.data);
-            this.smi._.navigation.trigger('content.smi', this.data);
+            this.smi._.workspace.trigger('content-smi', this.data);
+            this.smi._.navigation.trigger('content-smi', this.data);
             if (this.data.notifications) {
                 this.smi.notifications.notifies(this.data.notifications);
             }
@@ -157,7 +157,7 @@
         };
 
         // Bind the close event
-        notification.bind('close.notification', function() {
+        notification.bind('close-sminotification', function() {
             // Disable timeout if dialog is closed
             if (timer !== null) {
                 clearTimeout(timer);
@@ -173,11 +173,11 @@
 
         // Close and autoclose
         notification.bind('click', function() {
-            notification.trigger('close.notification');
+            notification.trigger('close-sminotification');
         });
         if(typeof message.autoclose == 'number') {
             timer = setTimeout(function() {
-                notification.trigger('close.notification');
+                notification.trigger('close-sminotification');
             }, message.autoclose);
         };
 
@@ -195,7 +195,7 @@
         this.container = $(options.selector);
 
         // Listen to pull notification events.
-        $(document).bind('refresh-feedback.smi', function() {
+        $(document).bind('refresh-feedback-smi', function() {
             $.getJSON(options.url, function(messages) {
                 this.notifies(messages);
             }.scope(this));
@@ -224,22 +224,27 @@
      * Mark all notifications as seen.
      */
     NotificationManager.prototype.mark_as_seen = function() {
-        this.container.children().trigger('close.notification');
+        this.container.children().trigger('close-sminotification');
     };
 
     /**
      * Clipboard used for listing content.
      */
     var ClipBoard = function () {
-        this.clear();
+        this.clear(true);
     };
 
     /**
      * Clear the clipboard.
      */
-    ClipBoard.prototype.clear = function() {
+    ClipBoard.prototype.clear = function(no_event) {
         this.cutted = [];
+        this._cutted_ids = [];
         this.copied = [];
+        this._copied_ids = [];
+        if (!no_event) {
+            $('body').trigger('contentchange-smiclipboard');
+        };
     };
 
     /**
@@ -247,8 +252,13 @@
      * @param items: Cutted items.
      */
     ClipBoard.prototype.cut = function(items) {
-        this.cutted = this.cutted.concat(items);
-        $('body').trigger('contentchange.smiclipboard');
+        $.each(items, function(i, item) {
+            if (this._cutted_ids.indexOf(item.id) < 0) {
+                this._cutted_ids.push(item.id);
+                this.cutted.push(item);
+            };
+        }.scope(this));
+        $('body').trigger('contentchange-smiclipboard');
     };
 
     /**
@@ -256,8 +266,13 @@
      * @param items: Copied items.
      */
     ClipBoard.prototype.copy = function(items) {
-        this.copied = this.copied.concat(items);
-        $('body').trigger('contentchange.smiclipboard');
+        $.each(items, function(i, item) {
+            if (!this._copied_ids.indexOf(item.id) < 0) {
+                this._copied_ids.push(item.id);
+                this.copied.push(item);
+            };
+        }.scope(this));
+        $('body').trigger('contentchange-smiclipboard');
     };
 
     /**
@@ -298,11 +313,11 @@
                 navigation.addClass('highlight');
                 workspace.addClass('highlight');
                 if (e.keyCode == 37) {
-                    workspace.trigger('blur.smi');
-                    navigation.trigger('focus.smi');
+                    workspace.trigger('blur-smi');
+                    navigation.trigger('focus-smi');
                 } else if (e.keyCode == 39) {
-                    navigation.trigger('blur.smi');
-                    workspace.trigger('focus.smi');
+                    navigation.trigger('blur-smi');
+                    workspace.trigger('focus-smi');
                 }
             }
         });
@@ -314,8 +329,8 @@
         });
 
         // By default, navigation is blue and workspace is focus
-        navigation.trigger('blur.smi');
-        workspace.trigger('focus.smi');
+        navigation.trigger('blur-smi');
+        workspace.trigger('focus-smi');
 
         var process_hash = function(hash) {
             var parts = HASH_REGEXP.exec(hash);
@@ -339,13 +354,7 @@
 
         // Bind event to open new tab
         $(document).delegate('a.screen', 'click', function(event) {
-            var link = $(event.target);
-            var path = link.attr('href');
-
-            if (!path) {
-                path = this.opened.path;
-            }
-            this.open(path, link.attr('rel'));
+            this.open_link($(event.target));
             return false;
         }.scope(this));
 
@@ -355,7 +364,7 @@
         }.scope(this));
 
         // Plugins initialization
-        $(document).trigger('load.smiplugins', this);
+        $(document).trigger('load-smiplugins', this);
 
         // Open the current location.
         process_hash(document.location.hash);
@@ -373,6 +382,19 @@
             tab = 'content';
         };
         document.location.hash = tab + '!' + path;
+    };
+
+    /**
+     * Open a content tab by reading the given link information.
+     * @param link: link containing information to open the content tab.
+     */
+    SMI.prototype.open_link = function(link) {
+        var path = link.attr('href');
+
+        if (!path) {
+            path = this.opened.path;
+        };
+        this.open(path, link.attr('rel'));
     };
 
     /**

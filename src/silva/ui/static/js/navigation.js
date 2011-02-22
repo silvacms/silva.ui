@@ -107,7 +107,7 @@
         });
 
         // If a content is selected, try to select its container
-        navigation.bind('content.smi', function (event, data) {
+        navigation.bind('content-smi', function (event, data) {
             uncollapse(data.navigation.parents);
         });
     };
