@@ -245,8 +245,10 @@
 
     /**
      * Clipboard used for listing content.
+     * @param notification: notification manage used to send notifications.
      */
     var ClipBoard = function(notifications) {
+        this.ifaces = ['clipboard'];
         this.notifications = notifications;
         this.clear(true);
     };

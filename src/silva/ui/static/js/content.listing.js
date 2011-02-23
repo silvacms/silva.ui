@@ -108,9 +108,9 @@
                 };
                 for (var limiter in action.available) {
                     switch(limiter) {
-                    case 'max_selected':
+                    case 'max_items':
                         definition['available'] = function() {
-                            return this.data.length <= action.available.max_selected;
+                            return this.data.length() <= action.available.max_items;
                         };
                     };
                 };
@@ -118,11 +118,11 @@
                     switch(action_type) {
                     case 'rest':
                         definition['action'] = function() {
-                            var url = template_url.expand({
+                            var url = url_template.expand({
                                 path: this.smi.opened.path,
-                                action: action.rest.action});
+                                action: action.action.rest.action});
                             var payload = [];
-                            switch(action.rest.send) {
+                            switch(action.action.rest.send) {
                             case 'selected_ids':
                                 $.each(this.data.data, function(i, item) {
                                     payload.push({name: 'content', value: item.id});
@@ -231,18 +231,25 @@
      * View clipboard data.
      * @param container: container containing the info hook.
      */
-    var SMIViewClipboard = function(container, clipboard) {
+    var SMIViewClipboard = function(container, smi) {
         var content = container.find('.clipboard-info');
         var actions = content.children('.actions');
         var info = content.children('.stat');
         var count = info.find('.count');
 
         // Set default clipboard count on creation
-        count.text(clipboard.length().toString());
+        count.text(smi.clipboard.length().toString());
+
+        // Render actions
+        actions.children('li:first').render({
+            every: smi.clipboard,
+            name: 'clipboardaction.smilisting',
+            extra: {smi: smi}});
+
 
         // Update count when clipboard is changed
         $('body').bind('contentchange-smiclipboard', function() {
-            count.text(clipboard.length().toString());
+            count.text(smi.clipboard.length().toString());
         });
 
         // Show actions when you click on the info.
@@ -253,12 +260,6 @@
         actions.bind('mouseleave', function() {
             actions.fadeOut();
         });
-
-        // Bind clear button
-        actions.find('#clear-clipboard').bind('click', function() {
-            clipboard.clear();
-        });
-
     };
 
     /**
@@ -306,7 +307,6 @@
         this.listing = listing;
         this.items = items;
 
-        this.length = items.length;
         this.ifaces = [];
         this.data = [];
 
@@ -320,6 +320,13 @@
             };
             this.data.push(local_data);
         }.scope(this));
+    };
+
+    /**
+     * Return the size of the selection
+     */
+    SMISelection.prototype.length = function() {
+        return this.items.length;
     };
 
     /**
@@ -620,7 +627,14 @@
             dataType: 'json',
             success:function(configuration) {
                 var action_url = jsontemplate.Template(smi.options.listing.action, {});
-                register_action_buttons(configuration.actions, action_url, 'action.smilisting');
+                register_action_buttons(
+                    configuration.actions,
+                    action_url,
+                    'action.smilisting');
+                register_action_buttons(
+                    configuration.clipboard_actions,
+                    action_url,
+                    'clipboardaction.smilisting');
 
                 obviel.view({
                     iface: 'listing',
@@ -635,7 +649,7 @@
                         this.content.disableTextSelect();
 
                         // Bind clipboard info
-                        var clipboard_info = new SMIViewClipboard(this.content, this.smi.clipboard);
+                        var clipboard_info = new SMIViewClipboard(this.content, this.smi);
 
                         // Fill in header
                         var first_cfg = configuration.listing[0];

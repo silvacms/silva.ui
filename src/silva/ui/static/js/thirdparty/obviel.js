@@ -321,6 +321,9 @@ var obviel = {};
         var views = module._views[args.name];
         var to_render = [];
 
+        if (views == undefined) {
+            return;
+        };
         $.each(ifaces, function (i, iface) {
             var definitions = views[iface];
             if (definitions) {

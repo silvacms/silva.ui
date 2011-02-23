@@ -17,6 +17,7 @@ from silva.ui.icon import get_icon
 from silva.ui.rest.base import PageREST, UIREST
 from silva.translations import translate as _
 
+from Acquisition import aq_parent
 from Products.SilvaMetadata.interfaces import IMetadataService
 from zExceptions import NotFound
 
@@ -112,7 +113,7 @@ class ColumnsContainerListing(UIREST):
                     {'title': self.translate(_(u'Rename')),
                      'icon': 'pencil',
                      'order': 10,
-                     'available': {'max_selected': 1},
+                     'available': {'max_items': 1},
                      'ifaces': ['content']},
                     {'title': self.translate(_(u'Publish')),
                      'icon': 'check',
@@ -132,6 +133,25 @@ class ColumnsContainerListing(UIREST):
                      'action': {'rest': {'action': 'delete',
                                          'send': 'selected_ids'}},
                      'ifaces': ['content']},
+                    ],
+                'clipboard_actions': [
+                    {'title': self.translate(_(u'Paste')),
+                     'icon': 'clipboard',
+                     'order': 6,
+                     'action': {'rest': {'action': 'paste',
+                                         'send': 'clipboard_ids'}},
+                     'ifaces': ['clipboard']},
+                    {'title': self.translate(_(u'Paste as Ghost')),
+                     'icon': 'link',
+                     'order': 7,
+                     'action': {'rest': {'action': 'pasteasghost',
+                                         'send': 'clipboard_ids'}},
+                     'ifaces': ['clipboard']},
+                    {'title': self.translate(_(u'Clear clipboard')),
+                     'icon': 'trash',
+                     'order': 8,
+                     'action': {'clear_clipboard': True},
+                     'ifaces': ['clipboard']},
                     ]})
 
 
@@ -166,6 +186,56 @@ def content_ifaces(content):
     return ifaces
 
 
+class ContentSerializer(object):
+    """Serialize content information into to be JSON.
+    """
+
+    def __init__(self, rest, request):
+        self.rest = rest
+        self.request = request
+        self.intids = getUtility(IIntIds)
+        self.metadata = getUtility(IMetadataService)
+
+    def get_data(self, content):
+        data = {
+            'ifaces': content_ifaces(content),
+            'id': self.intids.register(content)}
+        return data
+
+    def get_columns(self, content):
+        path = self.rest.get_content_path(content)
+        previewable = content.get_previewable()
+        content_metadata = self.metadata.getMetadata(previewable)
+        columns = {
+            "icon": {
+                "ifaces": ["icon"],
+                "value": get_icon(content, self.request)},
+            "title": {
+                "ifaces": ["action"],
+                "value": previewable.get_title_or_id(),
+                "path": path,
+                "action": "content"},
+            "author": {
+                "ifaces": ["action"],
+                "value": content_metadata.get('silva-extra', 'lastauthor'),
+                "path": path,
+                "action": "properties"},
+            "modified": {
+                "ifaces": ["text"],
+                "value": format_date(
+                    content_metadata.get('silva-extra', 'modificationtime'))}}
+        if interfaces.IPublishable.providedBy(content):
+            columns['status'] = {
+                "ifaces": ["workflow"],
+                "value": get_content_status(content)}
+        return columns
+
+    def __call__(self, content):
+        return {
+            "data": self.get_data(content),
+            "columns": self.get_columns(content)}
+
+
 class ContainerListing(PageREST):
     grok.context(interfaces.IContainer)
     grok.name('silva.ui.content')
@@ -186,72 +256,11 @@ class ContainerListing(PageREST):
         for content in self.context.get_non_publishables():
             yield content
 
-    def get_content_data(self, intids, content):
-        return {
-            'ifaces': content_ifaces(content),
-            'id': intids.register(content)}
-
     def payload(self):
-        publishables = []
-        intids = getUtility(IIntIds)
-        metadata = getUtility(IMetadataService)
-        for entry in self.get_publishable_content():
-            path = self.get_content_path(entry)
-            content = entry.get_previewable()
-            content_metadata = metadata.getMetadata(content)
-            publishables.append({
-                    "data": self.get_content_data(intids, entry),
-                    "columns": {
-                        "status": {
-                            "ifaces": ["workflow"],
-                            "value": get_content_status(entry)},
-                        "icon": {
-                            "ifaces": ["icon"],
-                            "value": get_icon(entry, self.request)},
-                        "title": {
-                            "ifaces": ["action"],
-                            "value": entry.get_title_or_id(),
-                            "path": path,
-                            "action": "content"},
-                        "author": {
-                            "ifaces": ["action"],
-                            "value": content_metadata.get(
-                                'silva-extra', 'lastauthor'),
-                            "path": path,
-                            "action": "properties"},
-                        "modified": {
-                            "ifaces": ["text"],
-                            "value": format_date(content_metadata.get(
-                                    'silva-extra', 'modificationtime'))}
-                        }})
-        assets = []
-        for entry in self.get_non_publishable_content():
-            path = self.get_content_path(entry)
-            asset_metadata = metadata.getMetadata(entry)
-            assets.append({
-                    "data": self.get_content_data(intids, entry),
-                    "columns": {
-                        "icon": {
-                            "ifaces": ["icon"],
-                            "value": get_icon(entry, self.request)},
-                        "title": {
-                            "ifaces": ["action"],
-                            "value": entry.get_title_or_id(),
-                            "path": path,
-                            "action": "content"},
-                        "author": {
-                            "ifaces": ["action"],
-                            "value": asset_metadata.get('silva-extra', 'lastauthor'),
-                            "path": path,
-                            "action": "properties"},
-                        "modified": {
-                            "ifaces": ["text"],
-                            "value": format_date(asset_metadata.get(
-                                    'silva-extra', 'modificationtime'))}
-                        }})
+        serializer = ContentSerializer(self, self.request)
         return {"ifaces": ["listing"],
-                "publishables": publishables,
-                "assets": assets}
+                "publishables": map(serializer, self.get_publishable_content()),
+                "assets": map(serializer, self.get_non_publishable_content())}
 
 
 class ActionREST(UIREST):
@@ -261,8 +270,8 @@ class ActionREST(UIREST):
     grok.context(interfaces.IContainer)
     grok.require('silva.ChangeSilvaContent')
 
-    def get_selected_content(self):
-        content = self.request.form.get('content')
+    def get_selected_content(self, key='content'):
+        content = self.request.form.get(key)
         if content is not None:
             intids = getUtility(IIntIds)
             if not isinstance(content, list):
@@ -313,18 +322,25 @@ class DeleteActionREST(ActionREST):
 
     def payload(self):
         removed = []
+        to_remove = []
         removed_titles = []
         kept = []
         kept_titles = []
+
+        # Collect information
         for intid, content in self.get_selected_content():
             if content.is_deletable():
                 removed.append(intid)
                 removed_titles.append(content.get_title_or_id())
-                self.context.manage_delObjects([content.getId()])
+                to_remove.append(content.getId())
             else:
                 kept.append(intid)
                 kept_titles.append(content.get_title_or_id())
 
+        # Remove objects
+        self.context.manage_delObjects(to_remove)
+
+        # Compute notification message
         elements = self.get_notification_elements
         if removed_titles:
             if kept_titles:
@@ -341,3 +357,41 @@ class DeleteActionREST(ActionREST):
                 _(u'Could not delete ${not_deleted}.',
                   mapping={'not_deleted': elements(kept_titles)}))
         return {'remove': removed}
+
+
+class PasteActionREST(ActionREST):
+    grok.name('silva.ui.listing.paste')
+
+    def payload(self):
+        target = self.context
+        tokens = []
+        copied_titles = []
+        moved_titles = []
+        pasted = []
+        serializer = ContentSerializer(self, self.request)
+
+        # Zope 2 API to copy and paster is not really great for this
+        for intid, content in self.get_selected_content('copied'):
+            parent = aq_parent(content)
+            tokens.append(parent.manage_copyObjects([content.getId()]))
+            copied_titles.append(content.get_title_or_id())
+        for intid, content in self.get_selected_content('cutted'):
+            parent = aq_parent(content)
+            tokens.append(parent.manage_cutObjects([content.getId()]))
+            moved_titles.append(content.get_title_or_id())
+        for token in tokens:
+            for id_info in target.manage_pasteObjects(token):
+                pasted.append(serializer(target[id_info['new_id']]))
+
+        # Notifications
+        elements = self.get_notification_elements
+        if copied_titles:
+            self.notify(
+                _(u'Pasted as a copy ${copied}.',
+                  mapping={'copied': elements(copied_titles)}))
+        if copied_titles:
+            self.notify(
+                _(u'Moved ${moved}.',
+                  mapping={'moved': elements(moved_titles)}))
+
+        return {'append': pasted}
