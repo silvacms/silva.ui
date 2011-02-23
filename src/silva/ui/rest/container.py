@@ -79,11 +79,11 @@ class ColumnsContainerListing(UIREST):
                              'view': 'workflow'},
                             {'name': 'identifier',
                              'caption': self.translate(_(u'Identifier')),
-                             'view': 'text'},
-                            {'name': 'title',
-                             'caption': self.translate(_(u'Title')),
                              'view': 'action',
                              'action': 'content'},
+                            {'name': 'title',
+                             'caption': self.translate(_(u'Title')),
+                             'view': 'text'},
                             {'name': 'author',
                              'caption': self.translate(_(u'Author')),
                              'view': 'action',
@@ -99,11 +99,11 @@ class ColumnsContainerListing(UIREST):
                              'view': 'icon'},
                             {'name': 'identifier',
                              'caption': self.translate(_(u'Identifier')),
-                             'view': 'text'},
-                            {'name': 'title',
-                             'caption': self.translate(_(u'Title')),
                              'view': 'action',
                              'action': 'content'},
+                            {'name': 'title',
+                             'caption': self.translate(_(u'Title')),
+                             'view': 'text'},
                             {'name': 'author',
                              'caption': self.translate(_(u'Author')),
                              'view': 'action',
@@ -228,7 +228,7 @@ class ContentSerializer(object):
             'author': content_metadata.get('silva-extra', 'lastauthor'),
             'modified': format_date(content_metadata.get('silva-extra', 'modificationtime'))}
         if interfaces.IPublishable.providedBy(content):
-            data['status'] =get_content_status(content)
+            data['status'] = get_content_status(content)
         return data
 
 
@@ -282,25 +282,6 @@ class ActionREST(UIREST):
     def payload(self):
         raise NotImplementedError
 
-    def get_notification_elements(self, elements):
-
-        def quotify(element):
-            return '"%s"' % element
-
-        count = len(elements)
-        if count == 1:
-            return quotify(elements[0])
-        if count > 4:
-            what = _(
-                '${count} contents',
-                mapping={'count': count})
-        else:
-            what = _(
-                '${contents} and ${content}',
-                mapping={'contents': ', '.join(map(quotify, elements[:-1])),
-                         'content': quotify(elements[-1])})
-        return self.translate(what)
-
     def notify(self, message, type=u""):
         service = getUtility(IMessageService)
         service.send(message, self.request, namespace=type)
@@ -313,45 +294,82 @@ class ActionREST(UIREST):
                 'notifications': self.get_notifications()})
 
 
+class ContentCounter(object):
+    """Report a sentance a number of content.
+    """
+    MAX_TITLES = 4
+
+    def __init__(self, rest):
+        self.rest = rest
+        self.size = 0
+        self.titles = []
+
+    def append(self, content):
+        if not (self.size > self.MAX_TITLES):
+            previewable = content.get_previewable()
+            self.titles.append(previewable.get_title_or_id())
+        self.size += 1
+
+    def __len__(self):
+        return self.size
+
+    def __unicode__(self):
+
+        def quotify(element):
+            return u'"%s"' % element
+
+        if self.size == 1:
+            return quotify(self.titles[0])
+        if self.size > 4:
+            what = _(
+                u'${count} contents',
+                mapping={'count': self.size})
+        else:
+            what = _(
+                u'${contents} and ${content}',
+                mapping={'contents': ', '.join(map(quotify, self.titles[:-1])),
+                         'content': quotify(self.titles[-1])})
+        return self.rest.translate(what)
+
+
 class DeleteActionREST(ActionREST):
     grok.name('silva.ui.listing.delete')
 
     def payload(self):
         removed = []
         to_remove = []
-        removed_titles = []
+        removed_titles = ContentCounter(self)
         kept = []
-        kept_titles = []
+        kept_titles = ContentCounter(self)
 
         # Collect information
         for intid, content in self.get_selected_content():
             if content.is_deletable():
                 removed.append(intid)
-                removed_titles.append(content.get_title_or_id())
+                removed_titles.append(content)
                 to_remove.append(content.getId())
             else:
                 kept.append(intid)
-                kept_titles.append(content.get_title_or_id())
+                kept_titles.append(content)
 
         # Remove objects
         self.context.manage_delObjects(to_remove)
 
         # Compute notification message
-        elements = self.get_notification_elements
         if removed_titles:
             if kept_titles:
                 self.notify(
                     _(u'Deleted ${deleted} but could not delete ${not_deleted}.',
-                      mapping={'deleted': elements(removed_titles),
-                               'not_deleted': elements(kept_titles)}))
+                      mapping={'deleted': removed_titles,
+                               'not_deleted': kept_titles}))
             else:
                 self.notify(
                     _(u'Deleted ${deleted}.',
-                      mapping={'deleted': elements(removed_titles)}))
+                      mapping={'deleted': removed_titles}))
         else:
             self.notify(
                 _(u'Could not delete ${not_deleted}.',
-                  mapping={'not_deleted': elements(kept_titles)}))
+                  mapping={'not_deleted': kept_titles}))
         return {'remove': removed}
 
 
@@ -361,33 +379,94 @@ class PasteActionREST(ActionREST):
     def payload(self):
         target = self.context
         tokens = []
-        copied_titles = []
-        moved_titles = []
-        pasted = []
+        copied_titles = ContentCounter(self)
+        moved_titles = ContentCounter(self)
+        pasted_publishables = []
+        pasted_assets = []
         serializer = ContentSerializer(self, self.request)
 
         # Zope 2 API to copy and paster is not really great for this
         for intid, content in self.get_selected_content('copied'):
             parent = aq_parent(content)
             tokens.append(parent.manage_copyObjects([content.getId()]))
-            copied_titles.append(content.get_title_or_id())
+            copied_titles.append(content)
         for intid, content in self.get_selected_content('cutted'):
             parent = aq_parent(content)
             tokens.append(parent.manage_cutObjects([content.getId()]))
-            moved_titles.append(content.get_title_or_id())
+            moved_titles.append(content)
         for token in tokens:
             for id_info in target.manage_pasteObjects(token):
-                pasted.append(serializer(target[id_info['new_id']]))
+                content = target[id_info['new_id']]
+                if interfaces.IPublishable.providedBy(content):
+                    pasted_publishables.append(serializer(content))
+                elif interfaces.INonPublishable.providedBy(content):
+                    pasted_assets.append(serializer(content))
 
         # Notifications
-        elements = self.get_notification_elements
         if copied_titles:
             self.notify(
                 _(u'Pasted as a copy ${copied}.',
-                  mapping={'copied': elements(copied_titles)}))
+                  mapping={'copied': copied_titles}))
         if copied_titles:
             self.notify(
                 _(u'Moved ${moved}.',
-                  mapping={'moved': elements(moved_titles)}))
+                  mapping={'moved': moved_titles}))
 
-        return {'append': pasted}
+        # Response
+        append = {}
+        if pasted_publishables:
+            append['publishables'] = pasted_publishables
+        if pasted_assets:
+            append['assets'] = pasted_assets
+        if append:
+            return {'append': append}
+        return {}
+
+
+class PublishActionREST(ActionREST):
+    grok.name('silva.ui.listing.publish')
+
+    def payload(self):
+        published = []
+        published_titles = ContentCounter(self)
+        serializer = ContentSerializer(self, self.request)
+
+        for intid, content in self.get_selected_content():
+            workflow = interfaces.IPublicationWorkflow(content, None)
+            if workflow is not None:
+                workflow.approve()
+                published.append(serializer(content))
+                published_titles.append(content)
+
+        # Notifications
+        if published_titles:
+            self.notify(
+                _(u'Published ${published}.',
+                  mapping={'published': published_titles}))
+
+        return {'update': published}
+
+
+class CloseActionREST(ActionREST):
+    grok.name('silva.ui.listing.close')
+
+    def payload(self):
+        closed = []
+        closed_titles = ContentCounter(self)
+        serializer = ContentSerializer(self, self.request)
+
+        for intid, content in self.get_selected_content():
+            workflow = interfaces.IPublicationWorkflow(content, None)
+            if workflow is not None:
+                workflow.close()
+                closed.append(serializer(content))
+                closed_titles.append(content)
+
+        # Notifications
+        if closed_titles:
+            self.notify(
+                _(u'Closed ${closed}.',
+                  mapping={'closed': closed_titles}))
+
+        return {'update': closed}
+

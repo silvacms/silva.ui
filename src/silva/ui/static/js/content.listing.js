@@ -49,9 +49,10 @@
         name: 'workflow',
         render: function(content, data) {
             var icon = $('<ins class="state"></ins>');
+            var value = data[this.column.name];
 
-            if (data.value) {
-                icon.addClass(data[this.column.name]);
+            if (value) {
+                icon.addClass(value);
             }
             content.append(icon);
         }
@@ -145,7 +146,10 @@
                                     for (var post_action in result.post_actions) {
                                         switch(post_action) {
                                         case 'remove':
-                                            this.listing.remove_lines(result.post_actions.remove);
+                                            this.data.remove(result.post_actions.remove);
+                                            break;
+                                        case 'update':
+                                            this.data.update(result.post_actions.update);
                                             break;
                                         };
                                     };
@@ -329,6 +333,20 @@
     };
 
     /**
+     * Update some selected items.
+     */
+    SMISelection.prototype.update = function(items) {
+        this.listing.update_lines(items);
+    };
+
+    /**
+     * Remove some items associated to the selection
+     */
+    SMISelection.prototype.remove = function(items) {
+        this.listing.remove_lines(items);
+    };
+
+    /**
      * Close the current selection (unselect it).
      */
     SMISelection.prototype.close = function() {
@@ -348,8 +366,7 @@
             cell.render({
                 every: selection,
                 name: 'action.smilisting',
-                extra: {listing: listing,
-                        smi: listing.smi}});
+                extra: {smi: listing.smi}});
         };
 
         this.listing.container.bind('selectionchange-smilisting', function(event, changes) {
@@ -419,13 +436,6 @@
             this.header.addClass('collapsed');
             content.addClass('collapsed');
             this.header.trigger('collapsingchange-smilisting');
-            this.header.one('collapsingchange-smilisting', function() {
-                // On the first display, add the data.
-                this.add_lines(data);
-            }.scope(this));
-        } else {
-            // We are not collapsed, add data now.
-            this.add_lines(data);
         };
         this.header.bind('click', function() {
             this.header.toggleClass('collapsed');
@@ -494,6 +504,8 @@
             });
         };
 
+        // Add default data
+        this.new_lines(data);
     };
 
     /**
@@ -508,7 +520,21 @@
     };
 
     /**
-     * Add a list of lines to the listing.
+     * Add a list of lines later one.
+     */
+    SMIListing.prototype.new_lines = function(data) {
+        if (this.header.is('.collapsed')) {
+            this.header.one('collapsingchange-smilisting', function() {
+                // On first next display, add the data.
+                this.add_lines(data);
+            }.scope(this));
+        } else {
+            this.add_lines(data);
+        };
+    };
+
+    /**
+     * Imediately add a list of lines to the listing.
      * @param data: list of line data
      */
     SMIListing.prototype.add_lines = function(data) {
@@ -561,14 +587,49 @@
 
     /**
      * Return the line associated to the given id.
-     * @param id: Line id
+     * @param id: line id
      */
     SMIListing.prototype.get_line = function(id) {
         return this.container.children('#list' + id.toString());
     };
 
     /**
-     * Remove a list of lines from their ids.
+     * Update a list of lines.
+     * @param data: list of data for each line to update.
+     */
+    SMIListing.prototype.update_lines = function(data) {
+        $.each(data, function(i, line) {
+            this.update_line(line['id'], line);
+        }.scope(this));
+    };
+
+    /**
+     * Update a line with more recent data.
+     * @param id: line id to update
+     * @param data: data to update the line with
+     */
+    SMIListing.prototype.update_line = function(id, data) {
+        var line = this.get_line(id);
+
+        line.children().each(function(i, content) {
+            var cell = $(content);
+            var column = this.configuration.columns[i];
+
+            if (this.configuration.sortable == column.name) {
+                cell.addClass('dragHandle');
+            };
+            listingcolumns.render(cell, {
+                data: data,
+                name: column.view,
+                extra: {smi: this.smi,
+                        column: column}});
+        }.scope(this));
+        line.data('smilisting', data);
+    };
+
+    /**
+     * Remove a list of lines.
+     * @param ids: list of id of lines to remove.
      */
     SMIListing.prototype.remove_lines = function(ids) {
         var is_selection_changed = false;
