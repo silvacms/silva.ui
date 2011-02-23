@@ -73,25 +73,44 @@ class ColumnsContainerListing(UIREST):
                 'listing': [
                     {'name': 'publishables',
                      'columns': [
-                            {'name': 'icon'},
-                            {'name': 'status'},
+                            {'name': 'icon',
+                             'view': 'icon'},
+                            {'name': 'status',
+                             'view': 'workflow'},
+                            {'name': 'identifier',
+                             'caption': self.translate(_(u'Identifier')),
+                             'view': 'text'},
                             {'name': 'title',
-                             'caption': self.translate(_(u'Title')),},
+                             'caption': self.translate(_(u'Title')),
+                             'view': 'action',
+                             'action': 'content'},
                             {'name': 'author',
-                             'caption': self.translate(_(u'Author')),},
+                             'caption': self.translate(_(u'Author')),
+                             'view': 'action',
+                             'action': 'properties'},
                             {'name': 'modified',
-                             'caption': self.translate(_(u'Modified')),}],
+                             'caption': self.translate(_(u'Modified')),
+                             'view': 'text'}],
                      'sortable': 'icon',
                      'collapsed': False},
                     {'name': 'assets',
                      'columns': [
-                            {'name': 'icon',},
+                            {'name': 'icon',
+                             'view': 'icon'},
+                            {'name': 'identifier',
+                             'caption': self.translate(_(u'Identifier')),
+                             'view': 'text'},
                             {'name': 'title',
-                             'caption': self.translate(_(u'Title')),},
+                             'caption': self.translate(_(u'Title')),
+                             'view': 'action',
+                             'action': 'content'},
                             {'name': 'author',
-                             'caption': self.translate(_(u'Author')),},
+                             'caption': self.translate(_(u'Author')),
+                             'view': 'action',
+                             'action': 'properties'},
                             {'name': 'modified',
-                             'caption': self.translate(_(u'Modified')),}],
+                             'caption': self.translate(_(u'Modified')),
+                             'view': 'text'}],
                      'collapsed': True},],
                 'actions': [
                     {'title': self.translate(_(u'Cut')),
@@ -196,44 +215,21 @@ class ContentSerializer(object):
         self.intids = getUtility(IIntIds)
         self.metadata = getUtility(IMetadataService)
 
-    def get_data(self, content):
-        data = {
-            'ifaces': content_ifaces(content),
-            'id': self.intids.register(content)}
-        return data
-
-    def get_columns(self, content):
-        path = self.rest.get_content_path(content)
+    def __call__(self, content):
         previewable = content.get_previewable()
         content_metadata = self.metadata.getMetadata(previewable)
-        columns = {
-            "icon": {
-                "ifaces": ["icon"],
-                "value": get_icon(content, self.request)},
-            "title": {
-                "ifaces": ["action"],
-                "value": previewable.get_title_or_id(),
-                "path": path,
-                "action": "content"},
-            "author": {
-                "ifaces": ["action"],
-                "value": content_metadata.get('silva-extra', 'lastauthor'),
-                "path": path,
-                "action": "properties"},
-            "modified": {
-                "ifaces": ["text"],
-                "value": format_date(
-                    content_metadata.get('silva-extra', 'modificationtime'))}}
+        data = {
+            'ifaces': content_ifaces(content),
+            'id': self.intids.register(content),
+            'identifier': content.getId(),
+            'path': self.rest.get_content_path(content),
+            'icon': get_icon(content, self.request),
+            'title': previewable.get_title_or_id(),
+            'author': content_metadata.get('silva-extra', 'lastauthor'),
+            'modified': format_date(content_metadata.get('silva-extra', 'modificationtime'))}
         if interfaces.IPublishable.providedBy(content):
-            columns['status'] = {
-                "ifaces": ["workflow"],
-                "value": get_content_status(content)}
-        return columns
-
-    def __call__(self, content):
-        return {
-            "data": self.get_data(content),
-            "columns": self.get_columns(content)}
+            data['status'] =get_content_status(content)
+        return data
 
 
 class ContainerListing(PageREST):

@@ -268,16 +268,18 @@ var obviel = {};
         var views = this._views[args.name];
         var to_render = null;
 
-        for (var i=0; i < ifaces.length; i++) {
-            var definitions = views[ifaces[i]];
-            if (definitions && definitions.length) {
-                var view_definition = {};
-                $.extend(view_definition, definitions[0]);
-                if (args.extra) {
-                    $.extend(view_definition, args.extra);
+        if (views) {
+            for (var i=0; i < ifaces.length; i++) {
+                var definitions = views[ifaces[i]];
+                if (definitions && definitions.length) {
+                    var view_definition = {};
+                    $.extend(view_definition, definitions[0]);
+                    if (args.extra) {
+                        $.extend(view_definition, args.extra);
+                    };
+                    to_render = new module.View(view_definition, element, data);
+                    break;
                 };
-                to_render = new module.View(view_definition, element, data);
-                break;
             };
         };
         if (to_render != null) {

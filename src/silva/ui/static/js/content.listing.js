@@ -1,16 +1,17 @@
 
 
-(function($) {
+(function($, obviel) {
 
     // Define columns renderers
-    obviel.view({
-        iface: 'action',
-        name: 'column.smilisting',
+    var listingcolumns = new obviel.Registry();
+
+    listingcolumns.register({
+        name: 'action',
         render: function(content, data) {
             var link = $('<a class="content-screen"></a>');
 
-            link.text(data.value);
-            link.attr('rel', data.action);
+            link.text(data[this.column.name]);
+            link.attr('rel', this.column.action);
             link.attr('href', data.path);
             link.bind('click', function(event) {
                 this.smi.open_link(link);
@@ -20,39 +21,37 @@
         }
     });
 
-    obviel.view({
-        iface: 'text',
-        name: 'column.smilisting',
+    listingcolumns.register({
+        name: 'text',
         render: function(content, data) {
-            content.text(data.value);
+            content.text(data[this.column.name]);
         }
     });
 
-    obviel.view({
-        iface: 'icon',
-        name: 'column.smilisting',
+    listingcolumns.register({
+        name: 'icon',
         render: function(content, data) {
             var icon = $('<ins class="icon"></ins>');
+            var value = data[this.column.name];
 
-            if (data.value.indexOf('.') < 0) {
-                icon.addClass(data.value);
+            if (value.indexOf('.') < 0) {
+                icon.addClass(value);
             } else {
                 icon.attr(
                     'style',
-                    'background:url(' + data.value + ') no-repeat center center;');
+                    'background:url(' + value + ') no-repeat center center;');
             }
             content.append(icon);
         }
     });
 
-    obviel.view({
-        iface: 'workflow',
-        name: 'column.smilisting',
+    listingcolumns.register({
+        name: 'workflow',
         render: function(content, data) {
             var icon = $('<ins class="state"></ins>');
 
             if (data.value) {
-                icon.addClass(data.value);
+                icon.addClass(data[this.column.name]);
             }
             content.append(icon);
         }
@@ -490,10 +489,7 @@
                     // XXX Send new order to server
                     //$("#SMIContents_rows").setClassSequence();
                     $(table).addClass('static');
-                    // If you drag a selected row, trigger selection change
-                    if ($(row).is('.selected')) {
-                        this.trigger('selectionchange-smilisting');
-                    };
+                    this.trigger('selectionchange-smilisting');
                 }.scope(this)
             });
         };
@@ -551,14 +547,15 @@
             if (this.configuration.sortable == column.name) {
                 cell.addClass('dragHandle');
             };
-            cell.render({
-                data: data.columns[column.name],
-                name: 'column.smilisting',
-                extra: {smi: this.smi}});
+            listingcolumns.render(cell, {
+                data: data,
+                name: column.view,
+                extra: {smi: this.smi,
+                        column: column}});
             line.append(cell);
         }.scope(this));
-        line.attr('id', 'list' + data.data['id'].toString());
-        line.data('smilisting', data.data);
+        line.attr('id', 'list' + data['id'].toString());
+        line.data('smilisting', data);
         this.container.append(line);
     };
 
