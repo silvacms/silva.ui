@@ -23,6 +23,22 @@
     });
 })(jQuery);
 
+(function ($) {
+    $(document).ready(function(){
+        // jQueryUI styling: this changes icon style on hover
+        $('a.ui-state-default').live('mouseenter', function() {
+            var context = $(this);
+            context.removeClass('ui-state-default');
+            context.addClass('ui-state-active');
+        });
+        $('a.ui-state-active').live('mouseleave', function() {
+            var context = $(this);
+            context.removeClass('ui-state-active');
+            context.addClass('ui-state-default');
+        });
+    });
+})(jQuery);
+
 
 (function($, obviel, shortcut) {
     var HASH_REGEXP = /#([^!]*)!?(.*)/;
@@ -230,7 +246,8 @@
     /**
      * Clipboard used for listing content.
      */
-    var ClipBoard = function () {
+    var ClipBoard = function(notifications) {
+        this.notifications = notifications;
         this.clear(true);
     };
 
@@ -243,6 +260,9 @@
         this.copied = [];
         this._copied_ids = [];
         if (!no_event) {
+            this.notifications.notify({
+                message: 'Clipboard cleared.',
+                autoclose: 4000});
             $('body').trigger('contentchange-smiclipboard');
         };
     };
@@ -252,12 +272,18 @@
      * @param items: Cutted items.
      */
     ClipBoard.prototype.cut = function(items) {
+        var count = 0;
+
         $.each(items, function(i, item) {
             if (this._cutted_ids.indexOf(item.id) < 0) {
                 this._cutted_ids.push(item.id);
                 this.cutted.push(item);
+                count += 1;
             };
         }.scope(this));
+        this.notifications.notify({
+            message: 'Cutted ' + count.toString() + ' content(s) in the clipboard.',
+            autoclose: 4000});
         $('body').trigger('contentchange-smiclipboard');
     };
 
@@ -266,12 +292,18 @@
      * @param items: Copied items.
      */
     ClipBoard.prototype.copy = function(items) {
+        var count = 0;
+
         $.each(items, function(i, item) {
-            if (!this._copied_ids.indexOf(item.id) < 0) {
+            if (this._copied_ids.indexOf(item.id) < 0) {
                 this._copied_ids.push(item.id);
                 this.copied.push(item);
+                count += 1;
             };
         }.scope(this));
+        this.notifications.notify({
+            message: 'Copied ' + count.toString() + ' content(s) in the clipboard.',
+            autoclose: 4000});
         $('body').trigger('contentchange-smiclipboard');
     };
 
@@ -297,9 +329,9 @@
 
         this.opened = {path: '', tab: ''};
         this.options = options;
-        this.clipboard = new ClipBoard();
         this.shortcuts = new ShortcutManager();
         this.notifications = new NotificationManager(options.notifications);
+        this.clipboard = new ClipBoard(this.notifications);
 
         header.disableTextSelect();
         navigation.SMINavigation(this, options.navigation);

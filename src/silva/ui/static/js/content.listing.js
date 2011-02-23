@@ -2,7 +2,7 @@
 
 (function($) {
 
-    obviel.iface('action');
+    // Define columns renderers
     obviel.view({
         iface: 'action',
         name: 'column.smilisting',
@@ -20,7 +20,6 @@
         }
     });
 
-    obviel.iface('text');
     obviel.view({
         iface: 'text',
         name: 'column.smilisting',
@@ -29,7 +28,6 @@
         }
     });
 
-    obviel.iface('icon');
     obviel.view({
         iface: 'icon',
         name: 'column.smilisting',
@@ -47,7 +45,6 @@
         }
     });
 
-    obviel.iface('workflow');
     obviel.view({
         iface: 'workflow',
         name: 'column.smilisting',
@@ -61,8 +58,131 @@
         }
     });
 
-    obviel.iface('listing');
+    // For action.smilisting add a clear selection action
+    obviel.view({
+        iface: 'content',
+        name: 'action.smilisting',
+        order: 0,
+        render: function() {
+            var link = $('<a class="close-selection ui-state-default" title="close selection">' +
+                         '<ins class="ui-icon ui-icon-closethick"></ins></a>');
+            link.bind('click', function() {
+                this.data.close();
+            }.scope(this));
+            this.content.append(link);
+        }
+    });
 
+    /**
+     * Register action buttons in obviel given the configuration.
+     * @param action_defintions: describe action (title, icon, what to do...)
+     * @param url_template: base URL to use for REST-type actions
+     * @param name: name used to register actions in obviel
+     */
+    var register_action_buttons = function(action_definitions, url_template, name) {
+        $.each(action_definitions, function(i, action) {
+            $.each(action.ifaces, function (e, iface) {
+                var definition = {
+                    iface: iface,
+                    name: name,
+                    order: action.order,
+                    render: function() {
+                        var link = $('<a class="action ui-state-default"></a>');
+
+                        if (action.title) {
+                            link.text(action.title);
+                        };
+                        if (action.icon) {
+                            link.prepend(
+                                '<ins class=" ui-icon  ui-icon-' +
+                                    action.icon +
+                                    '"></ins>');
+                        };
+                        if (this.action != undefined) {
+                            link.bind('click', function() {
+                                this.action();
+                            }.scope(this));
+                        };
+                        this.content.append(link);
+                    }
+                };
+                for (var limiter in action.available) {
+                    switch(limiter) {
+                    case 'max_selected':
+                        definition['available'] = function() {
+                            return this.data.length <= action.available.max_selected;
+                        };
+                    };
+                };
+                for (var action_type in action.action) {
+                    switch(action_type) {
+                    case 'rest':
+                        definition['action'] = function() {
+                            var url = template_url.expand({
+                                path: this.smi.opened.path,
+                                action: action.rest.action});
+                            var payload = [];
+                            switch(action.rest.send) {
+                            case 'selected_ids':
+                                $.each(this.data.data, function(i, item) {
+                                    payload.push({name: 'content', value: item.id});
+                                });
+                                break;
+                            case 'clipboard_ids':
+                                $.each(this.smi.clipboard.cutted, function(i, item) {
+                                    payload.push({name: 'cutted', value: item.id});
+                                });
+                                $.each(this.smi.clipboard.copied, function(i, item) {
+                                    payload.push({name: 'copied', value: item.id});
+                                });
+                                break;
+                            }
+                            $.ajax({
+                                url: url,
+                                type: 'POST',
+                                dataType: 'json',
+                                data: payload,
+                                success: function(result) {
+                                    for (var post_action in result.post_actions) {
+                                        switch(post_action) {
+                                        case 'remove':
+                                            this.listing.remove_lines(result.post_actions.remove);
+                                            break;
+                                        };
+                                    };
+                                    if (result.notifications) {
+                                        this.smi.notifications.notifies(result.notifications);
+                                    };
+                                }.scope(this)
+                            });
+                        };
+                        break;
+                    case 'cut':
+                        definition['action'] = function () {
+                            this.smi.clipboard.cut(this.data.data);
+                        };
+                        break;
+                    case 'copy':
+                        definition['action'] = function () {
+                            this.smi.clipboard.copy(this.data.data);
+                        };
+                        break;
+                    case 'clear_clipboard':
+                        definition['action'] = function() {
+                            this.smi.clipboard.clear();
+                        };
+                    };
+                };
+                obviel.view(definition);
+            });
+        });
+    };
+
+    /**
+     * Manage a selector that can unselect / select all
+     * element in a listing, and view selection status.
+     * @param listing: managed listing
+     */
     var SMIMultiSelector = function(listing) {
         this.selector = listing.header.find('.selector');
         this.status = 'none';
@@ -117,6 +237,9 @@
         var info = content.children('.stat');
         var count = info.find('.count');
 
+        // Set default clipboard count on creation
+        count.text(clipboard.length().toString());
+
         // Update count when clipboard is changed
         $('body').bind('contentchange-smiclipboard', function() {
             count.text(clipboard.length().toString());
@@ -139,7 +262,7 @@
     };
 
     /**
-     * Manage element (and selected element) counter.
+     * Manage item (and selected item) counter for a listing.
      * @param listing: associated listing.
      */
     var SMIViewCounter = function(listing) {
@@ -179,7 +302,8 @@
      * Represent a selection of multiple items in a listing.
      * @param items: selected rows (must have the .item class).
      */
-    var SMISelection = function(items) {
+    var SMISelection = function(listing, items) {
+        this.listing = listing;
         this.items = items;
 
         this.length = items.length;
@@ -199,19 +323,27 @@
     };
 
     /**
-     * Manage action buttons.
+     * Close the current selection (unselect it).
+     */
+    SMISelection.prototype.close = function() {
+        this.listing.unselect(this.items);
+    };
+
+    /**
+     * Manage action buttons on selected items of a listing.
      * @param listing: associated listing.
      */
     var SMIActions = function(listing) {
         this.listing = listing;
 
         var render_actions = function(items, cell) {
-            var selection = new SMISelection(items);
+            var selection = new SMISelection(listing, items);
 
             cell.render({
                 every: selection,
                 name: 'action.smilisting',
-                extra: {listing: listing}});
+                extra: {listing: listing,
+                        smi: listing.smi}});
         };
 
         this.listing.container.bind('selectionchange-smilisting', function(event, changes) {
@@ -363,6 +495,7 @@
 
     /**
      * Trigger an event on the listing data.
+     * @param event_name: name of the event to trigger
      */
     SMIListing.prototype.trigger = function (event_name) {
         var total = this.container.children('tr.item').length;
@@ -457,11 +590,19 @@
     };
 
     /**
+     * Unselect the given items.
+     * @param items: items to unselect.
+     */
+    SMIListing.prototype.unselect = function(items) {
+        items.removeClass('selected');
+        this.trigger('selectionchange-smilisting');
+    };
+
+    /**
      * Unselect all elements.
      */
     SMIListing.prototype.unselect_all = function() {
-        this.container.children('tr.item.selected').removeClass('selected');
-        this.trigger('selectionchange-smilisting');
+        this.unselect(this.container.children('tr.item.selected'));
     };
 
     /**
@@ -479,86 +620,7 @@
             dataType: 'json',
             success:function(configuration) {
                 var action_url = jsontemplate.Template(smi.options.listing.action, {});
-                $.each(configuration.actions, function(i, action) {
-                    // Each action gets changes and listing as extra
-                    $.each(action.ifaces, function (e, iface) {
-                        var definition = {
-                            iface: iface,
-                            name: 'action.smilisting',
-                            order: action.order,
-                            render: function() {
-                                var link = $('<a class="action ui-state-default"></a>');
-
-                                link.text(action.title);
-                                if (this.action != undefined) {
-                                    link.bind('click', function() {
-                                        this.action();
-                                    }.scope(this));
-                                };
-                                if (action.icon) {
-                                    link.prepend(
-                                        '<ins class=" ui-icon  ui-icon-' +
-                                            action.icon +
-                                            '"></ins>');
-                                };
-
-                                this.content.append(link);
-                            }
-                        };
-                        for (var limiter in action.available) {
-                            switch(limiter) {
-                            case 'max_selected':
-                                definition['available'] = function() {
-                                    return this.data.length <= action.available.max_selected;
-                                };
-                            };
-                        };
-                        for (var action_type in action.action) {
-                            switch(action_type) {
-                            case 'rest':
-                                definition['action'] = function() {
-                                    var url = action_url.expand({
-                                            path: smi.opened.path,
-                                            action: action.name});
-                                    var ids = [];
-                                    $.each(this.data.data, function(i, item) {
-                                        ids.push({name: 'content', value:item.id});
-                                    });
-                                    $.ajax({
-                                        url: url,
-                                        type: 'POST',
-                                        dataType: 'json',
-                                        data: ids,
-                                        success: function(result) {
-                                            for (var post_action in result.post_actions) {
-                                                switch(post_action) {
-                                                case 'remove':
-                                                    this.listing.remove_lines(result.post_actions.remove);
-                                                    break;
-                                                };
-                                            };
-                                            if (result.notifications) {
-                                                smi.notifications.notifies(result.notifications);
-                                            };
-                                        }.scope(this)
-                                    });
-                                };
-                                break;
-                            case 'cut':
-                                definition['action'] = function () {
-                                    smi.clipboard.cut(this.data.data);
-                                };
-                                break;
-                            case 'copy':
-                                definition['action'] = function () {
-                                    smi.clipboard.copy(this.data.data);
-                                };
-                                break;
-                            };
-                        };
-                        obviel.view(definition);
-                    });
-                });
+                register_action_buttons(configuration.actions, action_url, 'action.smilisting');
 
                 obviel.view({
                     iface: 'listing',

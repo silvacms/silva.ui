@@ -13,20 +13,7 @@ a {
 
 a ins {
   cursor:pointer;
-  margin:0 2px 0 0;
 }
-
-a.button {
-  display:block; float:left; border:1px #999 solid;
-  line-height:20px; margin-left:5px; padding:0 6px;
-  background:#eee url(../img/gradient25.png) repeat-x top;
-  -khtml-border-radius:3px; -moz-border-radius:3px;
-  -ms-border-radius:3px; -o-border-radius:3px;
-  -webkit-border-radius:3px; border-radius:3px;
-}
-a.button:hover { background-image:url(../img/gradient20m.png); color:#222; }
-a.button:active { background-image:url(../img/gradient25.png); }
-a.button ins { margin-left:-3px; }
 
 input, textarea {
   cursor: text;
@@ -63,7 +50,7 @@ input, textarea {
 
 #notifications {
   position:absolute;
-  bottom:50px;
+  top:185px;
   right:40px;
   width:300px;
   background: transparent;
@@ -188,7 +175,8 @@ input, textarea {
   }
 }
 
-#workspace .ui-state-default {
+#workspace .ui-state-default,
+#workspace .ui-state-active {
   background: inherit;
   color: inherit;
   border: inherit;
@@ -374,14 +362,9 @@ input, textarea {
 #workspace .content .header th.ui-state-default {
   padding: 0px 10px;
 }
-#workspace .content th.centered,
-#workspace .content td.centered {
-  text-align:center;
+#workspace .content .listing a.close-selection ins {
+  margin-top: 6px;
 }
-#workspace .content th.col_title {
-  padding-left:15px;
-}
-
 #workspace .content td.first {
   padding:0 8px;
   width:20px;
