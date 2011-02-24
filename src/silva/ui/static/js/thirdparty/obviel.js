@@ -1,6 +1,17 @@
 var obviel = {};
 
 (function($, module) {
+    // Add a rescope method (used by this modules and other using obviel)
+    if (Function.prototype.scope === undefined) {
+        Function.prototype.scope = function(scope) {
+            var _function = this;
+
+            return function() {
+                return _function.apply(scope, arguments);
+            };
+        };
+    }
+
     // Exceptions
     module.DuplicateInterfaces = function(name) {
         this.message = 'duplicate registration of interface ' + name;
@@ -111,7 +122,11 @@ var obviel = {};
         this._get_template(function(html) {
             this._render_template(html, callback);
             if (this.cleanup) {
-                this.content.one('cleanup.obviel', this.cleanup.scope(this));
+                this.content.one('cleanup.obviel', function(event) {
+                    if (this.content.get(0 ) === event.target) {
+                        this.cleanup();
+                    };
+                }.scope(this));
             };
         }.scope(this));
     };
@@ -263,6 +278,7 @@ var obviel = {};
         this._views[definition.name][definition.iface].unshift(definition);
     };
 
+    // Render the most specialized view for a JSON object
     module.Registry.prototype._render_data = function(element, data, args) {
         var ifaces = module.ifaces(data);
         var views = this._views[args.name];
@@ -289,6 +305,7 @@ var obviel = {};
         };
     };
 
+    // Render all possible views for a given JSON object (viewlet like)
     module.Registry.prototype._render_every_data = function(element, data, args) {
         var ifaces = module.ifaces(data);
         var views = this._views[args.name];
@@ -323,6 +340,7 @@ var obviel = {};
         });
     };
 
+    // Fetch an JSON object and render it.
     module.Registry.prototype._render_url = function(element, url, args) {
         $.ajax({
             type: 'GET',
