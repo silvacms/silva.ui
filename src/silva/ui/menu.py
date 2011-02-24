@@ -7,13 +7,13 @@ from five import grok
 
 from silva.translations import translate as _
 from silva.core.interfaces import IContent, IContainer, ISilvaObject, IVersionedContent
-from silva.ui.interfaces import ITabMenuItem
+from silva.ui.interfaces import IMenuItem, IContentLeftMenuItem, IContentRightMenuItem
 
 
-class TabMenuItem(grok.Subscription):
+class MenuItem(grok.Subscription):
     grok.baseclass()
-    grok.implements(ITabMenuItem)
-    grok.provides(ITabMenuItem)
+    grok.implements(IMenuItem)
+    grok.provides(IMenuItem)
     name = None
     action = None
     default = False
@@ -23,7 +23,19 @@ class TabMenuItem(grok.Subscription):
                 'action': self.action}
 
 
-class EditTabMenu(TabMenuItem):
+class ContentLeftMenuItem(MenuItem):
+    grok.baseclass()
+    grok.implements(IContentLeftMenuItem)
+    grok.provides(IContentLeftMenuItem)
+
+
+class ContentRightMenuItem(MenuItem):
+    grok.baseclass()
+    grok.implements(IContentRightMenuItem)
+    grok.provides(IContentRightMenuItem)
+
+
+class EditTabMenu(ContentLeftMenuItem):
     grok.context(IContent)
     grok.order(10)
     name = _('Edit')
@@ -31,7 +43,7 @@ class EditTabMenu(TabMenuItem):
     default = True
 
 
-class ContainerTabMenu(TabMenuItem):
+class ContainerTabMenu(ContentLeftMenuItem):
     grok.context(IContainer)
     grok.order(10)
     name = _('Content')
@@ -39,7 +51,7 @@ class ContainerTabMenu(TabMenuItem):
     default = True
 
 
-class AddTabMenu(TabMenuItem):
+class AddTabMenu(ContentLeftMenuItem):
     grok.context(IContainer)
     grok.order(15)
     name = _('Add')
@@ -55,19 +67,33 @@ class AddTabMenu(TabMenuItem):
         return data
 
 
-class PropertiesTabMenu(TabMenuItem):
+class PropertiesTabMenu(ContentLeftMenuItem):
     grok.context(ISilvaObject)
     grok.order(20)
     name = _('Properties')
     action = 'properties'
 
 
-class PublishTabMenu(TabMenuItem):
+class PublishTabMenu(ContentLeftMenuItem):
     grok.context(IVersionedContent)
     grok.order(30)
     name = _('Publish')
     action = 'publish'
 
 
-def get_menu_items(content):
-    return grok.queryOrderedSubscriptions(content, ITabMenuItem)
+class PreviewMenu(ContentRightMenuItem):
+    grok.context(ISilvaObject)
+    grok.order(10)
+    name = _('Preview')
+    action = 'preview'
+
+
+class ViewMenu(ContentRightMenuItem):
+    grok.context(ISilvaObject)
+    grok.order(20)
+    name = _('View')
+    action = 'view'
+
+
+def get_menu_items(content, menu):
+    return grok.queryOrderedSubscriptions(content, menu)

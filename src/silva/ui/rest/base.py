@@ -16,6 +16,7 @@ from Acquisition import aq_parent
 from silva.core.interfaces import IRoot
 from silva.core.messages.interfaces import IMessageService
 from silva.core.views.interfaces import IVirtualSite
+from silva.ui.interfaces import IContentLeftMenuItem, IContentRightMenuItem
 from silva.ui.icon import get_icon
 from silva.ui.menu import get_menu_items
 
@@ -94,7 +95,7 @@ class PageREST(UIREST):
         return {'selected': identifier(self.context.get_container()),
                 'parents': parents}
 
-    def get_metadata_tabs(self):
+    def get_metadata_menu(self, menu):
         tabs = []
         active = None
         current = self.__name__
@@ -102,11 +103,11 @@ class PageREST(UIREST):
             current = current.split('/', 1)[0]
         if current.startswith('silva.ui.'):
             current = current[9:]
-        for tab in get_menu_items(self.context):
+        for tab in get_menu_items(self.context, menu):
             tabs.append(tab.describe(self))
             if tab.action == current:
                 active = tab.action
-        return {'ifaces': ['tabs'],
+        return {'ifaces': ['menu'],
                 'active': active,
                 'entries': tabs}
 
@@ -128,7 +129,8 @@ class PageREST(UIREST):
                     'title': self.context.get_title_or_id(),
                     'icon': get_icon(self.context, self.request),
                     },
-                'tabs': self.get_metadata_tabs(),
+                'left': self.get_metadata_menu(IContentLeftMenuItem),
+                'right': self.get_metadata_menu(IContentRightMenuItem),
                 'path': self.get_content_path(self.context)
                 },
             })

@@ -18,9 +18,9 @@
             content.prepend(icon);
         }
     });
-    obviel.iface('tabs');
+    obviel.iface('menu');
     obviel.view({
-        iface: 'tabs',
+        iface: 'menu',
         create: function(info) {
             var tab = $('<li><a class="screen ui-state-default">' + info.name + '</a></li>');
             var link = tab.children('a');
@@ -78,7 +78,8 @@
 
             // Update header
             info.children('h3').render({data: data.metadata.title});
-            info.children('.tabs').render({data: data.metadata.tabs});
+            info.children('.tabs').render({data: data.metadata.left});
+            info.children('.actions').render({data: data.metadata.right});
             info.children('#content-url').attr(
                 'href', url.expand({path: data.metadata.path}));
 

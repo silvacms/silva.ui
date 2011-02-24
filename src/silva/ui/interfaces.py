@@ -30,8 +30,22 @@ class ISMIResources(ICKEditorResources, IReferenceUIResources):
     silvaconf.resource('js/smi.js')
 
 
-class ITabMenuItem(Interface):
+class IMenuItem(Interface):
     """A displayed tab.
     """
-    name = Attribute('Name of the tab')
-    action = Attribute('Action of the tab')
+    name = Attribute('Name of the menu')
+    action = Attribute('Action trigger by the menu')
+
+
+class IContentLeftMenuItem(IMenuItem):
+    """Menu to work on content (left).
+    """
+
+class IContentRightMenuItem(IMenuItem):
+    """Menu to work on content (right).
+    """
+
+
+class ISettingsMenuItem(IMenuItem):
+    """Menu to work on settings.
+    """
