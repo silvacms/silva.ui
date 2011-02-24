@@ -43,7 +43,6 @@
                         textarea.attr('name', this.data.name);
                         textarea.val(this.data.text);
 
-                        this.content.addClass('content-area');
                         this.content.append(textarea);
 
                         this.editor = CKEDITOR.replace(textarea.get(0), settings);
@@ -61,7 +60,6 @@
                     },
                     cleanup: function() {
                         this.content.empty();
-                        this.content.removeClass('content-area');
                         if (this.editor) {
                             this.editor.destroy(true);
                         }

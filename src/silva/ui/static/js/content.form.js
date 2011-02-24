@@ -2,7 +2,6 @@
 
 (function($, obviel) {
 
-    obviel.iface('form');
     obviel.view({
         iface: 'form',
         name: 'content',
@@ -16,8 +15,6 @@
                 };
                 this.smi.send(values);
             };
-
-            this.content.addClass('content-area');
 
             // Bind default submit
             form.bind('submit', function() {
@@ -44,7 +41,6 @@
         },
         cleanup: function() {
             this.content.empty();
-            this.content.removeClass('content-area');
         }
     });
 

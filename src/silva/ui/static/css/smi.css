@@ -328,6 +328,17 @@ input, textarea {
   border-color:#555;
 }
 
+/* Main working content space */
+#workspace .content {
+  position:absolute;
+  top:70px;
+  bottom:0;
+  left:0;
+  right:0;
+  overflow:hidden;
+  overflow-y:auto;
+}
+
 /* Action buttons */
 #workspace .content a.action {
   -khtml-border-radius:3px;
@@ -407,6 +418,16 @@ input, textarea {
   line-height:24px;
 }
 
+#workspace .content .listing {
+  -ms-overflow-x:hidden;
+  top:25px;
+  bottom:25px;
+  right:0;
+  left:0;
+  overflow-x:hidden;
+  overflow-y:scroll;
+  position:absolute;
+}
 #workspace .content .listing dt {
   padding-left: 8px;
   padding-right: 8px;
@@ -440,17 +461,6 @@ input, textarea {
 
 #workspace .content .listing dd.collapsed {
   display: none;
-}
-
-#workspace .content .listing {
-  -ms-overflow-x:hidden;
-  bottom:25px;
-  left:0;
-  overflow-x:hidden;
-  overflow-y:scroll;
-  position:absolute;
-  right:0;
-  top:95px;
 }
 #workspace .content .listing .static tr.even {
   background-color:#f3f7fb;
@@ -520,16 +530,6 @@ input, textarea {
   padding: 0px 15px;
   float:right;
   position: relative;
-}
-
-#workspace .content-area {
-  position:absolute;
-  top:70px;
-  bottom:0;
-  left:0;
-  right:0;
-  overflow:hidden;
-  overflow-y:auto;
 }
 
 /* Form styling */

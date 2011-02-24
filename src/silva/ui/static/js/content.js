@@ -1,7 +1,6 @@
 
 (function($) {
 
-    obviel.iface('title');
     obviel.view({
         iface: 'title',
         render: function(content, data) {
@@ -18,7 +17,7 @@
             content.prepend(icon);
         }
     });
-    obviel.iface('menu');
+
     obviel.view({
         iface: 'menu',
         create: function(info) {
@@ -56,6 +55,15 @@
                 this.content.append(tab);
             }.scope(this));
         },
+        cleanup: function() {
+            this.content.empty();
+        }
+    });
+
+    obviel.view({
+        iface: 'preview',
+        name: 'content',
+        iframe: true,
         cleanup: function() {
             this.content.empty();
         }

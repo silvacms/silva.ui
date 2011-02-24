@@ -9,7 +9,8 @@ from zope.intid.interfaces import IIntIds
 
 from silva.ui.icon import get_icon
 from silva.ui.rest.base import UIREST, PageREST
-from silva.core.interfaces import IContainer
+from silva.core.interfaces import ISilvaObject, IContainer
+from silva.core.views.interfaces import ISilvaURL
 from silva.app.document.interfaces import IDocument
 from silva.core.editor.transform.interfaces import ITransformer
 from silva.core.editor.transform.interfaces import IInputEditorFilter
@@ -62,3 +63,13 @@ class DocumentEdit(PageREST):
         return {"ifaces": ["editor"],
                 "name": "body",
                 "text": text}
+
+
+class Preview(PageREST):
+    grok.context(ISilvaObject)
+    grok.name('silva.ui.preview')
+    grok.require('silva.ReadSilvaContent')
+
+    def payload(self):
+        return {"ifaces": ["preview"],
+                "html_url": getMultiAdapter((self.context, self.request), ISilvaURL).preview()}

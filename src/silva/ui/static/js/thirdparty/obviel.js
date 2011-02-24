@@ -134,38 +134,26 @@ var obviel = {};
     // render the view using the given template
     module.View.prototype._render_template = function(template, callback) {
         if (this.iframe) {
-            var iframe = document.createElement('iframe');
-            iframe.src = '';
+            var iframe = $('<iframe src="">');
+
+            iframe.height(this.content.height());
+            iframe.width(this.content.width());
             this.content.html(iframe);
             if (template) {
-                var self = this;
-                var cw = iframe.contentWindow;
-                var cd = cw.document;
-                if (template.indexOf('<html') == -1 &&
-                        template.indexOf('<HTML') == -1) {
-                    // no html tags, assume it's body content rather than a
-                    // full doc
+                if (template.indexOf('<html') < 0 &&
+                    template.indexOf('<HTML') < 0) {
+                    // no html tags, add missing html tag
                     template = '<html><body>' + template + '</body></html>';
                 };
-                cd.write(template);
-                var onload = cw.onload = function() {
-                    var iframe = this.content[0].childNodes[0];
-                    function cbwrapper() {
-                        var jiframe = $(iframe);
-                        var jcontents = $(cd);
-                        $('body', jcontents).css('overflow', 'hidden');
-                        // deal with margin, though not sure where...
-                        jiframe.width(jcontents.width() + 2);
-                        jiframe.height(jcontents.height() + 2);
-                        if (callback) {
-                            callback.apply(this, arguments);
-                        };
-                    };
+                var template_window = iframe.get(0).contentWindow;
+                var template_document = template_window.document;
+                template_window.onload = function() {
                     if (this.render) {
                         this.render(this.content, this.data);
-                    }
-                };
-                cd.close();
+                    };
+                }.scope(this);
+                template_document.write(template);
+                template_document.close();
             } else {
                 if (this.render) {
                     this.render(this.content, this.data);
