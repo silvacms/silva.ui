@@ -622,7 +622,7 @@ ins.state.draft { background-position:-5px -145px; }
 ins.state.pending { background-position:-25px -145px; }
 ins.state.approved { background-position:-45px -145px; }
 ins.state.published { background-position:-65px -145px; }
-ins.state.expired { background-position:-85px -145px; }
+ins.state.closed { background-position:-85px -145px; }
 
 /*
  * jsTree theme

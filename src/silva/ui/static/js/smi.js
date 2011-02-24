@@ -43,17 +43,6 @@
 (function($, obviel, shortcut) {
     var HASH_REGEXP = /#([^!]*)!?(.*)/;
 
-    // Add a rescope method
-    if (Function.prototype.scope === undefined) {
-        Function.prototype.scope = function(scope) {
-            var _function = this;
-
-            return function() {
-                return _function.apply(scope, arguments);
-            };
-        };
-    }
-
     obviel.iface('redirect');
     obviel.view({
         iface: 'redirect',

@@ -429,20 +429,37 @@ class PublishActionREST(ActionREST):
     def payload(self):
         published = []
         published_titles = ContentCounter(self)
+        not_published_titles = ContentCounter(self)
         serializer = ContentSerializer(self, self.request)
 
         for intid, content in self.get_selected_content():
             workflow = interfaces.IPublicationWorkflow(content, None)
             if workflow is not None:
-                workflow.approve()
-                published.append(serializer(content))
-                published_titles.append(content)
+                try:
+                    workflow.approve()
+                except interfaces.PublicationWorkflowError:
+                    not_published_titles.append(content)
+                else:
+                    published.append(serializer(content))
+                    published_titles.append(content)
+            else:
+                not_published_titles.append(content)
 
         # Notifications
         if published_titles:
+            if not_published_titles:
+                self.notify(
+                    _(u'Published ${published}, but could not publish ${not_published}.',
+                      mapping={'published': published_titles,
+                               'not_published': not_published_titles}))
+            else:
+                self.notify(
+                    _(u'Published ${published}.',
+                      mapping={'published': published_titles}))
+        elif not_published_titles:
             self.notify(
-                _(u'Published ${published}.',
-                  mapping={'published': published_titles}))
+                _(u'Could not publish ${not_published}.',
+                  mapping={'not_published': not_published_titles}))
 
         return {'update': published}
 
@@ -453,20 +470,37 @@ class CloseActionREST(ActionREST):
     def payload(self):
         closed = []
         closed_titles = ContentCounter(self)
+        not_closed_titles = ContentCounter(self)
         serializer = ContentSerializer(self, self.request)
 
         for intid, content in self.get_selected_content():
             workflow = interfaces.IPublicationWorkflow(content, None)
             if workflow is not None:
-                workflow.close()
-                closed.append(serializer(content))
-                closed_titles.append(content)
+                try:
+                    workflow.close()
+                except interfaces.PublicationWorkflowError:
+                    not_closed_titles.append(content)
+                else:
+                    closed.append(serializer(content))
+                    closed_titles.append(content)
+            else:
+                not_closed_titles.append(content)
 
         # Notifications
         if closed_titles:
+            if not_closed_titles:
+                self.notify(
+                    _(u'Closed ${closed}, but could not close ${not_closed}.',
+                      mapping={'closed': closed_titles,
+                               'not_closed': not_closed_titles}))
+            else:
+                self.notify(
+                    _(u'Closed ${closed}.',
+                      mapping={'closed': closed_titles}))
+        elif not_closed_titles:
             self.notify(
-                _(u'Closed ${closed}.',
-                  mapping={'closed': closed_titles}))
+                _(u'Could not close ${not_closed}.',
+                  mapping={'not_closed': not_closed_titles}))
 
         return {'update': closed}
 

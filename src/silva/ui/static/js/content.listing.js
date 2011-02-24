@@ -7,17 +7,18 @@
 
     listingcolumns.register({
         name: 'action',
-        render: function(content, data) {
+        render: function() {
             var link = $('<a class="content-screen"></a>');
 
-            link.text(data[this.column.name]);
+            link.text(this.data[this.column.name]);
             link.attr('rel', this.column.action);
-            link.attr('href', data.path);
+            link.attr('href', this.data.path);
             link.bind('click', function(event) {
                 this.smi.open_link(link);
                 return false;
             }.scope(this));
-            content.append(link);
+            this.content.empty();
+            this.content.append(link);
         }
     });
 
@@ -30,9 +31,9 @@
 
     listingcolumns.register({
         name: 'icon',
-        render: function(content, data) {
+        render: function() {
             var icon = $('<ins class="icon"></ins>');
-            var value = data[this.column.name];
+            var value = this.data[this.column.name];
 
             if (value.indexOf('.') < 0) {
                 icon.addClass(value);
@@ -41,20 +42,22 @@
                     'style',
                     'background:url(' + value + ') no-repeat center center;');
             }
-            content.append(icon);
+            this.content.empty();
+            this.content.append(icon);
         }
     });
 
     listingcolumns.register({
         name: 'workflow',
-        render: function(content, data) {
+        render: function() {
             var icon = $('<ins class="state"></ins>');
-            var value = data[this.column.name];
+            var value = this.data[this.column.name];
 
             if (value) {
                 icon.addClass(value);
             }
-            content.append(icon);
+            this.content.empty();
+            this.content.append(icon);
         }
     });
 
