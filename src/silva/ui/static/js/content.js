@@ -82,6 +82,14 @@
             info.children('.actions').render({data: data.metadata.right});
             info.children('#content-url').attr(
                 'href', url.expand({path: data.metadata.path}));
+            var  parent_link = info.children('a.parent');
+            if (data.metadata.up != null) {
+                parent_link.attr('href', data.metadata.up ||'/');
+                parent_link.attr('rel', smi.opened.tab);
+                parent_link.show();
+            } else {
+                parent_link.hide();
+            };
 
             // Update content area
             content.render({data: data.content, name:'content', extra: {smi: smi}});

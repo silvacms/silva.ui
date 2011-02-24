@@ -376,10 +376,13 @@
         });
 
         // Bind event to open new tab
-        $(document).delegate('a.screen', 'click', function(event) {
-            this.open_link($(event.target));
-            return false;
-        }.scope(this));
+        {
+            var open_link = this.open_link.scope(this);
+            $(document).delegate('a.screen', 'click', function(event) {
+            open_link($(this));
+                return false;
+            });
+        };
 
         // Bind click on header logo bring back to root
         header.find('a.home').bind('click', function(event) {

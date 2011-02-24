@@ -197,6 +197,12 @@ input, textarea {
 #workspace .info a {
   color:#111;
 }
+#workspace .info a.parent {
+  display: none;
+}
+#workspace .info a.parent ins {
+  margin-top: 4px;
+}
 #workspace .info h3 {
   font-size:1.3em;
   height:24px;

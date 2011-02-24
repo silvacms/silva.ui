@@ -117,6 +117,9 @@ class PageREST(UIREST):
         except PageException as error:
             return self.json_response(error.payload(self))
 
+        parent = None
+        if not IRoot.providedBy(self.context):
+            parent = self.get_content_path(aq_parent(self.context))
         return self.json_response({
             'ifaces': ['content'],
             'content': payload,
@@ -131,7 +134,8 @@ class PageREST(UIREST):
                     },
                 'left': self.get_metadata_menu(IContentLeftMenuItem),
                 'right': self.get_metadata_menu(IContentRightMenuItem),
-                'path': self.get_content_path(self.context)
+                'path': self.get_content_path(self.context),
+                'up': parent,
                 },
             })
 

@@ -47,6 +47,11 @@
       </div>
       <div id="workspace">
         <div class="info">
+          <a class="parent screen ui-state-default" rel="content"
+             title="Go up one level"
+             i18n:attributes="title">
+            <ins class="ui-icon ui-icon-arrowreturnthick-1-n"></ins>
+          </a>
           <h3>
             <ins class="icon loading"></ins>
             <tal:msg i18n:translate="">Loading...</tal:msg>
