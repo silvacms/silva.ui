@@ -115,6 +115,23 @@
                         definition['available'] = function() {
                             return this.data.length() <= action.available.max_items;
                         };
+                        break;
+                    case 'items_match':
+                        definition['available'] = function() {
+                            var conditions = action.available.items_match;
+
+                            for (var i=0; i < this.data.length(); i++) {
+                                var item = this.data.data[i];
+
+                                for (var property in conditions) {
+                                    if (conditions[property].indexOf(item[property]) >= 0) {
+                                        return true;
+                                    };
+                                };
+                            };
+                            return false;
+                        };
+                        break;
                     };
                 };
                 for (var action_type in action.action) {
@@ -152,7 +169,13 @@
                                             this.data.remove(result.post_actions.remove);
                                             break;
                                         case 'update':
-                                            this.data.update(result.post_actions.update);
+                                            var need_refresh = this.data.update(result.post_actions.update);
+                                            // The update of the data might have trigger some data changes
+                                            // in the selection.
+                                            if (need_refresh) {
+                                                this.content.trigger(
+                                                    'actionrefresh-smilisting', {data: this.data});
+                                            };
                                             break;
                                         };
                                     };
@@ -313,6 +336,11 @@
         this.listing = listing;
         this.items = items;
 
+        this._refresh_data();
+    };
+
+    // Compute selection data
+    SMISelection.prototype._refresh_data = function () {
         this.ifaces = [];
         this.data = [];
 
@@ -329,7 +357,7 @@
     };
 
     /**
-     * Return the size of the selection
+     * Return the size of the selection.
      */
     SMISelection.prototype.length = function() {
         return this.items.length;
@@ -339,11 +367,16 @@
      * Update some selected items.
      */
     SMISelection.prototype.update = function(items) {
-        this.listing.update_lines(items);
+        if (items.length) {
+            this.listing.update_lines(items);
+            this._refresh_data();
+            return true;
+        };
+        return false;
     };
 
     /**
-     * Remove some items associated to the selection
+     * Remove some items associated to the selection.
      */
     SMISelection.prototype.remove = function(items) {
         this.listing.remove_lines(items);
@@ -363,8 +396,10 @@
     var SMIActions = function(listing) {
         this.listing = listing;
 
-        var render_actions = function(items, cell) {
-            var selection = new SMISelection(listing, items);
+        var render_actions = function(selection, cell) {
+            if (!(selection instanceof SMISelection)) {
+                selection = new SMISelection(listing, selection);
+            };
 
             cell.render({
                 every: selection,
@@ -409,6 +444,13 @@
 
                     render_actions(selected_items, action_cell);
                     action_cell.attr('colspan', this.listing.configuration.columns.length);
+                    action_cell.bind('actionrefresh-smilisting', function(event, data) {
+                        // If an action is executed, rerender the action line.
+                        var action_cell = $(this);
+
+                        action_cell.empty();
+                        render_actions(data.data, action_cell);
+                    });
                     action_line.append(action_cell);
                     last_selected.after(action_line);
                 };

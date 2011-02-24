@@ -134,17 +134,29 @@ class ColumnsContainerListing(UIREST):
                      'order': 10,
                      'available': {'max_items': 1},
                      'ifaces': ['content']},
+                    {'title': self.translate(_(u'New version')),
+                     'icon': 'document',
+                     'order': 50,
+                     'action': {'rest': {'action': 'newversion',
+                                         'send': 'selected_ids'}},
+                     'available': {'items_match': {'status': [
+                                    'published', 'closed']}},
+                     'ifaces': ['versioned']},
                     {'title': self.translate(_(u'Publish')),
                      'icon': 'check',
                      'order': 51,
                      'action': {'rest': {'action': 'publish',
                                          'send': 'selected_ids'}},
+                     'available': {'items_match': {'status': [
+                                    'draft', 'approved', 'pending', None]}},
                      'ifaces': ['container', 'versioned']},
                     {'title': self.translate(_(u'Close')),
                      'icon': 'close',
                      'order': 52,
                      'action': {'rest': {'action': 'close',
                                          'send': 'selected_ids'}},
+                     'available': {'items_match': {'status': [
+                                    'published', None]}},
                      'ifaces': ['container', 'versioned']},
                     {'title': self.translate(_(u'Delete')),
                      'icon': 'trash',
@@ -503,4 +515,46 @@ class CloseActionREST(ActionREST):
                   mapping={'not_closed': not_closed_titles}))
 
         return {'update': closed}
+
+
+class NewVersionActionREST(ActionREST):
+    grok.name('silva.ui.listing.newversion')
+
+    def payload(self):
+        newversion = []
+        newversion_titles = ContentCounter(self)
+        not_newversion_titles = ContentCounter(self)
+        serializer = ContentSerializer(self, self.request)
+
+        for intid, content in self.get_selected_content():
+            workflow = interfaces.IPublicationWorkflow(content, None)
+            if workflow is not None:
+                try:
+                    workflow.new_version()
+                except interfaces.PublicationWorkflowError:
+                    not_newversion_titles.append(content)
+                else:
+                    newversion.append(serializer(content))
+                    newversion_titles.append(content)
+            else:
+                not_newversion_titles.append(content)
+
+        # Notifications
+        if newversion_titles:
+            if not_newversion_titles:
+                self.notify(
+                    _(u'New version(s) created for ${newversion}, '
+                      u'but could do it for ${not_newversion}.',
+                      mapping={'newversion': newversion_titles,
+                               'not_newversion': not_newversion_titles}))
+            else:
+                self.notify(
+                    _(u'New version(s) created for ${newversion}.',
+                      mapping={'newversion': newversion_titles}))
+        elif not_newversion_titles:
+            self.notify(
+                _(u'Could not create new version(s) for ${not_newversion}.',
+                  mapping={'not_newversion': not_newversion_titles}))
+
+        return {'update': newversion}
 
