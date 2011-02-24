@@ -37,11 +37,12 @@ class IMenuItem(Interface):
     action = Attribute('Action trigger by the menu')
 
 
-class IContentLeftMenuItem(IMenuItem):
+class IContentMenuItem(IMenuItem):
     """Menu to work on content (left).
     """
 
-class IContentRightMenuItem(IMenuItem):
+
+class IViewMenuItem(IMenuItem):
     """Menu to work on content (right).
     """
 

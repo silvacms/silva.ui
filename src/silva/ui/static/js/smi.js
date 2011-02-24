@@ -384,11 +384,6 @@
             });
         };
 
-        // Bind click on header logo bring back to root
-        header.find('a.home').bind('click', function(event) {
-            this.open('/');
-        }.scope(this));
-
         // Plugins initialization
         $(document).trigger('load-smiplugins', this);
 

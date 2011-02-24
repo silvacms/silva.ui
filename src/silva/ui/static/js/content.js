@@ -21,7 +21,7 @@
     obviel.view({
         iface: 'menu',
         create: function(info) {
-            var tab = $('<li><a class="screen ui-state-default">' + info.name + '</a></li>');
+            var tab = $('<li class="entry"><a class="screen ui-state-default">' + info.name + '</a></li>');
             var link = tab.children('a');
 
             link.attr('rel', info.action);
@@ -64,6 +64,7 @@
         iface: 'preview',
         name: 'content',
         iframe: true,
+        nocache: true,
         cleanup: function() {
             this.content.empty();
         }
@@ -86,17 +87,19 @@
 
             // Update header
             info.children('h3').render({data: data.metadata.title});
-            info.children('.tabs').render({data: data.metadata.left});
-            info.children('.actions').render({data: data.metadata.right});
+            info.children('.content-tabs').render({data: data.metadata.menu.content});
+            info.children('.actions').render({data: data.metadata.menu.view});
             info.children('#content-url').attr(
                 'href', url.expand({path: data.metadata.path}));
-            var  parent_link = info.children('a.parent');
+            var  parent_link = info.find('a.parent');
             if (data.metadata.up != null) {
                 parent_link.attr('href', data.metadata.up ||'/');
                 parent_link.attr('rel', smi.opened.tab);
-                parent_link.show();
+                parent_link.removeClass('ui-state-disabled');
+                parent_link.addClass('ui-state-default');
             } else {
-                parent_link.hide();
+                parent_link.addClass('ui-state-disabled');
+                parent_link.removeClass('ui-state-default');
             };
 
             // Update content area

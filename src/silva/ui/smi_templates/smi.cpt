@@ -26,7 +26,7 @@
     <div id="notifications">
     </div>
     <div id="header">
-      <h1><a class="home"><img src="${imgs_url}/silva.png" alt="Silva" /></a></h1>
+      <h1><a href="#!/"><img src="${imgs_url}/silva.png" alt="Silva" /></a></h1>
       <ol>
         <li tal:condition="view.can_manage">
           <a href="${view.root_url}/manage_main"
@@ -34,9 +34,7 @@
             Manage
           </a>
         </li>
-        <li><a href="#"
-               i18n:translate="">Settings</a></li>
-        <li><a href="#"
+        <li><a href="${view.root_url}/service_members/logout"
                i18n:translate="">Logout</a></li>
       </ol>
     </div>
@@ -47,17 +45,19 @@
       </div>
       <div id="workspace">
         <div class="info">
-          <a class="parent screen ui-state-default" rel="content"
-             title="Go up one level"
-             i18n:attributes="title">
-            <ins class="ui-icon ui-icon-arrowreturnthick-1-n"></ins>
-          </a>
+          <ol class="tabs admin-tabs">
+            <li>
+              <a class="parent screen ui-state-default" href="" rel="">
+                <ins class="ui-icon ui-icon-arrowreturnthick-1-n"></ins>
+              </a>
+            </li>
+          </ol>
+          <ol class="tabs content-tabs"></ol>
+          <ol class="actions"></ol>
           <h3>
             <ins class="icon loading"></ins>
             <tal:msg i18n:translate="">Loading...</tal:msg>
           </h3>
-          <ol class="tabs"></ol>
-          <ol class="actions"></ol>
           <a href="#" id="content-url"></a>
         </div>
         <div class="content"></div>

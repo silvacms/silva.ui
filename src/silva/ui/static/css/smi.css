@@ -50,9 +50,9 @@ input, textarea {
 
 #notifications {
   position:absolute;
-  top:185px;
-  right:40px;
-  width:300px;
+  top:0px;
+  right:40%;
+  width:20%;
   background: transparent;
   z-index: 2000;
 }
@@ -90,17 +90,32 @@ input, textarea {
 #header ol { float:right; list-style:none; margin:0 20px; line-height:22px; }
 #header ol li { float:left; }
 #header ol li a {
-  display:block; margin:18px 0 0 10px; padding:2px 15px;
-  background:#fff url(../img/gradient25.png) repeat-x bottom; color:#222;
-  -khtml-border-radius:5px; -moz-border-radius:5px;
-  -ms-border-radius:5px; -o-border-radius:5px;
-  -webkit-border-radius:5px; border-radius:5px;
-  -khtml-box-shadow:#1c2e3d 0 1px 4px; -moz-box-shadow:#1c2e3d 0 1px 4px;
-  -ms-box-shadow:#1c2e3d 0 1px 4px; -o-box-shadow:#1c2e3d 0 1px 4px;
-  -webkit-box-shadow:#1c2e3d 0 1px 4px; box-shadow:#1c2e3d 0 1px 4px;
+  display:block;
+  margin:18px 0 0 10px;
+  padding:2px 15px;
+  background:#fff url(../img/gradient25.png) repeat-x bottom;
+  color:#222;
+  -khtml-border-radius:5px;
+  -moz-border-radius:5px;
+  -ms-border-radius:5px;
+  -o-border-radius:5px;
+  -webkit-border-radius:5px;
+  border-radius:5px;
+  -khtml-box-shadow:#1c2e3d 0 1px 4px;
+  -moz-box-shadow:#1c2e3d 0 1px 4px;
+  -ms-box-shadow:#1c2e3d 0 1px 4px;
+  -o-box-shadow:#1c2e3d 0 1px 4px;
+  -webkit-box-shadow:#1c2e3d 0 1px 4px;
+  box-shadow:#1c2e3d 0 1px 4px;
 }
-#header ol li a:hover { color:#000; border-color:#555; }
-#main { position:absolute; top:65px; bottom:20px; left:20px; right:20px; }
+
+#main {
+  position:absolute;
+  top:65px;
+  bottom:20px;
+  left:20px;
+  right:20px;
+}
 
 #navigation {
   position:absolute; top:0; bottom:0; left:0; width:280px; background:#fff;
@@ -191,22 +206,16 @@ input, textarea {
   color:#111;
   height:49px;
   line-height:24px;
-  overflow:hidden;
-  padding:10px;
+  padding: 0 10px 20px 10px;
 }
 #workspace .info a {
   color:#111;
 }
-#workspace .info a.parent {
-  display: none;
-}
-#workspace .info a.parent ins {
-  margin-top: 4px;
-}
 #workspace .info h3 {
+  clear: both;
   font-size:1.3em;
+  padding-top: 8px;
   height:24px;
-  margin-bottom:5px;
   overflow:hidden;
   white-space:nowrap;
 }
@@ -226,8 +235,6 @@ input, textarea {
   list-style:none;
   margin:0;
   padding:0;
-  position:absolute;
-  z-index:99;
 }
 #workspace .info .tabs li {
   position:relative;
@@ -237,63 +244,75 @@ input, textarea {
 #workspace .info .tabs li a ins.ui-icon {
   margin-top: 5px;
 }
-#workspace .info .tabs li a {
+#workspace .info .admin-tabs a.parent ins.ui-icon {
+  margin: 9px 9px 0px 0px;
+}
+#workspace .info .tabs li.entry a {
   color:#222;
   display:block;
-  height:27px;
-  line-height:26px;
-  margin-top:4px;
-  padding:0 11px;
+  height:26px;
+  line-height:25px;
+  margin-right: 5px;
+  padding:4px 12px 1px 12px;
 }
-#workspace .info .tabs li a:hover {
-  text-decoration:underline;
-}
-#workspace .info .tabs li a.active {
-  -khtml-border-radius:3px 3px 0 0;
-  -moz-border-radius:3px 3px 0 0;
-  -ms-border-radius:3px 3px 0 0;
-  -o-border-radius:3px 3px 0 0;
-  -webkit-border-radius:3px 3px 0 0;
+#workspace .info .tabs li.entry a:hover,
+#workspace .info .tabs li.entry a.active {
+  -khtml-border-radius:0 0 3px 3px;
+  -khtml-box-shadow:inset 0 0 2px #aaa;
+  -moz-border-radius:0 0 3px 3px;
+  -moz-box-shadow:inset 0 0 2px #aaa;
+  -ms-border-radius:0 0 3px 3px;
+  -ms-box-shadow:inset 0 0 2px #aaa;
+  -o-border-radius:0 0 3px 3px;
+  -o-box-shadow:inset 0 0 2px #aaa;
+  -webkit-border-radius:0 0 3px 3px;
+  -webkit-box-shadow:inset 0 0 2px #aaa;
   background:#fff;
-  border-bottom:0;
-  border-radius:3px 3px 0 0;
+  border-radius:0 0 3px 3px;
   border:1px #999 solid;
-  height:25px;
-  line-height:24px;
-  padding:0 10px;
-  text-decoration:none;
+  border-top:0;
+  box-shadow: inset 0 0 2px #aaa;
+  height:26px;
+  line-height:25px;
+  padding:4px 11px 0px 11px;
 }
-#workspace .info .tabs li.openable a {
-  padding:0 11px 0px 5px;
+#workspace .info .tabs li.entry.openable a {
+  padding:4px 12px 1px 3px;
 }
-#workspace .info .tabs li.openable a.active {
-  padding:0 10px 0px 4px;
+#workspace .info .tabs li.entry.openable a:hover,
+#workspace .info .tabs li.entry.openable a.active {
+  padding:4px 11px 0px 2px;
 }
 
 #workspace .info .tabs .subtabs {
-  -khtml-border-radius:0px 0px 3px 3px;
-  -moz-border-radius:0px 0px 3px 3px;
-  -ms-border-radius:0px 0px 3px 3px;
-  -o-border-radius:0px 0px 3px 3px;
-  -webkit-border-radius:0px 0px 3px 3px;
+  -khtml-border-radius:3px 3px 3px 3px;
+  -moz-border-radius:3px 3px 3px 3px;
+  -ms-border-radius:3px 3px 3px 3px;
+  -o-border-radius:3px 3px 3px 3px;
+  -webkit-border-radius:3px 3px 3px 3px;
   position:absolute;
   width: 200px;
-  top: 30px;
+  top: 32px;
+  left: 3px;
   display:block;
   background:#fff;
-  border-radius:0px 0px 3px 3px;
+  border-radius:3px 3px 3px 3px;
   border:1px #999 solid;
   margin-left: 0px;
   display: none;
+  z-index: 100;
 }
 
-#workspace .info .tabs .subtabs li {
+#workspace .info .tabs .subtabs li.entry {
   float: none;
 }
-#workspace .info .tabs .subtabs li a {
+#workspace .info .tabs .subtabs li.entry a,
+#workspace .info .tabs .subtabs li.entry a:hover {
   line-height:20px;
   height:20px
+  border: 0px
 }
+
 #workspace .info .actions {
   float:right;
   margin:0;
@@ -302,7 +321,6 @@ input, textarea {
 }
 #workspace .info .actions li {
   float:left;
-  margin-left:8px;
 }
 #workspace .info .actions li a {
   -khtml-border-radius:5px;
@@ -322,10 +340,18 @@ input, textarea {
   display:block;
   line-height:22px;
   padding:0 8px;
+  margin: 5px 0 0 10px;
 }
-#workspace .info .actions li a:hover {
+#workspace .info .actions li a:hover,
+#workspace .info .actions li a.active {
+  -khtml-box-shadow:inset 0 0 2px #aaa;
+  -moz-box-shadow:inset 0 0 2px #aaa;
+  -ms-box-shadow:inset 0 0 2px #aaa;
+  -o-box-shadow:inset 0 0 2px #aaa;
+  -webkit-box-shadow:inset 0 0 2px #aaa;
   background:#fff url(../img/gradient25.png) repeat-x bottom;
   border-color:#555;
+  box-shadow:inset 0 0 2px #aaa;
 }
 
 /* Main working content space */

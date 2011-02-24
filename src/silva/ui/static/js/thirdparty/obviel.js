@@ -202,11 +202,13 @@ var obviel = {};
                 };
             } else {
                 url = (this.data.html_url || this.html_url);
-                var template = module._template_cache[url];
-                if (template) {
-                    callback(template);
-                    return;
-                };
+                if (!this.nocache) {
+                    var template = module._template_cache[url];
+                    if (template) {
+                        callback(template);
+                        return;
+                    };
+                }
             };
             $.ajax({
                 type: 'GET',

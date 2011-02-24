@@ -6,8 +6,10 @@
 from five import grok
 
 from silva.translations import translate as _
-from silva.core.interfaces import IContent, IContainer, ISilvaObject, IVersionedContent
-from silva.ui.interfaces import IMenuItem, IContentLeftMenuItem, IContentRightMenuItem
+from silva.core.interfaces import IContent, IContainer
+from silva.core.interfaces import ISilvaObject, IVersionedContent
+from silva.ui.interfaces import IMenuItem, IContentMenuItem
+from silva.ui.interfaces import IViewMenuItem, ISettingsMenuItem
 
 
 class MenuItem(grok.Subscription):
@@ -23,19 +25,25 @@ class MenuItem(grok.Subscription):
                 'action': self.action}
 
 
-class ContentLeftMenuItem(MenuItem):
+class ContentMenuItem(MenuItem):
     grok.baseclass()
-    grok.implements(IContentLeftMenuItem)
-    grok.provides(IContentLeftMenuItem)
+    grok.implements(IContentMenuItem)
+    grok.provides(IContentMenuItem)
 
 
-class ContentRightMenuItem(MenuItem):
+class ViewMenuItem(MenuItem):
     grok.baseclass()
-    grok.implements(IContentRightMenuItem)
-    grok.provides(IContentRightMenuItem)
+    grok.implements(IViewMenuItem)
+    grok.provides(IViewMenuItem)
 
 
-class EditTabMenu(ContentLeftMenuItem):
+class SettingsMenuItem(MenuItem):
+    grok.baseclass()
+    grok.implements(ISettingsMenuItem)
+    grok.provides(ISettingsMenuItem)
+
+
+class EditTabMenu(ContentMenuItem):
     grok.context(IContent)
     grok.order(10)
     name = _('Edit')
@@ -43,7 +51,7 @@ class EditTabMenu(ContentLeftMenuItem):
     default = True
 
 
-class ContainerTabMenu(ContentLeftMenuItem):
+class ContainerTabMenu(ContentMenuItem):
     grok.context(IContainer)
     grok.order(10)
     name = _('Content')
@@ -51,7 +59,7 @@ class ContainerTabMenu(ContentLeftMenuItem):
     default = True
 
 
-class AddTabMenu(ContentLeftMenuItem):
+class AddTabMenu(ContentMenuItem):
     grok.context(IContainer)
     grok.order(15)
     name = _('Add')
@@ -67,32 +75,46 @@ class AddTabMenu(ContentLeftMenuItem):
         return data
 
 
-class PropertiesTabMenu(ContentLeftMenuItem):
+class PropertiesTabMenu(ContentMenuItem):
     grok.context(ISilvaObject)
     grok.order(20)
     name = _('Properties')
     action = 'properties'
 
 
-class PublishTabMenu(ContentLeftMenuItem):
+class PublishTabMenu(ContentMenuItem):
     grok.context(IVersionedContent)
     grok.order(30)
     name = _('Publish')
     action = 'publish'
 
 
-class PreviewMenu(ContentRightMenuItem):
+class PreviewMenu(ViewMenuItem):
     grok.context(ISilvaObject)
     grok.order(10)
     name = _('Preview')
     action = 'preview'
 
 
-class ViewMenu(ContentRightMenuItem):
+class ViewMenu(ViewMenuItem):
     grok.context(ISilvaObject)
     grok.order(20)
     name = _('View')
     action = 'view'
+
+
+class AccessMenu(SettingsMenuItem):
+    grok.context(ISilvaObject)
+    grok.order(10)
+    name = _(u'Access')
+    action = 'access'
+
+
+class SettingsMenu(SettingsMenuItem):
+    grok.context(ISilvaObject)
+    grok.order(10)
+    name = _(u'Settings')
+    action = 'settings'
 
 
 def get_menu_items(content, menu):

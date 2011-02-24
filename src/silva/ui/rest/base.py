@@ -16,7 +16,7 @@ from Acquisition import aq_parent
 from silva.core.interfaces import IRoot
 from silva.core.messages.interfaces import IMessageService
 from silva.core.views.interfaces import IVirtualSite
-from silva.ui.interfaces import IContentLeftMenuItem, IContentRightMenuItem
+from silva.ui.interfaces import IContentMenuItem, IViewMenuItem
 from silva.ui.icon import get_icon
 from silva.ui.menu import get_menu_items
 
@@ -132,8 +132,10 @@ class PageREST(UIREST):
                     'title': self.context.get_title_or_id(),
                     'icon': get_icon(self.context, self.request),
                     },
-                'left': self.get_metadata_menu(IContentLeftMenuItem),
-                'right': self.get_metadata_menu(IContentRightMenuItem),
+                'menu': {
+                        'content': self.get_metadata_menu(IContentMenuItem),
+                        'view': self.get_metadata_menu(IViewMenuItem),
+                        },
                 'path': self.get_content_path(self.context),
                 'up': parent,
                 },
