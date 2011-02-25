@@ -3,6 +3,9 @@
 # See also LICENSE.txt
 # $Id$
 
+
+from collections import defaultdict
+
 from five import grok
 from infrae import rest
 from zope.cachedescriptors.property import CachedProperty
@@ -20,6 +23,8 @@ from silva.ui.interfaces import IContentMenuItem, IViewMenuItem
 from silva.ui.interfaces import ISettingsMenuItem
 from silva.ui.icon import get_icon
 from silva.ui.menu import get_menu_items
+
+import fanstatic
 
 
 class PageException(Exception):
@@ -77,6 +82,27 @@ class UIREST(rest.REST):
 
 
 
+def get_resources(request):
+    needed = fanstatic.get_needed()
+    if not needed.has_resources():
+        return None
+    if not needed.base_url:
+        needed.base_url = IVirtualSite(request).get_root_url()
+    data = defaultdict(list)
+    url_cache = {}
+    for resource in needed.resources():
+        library = resource.library
+        library_url = url_cache.get(library.name)
+        if library_url is None:
+            library_url = url_cache[library.name] = needed.library_url(library)
+        resource_url =  '/'.join((library_url, resource.relpath))
+        data[resource.ext[1:]].append(resource_url)
+
+    data['ifaces'] = ['resources']
+    return data
+
+
+
 class PageREST(UIREST):
     grok.baseclass()
     grok.require('silva.ReadSilvaContent')
@@ -126,6 +152,7 @@ class PageREST(UIREST):
             'content': payload,
             'notifications': self.get_notifications(),
             'navigation': self.get_navigation(),
+            'html_resources': get_resources(self.request),
             'metadata': {
                 'ifaces': ['metadata'],
                 'title': {

@@ -38,6 +38,9 @@
                 return false;
             });
 
+            // Send an event form loaded to init specific JS field
+            form.trigger('load-smiform');
+
         },
         cleanup: function() {
             this.content.empty();

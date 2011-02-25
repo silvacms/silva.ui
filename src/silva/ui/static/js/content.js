@@ -37,6 +37,7 @@
                 if (info.entries) {
                     var container = $('<ol class="subtabs"></ol>');
                     var link = tab.children('a');
+                    var is_current = link.hasClass('active');
 
                     $.each(info.entries, function(i, entry) {
                         container.append(this.create(entry));
@@ -46,11 +47,15 @@
                     link.prepend('<ins class="ui-icon ui-icon-triangle-1-s"></ins>');
                     container.bind('mouseleave', function() {
                         container.fadeOut();
-                        link.removeClass('active');
+                        if (!is_current) {
+                            link.removeClass('active');
+                        };
                     });
                     link.bind('click', function () {
                         container.fadeToggle();
-                        link.toggleClass('active');
+                        if (!is_current) {
+                            link.toggleClass('active');
+                        };
                         return false;
                     });
                 };

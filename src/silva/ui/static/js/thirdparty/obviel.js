@@ -99,6 +99,47 @@ var obviel = {};
         return ret;
     };
 
+
+    /**
+     * HTMLResource, load extra JS or CSS at run time.
+     */
+    module.HTMLResources = function() {
+        this._js = [];
+        $(document).ready(function() {
+            this.populate();
+        }.scope(this));
+    };
+
+    module.HTMLResources.prototype.populate = function() {
+        $('script').each(function (i, script) {
+            var src = $(script).attr('src');
+
+            if (src != undefined && !this.is_js_loaded(src)) {
+                this._js.push(src);
+            };
+        }.scope(this));
+    };
+
+    module.HTMLResources.prototype.is_js_loaded = function(script) {
+        return this._js.indexOf(script) >= 0;
+    };
+
+    module.HTMLResources.prototype.load_js = function(script) {
+        if (!this.is_js_loaded(script)) {
+            // We don't use jQuery here, as does strange things with scripts.
+
+            var head = document.getElementsByTagName('head')[0];
+            var script_tag = document.createElement('script');
+            script_tag.type = 'text/javascript';
+            script_tag.src = script;
+            head.appendChild(script_tag);
+
+            this._js.push(script);
+        };
+    };
+
+    module._resources = new module.HTMLResources();
+
     /**
      * View
      * @param definition: definition of the view (object containing settings and methods)
@@ -117,15 +158,13 @@ var obviel = {};
 
     // render the view
     module.View.prototype._render = function(callback) {
-        this.content.trigger('cleanup.obviel');
+        this.content.triggerHandler('cleanup-obviel');
 
         this._get_template(function(html) {
             this._render_template(html, callback);
             if (this.cleanup) {
-                this.content.one('cleanup.obviel', function(event) {
-                    if (this.content.get(0 ) === event.target) {
-                        this.cleanup();
-                    };
+                this.content.one('cleanup-obviel', function(event) {
+                    this.cleanup();
                 }.scope(this));
             };
         }.scope(this));
@@ -174,6 +213,16 @@ var obviel = {};
 
     // retrieve a template for a view
     module.View.prototype._get_template = function(callback) {
+        // resources
+        var resources = this.data.html_resources || this.html_resources;
+        if (resources) {
+            if (resources.js) {
+                $.each(resources.js, function(i, script) {
+                    module._resources.load_js(script);
+                });
+            };
+        };
+
         if (this.data.html || (this.html && !this.data.html_url) ||
             this.data.jsont || (this.jsont && !this.data.jsont_url)) {
             var jsont = (this.data.jsont || this.jsont);

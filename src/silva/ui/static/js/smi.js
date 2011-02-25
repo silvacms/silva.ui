@@ -7,7 +7,7 @@
         var message = $('div#loading-message');
 
         if (message) {
-            $(document).ajaxSend(function() {
+            $('body').ajaxSend(function() {
                 if (!count) {
                     message.fadeIn('fast');
                 };
@@ -400,7 +400,7 @@
      */
     SMI.prototype.open = function(path, tab) {
         if (tab == undefined) {
-            tab = 'content';
+            tab = this.opened.tab;
         };
         document.location.hash = tab + '!' + path;
     };
