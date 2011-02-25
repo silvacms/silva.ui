@@ -326,6 +326,8 @@ class ContentCounter(object):
         return self.size
 
     def __unicode__(self):
+        if not self.size:
+            return u''
 
         def quotify(element):
             return u'"%s"' % element
@@ -419,7 +421,7 @@ class PasteActionREST(ActionREST):
             self.notify(
                 _(u'Pasted as a copy ${copied}.',
                   mapping={'copied': copied_titles}))
-        if copied_titles:
+        if moved_titles:
             self.notify(
                 _(u'Moved ${moved}.',
                   mapping={'moved': moved_titles}))

@@ -110,12 +110,6 @@ class AccessMenu(SettingsMenuItem):
     action = 'access'
 
 
-class SettingsMenu(SettingsMenuItem):
-    grok.context(ISilvaObject)
-    grok.order(10)
-    name = _(u'Settings')
-    action = 'settings'
-
 
 def get_menu_items(content, menu):
     return grok.queryOrderedSubscriptions(content, menu)
