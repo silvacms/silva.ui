@@ -75,25 +75,11 @@ class AddTabMenu(ContentMenuItem):
         return data
 
 
-class PropertiesTabMenu(ContentMenuItem):
-    grok.context(ISilvaObject)
-    grok.order(20)
-    name = _('Properties')
-    action = 'properties'
-
-
 class PublishTabMenu(ContentMenuItem):
     grok.context(IVersionedContent)
     grok.order(30)
     name = _('Publish')
     action = 'publish'
-
-
-class PreviewMenu(ViewMenuItem):
-    grok.context(ISilvaObject)
-    grok.order(10)
-    name = _('Preview')
-    action = 'preview'
 
 
 class ViewMenu(ViewMenuItem):

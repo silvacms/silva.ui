@@ -15,11 +15,14 @@ from zope.i18n.interfaces import IUserPreferredLanguages
 
 
 class SMI(grok.View):
-    grok.name('smi.html')
+    grok.name('edit')
     grok.context(ISilvaObject)
     grok.require('silva.ReadSilvaContent')
 
     def update(self):
+        # XXX Apply the correct SMI skin
+        # XXX redirect at the root of VirtualSite + '#content!/'
+        # component.getUtility(Interface, root._smi_skin)
         applySkin(self.request, ISMIResources)
 
         langs = IUserPreferredLanguages(self.request).getPreferredLanguages()
