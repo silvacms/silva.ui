@@ -17,6 +17,7 @@ from silva.core.interfaces import IRoot
 from silva.core.messages.interfaces import IMessageService
 from silva.core.views.interfaces import IVirtualSite
 from silva.ui.interfaces import IContentMenuItem, IViewMenuItem
+from silva.ui.interfaces import ISettingsMenuItem
 from silva.ui.icon import get_icon
 from silva.ui.menu import get_menu_items
 
@@ -135,6 +136,7 @@ class PageREST(UIREST):
                 'menu': {
                         'content': self.get_metadata_menu(IContentMenuItem),
                         'view': self.get_metadata_menu(IViewMenuItem),
+                        'settings': self.get_metadata_menu(ISettingsMenuItem),
                         },
                 'path': self.get_content_path(self.context),
                 'up': parent,

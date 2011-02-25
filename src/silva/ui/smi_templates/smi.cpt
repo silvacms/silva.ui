@@ -46,13 +46,19 @@
       <div id="workspace">
         <div class="info">
           <ol class="tabs admin-tabs">
-            <li>
-              <a class="parent screen ui-state-default" href="" rel="">
+            <li class="entry">
+              <a class="parent screen tool ui-state-default" href="" rel="">
                 <ins class="ui-icon ui-icon-arrowreturnthick-1-n"></ins>
+              </a>
+            </li>
+            <li class="entry">
+              <a class="settings tool ui-state-default" href="" rel="">
+                <ins class="ui-icon ui-icon-wrench"></ins>
               </a>
             </li>
           </ol>
           <ol class="tabs content-tabs"></ol>
+          <ol class="tabs settings-tabs"></ol>
           <ol class="actions"></ol>
           <h3>
             <ins class="icon loading"></ins>

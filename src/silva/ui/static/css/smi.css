@@ -49,12 +49,12 @@ input, textarea {
 }
 
 #notifications {
-  position:absolute;
-  top:0px;
-  right:40%;
-  width:20%;
+  position: absolute;
+  top: 5px;
+  left: 310px;
+  right: 180px;
   background: transparent;
-  z-index: 2000;
+  z-index: 200;
 }
 #notifications .notification {
   margin:10px;
@@ -230,6 +230,9 @@ input, textarea {
   width:20px;
 }
 
+#workspace .info .settings-tabs {
+  display: none;
+}
 #workspace .info .tabs {
   float:left;
   list-style:none;
@@ -243,9 +246,6 @@ input, textarea {
 }
 #workspace .info .tabs li a ins.ui-icon {
   margin-top: 5px;
-}
-#workspace .info .admin-tabs a.parent ins.ui-icon {
-  margin: 9px 9px 0px 0px;
 }
 #workspace .info .tabs li.entry a {
   color:#222;
@@ -308,10 +308,29 @@ input, textarea {
 }
 #workspace .info .tabs .subtabs li.entry a,
 #workspace .info .tabs .subtabs li.entry a:hover {
-  line-height:20px;
-  height:20px
-  border: 0px
+  line-height: 20px;
+  height: 20px;
+  border: 0px;
+  box-shadow: none;
+  padding: 2px 5px;
+  -khtml-box-shadow: none;
+  -moz-box-shadow: none;
+  -ms-box-shadow: none;
+  -o-box-shadow: none;
+  -webkit-box-shadow: none;
 }
+
+#workspace .info .admin-tabs li.entry a.tool {
+  padding: 4px 1px 0px 1px;
+}
+#workspace .info .admin-tabs li.entry a.tool.active,
+#workspace .info .admin-tabs li.entry a.tool:hover {
+  padding: 4px 0px 0px 0px;
+}
+#workspace .info .admin-tabs li.entry a.tool ins.ui-icon {
+  margin: 5px 3px 0px 3px;
+}
+
 
 #workspace .info .actions {
   float:right;

@@ -46,9 +46,11 @@
                     link.prepend('<ins class="ui-icon ui-icon-triangle-1-s"></ins>');
                     container.bind('mouseleave', function() {
                         container.fadeOut();
+                        link.removeClass('active');
                     });
                     link.bind('click', function () {
                         container.fadeToggle();
+                        link.toggleClass('active');
                         return false;
                     });
                 };
@@ -57,6 +59,33 @@
         },
         cleanup: function() {
             this.content.empty();
+        }
+    });
+
+    obviel.view({
+        iface: 'metadata',
+        render: function() {
+            var  parent_link = this.content.find('a.parent');
+
+            // Update header
+            this.content.children('h3').render({data: this.data.title});
+            this.content.children('.content-tabs').render({data: this.data.menu.content});
+            this.content.children('.settings-tabs').render({data: this.data.menu.settings});
+            this.content.children('.actions').render({data: this.data.menu.view});
+
+            // Update content link hidden link
+            this.content.children('#content-url').attr('href', this.url.expand({path: this.data.path}));
+
+            // Update parent link
+            if (this.data.up != null) {
+                parent_link.attr('href', this.data.up ||'/');
+                parent_link.attr('rel', this.smi.opened.tab);
+                parent_link.removeClass('ui-state-disabled');
+                parent_link.addClass('ui-state-default');
+            } else {
+                parent_link.addClass('ui-state-disabled');
+                parent_link.removeClass('ui-state-default');
+            };
         }
     });
 
@@ -79,30 +108,34 @@
         // Disable text selection
         workspace.children('.info').disableTextSelect();
 
+        // Bind the settings display tool
+        {
+            var settings_switcher = workspace.find('.admin-tabs a.settings');
+            var settings_menu = workspace.find('.settings-tabs');
+            var content_menu = workspace.find('.content-tabs');
+
+            settings_switcher.bind('click', function() {
+                if (content_menu.is(':visible')) {
+                    content_menu.hide();
+                    settings_menu.show();
+                    settings_switcher.toggleClass('active');
+                } else {
+                    content_menu.show();
+                    settings_menu.hide();
+                    settings_switcher.toggleClass('active');
+                };
+                return false;
+            });
+        };
+
         // New workspace is loaded
         workspace.bind('content-smi', function (event, data) {
             var workspace = $(this);
             var info = workspace.children('.info');
             var content = workspace.children('.content');
 
-            // Update header
-            info.children('h3').render({data: data.metadata.title});
-            info.children('.content-tabs').render({data: data.metadata.menu.content});
-            info.children('.actions').render({data: data.metadata.menu.view});
-            info.children('#content-url').attr(
-                'href', url.expand({path: data.metadata.path}));
-            var  parent_link = info.find('a.parent');
-            if (data.metadata.up != null) {
-                parent_link.attr('href', data.metadata.up ||'/');
-                parent_link.attr('rel', smi.opened.tab);
-                parent_link.removeClass('ui-state-disabled');
-                parent_link.addClass('ui-state-default');
-            } else {
-                parent_link.addClass('ui-state-disabled');
-                parent_link.removeClass('ui-state-default');
-            };
-
             // Update content area
+            info.render({data: data.metadata, extra: {smi: smi, url: url}});
             content.render({data: data.content, name:'content', extra: {smi: smi}});
         });
     };
