@@ -75,26 +75,11 @@ class AddTabMenu(ContentMenuItem):
         return data
 
 
-class PublishTabMenu(ContentMenuItem):
-    grok.context(IVersionedContent)
-    grok.order(30)
-    name = _('Publish')
-    action = 'publish'
-
-
 class ViewMenu(ViewMenuItem):
     grok.context(ISilvaObject)
     grok.order(20)
     name = _('View')
     action = 'view'
-
-
-class AccessMenu(SettingsMenuItem):
-    grok.context(ISilvaObject)
-    grok.order(10)
-    name = _(u'Access')
-    action = 'access'
-
 
 
 def get_menu_items(content, menu):
