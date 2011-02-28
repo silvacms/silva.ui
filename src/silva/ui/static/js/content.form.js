@@ -6,7 +6,7 @@
         iface: 'form',
         name: 'content',
         render: function() {
-            var form = this.content.children('form');
+            var form = this.content.find('form');
             var send = function(extra) {
                 var values = form.serializeArray();
 
@@ -28,7 +28,7 @@
             });
 
             // Bind click submit
-            form.find('.controls input').bind('click', function() {
+            form.find('.form-controls input').bind('click', function() {
                 var button = $(this);
 
                 send([{
