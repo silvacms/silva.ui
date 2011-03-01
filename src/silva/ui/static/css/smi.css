@@ -579,16 +579,12 @@ input, textarea {
 
 /* Form styling */
 
-#workspace .content-form td,
-#workspace .content-form th {
+#workspace .form-content .form-section,
+#workspace .form-content .form-footer {
   padding: 10px;
 }
 
-#workspace .content-form td.label {
-  width: 33%;
-}
-
-#workspace .content-form label {
+#workspace .form-content label {
   font-weight: bold;
 }
 

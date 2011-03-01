@@ -9,10 +9,7 @@ from silva.core.editor.interfaces import ICKEditorResources
 from silva.core.references.widgets import IReferenceUIResources
 
 # CKeditor already contains jquery and json-template
-class ISMIResources(ICKEditorResources, IReferenceUIResources):
-
-    silvaconf.resource('css/style.css')
-    silvaconf.resource('css/smi.css')
+class ISMIScripts(ICKEditorResources, IReferenceUIResources):
 
     silvaconf.resource('js/thirdparty/obviel.js')
     silvaconf.resource('js/thirdparty/shortcut.js')
@@ -28,6 +25,12 @@ class ISMIResources(ICKEditorResources, IReferenceUIResources):
     silvaconf.resource('js/content.form.js')
     silvaconf.resource('js/navigation.js')
     silvaconf.resource('js/smi.js')
+
+
+class ISMIResources(ISMIScripts):
+
+    silvaconf.resource('css/style.css')
+    silvaconf.resource('css/smi.css')
 
 
 class IMenuItem(Interface):

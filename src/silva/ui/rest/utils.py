@@ -11,7 +11,6 @@ from silva.ui.icon import get_icon
 from silva.ui.rest.base import UIREST, PageREST
 from silva.core.interfaces import IContainer
 from silva.app.document.interfaces import IDocument
-from silva.core.editor.transform.interfaces import ITransformer
 from silva.core.editor.transform.interfaces import IInputEditorFilter
 
 from Products.Silva.ExtensionRegistry import meta_types_for_interface
@@ -56,8 +55,7 @@ class DocumentEdit(PageREST):
 
     def payload(self):
         version = self.context.get_editable()
-        transformer = getMultiAdapter((version, self.request), ITransformer)
-        text = transformer.attribute('body', IInputEditorFilter)
+        text = version.body.render(version, self.request, IInputEditorFilter)
 
         return {"ifaces": ["editor"],
                 "name": "body",
