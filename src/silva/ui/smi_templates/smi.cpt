@@ -72,7 +72,7 @@
     <script type="text/javascript">
       $(document).ready(function() {
       smi = $('body').SMI({
-          url: "${view.root_url}/{path}/++rest++silva.ui.{tab}",
+          url: "${view.root_url}/{path}/++rest++silva.ui.{screen}",
           header: {
               selector: "#header"
           },

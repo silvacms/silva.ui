@@ -143,7 +143,7 @@ class ColumnsContainerListing(UIREST):
                      'action': {'rest': {'action': 'publish',
                                          'send': 'selected_ids'}},
                      'available': {'items_match': {'status': [
-                                    'draft', 'approved', 'pending', None]}},
+                                    'draft', 'approved', 'pending', 'closed', None]}},
                      'ifaces': ['container', 'versioned']},
                     {'title': self.translate(_(u'Close')),
                      'icon': 'close',
@@ -448,7 +448,7 @@ class PublishActionREST(ActionREST):
         not_published_titles = ContentCounter(self)
         serializer = ContentSerializer(self, self.request)
 
-        for ignored, content in self.get_selected_content(recursive=True):
+        for identifier, content in self.get_selected_content(recursive=True):
             workflow = interfaces.IPublicationWorkflow(content, None)
             if workflow is not None:
                 try:
@@ -456,7 +456,8 @@ class PublishActionREST(ActionREST):
                 except interfaces.PublicationWorkflowError:
                     not_published_titles.append(content)
                 else:
-                    published.append(serializer(content))
+                    if identifier is not None:
+                        published.append(serializer(content))
                     published_titles.append(content)
             else:
                 not_published_titles.append(content)
@@ -489,7 +490,7 @@ class CloseActionREST(ActionREST):
         not_closed_titles = ContentCounter(self)
         serializer = ContentSerializer(self, self.request)
 
-        for ignored, content in self.get_selected_content(recursive=True):
+        for identifier, content in self.get_selected_content(recursive=True):
             workflow = interfaces.IPublicationWorkflow(content, None)
             if workflow is not None:
                 try:
@@ -497,7 +498,8 @@ class CloseActionREST(ActionREST):
                 except interfaces.PublicationWorkflowError:
                     not_closed_titles.append(content)
                 else:
-                    closed.append(serializer(content))
+                    if identifier is not None:
+                        closed.append(serializer(content))
                     closed_titles.append(content)
             else:
                 not_closed_titles.append(content)

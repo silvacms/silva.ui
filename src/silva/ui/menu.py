@@ -7,7 +7,7 @@ from five import grok
 
 from silva.translations import translate as _
 from silva.core.interfaces import IContent, IContainer
-from silva.core.interfaces import ISilvaObject, IVersionedContent
+from silva.core.interfaces import ISilvaObject
 from silva.ui.interfaces import IMenuItem, IContentMenuItem
 from silva.ui.interfaces import IViewMenuItem, ISettingsMenuItem
 

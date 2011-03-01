@@ -43,7 +43,6 @@
 (function($, obviel, shortcut) {
     var HASH_REGEXP = /#([^!]*)!?(.*)/;
 
-    obviel.iface('redirect');
     obviel.view({
         iface: 'redirect',
         render: function() {
@@ -51,7 +50,13 @@
         }
     });
 
-    obviel.iface('content');
+    obviel.view({
+        iface: 'view',
+        render: function() {
+            window.open(this.data.url);
+        }
+    });
+
     obviel.view({
         iface: 'content',
         render: function() {
@@ -318,7 +323,8 @@
         this._.workspace = workspace;
         this._.navigation = navigation;
 
-        this.opened = {path: '', tab: ''};
+        this.opened = {path: '', screen: ''}; // Currently opened screen
+        this.opening = {path: '', screen: ''}; // Screen being currently opened
         this.options = options;
         this.shortcuts = new ShortcutManager();
         this.notifications = new NotificationManager(options.notifications);
@@ -359,13 +365,13 @@
             var parts = HASH_REGEXP.exec(hash);
 
             if (parts) {
-                this.opened = {tab: parts[1], path: parts[2]};
+                this.opening = {screen: parts[1], path: parts[2]};
             } else {
-                this.opened = {tab: '', path: ''};
+                this.opening = {screen: '', path: ''};
             }
 
-            if (!this.opened.tab.length) {
-                this.opened.tab = 'content';
+            if (!this.opening.screen.length) {
+                this.opening.screen = 'content';
             };
             this.send();
         }.scope(this);
@@ -398,11 +404,11 @@
      * @param path: path to the content to open.
      * @param tab: tab name to open on the content.
      */
-    SMI.prototype.open = function(path, tab) {
-        if (tab == undefined) {
-            tab = this.opened.tab;
+    SMI.prototype.open = function(path, screen) {
+        if (screen == undefined) {
+            screen = this.opened.screen;
         };
-        document.location.hash = tab + '!' + path;
+        document.location.hash = screen + '!' + path;
     };
 
     /**
@@ -426,11 +432,15 @@
     SMI.prototype.send = function(data) {
         var query = {};
 
-        query['url'] = this._.url.expand(this.opened);
+        query['url'] = this._.url.expand(this.opening);
         query['dataType'] = 'json';
         query['success'] = function(data) {
+            this.opened = this.opening;
             $(document).render({data: data, extra: {smi: this}});
         }.scope(this);
+        query['error'] = function(request, status, error) {
+            alert('Error '  + request.status.toString() + ' please reboot: ' + error);
+        };
         if (data) {
             query['type'] = 'POST';
             query['data'] = data;

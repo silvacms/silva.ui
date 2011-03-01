@@ -4,12 +4,13 @@
 # $Id$
 
 from five import grok
-from zope.component import getUtility, getMultiAdapter
+from zope.component import getUtility
 from zope.intid.interfaces import IIntIds
+from zope.traversing.browser import absoluteURL
 
 from silva.ui.icon import get_icon
 from silva.ui.rest.base import UIREST, PageREST
-from silva.core.interfaces import IContainer
+from silva.core.interfaces import ISilvaObject, IContainer
 from silva.app.document.interfaces import IDocument
 from silva.core.editor.transform.interfaces import IInputEditorFilter
 
@@ -22,6 +23,16 @@ class NotificationPoll(UIREST):
 
     def GET(self):
         return self.json_response(self.get_notifications())
+
+
+class ViewREST(UIREST):
+    grok.name('silva.ui.view')
+    grok.context(ISilvaObject)
+
+    def GET(self):
+        data = {'ifaces': ['view'],
+                'url': absoluteURL(self.context, self.request)}
+        return self.json_response(data)
 
 
 class NavigationListing(UIREST):
