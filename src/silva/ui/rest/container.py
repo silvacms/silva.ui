@@ -16,6 +16,7 @@ from silva.core.messages.interfaces import IMessageService
 from silva.ui.icon import get_icon
 from silva.ui.rest.base import PageREST, UIREST
 from silva.translations import translate as _
+from silva.core.services.utils import walk_silva_tree
 
 from Acquisition import aq_parent
 from Products.SilvaMetadata.interfaces import IMetadataService
@@ -272,18 +273,25 @@ class ActionREST(UIREST):
     grok.context(interfaces.IContainer)
     grok.require('silva.ChangeSilvaContent')
 
-    def get_selected_content(self, key='content'):
-        content = self.request.form.get(key)
-        if content is not None:
+    def get_selected_content(self, key='content', recursive=False):
+        ids = self.request.form.get(key)
+        if ids is not None:
             intids = getUtility(IIntIds)
-            if not isinstance(content, list):
+            if not isinstance(ids, list):
                 # If only one item have been submitted we won't get a list
-                content = [content]
-            for intid in content:
+                ids = [ids]
+            for id in ids:
                 try:
-                    yield intid, intids.getObject(int(intid))
+                    content = intids.getObject(int(id))
                 except (KeyError, ValueError):
                     pass
+                else:
+                    if recursive and interfaces.IContainer.providedBy(content):
+                        for content in walk_silva_tree(content):
+                            yield id, content
+                            id = None
+                    else:
+                        yield id, content
 
     def payload(self):
         raise NotImplementedError
@@ -440,7 +448,7 @@ class PublishActionREST(ActionREST):
         not_published_titles = ContentCounter(self)
         serializer = ContentSerializer(self, self.request)
 
-        for intid, content in self.get_selected_content():
+        for ignored, content in self.get_selected_content(recursive=True):
             workflow = interfaces.IPublicationWorkflow(content, None)
             if workflow is not None:
                 try:
@@ -481,7 +489,7 @@ class CloseActionREST(ActionREST):
         not_closed_titles = ContentCounter(self)
         serializer = ContentSerializer(self, self.request)
 
-        for intid, content in self.get_selected_content():
+        for ignored, content in self.get_selected_content(recursive=True):
             workflow = interfaces.IPublicationWorkflow(content, None)
             if workflow is not None:
                 try:
@@ -522,7 +530,7 @@ class NewVersionActionREST(ActionREST):
         not_newversion_titles = ContentCounter(self)
         serializer = ContentSerializer(self, self.request)
 
-        for intid, content in self.get_selected_content():
+        for ignored, content in self.get_selected_content():
             workflow = interfaces.IPublicationWorkflow(content, None)
             if workflow is not None:
                 try:
