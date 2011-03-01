@@ -210,6 +210,10 @@
                 this.notifies(messages);
             }.scope(this));
         }.scope(this));
+
+        $(document).bind('notify', function(event, message) {
+            this.notify(message);
+        }.scope(this));
     };
 
     /**
