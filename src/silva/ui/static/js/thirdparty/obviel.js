@@ -285,6 +285,7 @@ var obviel = {};
     module.Registry = function() {
         // Registered views
         this._views = {}; // name to dict {name: iface: view}
+        this._count = 0;
     };
 
     /**
@@ -300,21 +301,37 @@ var obviel = {};
         if (definition.name == undefined) {
             definition.name = 'default';
         };
-        if (definition.iface == undefined) {
-            definition.iface = 'object';
-        };
         if (definition.order == undefined) {
             definition.order = 0;
         };
 
-        // Registration
-        if (!this._views[definition.name]) {
-            this._views[definition.name] = {};
+        definition['__obviel_uid__'] = this._count.toString();
+        this._count += 1;
+
+        var views = this._views;
+        var add = function(definition) {
+            if (!views[definition.name]) {
+                views[definition.name] = {};
+            };
+            if (!views[definition.name][definition.iface]) {
+                views[definition.name][definition.iface] = [];
+            };
+            views[definition.name][definition.iface].unshift(definition);
         };
-        if (!this._views[definition.name][definition.iface]) {
-            this._views[definition.name][definition.iface] = [];
+
+        // Registration multiple or simple
+        if (definition.ifaces) {
+            $.each(definition.ifaces, function(i, iface) {
+                definition.iface = iface;
+                add(definition);
+            });
+        } else {
+            // Default
+            if (definition.iface == undefined) {
+                definition.iface = 'object';
+            };
+            add(definition);
         };
-        this._views[definition.name][definition.iface].unshift(definition);
     };
 
     // Render the most specialized view for a JSON object
@@ -348,6 +365,7 @@ var obviel = {};
     module.Registry.prototype._render_every_data = function(element, data, args) {
         var ifaces = module.ifaces(data);
         var views = this._views[args.name];
+        var seen_definitions = [];
         var to_render = [];
 
         if (views == undefined) {
@@ -357,17 +375,20 @@ var obviel = {};
             var definitions = views[iface];
             if (definitions) {
                 $.each(definitions, function(e, definition) {
-                    var view_definition = {};
-                    $.extend(view_definition, definition);
-                    if (args.extra) {
-                        $.extend(view_definition, args.extra);
-                    };
-                    var view = new module.View(view_definition, element, data);
-                    if (view.available != undefined)
-                        if (!view.available()) {
-                            return;
+                    if (seen_definitions.indexOf(definition['__obviel_uid__']) < 0) {
+                        var view_definition = {};
+                        $.extend(view_definition, definition);
+                        if (args.extra) {
+                            $.extend(view_definition, args.extra);
                         };
-                    to_render.push(view);
+                        var view = new module.View(view_definition, element, data);
+                        if (view.available != undefined)
+                            if (!view.available()) {
+                                return;
+                            };
+                        to_render.push(view);
+                        seen_definitions.push(definition['__obviel_uid__']);
+                    };
                 });
             };
         });

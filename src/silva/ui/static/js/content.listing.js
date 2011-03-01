@@ -84,126 +84,124 @@
      */
     var register_action_buttons = function(action_definitions, url_template, name) {
         $.each(action_definitions, function(i, action) {
-            $.each(action.ifaces, function (e, iface) {
-                var definition = {
-                    iface: iface,
-                    name: name,
-                    order: action.order,
-                    render: function() {
-                        var link = $('<a class="action ui-state-default"></a>');
+            var definition = {
+                ifaces: action.ifaces,
+                name: name,
+                order: action.order,
+                render: function() {
+                    var link = $('<a class="action ui-state-default"></a>');
 
-                        if (action.title) {
-                            link.text(action.title);
-                        };
-                        if (action.icon) {
-                            link.prepend(
-                                '<ins class=" ui-icon  ui-icon-' +
-                                    action.icon +
-                                    '"></ins>');
-                        };
-                        if (this.action != undefined) {
-                            link.bind('click', function() {
-                                this.action();
-                            }.scope(this));
-                        };
-                        this.content.append(link);
-                    }
-                };
-                for (var limiter in action.available) {
-                    switch(limiter) {
-                    case 'max_items':
-                        definition['available'] = function() {
-                            return this.data.length() <= action.available.max_items;
-                        };
-                        break;
-                    case 'items_match':
-                        definition['available'] = function() {
-                            var conditions = action.available.items_match;
+                    if (action.title) {
+                        link.text(action.title);
+                    };
+                    if (action.icon) {
+                        link.prepend(
+                            '<ins class=" ui-icon  ui-icon-' +
+                                action.icon +
+                                '"></ins>');
+                    };
+                    if (this.action != undefined) {
+                        link.bind('click', function() {
+                            this.action();
+                        }.scope(this));
+                    };
+                    this.content.append(link);
+                }
+            };
+            for (var limiter in action.available) {
+                switch(limiter) {
+                case 'max_items':
+                    definition['available'] = function() {
+                        return this.data.length() <= action.available.max_items;
+                    };
+                    break;
+                case 'items_match':
+                    definition['available'] = function() {
+                        var conditions = action.available.items_match;
 
-                            for (var i=0; i < this.data.length(); i++) {
-                                var item = this.data.data[i];
+                        for (var i=0; i < this.data.length(); i++) {
+                            var item = this.data.data[i];
 
-                                for (var property in conditions) {
-                                    if (conditions[property].indexOf(item[property]) >= 0) {
-                                        return true;
-                                    };
+                            for (var property in conditions) {
+                                if (conditions[property].indexOf(item[property]) >= 0) {
+                                    return true;
                                 };
                             };
-                            return false;
                         };
-                        break;
+                        return false;
                     };
+                    break;
                 };
-                for (var action_type in action.action) {
-                    switch(action_type) {
-                    case 'rest':
-                        definition['action'] = function() {
-                            var url = url_template.expand({
-                                path: this.smi.opened.path,
-                                action: action.action.rest.action});
-                            var payload = [];
-                            switch(action.action.rest.send) {
-                            case 'selected_ids':
-                                $.each(this.data.data, function(i, item) {
-                                    payload.push({name: 'content', value: item.id});
-                                });
-                                break;
-                            case 'clipboard_ids':
-                                $.each(this.smi.clipboard.cutted, function(i, item) {
-                                    payload.push({name: 'cutted', value: item.id});
-                                });
-                                $.each(this.smi.clipboard.copied, function(i, item) {
-                                    payload.push({name: 'copied', value: item.id});
-                                });
-                                break;
-                            }
-                            $.ajax({
-                                url: url,
-                                type: 'POST',
-                                dataType: 'json',
-                                data: payload,
-                                success: function(result) {
-                                    for (var post_action in result.post_actions) {
-                                        switch(post_action) {
-                                        case 'remove':
-                                            this.data.remove(result.post_actions.remove);
-                                            break;
-                                        case 'update':
-                                            var need_refresh = this.data.update(result.post_actions.update);
-                                            // The update of the data might have trigger some data changes
-                                            // in the selection.
-                                            if (need_refresh) {
-                                                this.content.trigger(
-                                                    'actionrefresh-smilisting', {data: this.data});
-                                            };
-                                            break;
-                                        };
-                                    };
-                                    if (result.notifications) {
-                                        this.smi.notifications.notifies(result.notifications);
-                                    };
-                                }.scope(this)
+            };
+            for (var action_type in action.action) {
+                switch(action_type) {
+                case 'rest':
+                    definition['action'] = function() {
+                        var url = url_template.expand({
+                            path: this.smi.opened.path,
+                            action: action.action.rest.action});
+                        var payload = [];
+                        switch(action.action.rest.send) {
+                        case 'selected_ids':
+                            $.each(this.data.data, function(i, item) {
+                                payload.push({name: 'content', value: item.id});
                             });
-                        };
-                        break;
-                    case 'cut':
-                        definition['action'] = function () {
-                            this.smi.clipboard.cut(this.data.data);
-                        };
-                        break;
-                    case 'copy':
-                        definition['action'] = function () {
-                            this.smi.clipboard.copy(this.data.data);
-                        };
-                        break;
-                    case 'clear_clipboard':
-                        definition['action'] = function() {
-                            this.smi.clipboard.clear();
-                        };
+                            break;
+                        case 'clipboard_ids':
+                            $.each(this.smi.clipboard.cutted, function(i, item) {
+                                payload.push({name: 'cutted', value: item.id});
+                            });
+                            $.each(this.smi.clipboard.copied, function(i, item) {
+                                payload.push({name: 'copied', value: item.id});
+                            });
+                            break;
+                        }
+                        $.ajax({
+                            url: url,
+                            type: 'POST',
+                            dataType: 'json',
+                            data: payload,
+                            success: function(result) {
+                                for (var post_action in result.post_actions) {
+                                    switch(post_action) {
+                                    case 'remove':
+                                        this.data.remove(result.post_actions.remove);
+                                        break;
+                                    case 'update':
+                                        var need_refresh = this.data.update(result.post_actions.update);
+                                        // The update of the data might have trigger some data changes
+                                        // in the selection.
+                                        if (need_refresh) {
+                                            this.content.trigger(
+                                                'actionrefresh-smilisting', {data: this.data});
+                                        };
+                                        break;
+                                    };
+                                };
+                                if (result.notifications) {
+                                    this.smi.notifications.notifies(result.notifications);
+                                };
+                            }.scope(this)
+                        });
+                    };
+                    break;
+                case 'cut':
+                    definition['action'] = function () {
+                        this.smi.clipboard.cut(this.data.data);
+                    };
+                    break;
+                case 'copy':
+                    definition['action'] = function () {
+                        this.smi.clipboard.copy(this.data.data);
+                    };
+                    break;
+                case 'clear_clipboard':
+                    definition['action'] = function() {
+                        this.smi.clipboard.clear();
                     };
                 };
-                obviel.view(definition);
-            });
+            };
+            obviel.view(definition);
         });
     };
 
