@@ -507,7 +507,7 @@ input, textarea {
 #workspace .content .listing dd.collapsed {
   display: none;
 }
-#workspace .content .listing .static tr.even {
+#workspace .content .listing .static tr:nth-child(even) {
   background-color:#f3f7fb;
 }
 #workspace .content .listing .static tr.hover {
