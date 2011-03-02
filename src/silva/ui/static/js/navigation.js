@@ -22,21 +22,21 @@
         var uncollapse = function(parents) {
             var last = parents.length - 1;
 
-            function openNode(remaining) {
-                var parentNode = $("#" + remaining[0]);
+            function open_node(remaining) {
+                var parent_node = $("#" + remaining[0]);
                 var left = remaining.slice(1);
-                if (parentNode.length) {
+                if (parent_node.length) {
                     if (left.length) {
                         tree.jstree(
                             'open_node',
-                            parentNode,
-                            function(){ openNode(left); });
+                            parent_node,
+                            function(){ open_node(left); });
                     } else {
-                        tree.jstree('select_node', parentNode, true);
+                        tree.jstree('select_node', parent_node, true);
                     }
                 }
             };
-            openNode(parents);
+            open_node(parents);
         };
 
         // Disable text selection on tree
@@ -96,14 +96,9 @@
 
         // Open view on click
         $(options.selector + ' .tree a').live('click', function(event) {
-            smi.open($(this).parent().data('jstree').path);
+            smi.open_screen($(this).parent().data('jstree').path);
 
             return false;
-        });
-
-        // Bind clik on view structure back to root
-        navigation.children('h2').bind('click', function(event) {
-            smi.open('/');
         });
 
         // If a content is selected, try to select its container

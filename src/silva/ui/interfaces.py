@@ -39,6 +39,14 @@ class IMenuItem(Interface):
     name = Attribute('Name of the menu')
     action = Attribute('Action trigger by the menu')
 
+    def available():
+        """Should return true if the item is available.
+        """
+
+    def describe():
+        """Should return a JSON dictionnary describing the menu item.
+        """
+
 
 class IContentMenuItem(IMenuItem):
     """Menu to work on content (left).

@@ -18,12 +18,19 @@ class MenuItem(grok.Subscription):
     grok.implements(IMenuItem)
     grok.provides(IMenuItem)
     name = None
+    screen = None
     action = None
-    default = False
+
+    def available(self):
+        return True
 
     def describe(self, page):
-        return {'name': page.translate(self.name),
-                'action': self.action}
+        data = {'name': page.translate(self.name)}
+        if self.screen is not None:
+            data['screen'] = self.screen
+        if self.action is not None:
+            data['action'] = self.action
+        return data
 
 
 class ContentMenuItem(MenuItem):
@@ -54,23 +61,21 @@ class EditTabMenu(ContentMenuItem):
     grok.context(IContent)
     grok.order(10)
     name = _('Edit')
-    action = 'content'
-    default = True
+    screen = 'content'
 
 
 class ContainerTabMenu(ContentMenuItem):
     grok.context(IContainer)
     grok.order(10)
     name = _('Content')
-    action = 'content'
-    default = True
+    screen = 'content'
 
 
 class AddTabMenu(ContentMenuItem):
     grok.context(IContainer)
     grok.order(15)
     name = _('Add')
-    action = 'adding'
+    screen = 'adding'
 
     def describe(self, page):
         data = super(AddTabMenu, self).describe(page)
@@ -78,7 +83,7 @@ class AddTabMenu(ContentMenuItem):
         for addable in self.context.get_silva_addables():
             entries.append({
                     'name': addable['name'],
-                    'action': '/'.join((self.action, addable['name']))})
+                    'screen': '/'.join((self.screen, addable['name']))})
         return data
 
 
@@ -90,4 +95,6 @@ class ViewMenu(ViewMenuItem):
 
 
 def get_menu_items(content, menu):
-    return grok.queryOrderedSubscriptions(content, menu)
+    return filter(
+        lambda m: m.available(),
+        grok.queryOrderedSubscriptions(content, menu))

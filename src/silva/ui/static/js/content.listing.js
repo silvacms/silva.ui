@@ -8,13 +8,13 @@
     listingcolumns.register({
         name: 'action',
         render: function() {
-            var link = $('<a class="content-screen"></a>');
+            var link = $('<a></a>');
 
             link.text(this.data[this.column.name]);
             link.attr('rel', this.column.action);
             link.attr('href', this.data.path);
             link.bind('click', function(event) {
-                this.smi.open_link(link);
+                this.smi.open_screen_from_link(link);
                 return false;
             }.scope(this));
             this.content.empty();

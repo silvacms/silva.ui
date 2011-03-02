@@ -134,8 +134,8 @@ class PageREST(UIREST):
             current = current[9:]
         for tab in get_menu_items(self.context, menu):
             tabs.append(tab.describe(self))
-            if tab.action == current:
-                active = tab.action
+            if tab.screen == current:
+                active = tab.screen
         return {'ifaces': ['menu'],
                 'active': active,
                 'entries': tabs}

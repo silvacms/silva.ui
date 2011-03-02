@@ -320,7 +320,6 @@
     var SMI = function(options) {
         var navigation = $(options.navigation.selector);
         var workspace = $(options.workspace.selector);
-        var header = $(options.header.selector);
 
         this._ = {};
         this._.url = jsontemplate.Template(options.url, {});
@@ -334,7 +333,6 @@
         this.notifications = new NotificationManager(options.notifications);
         this.clipboard = new ClipBoard(this.notifications);
 
-        header.disableTextSelect();
         navigation.SMINavigation(this, options.navigation);
 
         this.workspace = workspace.SMIWorkspace(this, options.workspace);
@@ -377,7 +375,7 @@
             if (!this.opening.screen.length) {
                 this.opening.screen = 'content';
             };
-            this.send();
+            this.send_to_screen();
         }.scope(this);
 
         // Bind the hash change used by open
@@ -387,9 +385,17 @@
 
         // Bind event to open new tab
         {
-            var open_link = this.open_link.scope(this);
-            $(document).delegate('a.screen', 'click', function(event) {
-            open_link($(this));
+            var open_link = this.open_screen_from_link.scope(this);
+            $(document).delegate('a.open-screen', 'click', function(event) {
+                open_link($(this));
+                return false;
+            });
+        };
+        // Bind action to open
+        {
+            var open_action = this.open_action_from_link.scope(this);
+            $(document).delegate('a.open-action', 'click', function(event) {
+                open_action($(this));
                 return false;
             });
         };
@@ -408,7 +414,7 @@
      * @param path: path to the content to open.
      * @param tab: tab name to open on the content.
      */
-    SMI.prototype.open = function(path, screen) {
+    SMI.prototype.open_screen = function(path, screen) {
         if (screen == undefined) {
             screen = this.opened.screen;
         };
@@ -419,13 +425,13 @@
      * Open a content tab by reading the given link information.
      * @param link: link containing information to open the content tab.
      */
-    SMI.prototype.open_link = function(link) {
+    SMI.prototype.open_screen_from_link = function(link) {
         var path = link.attr('href');
 
         if (!path) {
             path = this.opened.path;
         };
-        this.open(path, link.attr('rel'));
+        this.open_screen(path, link.attr('rel'));
     };
 
     /**
@@ -433,7 +439,7 @@
      * tab.
      * @param data: dictionnary to be posted to the server.
      */
-    SMI.prototype.send = function(data) {
+    SMI.prototype.send_to_screen = function(data) {
         var query = {};
 
         query['url'] = this._.url.expand(this.opening);
@@ -448,6 +454,28 @@
         if (data) {
             query['type'] = 'POST';
             query['data'] = data;
+        };
+        $.ajax(query);
+    };
+
+    /**
+     * Send an action, and process the result.
+     */
+    SMI.prototype.open_action_from_link = function(link) {
+        var query = {};
+        var screen = link.attr('rel');
+        var path = link.attr('href');
+
+        if (!path) {
+            path = this.opened.path;
+        };
+        query['url'] = this._.url.expand({path: path, screen: screen});
+        query['dataType'] = 'json';
+        query['success'] = function(data) {
+            $(document).render({data: data, extra: {smi: this}});
+        }.scope(this);
+        query['error'] = function(request, status, error) {
+            alert('Error '  + request.status.toString() + ' please reboot: ' + error);
         };
         $.ajax(query);
     };

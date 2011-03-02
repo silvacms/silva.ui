@@ -21,12 +21,18 @@
     obviel.view({
         iface: 'menu',
         create: function(info) {
-            var tab = $('<li><a class="screen ui-state-default">' + info.name + '</a></li>');
+            var tab = $('<li><a class="ui-state-default">' + info.name + '</a></li>');
             var link = tab.children('a');
 
-            link.attr('rel', info.action);
-            if (info.action == this.data.active) {
-                link.addClass('active');
+            if (info.screen) {
+                link.addClass('open-screen');
+                link.attr('rel', info.screen);
+                if (info.screen == this.data.active) {
+                    link.addClass('active');
+                };
+            } else if (info.action) {
+                link.addClass('open-action');
+                link.attr('rel', info.action);
             };
             return tab;
         },
@@ -77,6 +83,7 @@
             this.content.children('.content-tabs').render({data: this.data.menu.content});
             this.content.children('.settings-tabs').render({data: this.data.menu.settings});
             this.content.children('.view-actions').render({data: this.data.menu.view});
+            this.content.children('.content-actions').render({data: this.data.menu.actions});
 
             // Update content link hidden link
             this.content.children('#content-url').attr('href', this.url.expand({path: this.data.path}));

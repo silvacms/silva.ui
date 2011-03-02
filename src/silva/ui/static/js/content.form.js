@@ -13,7 +13,7 @@
                 if (extra) {
                     values = values.concat(extra);
                 };
-                this.smi.send(values);
+                this.smi.send_to_screen(values);
             };
 
             // Bind default submit

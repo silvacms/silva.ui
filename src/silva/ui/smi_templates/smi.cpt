@@ -37,7 +37,7 @@
         <div class="info">
           <ol class="actions admin-actions">
             <li>
-              <a class="parent screen tool ui-state-default" href="" rel="">
+              <a class="parent open-screen tool ui-state-default" href="" rel="">
                 <ins class="ui-icon ui-icon-arrowreturnthick-1-n"></ins>
               </a>
             </li>
@@ -54,9 +54,7 @@
             <ins class="icon loading"></ins>
             <tal:msg i18n:translate="">Loading...</tal:msg>
           </h2>
-          <ol class="actions content-actions">
-            <li><a href="foo">Big fat ass button</a></li>
-          </ol>
+          <ol class="actions content-actions"></ol>
           <a href="#" id="content-url"></a>
         </div>
         <div class="content"></div>
@@ -66,9 +64,6 @@
       $(document).ready(function() {
       smi = $('body').SMI({
           url: "${view.root_url}/{path}/++rest++silva.ui.{screen}",
-          header: {
-              selector: "#header"
-          },
           navigation: {
               selector: "#navigation",
               url: "${view.root_url}/{path}/++rest++silva.ui.navigation",
