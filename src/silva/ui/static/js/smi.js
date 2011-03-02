@@ -498,12 +498,26 @@
     $.fn.SMI = function(options) {
         return new SMI(options);
     };
+
+    $('.form-section').live('focusin', function(){
+        var section = $($(this).closest('.form-section'));
+        if (section.hasClass('form-focus')) {
+            return;
+        }
+        $('.form-section', section.closest('form')).removeClass('form-focus');
+        section.addClass('form-focus');
+    });
+
+    $('.form-section').live('click', function(){
+        var section = $($(this).closest('.form-section'));
+        if (section.hasClass('form-focus')) {
+            return;
+        }
+        $('.form-section', section.closest('form')).removeClass('form-focus');
+        section.addClass('form-focus');
+        $('input, textarea, select', section).first().focus();
+    });
+
 })(jQuery, obviel, shortcut);
 
-
-
-$('.form-section').live('focusin', function(event) {
-    $('.form-section', $(this).closest('form')).removeClass('form-focus');
-    $(this).closest('.form-section').addClass('form-focus');
-});
 

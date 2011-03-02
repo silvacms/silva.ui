@@ -1,6 +1,11 @@
+form {
+  background-color: #efefef;
+  color: black;
+}
+
 form h3, form h4 {
   padding: 10px;
-  background-color: #eee;
+  background-color: #efefef;
   border-bottom: 1px solid #ddd;
 }
 
@@ -21,9 +26,13 @@ form h4 {
   font-style: italic;
 }
 
-.form-section label {
+.form-section .form-label label {
   font-weight: bold;
   font-size: 120%;
+}
+
+.form-section .form-label {
+  margin-bottom: 10px;
 }
 
 .form-controls {
@@ -33,27 +42,23 @@ form h4 {
 }
 
 .form-required {
+  position: relative;
+  top: -3px;
+  display: inline-block;
   background-color: #DE2A2A;
-  font-size: 70%;
+  font-size: 9px; /* fixed, prevent to grow with % on parent */
   text-transform: uppercase;
   padding: 2px;
+  margin-left: 5px;
   color: white;
   border-radius: 2px;
   -moz-border-radius: 2px;
   -webkit-border-radius: 2px;
 }
 
-.form-field input,
-.form-field select,
-.form-field textarea
-{
-  margin: 10px 0px;
-  font-size: 110%;
-}
-
 .form-focus {
+  border-left: 2px solid #0E7F2A;
   padding-left: 20px;
   font-size: 110%;
   background-color: #D8EED5;
-  border-bottom: 1px dotted #0E7F2A;
 }
