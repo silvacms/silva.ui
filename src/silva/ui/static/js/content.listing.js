@@ -67,14 +67,53 @@
         name: 'action.smilisting',
         order: 0,
         render: function() {
-            var link = $('<a class="close-selection ui-state-default" title="close selection">' +
-                         '<ins class="ui-icon ui-icon-closethick"></ins></a>');
+            var html = $('<li><a class="close-selection ui-state-default" title="close selection">' +
+                         '<ins class="ui-icon ui-icon-closethick"></ins></a></li>');
+            var link = html.children('a');
+
             link.bind('click', function() {
                 this.data.close();
             }.scope(this));
-            this.content.append(link);
+            this.content.append(html);
         }
     });
+
+    // Display a element in the clipboard
+    obviel.view({
+        iface: 'content',
+        name: 'clipboarditem.smilisting',
+        render: function() {
+            var item = $('<li class="clipboard-item"></li>');
+
+            item.addClass(this.state);
+            if (this.data.title) {
+                if (this.data.path) {
+                    var link = $('<a class="content-screen"></a>');
+
+                    link.attr('href', this.data.path);
+                    link.text(this.data.title);
+                    item.append(link);
+                } else {
+                    item.text(this.data.title);
+                };
+            };
+            if (this.data.icon) {
+                var icon = $('<ins class="icon"></icon>');
+
+                if (this.data.icon.indexOf('.') < 0) {
+                    icon.addClass(this.data.icon);
+                } else {
+                    icon.attr(
+                        'style',
+                        'background:url(' + this.data.icon + ') no-repeat center center;');
+                };
+                item.prepend(icon);
+            };
+
+            this.content.append(item);
+        }
+    });
+
 
     /**
      * Register action buttons in obviel given the configuration.
@@ -89,7 +128,8 @@
                 name: name,
                 order: action.order,
                 render: function() {
-                    var link = $('<a class="action ui-state-default"></a>');
+                    var html = $('<li><a class="action ui-state-default"></a></li>');
+                    var link = html.children('a');
 
                     if (action.title) {
                         link.text(action.title);
@@ -105,7 +145,7 @@
                             this.action();
                         }.scope(this));
                     };
-                    this.content.append(link);
+                    this.content.append(html);
                 }
             };
             for (var limiter in action.available) {
@@ -113,6 +153,11 @@
                 case 'max_items':
                     definition['available'] = function() {
                         return this.data.length() <= action.available.max_items;
+                    };
+                    break;
+                case 'min_items':
+                    definition['available'] = function() {
+                        return this.data.length() >= action.available.min_items;
                     };
                     break;
                 case 'items_match':
@@ -175,6 +220,9 @@
                                             this.content.trigger(
                                                 'actionrefresh-smilisting', {data: this.data});
                                         };
+                                        break;
+                                    case 'clear_clipboard':
+                                        this.smi.clipboard.clear(true);
                                         break;
                                     };
                                 };
@@ -259,34 +307,68 @@
      * @param container: container containing the info hook.
      */
     var SMIViewClipboard = function(container, smi) {
+        this.smi = smi;
         var content = container.find('.clipboard-info');
-        var actions = content.children('.actions');
+        this.popup = content.children('.popup');
+        this._uptodate = false;
         var info = content.children('.stat');
         var count = info.find('.count');
 
         // Set default clipboard count on creation
         count.text(smi.clipboard.length().toString());
 
-        // Render actions
-        actions.children('li:first').render({
-            every: smi.clipboard,
-            name: 'clipboardaction.smilisting',
-            extra: {smi: smi}});
-
-
         // Update count when clipboard is changed
         $('body').bind('contentchange-smiclipboard', function() {
             count.text(smi.clipboard.length().toString());
-        });
+            if (this.popup.is(':visible')) {
+                this.update();
+            } else {
+                this._uptodate = false;
+            };
+        }.scope(this));
 
         // Show actions when you click on the info.
         info.bind('click', function() {
-            actions.fadeToggle();
+            this.toggle();
             return false;
+        }.scope(this));
+        this.popup.bind('mouseleave', function() {
+            this.popup.fadeOut();
+        }.scope(this));
+    };
+
+    SMIViewClipboard.prototype.toggle = function() {
+        if (!this._uptodate && !this.popup.is(':visible')) {
+            this.update();
+        };
+        this.popup.fadeToggle();
+    };
+
+    SMIViewClipboard.prototype.hide = function() {
+        this.popup.fadeOut();
+    };
+
+    SMIViewClipboard.prototype.update = function() {
+        var popup = this.popup;
+
+        popup.empty();
+        $.each(this.smi.clipboard.cutted, function(i, item) {
+            popup.render({
+                data: item,
+                name: 'clipboarditem.smilisting',
+                extra: {state: 'cutted'}});
         });
-        actions.bind('mouseleave', function() {
-            actions.fadeOut();
+        $.each(this.smi.clipboard.copied, function(i, item) {
+            popup.render({
+                data: item,
+                name: 'clipboarditem.smilisting',
+                extra: {state: 'copied'}});
         });
+        popup.render({
+            every: this.smi.clipboard,
+            name: 'clipboardaction.smilisting',
+            extra: {smi: this.smi}});
+        this._uptodate = true;
     };
 
     /**
@@ -433,23 +515,23 @@
                     } else {
                         // The selection might have got bigger from
                         // the top. Rerender actions.
-                        render_actions(selected_items, next_actions.find('td'));
+                        render_actions(selected_items, next_actions.find('ol'));
                     };
                 } else {
                     // Let's insert an action line here.
-                    var action_line = $('<tr class="actions"></tr>');
-                    var action_cell = $('<td></td>');
+                    var action_line = $('<tr class="actions"><td><ol></ol></td></tr>');
+                    var action_cell = action_line.children('td');
+                    var actions = action_cell.children('ol');
 
-                    render_actions(selected_items, action_cell);
+                    render_actions(selected_items, actions);
                     action_cell.attr('colspan', this.listing.configuration.columns.length);
                     action_cell.bind('actionrefresh-smilisting', function(event, data) {
                         // If an action is executed, rerender the action line.
-                        var action_cell = $(this);
+                        var actions = $(this).children('ol');
 
-                        action_cell.empty();
-                        render_actions(data.data, action_cell);
+                        actions.empty();
+                        render_actions(data.data, actions);
                     });
-                    action_line.append(action_cell);
                     last_selected.after(action_line);
                 };
                 var following = next.nextUntil('.selected');

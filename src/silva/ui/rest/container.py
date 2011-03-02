@@ -168,12 +168,14 @@ class ColumnsContainerListing(UIREST):
                      'order': 6,
                      'action': {'rest': {'action': 'paste',
                                          'send': 'clipboard_ids'}},
+                     'available': {'min_items': 1},
                      'ifaces': ['clipboard']},
                     {'title': self.translate(_(u'Paste as Ghost')),
                      'icon': 'link',
                      'order': 7,
                      'action': {'rest': {'action': 'pasteasghost',
                                          'send': 'clipboard_ids'}},
+                     'available': {'min_items': 1},
                      'ifaces': ['clipboard']},
                     {'title': self.translate(_(u'Clear clipboard')),
                      'icon': 'trash',
@@ -431,14 +433,15 @@ class PasteActionREST(ActionREST):
                   mapping={'moved': moved_titles}))
 
         # Response
+        data = {'clear_clipboard': True}
         append = {}
         if pasted_publishables:
             append['publishables'] = pasted_publishables
         if pasted_assets:
             append['assets'] = pasted_assets
         if append:
-            return {'append': append}
-        return {}
+            data['append'] = append
+        return data
 
 
 class PublishActionREST(ActionREST):

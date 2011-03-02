@@ -62,9 +62,7 @@
 
     <div class="clipboard-info"
        i18n:translate="">
-      <ol class="actions">
-        <li>
-        </li>
+      <ol class="popup">
       </ol>
       <a class="stat ui-state-default">
         <ins class="ui-icon ui-icon-triangle-1-n"></ins>

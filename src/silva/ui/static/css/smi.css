@@ -531,6 +531,10 @@ input, textarea {
 #workspace .content .listing tr.empty td {
   padding: 0px 8px;
 }
+#workspace .content .listing .actions ol {
+  list-style:none;
+  margin-left: 0px;
+}
 
 
 /* Table listing footer */
@@ -553,7 +557,7 @@ input, textarea {
 #workspace .content .footer .clipboard-info a.stat ins {
   margin-top: 4px;
 }
-#workspace .content .footer .clipboard-info .actions {
+#workspace .content .footer .clipboard-info .popup {
   -khtml-border-radius:3px 3px 0px 0px;
   -moz-border-radius:3px 3px 0px 0px;
   -ms-border-radius:3px 3px 0px 0px;
