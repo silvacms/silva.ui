@@ -20,7 +20,7 @@ from silva.core.interfaces import IRoot
 from silva.core.messages.interfaces import IMessageService
 from silva.core.views.interfaces import IVirtualSite
 from silva.ui.interfaces import IContentMenuItem, IViewMenuItem
-from silva.ui.interfaces import ISettingsMenuItem
+from silva.ui.interfaces import ISettingsMenuItem, IActionMenuItem
 from silva.ui.icon import get_icon
 from silva.ui.menu import get_menu_items
 
@@ -78,6 +78,8 @@ class UIREST(rest.REST):
             if message.namespace != 'error':
                 data['autoclose'] = 4000
             messages.append(data)
+        if not messages:
+            return None
         return messages
 
 
@@ -144,15 +146,10 @@ class PageREST(UIREST):
         except PageException as error:
             return self.json_response(error.payload(self))
 
-        parent = None
-        if not IRoot.providedBy(self.context):
-            parent = self.get_content_path(aq_parent(self.context))
-        return self.json_response({
+        data = {
             'ifaces': ['content'],
             'content': payload,
-            'notifications': self.get_notifications(),
             'navigation': self.get_navigation(),
-            'html_resources': get_resources(self.request),
             'metadata': {
                 'ifaces': ['metadata'],
                 'title': {
@@ -164,10 +161,18 @@ class PageREST(UIREST):
                         'content': self.get_metadata_menu(IContentMenuItem),
                         'view': self.get_metadata_menu(IViewMenuItem),
                         'settings': self.get_metadata_menu(ISettingsMenuItem),
+                        'actions': self.get_metadata_menu(IActionMenuItem),
                         },
                 'path': self.get_content_path(self.context),
-                'up': parent,
-                },
-            })
+                }}
+        notifications =  self.get_notifications()
+        if notifications is not None:
+            data['notifications'] = notifications
+        resources = get_resources(self.request)
+        if resources is not None:
+            data['html_resources'] = resources
+        if not IRoot.providedBy(self.context):
+            data['metadata']['up'] = self.get_content_path(aq_parent(self.context))
+        return self.json_response(data)
 
     POST = GET

@@ -45,6 +45,11 @@ class IContentMenuItem(IMenuItem):
     """
 
 
+class IActionMenuItem(IMenuItem):
+    """Menu that contains action on the content.
+    """
+
+
 class IViewMenuItem(IMenuItem):
     """Menu to work on content (right).
     """

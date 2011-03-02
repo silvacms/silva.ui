@@ -8,7 +8,8 @@ from five import grok
 from silva.translations import translate as _
 from silva.core.interfaces import IContent, IContainer
 from silva.core.interfaces import ISilvaObject
-from silva.ui.interfaces import IMenuItem, IContentMenuItem
+from silva.ui.interfaces import IMenuItem
+from silva.ui.interfaces import IContentMenuItem, IActionMenuItem
 from silva.ui.interfaces import IViewMenuItem, ISettingsMenuItem
 
 
@@ -29,6 +30,12 @@ class ContentMenuItem(MenuItem):
     grok.baseclass()
     grok.implements(IContentMenuItem)
     grok.provides(IContentMenuItem)
+
+
+class ActionMenuItem(MenuItem):
+    grok.baseclass()
+    grok.implements(IActionMenuItem)
+    grok.provides(IActionMenuItem)
 
 
 class ViewMenuItem(MenuItem):

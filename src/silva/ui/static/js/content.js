@@ -21,7 +21,7 @@
     obviel.view({
         iface: 'menu',
         create: function(info) {
-            var tab = $('<li class="entry"><a class="screen ui-state-default">' + info.name + '</a></li>');
+            var tab = $('<li><a class="screen ui-state-default">' + info.name + '</a></li>');
             var link = tab.children('a');
 
             link.attr('rel', info.action);
@@ -73,10 +73,10 @@
             var  parent_link = this.content.find('a.parent');
 
             // Update header
-            this.content.children('h3').render({data: this.data.title});
+            this.content.children('h2').render({data: this.data.title});
             this.content.children('.content-tabs').render({data: this.data.menu.content});
             this.content.children('.settings-tabs').render({data: this.data.menu.settings});
-            this.content.children('.actions').render({data: this.data.menu.view});
+            this.content.children('.view-actions').render({data: this.data.menu.view});
 
             // Update content link hidden link
             this.content.children('#content-url').attr('href', this.url.expand({path: this.data.path}));
@@ -115,7 +115,7 @@
 
         // Bind the settings display tool
         {
-            var settings_switcher = workspace.find('.admin-tabs a.settings');
+            var settings_switcher = workspace.find('.admin-actions a.settings');
             var settings_menu = workspace.find('.settings-tabs');
             var content_menu = workspace.find('.content-tabs');
 

@@ -21,37 +21,27 @@
 
   <body>
     <div id="loading-message">
-      <p i18n:translate="">Loading...</p>
+      <img src="${imgs_url}/loader.gif" alt="Loading data from server"
+           i18n:attributes="alt" />
     </div>
     <div id="notifications">
     </div>
-    <div id="header">
-      <h1><a href="#!/"><img src="${imgs_url}/silva.png" alt="Silva" /></a></h1>
-      <ol>
-        <li tal:condition="view.can_manage">
-          <a href="${view.root_url}/manage_main"
-             i18n:translate="">
-            Manage
-          </a>
-        </li>
-        <li><a href="${view.root_url}/service_members/logout"
-               i18n:translate="">Logout</a></li>
-      </ol>
-    </div>
     <div id="main">
-      <div id="navigation">
-        <h2 i18n:translate="">Structure</h2>
+      <nav id="navigation">
+        <h1 i18n:translate="">
+          <a href="#!/"><img src="${imgs_url}/silva.png" alt="Silva" /></a>
+        </h1>
         <div class="tree"></div>
-      </div>
+      </nav>
       <div id="workspace">
         <div class="info">
-          <ol class="tabs admin-tabs">
-            <li class="entry">
+          <ol class="actions admin-actions">
+            <li>
               <a class="parent screen tool ui-state-default" href="" rel="">
                 <ins class="ui-icon ui-icon-arrowreturnthick-1-n"></ins>
               </a>
             </li>
-            <li class="entry">
+            <li>
               <a class="settings tool ui-state-default" href="" rel="">
                 <ins class="ui-icon ui-icon-wrench"></ins>
               </a>
@@ -59,11 +49,14 @@
           </ol>
           <ol class="tabs content-tabs"></ol>
           <ol class="tabs settings-tabs"></ol>
-          <ol class="actions"></ol>
-          <h3>
+          <ol class="actions view-actions"></ol>
+          <h2>
             <ins class="icon loading"></ins>
             <tal:msg i18n:translate="">Loading...</tal:msg>
-          </h3>
+          </h2>
+          <ol class="actions content-actions">
+            <li><a href="foo">Big fat ass button</a></li>
+          </ol>
           <a href="#" id="content-url"></a>
         </div>
         <div class="content"></div>

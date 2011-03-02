@@ -20,28 +20,12 @@ input, textarea {
 }
 
 #loading-message {
-  -khtml-box-shadow:#ccc 0 0 3px;
-  -moz-border-radius-bottomleft: 3px;
-  -moz-border-radius-bottomright: 3px;
-  -moz-box-shadow:#CCC 0 0 3px;
-  -ms-box-shadow:#CCC 0 0 3px;
-  -o-box-shadow:#CCC 0 0 3px;
-  -webkit-border-bottom-left-radius: 3px;
-  -webkit-border-bottom-right-radius: 3px;
-  -webkit-box-shadow:#ccc 0 0 3px;
-  background: url("../img/gradient25.png") repeat-x;
-  border-bottom-left-radius: 3px;
-  border-bottom-right-radius: 3px;
-  border-bottom: 1px solid #FEFEFE;
-  border-left: 1px solid #FEFEFE;
-  border-right: 1px solid #FEFEFE;
-  box-shadow:#CCC 0 0 3px;
-  color: #000;
   display: none;
-  padding: 2px 15px;
+  padding: 2px 0px;
   position: fixed;
   right: 50%;
   top: 0px;
+  z-index: 200;
 }
 
 #content-url {
@@ -50,16 +34,16 @@ input, textarea {
 
 #notifications {
   position: absolute;
-  top: 5px;
-  left: 310px;
-  right: 185px;
+  top: 75px;
+  left: 322px;
+  right: 200px;
   background: transparent;
   z-index: 200;
 }
 #notifications .notification {
   margin:10px;
-  padding:8px;
-  background:url(../img/gradient50.png) repeat-x bottom;
+  padding:5px;
+  background:url(../img/green30.png) repeat-x bottom;
   -khtml-box-shadow:#1c2e3d 0 3px 10px; -moz-box-shadow:#1c2e3d 0 3px 10px;
   -ms-box-shadow:#1c2e3d 0 3px 10px; -o-box-shadow:#1c2e3d 0 3px 10px;
   -webkit-box-shadow:#1c2e3d 0 3px 10px; box-shadow:#1c2e3d 0 3px 10px;
@@ -71,47 +55,9 @@ input, textarea {
   font-size:85%;
 }
 
-#header {
-  height:60px;
-  overflow:hidden;
-}
-#header h1 {
-  width:280px;
-  height:50px;
-  line-height:50px;
-  overflow:hidden;
-  float:left;
-  margin:7px 20px;
-  font-size:2em;
-}
-#header h1 a img {
-  cursor: pointer;
-}
-#header ol { float:right; list-style:none; margin:0 20px; line-height:22px; }
-#header ol li { float:left; }
-#header ol li a {
-  display:block;
-  margin:18px 0 0 10px;
-  padding:2px 15px;
-  background:#fff url(../img/gradient25.png) repeat-x bottom;
-  color:#222;
-  -khtml-border-radius:5px;
-  -moz-border-radius:5px;
-  -ms-border-radius:5px;
-  -o-border-radius:5px;
-  -webkit-border-radius:5px;
-  border-radius:5px;
-  -khtml-box-shadow:#1c2e3d 0 1px 4px;
-  -moz-box-shadow:#1c2e3d 0 1px 4px;
-  -ms-box-shadow:#1c2e3d 0 1px 4px;
-  -o-box-shadow:#1c2e3d 0 1px 4px;
-  -webkit-box-shadow:#1c2e3d 0 1px 4px;
-  box-shadow:#1c2e3d 0 1px 4px;
-}
-
 #main {
   position:absolute;
-  top:65px;
+  top:20px;
   bottom:20px;
   left:20px;
   right:20px;
@@ -123,10 +69,14 @@ input, textarea {
   -ms-box-shadow:#1c2e3d 0 3px 10px; -o-box-shadow:#1c2e3d 0 3px 10px;
   -webkit-box-shadow:#1c2e3d 0 3px 10px; box-shadow:#1c2e3d 0 3px 10px;
 }
-#navigation h2 {
-  height:30px; line-height:30px;
-  background:#a3d042 url(../img/green30.png) repeat-x bottom;
-  color:#fff; padding:0 8px; text-shadow:#305c00 1px 1px 0;
+#navigation h1 {
+  height:59px;
+  line-height:60px;
+  background:url(../img/gradient50.png) repeat-x bottom;
+  border-bottom: 1px solid #999;
+  color:#fff;
+  padding:0 8px;
+  text-shadow:#305c00 1px 1px 0;
 }
 
 #workspace {
@@ -151,7 +101,7 @@ input, textarea {
 
 #navigation .tree {
   position:absolute;
-  top:30px;
+  top:60px;
   bottom:0;
   left:0;
   right:0;
@@ -204,14 +154,14 @@ input, textarea {
   background:url(../img/gradient50.png) repeat-x bottom;
   border-bottom:1px #999 solid;
   color:#111;
-  height:49px;
+  height:59px;
   line-height:24px;
-  padding: 0 10px 20px 10px;
+  padding: 0 10px 40px 10px;
 }
 #workspace .info a {
   color:#111;
 }
-#workspace .info h3 {
+#workspace .info h2 {
   clear: both;
   font-size:1.3em;
   padding-top: 8px;
@@ -219,7 +169,7 @@ input, textarea {
   overflow:hidden;
   white-space:nowrap;
 }
-#workspace .info h3 ins.icon {
+#workspace .info h2 ins.icon {
   background-color:transparent;
   background-image:url(../img/sprite.png);
   background-repeat:no-repeat;
@@ -230,9 +180,6 @@ input, textarea {
   width:20px;
 }
 
-#workspace .info .settings-tabs {
-  display: none;
-}
 #workspace .info .tabs {
   float:left;
   list-style:none;
@@ -247,7 +194,7 @@ input, textarea {
 #workspace .info .tabs li a ins.ui-icon {
   margin-top: 5px;
 }
-#workspace .info .tabs li.entry a {
+#workspace .info .tabs li a {
   color:#222;
   display:block;
   height:26px;
@@ -255,8 +202,8 @@ input, textarea {
   margin-right: 5px;
   padding:4px 12px 1px 12px;
 }
-#workspace .info .tabs li.entry a:hover,
-#workspace .info .tabs li.entry a.active {
+#workspace .info .tabs li a:hover,
+#workspace .info .tabs li a.active {
   -khtml-border-radius:0 0 3px 3px;
   -khtml-box-shadow:inset 0 0 2px #aaa;
   -moz-border-radius:0 0 3px 3px;
@@ -276,11 +223,11 @@ input, textarea {
   line-height:25px;
   padding:4px 11px 0px 11px;
 }
-#workspace .info .tabs li.entry.openable a {
+#workspace .info .tabs li.openable a {
   padding:4px 12px 1px 3px;
 }
-#workspace .info .tabs li.entry.openable a:hover,
-#workspace .info .tabs li.entry.openable a.active {
+#workspace .info .tabs li.openable a:hover,
+#workspace .info .tabs li.openable a.active {
   padding:4px 11px 0px 2px;
 }
 
@@ -303,11 +250,11 @@ input, textarea {
   z-index: 100;
 }
 
-#workspace .info .tabs .subtabs li.entry {
+#workspace .info .tabs .subtabs li {
   float: none;
 }
-#workspace .info .tabs .subtabs li.entry a,
-#workspace .info .tabs .subtabs li.entry a:hover {
+#workspace .info .tabs .subtabs li a,
+#workspace .info .tabs .subtabs li a:hover {
   line-height: 20px;
   height: 20px;
   border: 0px;
@@ -320,23 +267,13 @@ input, textarea {
   -webkit-box-shadow: none;
 }
 
-#workspace .info .admin-tabs li.entry a.tool {
-  padding: 4px 1px 0px 1px;
-}
-#workspace .info .admin-tabs li.entry a.tool.active,
-#workspace .info .admin-tabs li.entry a.tool:hover {
-  padding: 4px 0px 0px 0px;
-}
-#workspace .info .admin-tabs li.entry a.tool ins.ui-icon {
-  margin: 5px 3px 0px 3px;
-}
-
-
 #workspace .info .actions {
-  float:right;
-  margin:0;
   list-style:none;
+  margin:0;
   padding:0;
+}
+#workspace .info .actions ins.ui-icon {
+  float: none;
 }
 #workspace .info .actions li {
   float:left;
@@ -373,10 +310,22 @@ input, textarea {
   box-shadow:inset 0 0 2px #aaa;
 }
 
+#workspace .info .settings-tabs {
+  display: none;
+}
+#workspace .info .view-actions,
+#workspace .info .content-actions {
+  float:right;
+}
+#workspace .info .admin-actions li a {
+  padding: 2px 2px;
+  margin: 6px 6px 0px 0px;
+}
+
 /* Main working content space */
 #workspace .content {
   position:absolute;
-  top:70px;
+  top:100px;
   bottom:0;
   left:0;
   right:0;
