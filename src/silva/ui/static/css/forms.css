@@ -1,0 +1,59 @@
+form h3, form h4 {
+  padding: 10px;
+  background-color: #eee;
+  border-bottom: 1px solid #ddd;
+}
+
+form h3 {
+  font-size: 130%;
+}
+
+form h4 {
+  font-size: 120%;
+}
+
+.form-section {
+  padding: 10px;
+  border-bottom: 1px dotted #ccc;
+}
+
+.form-section p {
+  font-style: italic;
+}
+
+.form-section label {
+  font-weight: bold;
+  font-size: 120%;
+}
+
+.form-controls {
+  background-color: #eee;
+  padding: 10px 20px 10px 10px;
+  text-align: right;
+}
+
+.form-required {
+  background-color: #DE2A2A;
+  font-size: 70%;
+  text-transform: uppercase;
+  padding: 2px;
+  color: white;
+  border-radius: 2px;
+  -moz-border-radius: 2px;
+  -webkit-border-radius: 2px;
+}
+
+.form-field input,
+.form-field select,
+.form-field textarea
+{
+  margin: 10px 0px;
+  font-size: 110%;
+}
+
+.form-focus {
+  padding-left: 20px;
+  font-size: 110%;
+  background-color: #D8EED5;
+  border-bottom: 1px dotted #0E7F2A;
+}

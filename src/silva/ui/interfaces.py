@@ -28,9 +28,9 @@ class ISMIScripts(ICKEditorResources, IReferenceUIResources):
 
 
 class ISMIResources(ISMIScripts):
-
     silvaconf.resource('css/style.css')
     silvaconf.resource('css/smi.css')
+    silvaconf.resource('css/forms.css')
 
 
 class IMenuItem(Interface):

@@ -500,3 +500,10 @@
     };
 })(jQuery, obviel, shortcut);
 
+
+
+$('.form-section').live('focusin', function(event) {
+    $('.form-section', $(this).closest('form')).removeClass('form-focus');
+    $(this).closest('.form-section').addClass('form-focus');
+});
+
