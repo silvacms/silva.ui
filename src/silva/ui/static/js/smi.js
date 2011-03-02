@@ -46,7 +46,7 @@
     obviel.view({
         iface: 'redirect',
         render: function() {
-            this.smi.open(this.data.path, this.data.tab);
+            this.smi.open_screen(this.data.path, this.data.tab);
         }
     });
 
@@ -370,7 +370,7 @@
                 this.opening = {screen: parts[1], path: parts[2]};
             } else {
                 this.opening = {screen: '', path: ''};
-            }
+            };
 
             if (!this.opening.screen.length) {
                 this.opening.screen = 'content';
