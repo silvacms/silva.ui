@@ -34,6 +34,9 @@
                 link.addClass('open-action');
                 link.attr('rel', info.action);
             };
+            if (info.description) {
+                link.attr('title', info.description);
+            };
             return tab;
         },
         render: function() {
