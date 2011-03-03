@@ -1,20 +1,28 @@
 form {
-  background-color: #efefef;
   color: black;
 }
 
-form h3, form h4 {
-  padding: 10px;
+.form-head h3, .form-head h4 {
   background-color: #efefef;
   border-bottom: 1px solid #ddd;
 }
 
-form h3 {
+.form-head h3 {
+  background-image: url('../img/gradientblack.png');
+  color: #fff;
+  font-weight: normal;
+  padding: 6px 10px 6px 10px;
   font-size: 130%;
 }
 
-form h4 {
+.form-head h4 {
+  padding: 5px;
   font-size: 120%;
+}
+
+.form-section, .form-head, .form-footer {
+  background-image: url('../img/workspace_bg.png');
+  background-repeat: repeat;
 }
 
 .form-section {
@@ -28,7 +36,7 @@ form h4 {
 
 .form-section .form-label label {
   font-weight: bold;
-  font-size: 120%;
+  font-size: 105%;
 }
 
 .form-section .form-label {
@@ -36,7 +44,7 @@ form h4 {
 }
 
 .form-controls {
-  background-color: #eee;
+  border-bottom: 2px solid #eee;
   padding: 10px 20px 10px 10px;
   text-align: right;
 }
@@ -57,8 +65,13 @@ form h4 {
 }
 
 .form-focus {
+  background-image: none;
   border-left: 2px solid #0E7F2A;
   padding-left: 20px;
-  font-size: 110%;
+  font-size: 105%;
   background-color: #D8EED5;
+}
+
+.form-table {
+  padding: 10px;
 }
