@@ -248,22 +248,27 @@
     var ClipBoard = function(notifications) {
         this.ifaces = ['clipboard'];
         this.notifications = notifications;
-        this.clear(true);
+        this._clear();
+    };
+
+    // Internal clear.
+    ClipBoard.prototype._clear = function() {
+        this.cutted = [];
+        this._cutted_ids = [];
+        this.copied = [];
+        this._copied_ids = [];
     };
 
     /**
      * Clear the clipboard.
      */
-    ClipBoard.prototype.clear = function(no_event) {
-        this.cutted = [];
-        this._cutted_ids = [];
-        this.copied = [];
-        this._copied_ids = [];
-        if (!no_event) {
+    ClipBoard.prototype.clear = function(no_notification) {
+        this._clear();
+        $('body').trigger('contentchange-smiclipboard');
+        if (!no_notification) {
             this.notifications.notify({
                 message: 'Clipboard cleared.',
                 autoclose: 4000});
-            $('body').trigger('contentchange-smiclipboard');
         };
     };
 
@@ -271,7 +276,7 @@
      * Store the given items as a cut in the clipboard.
      * @param items: Cutted items.
      */
-    ClipBoard.prototype.cut = function(items) {
+    ClipBoard.prototype.cut = function(items, no_notification) {
         var count = 0;
 
         $.each(items, function(i, item) {
@@ -281,17 +286,19 @@
                 count += 1;
             };
         }.scope(this));
-        this.notifications.notify({
-            message: 'Cutted ' + count.toString() + ' content(s) in the clipboard.',
-            autoclose: 4000});
         $('body').trigger('contentchange-smiclipboard');
+        if (!no_notification) {
+            this.notifications.notify({
+                message: 'Cutted ' + count.toString() + ' content(s) in the clipboard.',
+                autoclose: 4000});
+        };
     };
 
     /**
      * Store the given items as a copy in the clipboard.
      * @param items: Copied items.
      */
-    ClipBoard.prototype.copy = function(items) {
+    ClipBoard.prototype.copy = function(items, no_notification) {
         var count = 0;
 
         $.each(items, function(i, item) {
@@ -301,10 +308,12 @@
                 count += 1;
             };
         }.scope(this));
-        this.notifications.notify({
-            message: 'Copied ' + count.toString() + ' content(s) in the clipboard.',
-            autoclose: 4000});
         $('body').trigger('contentchange-smiclipboard');
+        if (!no_notification) {
+            this.notifications.notify({
+                message: 'Copied ' + count.toString() + ' content(s) in the clipboard.',
+                autoclose: 4000});
+        };
     };
 
     /**
@@ -322,7 +331,8 @@
         var workspace = $(options.workspace.selector);
 
         this._ = {};
-        this._.url = jsontemplate.Template(options.url, {});
+        this._.screen_url = jsontemplate.Template(options.screen, {});
+        this._.action_url = jsontemplate.Template(options.action, {});
         this._.workspace = workspace;
         this._.navigation = navigation;
 
@@ -442,7 +452,7 @@
     SMI.prototype.send_to_screen = function(data) {
         var query = {};
 
-        query['url'] = this._.url.expand(this.opening);
+        query['url'] = this._.screen_url.expand(this.opening);
         query['dataType'] = 'json';
         query['success'] = function(data) {
             this.opened = this.opening;
@@ -463,13 +473,13 @@
      */
     SMI.prototype.open_action_from_link = function(link) {
         var query = {};
-        var screen = link.attr('rel');
+        var action = link.attr('rel');
         var path = link.attr('href');
 
         if (!path) {
             path = this.opened.path;
         };
-        query['url'] = this._.url.expand({path: path, screen: screen});
+        query['url'] = this._.action_url.expand({path: path, action: action});
         query['dataType'] = 'json';
         query['success'] = function(data) {
             $(document).render({data: data, extra: {smi: this}});

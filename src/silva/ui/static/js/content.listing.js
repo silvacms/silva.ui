@@ -88,7 +88,7 @@
             item.addClass(this.state);
             if (this.data.title) {
                 if (this.data.path) {
-                    var link = $('<a class="content-screen"></a>');
+                    var link = $('<a class="open-screen"></a>');
 
                     link.attr('href', this.data.path);
                     link.text(this.data.title);
@@ -222,9 +222,12 @@
                                         // The update of the data might have trigger some data changes
                                         // in the selection.
                                         if (need_refresh) {
-                                            this.content.trigger(
+                                            this.content.triggerHandler(
                                                 'actionrefresh-smilisting', {data: this.data});
                                         };
+                                        break;
+                                    case 'new_data':
+                                        this.content.trigger('newdata-smilisting', result.post_actions.new_data);
                                         break;
                                     case 'clear_clipboard':
                                         this.smi.clipboard.clear(true);
@@ -528,11 +531,11 @@
                     var action_cell = action_line.children('td');
                     var actions = action_cell.children('ol');
 
-                    render_actions(selected_items, actions);
                     action_cell.attr('colspan', this.listing.configuration.columns.length);
-                    action_cell.bind('actionrefresh-smilisting', function(event, data) {
+                    render_actions(selected_items, actions);
+                    actions.bind('actionrefresh-smilisting', function(event, data) {
                         // If an action is executed, rerender the action line.
-                        var actions = $(this).children('ol');
+                        var actions = $(this);
 
                         actions.empty();
                         render_actions(data.data, actions);
@@ -615,8 +618,10 @@
         });
 
         if (configuration.sortable) {
+            var table = content.find('table');
+
             // Add the sorting if the table is sortable
-            content.find('table').tableDnD({
+            table.tableDnD({
                 dragHandle: "dragHandle",
                 onDragClass: "dragging",
                 onDragStart: function(table, row) {
@@ -627,15 +632,18 @@
                 },
                 onDrop: function(table, row) {
                     // XXX Send new order to server
-                    //$("#SMIContents_rows").setClassSequence();
                     $(table).addClass('static');
                     this.trigger('selectionchange-smilisting');
                 }.scope(this)
             });
+            // If content change, reinitialize the DND
+            content.bind('contentchange-smilisting', function() {
+                table.tableDnDUpdate();
+            });
         };
 
         // Add default data
-        this.new_lines(data);
+        this.new_lines(data, true);
     };
 
     /**
@@ -650,30 +658,44 @@
     };
 
     /**
-     * Add a list of lines later one.
+     * Add a list of lines later on.
      */
-    SMIListing.prototype.new_lines = function(data) {
+    SMIListing.prototype.new_lines = function(data, initial) {
         if (this.header.is('.collapsed')) {
             this.header.one('collapsingchange-smilisting', function() {
                 // On first next display, add the data.
-                this.add_lines(data);
+                this.add_lines(data, initial);
             }.scope(this));
         } else {
-            this.add_lines(data);
+            this.add_lines(data, initial);
         };
     };
 
     /**
      * Imediately add a list of lines to the listing.
      * @param data: list of line data
+     * @param initial: is it the initial adding.
+     *
+     * In case of initial adding, if there is no data, an empty line
+     * will be added. Otherwise, eventual empty line will removed,
+     * added lines will be selected.
      */
-    SMIListing.prototype.add_lines = function(data) {
+    SMIListing.prototype.add_lines = function(data, initial) {
         if (data.length) {
+            if (!initial) {
+                // Remove any eventual empty line
+                this.container.children('.empty').remove();
+            };
             // Fill in table
             $.each(data, function(i, line) {
-                this.add_line(line);
+                this.add_line(line, !initial);
             }.scope(this));
-        } else {
+            // Send events
+            this.trigger('contentchange-smilisting');
+            if (!initial) {
+                this.trigger('selectionchange-smilisting');
+            };
+        } else if (initial) {
             // Add a message no lines.
             // XXX should come from a template, i18n
             var empty_line = $('<tr class="empty"></tr>');
@@ -689,8 +711,10 @@
     /**
      * Add one line to the listing.
      * @param data: line data.
+     * @param selected: should the added line be selected (doesn't
+     *        trigger the selectionchange-smilisting event).
      */
-    SMIListing.prototype.add_line = function(data) {
+    SMIListing.prototype.add_line = function(data, selected) {
         // Add a data line to the table
         var line = $('<tr class="item"></tr>');
 
@@ -710,6 +734,9 @@
                         column: column}});
             line.append(cell);
         }.scope(this));
+        if (selected) {
+            line.addClass('selected');
+        };
         line.attr('id', 'list' + data['id'].toString());
         line.data('smilisting', data);
         this.container.append(line);
@@ -865,6 +892,16 @@
                             this.listings.push(listing);
                         }.scope(this));
 
+                        this.content.bind('newdata-smilisting', function(event, data) {
+                            $.each(this.listings, function(i, listing) {
+                                var lines = data[listing.name];
+
+                                if (lines && lines.length)  {
+                                    listing.new_lines(lines);
+                                };
+                            });
+                        }.scope(this));
+
                         // Fix table widths
                         var listing = this.content.find('dd.publishables table');
 
@@ -879,6 +916,7 @@
                     cleanup: function() {
                         this.content.empty();
                         this.content.enableTextSelect();
+                        this.content.unbind('newdata-smilisting');
                     }
                 });
 

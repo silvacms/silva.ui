@@ -458,7 +458,7 @@ class PasteActionREST(ActionREST):
         if pasted_assets:
             append['assets'] = pasted_assets
         if append:
-            data['append'] = append
+            data['new_data'] = append
         return data
 
 
