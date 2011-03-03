@@ -166,11 +166,16 @@
 
                         for (var i=0; i < this.data.length(); i++) {
                             var item = this.data.data[i];
+                            var missing = false;
 
                             for (var property in conditions) {
-                                if (conditions[property].indexOf(item[property]) >= 0) {
-                                    return true;
+                                if (conditions[property].indexOf(item[property]) < 0) {
+                                    missing = true;
+                                    break;
                                 };
+                            };
+                            if (!missing) {
+                                return true;
                             };
                         };
                         return false;

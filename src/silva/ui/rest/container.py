@@ -3,6 +3,7 @@
 # See also LICENSE.txt
 # $Id$
 
+
 from five import grok
 from infrae import rest
 from megrok.chameleon.components import ChameleonPageTemplate
@@ -19,6 +20,7 @@ from silva.translations import translate as _
 from silva.core.services.utils import walk_silva_tree
 
 from Acquisition import aq_parent
+from AccessControl import getSecurityManager
 from Products.SilvaMetadata.interfaces import IMetadataService
 from zExceptions import NotFound
 
@@ -134,26 +136,31 @@ class ColumnsContainerListing(UIREST):
                     {'title': self.translate(_(u'New version')),
                      'icon': 'document',
                      'order': 50,
-                     'action': {'rest': {'action': 'newversion',
-                                         'send': 'selected_ids'}},
-                     'available': {'items_match': {'status': [
-                                    'published', 'closed']}},
+                     'action': {'rest': {
+                                'action': 'newversion',
+                                'send': 'selected_ids'}},
+                     'available': {'items_match': {
+                                'status': ['published', 'closed'],
+                                'access': ['manage', 'publish', 'write']}},
                      'ifaces': ['versioned']},
                     {'title': self.translate(_(u'Publish')),
                      'icon': 'check',
                      'order': 51,
-                     'action': {'rest': {'action': 'publish',
-                                         'send': 'selected_ids'}},
-                     'available': {'items_match': {'status': [
-                                    'draft', 'approved', 'pending', 'closed', None]}},
+                     'action': {'rest': {
+                                'action': 'publish',
+                                'send': 'selected_ids'}},
+                     'available': {'items_match': {
+                                'status': ['draft', 'approved', 'pending', 'closed', None],
+                                'access': ['manage', 'publish']}},
                      'ifaces': ['container', 'versioned']},
                     {'title': self.translate(_(u'Close')),
                      'icon': 'close',
                      'order': 52,
                      'action': {'rest': {'action': 'close',
                                          'send': 'selected_ids'}},
-                     'available': {'items_match': {'status': [
-                                    'published', None]}},
+                     'available': {'items_match': {
+                                'status': ['published', None],
+                                'access': ['manage', 'publish']}},
                      'ifaces': ['container', 'versioned']},
                     {'title': self.translate(_(u'Delete')),
                      'icon': 'trash',
@@ -225,6 +232,16 @@ class ContentSerializer(object):
         self.request = request
         self.intids = getUtility(IIntIds)
         self.metadata = getUtility(IMetadataService)
+        self.check_permission = getSecurityManager().checkPermission
+
+    def get_access(self, content):
+        for access, permission in [
+            ('manage', 'Manage Silva Content Settings'),
+            ('publish', 'Approve Silva Content'),
+            ('write', 'Change Silva Content')]:
+            if self.check_permission(permission, content):
+                return access
+        return None
 
     def __call__(self, content):
         previewable = content.get_previewable()
@@ -237,7 +254,8 @@ class ContentSerializer(object):
             'icon': get_icon(content, self.request),
             'title': previewable.get_title_or_id(),
             'author': content_metadata.get('silva-extra', 'lastauthor'),
-            'modified': format_date(content_metadata.get('silva-extra', 'modificationtime'))}
+            'modified': format_date(content_metadata.get('silva-extra', 'modificationtime')),
+            'access': self.get_access(content)}
         if interfaces.IPublishable.providedBy(content):
             data['status'] = get_content_status(content)
         return data
