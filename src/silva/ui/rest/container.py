@@ -121,68 +121,97 @@ class ColumnsContainerListing(UIREST):
                     {'title': self.translate(_(u'Cut')),
                      'icon': 'scissors',
                      'order': 5,
-                     'action': {'cut': True},
+                     'action':
+                         {'cut': True},
+                     'available':
+                         {'content_match':
+                              {'access': ['manage', 'publish', 'write']}},
                      'ifaces': ['content']},
                     {'title': self.translate(_(u'Copy')),
                      'icon': 'copy',
                      'order': 6,
-                     'action': {'copy': True},
+                     'action':
+                         {'copy': True},
                      'ifaces': ['content']},
                     {'title': self.translate(_(u'Rename')),
                      'icon': 'pencil',
                      'order': 10,
-                     'available': {'max_items': 1},
+                     'available':
+                         {'max_items': 1,
+                          'content_match':
+                              {'access': ['manage', 'publish', 'write']}},
                      'ifaces': ['content']},
                     {'title': self.translate(_(u'New version')),
                      'icon': 'document',
                      'order': 50,
-                     'action': {'rest': {
-                                'action': 'newversion',
-                                'send': 'selected_ids'}},
-                     'available': {'items_match': {
-                                'status': ['published', 'closed'],
-                                'access': ['manage', 'publish', 'write']}},
+                     'action':
+                         {'rest':
+                              {'action': 'newversion',
+                               'send': 'selected_ids'}},
+                     'available':
+                         {'items_match':
+                              {'status': ['published', 'closed'],
+                               'access': ['manage', 'publish', 'write']}},
                      'ifaces': ['versioned']},
                     {'title': self.translate(_(u'Publish')),
                      'icon': 'check',
                      'order': 51,
-                     'action': {'rest': {
-                                'action': 'publish',
-                                'send': 'selected_ids'}},
-                     'available': {'items_match': {
-                                'status': ['draft', 'approved', 'pending', 'closed', None],
-                                'access': ['manage', 'publish']}},
+                     'action':
+                         {'rest':
+                              {'action': 'publish',
+                               'send': 'selected_ids'}},
+                     'available':
+                         {'items_match':
+                              {'status': ['draft', 'approved', 'pending', None],
+                               'access': ['manage', 'publish']}},
                      'ifaces': ['container', 'versioned']},
                     {'title': self.translate(_(u'Close')),
                      'icon': 'close',
                      'order': 52,
-                     'action': {'rest': {'action': 'close',
-                                         'send': 'selected_ids'}},
-                     'available': {'items_match': {
-                                'status': ['published', None],
-                                'access': ['manage', 'publish']}},
+                     'action':
+                         {'rest':
+                              {'action': 'close',
+                               'send': 'selected_ids'}},
+                     'available':
+                         {'items_match':
+                              {'status': ['published', None],
+                               'access': ['manage', 'publish']}},
                      'ifaces': ['container', 'versioned']},
                     {'title': self.translate(_(u'Delete')),
                      'icon': 'trash',
                      'order': 100,
-                     'action': {'rest': {'action': 'delete',
-                                         'send': 'selected_ids'}},
+                     'action':
+                         {'rest':
+                              {'action': 'delete',
+                               'send': 'selected_ids'}},
+                     'available':
+                         {'content_match':
+                              {'access': ['manage', 'publish', 'write']}},
                      'ifaces': ['content']},
                     ],
                 'clipboard_actions': [
                     {'title': self.translate(_(u'Paste')),
                      'icon': 'clipboard',
                      'order': 6,
-                     'action': {'rest': {'action': 'paste',
-                                         'send': 'clipboard_ids'}},
-                     'available': {'min_items': 1},
+                     'action':
+                         {'rest':
+                              {'action': 'paste',
+                               'send': 'clipboard_ids'}},
+                     'available': {'min_items': 1,
+                                   'content_match':
+                                       {'access': ['manage', 'publish', 'write']}},
                      'ifaces': ['clipboard']},
                     {'title': self.translate(_(u'Paste as Ghost')),
                      'icon': 'link',
                      'order': 7,
-                     'action': {'rest': {'action': 'pasteasghost',
-                                         'send': 'clipboard_ids'}},
-                     'available': {'min_items': 1},
+                     'action':
+                         {'rest':
+                              {'action': 'pasteasghost',
+                               'send': 'clipboard_ids'}},
+                     'available':
+                         {'min_items': 1,
+                          'content_match':
+                              {'access': ['manage', 'publish', 'write']}},
                      'ifaces': ['clipboard']},
                     {'title': self.translate(_(u'Clear clipboard')),
                      'icon': 'trash',
@@ -284,8 +313,9 @@ class ContainerListing(PageREST):
     def payload(self):
         serializer = ContentSerializer(self, self.request)
         return {"ifaces": ["listing"],
-                "publishables": map(serializer, self.get_publishable_content()),
-                "assets": map(serializer, self.get_non_publishable_content())}
+                "content": serializer(self.context),
+                "items": {"publishables": map(serializer, self.get_publishable_content()),
+                          "assets": map(serializer, self.get_non_publishable_content())}}
 
 
 class ActionREST(UIREST):

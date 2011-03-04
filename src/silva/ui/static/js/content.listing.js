@@ -2,6 +2,32 @@
 
 (function($, obviel) {
 
+    /**
+     * Helper that return true if one object in data match all conditions.
+     * @param data: list of object with properties
+     * @param conditions: object with properties that are list of
+     *        possible values that a data object must have in order to
+     *        match.
+     */
+    var objects_match = function(data, conditions) {
+        for (var i=0; i < data.length; i++) {
+            var item = data[i];
+            var missing = false;
+
+            for (var property in conditions) {
+                if (conditions[property].indexOf(item[property]) < 0) {
+                    missing = true;
+                    break;
+                };
+            };
+            if (!missing) {
+                return true;
+            };
+        };
+        return false;
+    };
+
+
     // Define columns renderers
     var listingcolumns = new obviel.Registry();
 
@@ -148,39 +174,40 @@
                     this.content.append(html);
                 }
             };
-            for (var limiter in action.available) {
-                switch(limiter) {
-                case 'max_items':
-                    definition['available'] = function() {
-                        return this.data.length() <= action.available.max_items;
-                    };
-                    break;
-                case 'min_items':
-                    definition['available'] = function() {
-                        return this.data.length() >= action.available.min_items;
-                    };
-                    break;
-                case 'items_match':
-                    definition['available'] = function() {
-                        var conditions = action.available.items_match;
+            if (action.available) {
+                var conditions = [];
 
-                        for (var i=0; i < this.data.length(); i++) {
-                            var item = this.data.data[i];
-                            var missing = false;
-
-                            for (var property in conditions) {
-                                if (conditions[property].indexOf(item[property]) < 0) {
-                                    missing = true;
-                                    break;
-                                };
-                            };
-                            if (!missing) {
-                                return true;
-                            };
+                for (var limiter in action.available) {
+                    switch(limiter) {
+                    case 'max_items':
+                        conditions.push(function() {
+                            return this.data.length() <= action.available.max_items;
+                        });
+                        break;
+                    case 'min_items':
+                        conditions.push(function() {
+                            return this.data.length() >= action.available.min_items;
+                        });
+                        break;
+                    case 'items_match':
+                        conditions.push(function() {
+                            return objects_match(this.data.items(), action.available.items_match);
+                        });
+                        break;
+                    case 'content_match':
+                        conditions.push(function() {
+                            return objects_match([this.data.content], action.available.content_match);
+                        });
+                        break;
+                    };
+                };
+                definition['available'] = function() {
+                    for (var i=0; i < conditions.length; i++) {
+                        if (!conditions[i].apply(this)) {
+                            return false;
                         };
-                        return false;
                     };
-                    break;
+                    return true;
                 };
             };
             for (var action_type in action.action) {
@@ -193,7 +220,7 @@
                         var payload = [];
                         switch(action.action.rest.send) {
                         case 'selected_ids':
-                            $.each(this.data.data, function(i, item) {
+                            $.each(this.data.items(), function(i, item) {
                                 payload.push({name: 'content', value: item.id});
                             });
                             break;
@@ -267,20 +294,20 @@
      * @param listing: managed listing
      */
     var SMIMultiSelector = function(listing) {
-        this.selector = listing.header.find('.selector');
+        this.$selector = listing.$header.find('.selector');
         this.status = 'none';
         this.listing = listing;
 
         // Hide selector if the header is hidden.
-        this.listing.header.bind('collapsingchange-smilisting', function() {
-            this.selector.fadeToggle();
+        this.listing.$header.bind('collapsingchange-smilisting', function() {
+            this.$selector.fadeToggle();
         }.scope(this));
-        if (this.listing.header.is('.collapsed')) {
-            this.selector.hide();
+        if (this.listing.$header.is('.collapsed')) {
+            this.$selector.hide();
         };
 
         // Update selector on selection change
-        this.listing.container.bind('selectionchange-smilisting', function(event, changes) {
+        this.listing.$container.bind('selectionchange-smilisting', function(event, changes) {
             if (changes.selected == 0) {
                 this.set('none');
             } else if (changes.selected == changes.total) {
@@ -294,7 +321,7 @@
         }.scope(this));
 
         // Clicking on the selector change the selection.
-        this.selector.bind('click', function() {
+        this.$selector.bind('click', function() {
             if (this.status == 'none') {
                 this.listing.select_all();
             } else {
@@ -305,8 +332,8 @@
     };
 
     SMIMultiSelector.prototype.set = function(status) {
-        this.selector.removeClass(this.status);
-        this.selector.addClass(status);
+        this.$selector.removeClass(this.status);
+        this.$selector.addClass(status);
         this.status = status;
     };
 
@@ -317,7 +344,7 @@
     var SMIViewClipboard = function(container, smi) {
         this.smi = smi;
         var content = container.find('.clipboard-info');
-        this.popup = content.children('.popup');
+        this.$popup = content.children('.popup');
         this._uptodate = false;
         var info = content.children('.stat');
         var count = info.find('.count');
@@ -328,7 +355,7 @@
         // Update count when clipboard is changed
         $('body').bind('contentchange-smiclipboard', function() {
             count.text(smi.clipboard.length().toString());
-            if (this.popup.is(':visible')) {
+            if (this.$popup.is(':visible')) {
                 this.update();
             } else {
                 this._uptodate = false;
@@ -340,24 +367,24 @@
             this.toggle();
             return false;
         }.scope(this));
-        this.popup.bind('mouseleave', function() {
-            this.popup.fadeOut();
+        this.$popup.bind('mouseleave', function() {
+            this.$popup.fadeOut();
         }.scope(this));
     };
 
     SMIViewClipboard.prototype.toggle = function() {
-        if (!this._uptodate && !this.popup.is(':visible')) {
+        if (!this._uptodate && !this.$popup.is(':visible')) {
             this.update();
         };
-        this.popup.fadeToggle();
+        this.$popup.fadeToggle();
     };
 
     SMIViewClipboard.prototype.hide = function() {
-        this.popup.fadeOut();
+        this.$popup.fadeOut();
     };
 
     SMIViewClipboard.prototype.update = function() {
-        var popup = this.popup;
+        var popup = this.$popup;
 
         popup.empty();
         $.each(this.smi.clipboard.cutted, function(i, item) {
@@ -385,33 +412,33 @@
      */
     var SMIViewCounter = function(listing) {
         this.listing = listing;
-        this.counter = $('p.' + this.listing.name);
-        this.total = this.counter.find('span.total');
-        this.selected = this.counter.find('span.selected');
-        this.selected.hide();
+        this.$counter = $('p.' + this.listing.name);
+        this.$total = this.$counter.find('span.total');
+        this.$selected = this.$counter.find('span.selected');
+        this.$selected.hide();
 
         // Hide counter on header collapse
-        this.listing.header.bind('collapsingchange-smilisting', function() {
-            this.counter.toggle();
+        this.listing.$header.bind('collapsingchange-smilisting', function() {
+            this.$counter.toggle();
         }.scope(this));
 
         // Bind selection change event
-        this.listing.container.bind('selectionchange-smilisting', function(event, changes) {
+        this.listing.$container.bind('selectionchange-smilisting', function(event, changes) {
             if (changes.selected) {
-                this.selected.find('.count').text(changes.selected.toString());
-                this.selected.show();
+                this.$selected.find('.count').text(changes.selected.toString());
+                this.$selected.show();
             } else {
-                this.selected.hide();
+                this.$selected.hide();
             };
         }.scope(this));
 
         // Bind content change event
-        this.listing.container.bind('contentchange-smilisting', function(event, changes) {
+        this.listing.$container.bind('contentchange-smilisting', function(event, changes) {
             if (changes.total) {
-                this.total.find('.count').text(changes.total.toString());
-                this.total.show();
+                this.$total.find('.count').text(changes.total.toString());
+                this.$total.show();
             } else {
-                this.total.hide();
+                this.$total.hide();
             };
         }.scope(this));
     };
@@ -422,8 +449,9 @@
      */
     var SMISelection = function(listing, items) {
         this.listing = listing;
-        this.items = items;
+        this.content = listing.content;
 
+        this._raw_items = items;
         this._refresh_data();
     };
 
@@ -432,7 +460,7 @@
         this.ifaces = [];
         this.data = [];
 
-        $.each(this.items, function (i, item) {
+        $.each(this._raw_items, function (i, item) {
             var local_data = $(item).data('smilisting');
 
             for (var e=0; e < local_data.ifaces.length; e++) {
@@ -448,7 +476,14 @@
      * Return the size of the selection.
      */
     SMISelection.prototype.length = function() {
-        return this.items.length;
+        return this._raw_items.length;
+    };
+
+    /**
+     * Return the items of the selection.
+     */
+    SMISelection.prototype.items = function() {
+        return this.data;
     };
 
     /**
@@ -465,17 +500,19 @@
 
     /**
      * Remove some items associated to the selection.
+     * @param ids: content id of the line to remove.
      */
-    SMISelection.prototype.remove = function(items) {
-        this.listing.remove_lines(items);
+    SMISelection.prototype.remove = function(ids) {
+        this.listing.remove_lines(ids);
     };
 
     /**
      * Close the current selection (unselect it).
      */
     SMISelection.prototype.close = function() {
-        this.listing.unselect(this.items);
+        this.listing.unselect(this._raw_items);
     };
+
 
     /**
      * Manage action buttons on selected items of a listing.
@@ -495,17 +532,17 @@
                 extra: {smi: listing.smi}});
         };
 
-        this.listing.container.bind('selectionchange-smilisting', function(event, changes) {
+        this.listing.$container.bind('selectionchange-smilisting', function(event, changes) {
             // First remove, all action lines that are no longer below
             // a selection
-            this.listing.container.children('tr.actions').each(function (i, item){
+            this.listing.$container.children('tr.actions').each(function (i, item){
                 var action = $(item);
 
                 if (!action.prev().is(':selected')) {
                     action.remove();
                 };
             });
-            var last_selected = this.listing.container.children('tr.item.selected:first');
+            var last_selected = this.listing.$container.children('tr.item.selected:first');
             while (last_selected.length) {
                 var selected_items = last_selected.nextUntil(':not(.selected)').andSelf();
                 last_selected = selected_items.last();
@@ -551,12 +588,13 @@
         }.scope(this));
     };
 
-    var SMIListing = function(name, smi, data, configuration) {
-        var content = $('dd.' + name);
-        var container = content.find('tbody');
+    var SMIListing = function(name, smi, data, content, configuration) {
+        var $content = $('dd.' + name);
+        var $container = $content.find('tbody');
         this.name = name;
-        this.header = $('dt.' + name);
-        this.container = container;
+        this.$header = $('dt.' + name);
+        this.$container = $container;
+        this.content = content;
         this.configuration = configuration;
         this.smi = smi;
 
@@ -566,29 +604,29 @@
 
         // Collapse feature
         if (configuration.collapsed) {
-            this.header.addClass('collapsed');
-            content.addClass('collapsed');
-            this.header.trigger('collapsingchange-smilisting');
+            this.$header.addClass('collapsed');
+            $content.addClass('collapsed');
+            this.$header.trigger('collapsingchange-smilisting');
         };
-        this.header.bind('click', function() {
-            this.header.toggleClass('collapsed');
-            content.toggleClass('collapsed');
+        this.$header.bind('click', function() {
+            this.$header.toggleClass('collapsed');
+            $content.toggleClass('collapsed');
             configuration.collapsed = !configuration.collapsed;
-            this.header.trigger('collapsingchange-smilisting');
+            this.$header.trigger('collapsingchange-smilisting');
         }.scope(this));
 
         // Add the hover style
-        this.container.delegate('tr.item', 'mouseenter', function() {
+        this.$container.delegate('tr.item', 'mouseenter', function() {
             $(this).addClass("hover");
         });
-        this.container.delegate('tr.item', 'mouseleave', function() {
+        this.$container.delegate('tr.item', 'mouseleave', function() {
             $(this).removeClass("hover");
         });
 
         // Row selection with mouse
         var mouse_last_selected = null;
         var trigger = this.trigger.scope(this);
-        this.container.delegate('tr.item', 'click', function(event) {
+        this.$container.delegate('tr.item', 'click', function(event) {
             var row = $(this);
 
             if (mouse_last_selected === null || !event.shiftKey) {
@@ -618,7 +656,7 @@
         });
 
         if (configuration.sortable) {
-            var table = content.find('table');
+            var table = $content.find('table');
 
             // Add the sorting if the table is sortable
             table.tableDnD({
@@ -637,7 +675,7 @@
                 }.scope(this)
             });
             // If content change, reinitialize the DND
-            content.bind('contentchange-smilisting', function() {
+            $content.bind('contentchange-smilisting', function() {
                 table.tableDnDUpdate();
             });
         };
@@ -651,18 +689,18 @@
      * @param event_name: name of the event to trigger
      */
     SMIListing.prototype.trigger = function (event_name) {
-        var total = this.container.children('tr.item').length;
-        var selected = this.container.children('tr.item.selected').length;
+        var total = this.$container.children('tr.item').length;
+        var selected = this.$container.children('tr.item.selected').length;
 
-        this.container.trigger(event_name, {total: total, selected: selected});
+        this.$container.trigger(event_name, {total: total, selected: selected});
     };
 
     /**
      * Add a list of lines later on.
      */
     SMIListing.prototype.new_lines = function(data, initial) {
-        if (this.header.is('.collapsed')) {
-            this.header.one('collapsingchange-smilisting', function() {
+        if (this.$header.is('.collapsed')) {
+            this.$header.one('collapsingchange-smilisting', function() {
                 // On first next display, add the data.
                 this.add_lines(data, initial);
             }.scope(this));
@@ -684,7 +722,7 @@
         if (data.length) {
             if (!initial) {
                 // Remove any eventual empty line
-                this.container.children('.empty').remove();
+                this.$container.children('.empty').remove();
             };
             // Fill in table
             $.each(data, function(i, line) {
@@ -703,7 +741,7 @@
 
             empty_cell.attr('colspan', this.configuration.columns.length);
             empty_line.append(empty_cell);
-            this.container.append(empty_line);
+            this.$container.append(empty_line);
         };
         this.trigger('contentchange-smilisting');
     };
@@ -739,7 +777,7 @@
         };
         line.attr('id', 'list' + data['id'].toString());
         line.data('smilisting', data);
-        this.container.append(line);
+        this.$container.append(line);
     };
 
     /**
@@ -747,7 +785,7 @@
      * @param id: line id
      */
     SMIListing.prototype.get_line = function(id) {
-        return this.container.children('#list' + id.toString());
+        return this.$container.children('#list' + id.toString());
     };
 
     /**
@@ -824,14 +862,14 @@
      * Unselect all elements.
      */
     SMIListing.prototype.unselect_all = function() {
-        this.unselect(this.container.children('tr.item.selected'));
+        this.unselect(this.$container.children('tr.item.selected'));
     };
 
     /**
      * Select all elements.
      */
     SMIListing.prototype.select_all = function() {
-        this.container.children('tr.item').addClass('selected');
+        this.$container.children('tr.item').addClass('selected');
         this.trigger('selectionchange-smilisting');
     };
 
@@ -864,6 +902,7 @@
                         this.content.disableTextSelect();
 
                         // Bind clipboard info
+                        this.smi.clipboard.content = this.data.content;
                         var clipboard_info = new SMIViewClipboard(this.content, this.smi);
 
                         // Fill in header
@@ -887,7 +926,11 @@
 
                         $.each(this.configuration.listing, function(i, configuration) {
                             var listing = new SMIListing(
-                                configuration.name, this.smi, this.data[configuration.name], configuration);
+                                configuration.name,
+                                this.smi,
+                                this.data.items[configuration.name],
+                                this.data.content,
+                                configuration);
 
                             this.listings.push(listing);
                         }.scope(this));
@@ -914,6 +957,7 @@
 
                     },
                     cleanup: function() {
+                        this.smi.clipboard.content = null;
                         this.content.empty();
                         this.content.enableTextSelect();
                         this.content.unbind('newdata-smilisting');

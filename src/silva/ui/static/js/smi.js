@@ -202,7 +202,7 @@
      * @param options: configuration options.
      */
     var NotificationManager = function(options) {
-        this.container = $(options.selector);
+        this.$container = $(options.selector);
 
         // Listen to pull notification events.
         $(document).bind('refresh-feedback-smi', function() {
@@ -221,7 +221,7 @@
      * @param message: message.
      */
     NotificationManager.prototype.notify = function(message) {
-        new Notification(this.container, message);
+        new Notification(this.$container, message);
     };
 
     /**
@@ -238,7 +238,7 @@
      * Mark all notifications as seen.
      */
     NotificationManager.prototype.mark_as_seen = function() {
-        this.container.children().trigger('close-sminotification');
+        this.$container.children().trigger('close-sminotification');
     };
 
     /**
@@ -248,6 +248,9 @@
     var ClipBoard = function(notifications) {
         this.ifaces = ['clipboard'];
         this.notifications = notifications;
+        // content represent information about content that might be
+        // the target of a paste.
+        this.content = null;
         this._clear();
     };
 
