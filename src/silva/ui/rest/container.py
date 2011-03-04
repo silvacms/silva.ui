@@ -75,6 +75,7 @@ class ColumnsContainerListing(UIREST):
         return self.json_response({
                 'listing': [
                     {'name': 'publishables',
+                     'layout': {'fixed': {0:16, 1:16}},
                      'columns': [
                             {'name': 'icon',
                              'view': 'icon'},
@@ -95,9 +96,14 @@ class ColumnsContainerListing(UIREST):
                              'caption': self.translate(_(u'Author')),
                              'view': 'action',
                              'action': 'properties'}],
-                     'sortable': 'icon',
+                     'sortable':
+                         {'columns': ['icon', 'status'],
+                          'available':
+                              {'content_match':
+                                   {'access': ['manage', 'publish', 'write']}}},
                      'collapsed': False},
                     {'name': 'assets',
+                     'layout': {'fixed': {0:32}, 'skip': {1:True}},
                      'columns': [
                             {'name': 'icon',
                              'view': 'icon'},

@@ -76,20 +76,6 @@
         });
     };
 
-    $.fn.findState = function(source, find) {
-        var total = $(this).find(source).length;
-        var found = $(this).find(find).length;
-        if (found == 0) {
-            return 'none';
-        } else if (found == total) {
-            return (found == 1) ? 'all single' : 'all';
-        } else if (found == 1) {
-            return 'partial single';
-        } else {
-            return 'partial';
-        }
-    };
-
     $.fn.array_match = function(one, two) {
         for (var i in one) {
             for (var j in two) {
@@ -148,7 +134,7 @@
      * @param options: Object which can contain a 'source' jQuery object or a
      * 'fixedColumns' object containing columnindex:pixelwidth values
      */
-    $.fn.updateTableColumnsWidths = function(options) {
+    $.fn.updateTableColumnsWidths = function(options, reference) {
         return this.each(function() {
             var colComputedWidths = {};
             var colWidths = {};
@@ -157,22 +143,22 @@
             var totalWidth = 0;
 
             $(this).css("table-layout", "auto");
-            if (typeof(options.fixedColumns) != 'object') {
-                options.fixedColumns = {};
+            if (typeof(options.fixed) != 'object') {
+                options.fixed = {};
             }
-            if (options.source) {
+            if (reference !== undefined) {
                 var regex = /width: ([0-9]+)([pxem%]*)/;
                 var minus = 0;
 
-                $(options.source).find('tr:first').find('td, th').each(function(i) {
-                    var stylematch = $(this).attr('style').toLowerCase().match(regex);
-                    var width = parseInt(stylematch[1]);
-                    var fixed = stylematch[2];
+                reference.find('tr:first').find('td, th').each(function(i) {
+                    var match = $(this).attr('style').toLowerCase().match(regex);
+                    var width = parseInt(match[1]);
+                    var fixed = match[2];
 
                     colWidths[i] = width;
                     colOuterWidths[i] = $(this).outerWidth();
-                    if (options.skipColumns &&
-                        options.skipColumns[i] &&
+                    if (options.skip &&
+                        options.skip[i] &&
                         i - minus &&
                         fixedWidths[i - (minus + 1)] == fixed) {
                         minus += 1;
@@ -185,9 +171,9 @@
                 });
             } else {
                 $(this).find('tr:first').find('td').each(function(i) {
-                    if (options.fixedColumns[i]) {
-                        colComputedWidths[i] = options.fixedColumns[i];
-                        totalWidth += options.fixedColumns[i];
+                    if (options.fixed[i]) {
+                        colComputedWidths[i] = options.fixed[i];
+                        totalWidth += options.fixed[i];
                         fixedWidths[i] = 'px';
                     } else {
                         colComputedWidths[i] = $(this).outerWidth();
@@ -222,11 +208,4 @@
         }
     };
 
-    $.fn.getCell = function(column, row) {
-        if (row) {
-            return $(this).rangeFilter('tr', [row]).rangeFilter('td, th', [column]);
-        } else {
-            return $(this).rangeFilter('td, th', [column]);
-        }
-    };
 })(jQuery);

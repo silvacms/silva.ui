@@ -655,12 +655,12 @@
             };
         });
 
-        if (configuration.sortable) {
+        if (this.configuration.sortable) {
             var table = $content.find('table');
 
             // Add the sorting if the table is sortable
             table.tableDnD({
-                dragHandle: "dragHandle",
+                dragHandle: "moveable",
                 onDragClass: "dragging",
                 onDragStart: function(table, row) {
                     // Reset hover style and mouse mouse_last_selected
@@ -762,8 +762,9 @@
             if (!i) {
                 cell.addClass('first');
             };
-            if (this.configuration.sortable == column.name) {
-                cell.addClass('dragHandle');
+            if (this.configuration.sortable &&
+                this.configuration.sortable.columns.indexOf(column.name) >= 0) {
+                cell.addClass('moveable');
             };
             listingcolumns.render(cell, {
                 data: data,
@@ -810,8 +811,9 @@
             var cell = $(content);
             var column = this.configuration.columns[i];
 
-            if (this.configuration.sortable == column.name) {
-                cell.addClass('dragHandle');
+            if (this.configuration.sortable &&
+                this.configuration.sortable.columns.indexOf(column.name) >= 0) {
+                cell.addClass('moveable');
             };
             listingcolumns.render(cell, {
                 data: data,
@@ -945,22 +947,48 @@
                             });
                         }.scope(this));
 
-                        // Fix table widths
-                        var listing = this.content.find('dd.publishables table');
+                        // Bind and update the listing column sizes
+                        this.update_listing_sizes();
+                        this.content.bind('collapsingchange-smilisting', function() {
+                            this.update_listing_sizes();
+                        }.scope(this));
+                    },
+                    update_listing_sizes: function() {
+                        var $header = this.content.find('div.header table');
+                        var $reference = null;
+                        var configuration = null;
+                        var others = [];
+                        var other_configurations = [];
 
-                        listing.updateTableColumnsWidths({fixedColumns: {0:16, 1:16}});
-                        this.content.find('div.header table').updateTableColumnsWidths(
-                            {source: '#workspace dd.publishables table'});
-                        this.content.find('dd.assets table').updateTableColumnsWidths(
-                            {source: '#workspace dd.publishables table',
-                             skipColumns: {1:true}});
+                        for (var l=0; l < this.listings.length; l++) {
+                            var listing = this.listings[l];
+                            var $table = listing.$container.parent();
+                            if ($table.is(':visible')) {
+                                if ($reference === null) {
+                                    $reference = $table;
+                                    configuration = listing.configuration.layout;
+                                } else {
+                                    others.push($table);
+                                    other_configurations.push(listing.configuration.layout);
+                                };
+                            };
+                        };
 
+                        if ($reference !== null) {
+                            $reference.updateTableColumnsWidths(configuration);
+                            $header.updateTableColumnsWidths({}, $reference);
+
+                            for (var i=0; i < others.length; i++) {
+                                others[i].updateTableColumnsWidths(other_configurations[i], $reference);
+                            };
+                        };
                     },
                     cleanup: function() {
                         this.smi.clipboard.content = null;
                         this.content.empty();
                         this.content.enableTextSelect();
                         this.content.unbind('newdata-smilisting');
+                        this.content.unbind('collapsingchange-smilisting');
                     }
                 });
 

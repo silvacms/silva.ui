@@ -362,7 +362,7 @@ input, textarea {
 }
 #workspace .content .listing td,
 #workspace .content .header th {
-  padding:0 10px 0 0;
+  padding:0 5px 0 5px;
   line-height:22px;
   text-align:left;
   white-space:nowrap;
@@ -370,33 +370,23 @@ input, textarea {
   overflow:hidden;
 }
 #workspace .content .header th.ui-state-default {
-  padding: 0px 10px;
+  padding: 0px 2px 0px 8px;
 }
 #workspace .content .listing a.close-selection ins {
   margin-top: 6px;
 }
-#workspace .content td.first {
-  padding:0 8px;
+#workspace .content .listing td.first {
+  padding:0 5px;
   width:20px;
 }
-#workspace .content td.dragHandle {
-  cursor:move;
-}
-#workspace .content td.dragHandle ins {
-  display:block;
-  float:left;
-  width:20px;
-  height:20px;
-  margin:1px 0;
-  background-image:url(../img/sprite.png);
+#workspace .content .listing td.moveable,
+#workspace .content .listing td.moveable ins {
   cursor:move;
 }
 #workspace .content td ins.state {
   background-image:url(../img/sprite.png);
   display:block;
   float:left;
-  margin-right:5px;
-  margin-top:6px;
 }
 
 /* Table listing */
