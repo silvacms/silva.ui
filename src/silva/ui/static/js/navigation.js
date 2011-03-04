@@ -33,10 +33,14 @@
                             function(){ open_node(left); });
                     } else {
                         tree.jstree('select_node', parent_node, true);
-                    }
-                }
+                    };
+                    return true;
+                };
+                return false;
             };
-            open_node(parents);
+            if (!open_node(parents)) {
+                tree.jstree('deselect_all');
+            };
         };
 
         // Disable text selection on tree
@@ -71,6 +75,12 @@
             scroll($(this), data.rslt.obj.parents('ul').length - 3);
         });
 
+        // Open view on click
+        tree.delegate('a', 'click', function(event) {
+            smi.open_screen($(this).parent().data('jstree').path);
+            return false;
+        });
+
         // Listen to smi.blur and focus to activate/disable shortcuts.
         navigation.bind('blur-smi', function() {
             tree.jstree("disable_hotkeys");
@@ -79,14 +89,7 @@
             tree.jstree("enable_hotkeys");
         });
 
-        // Open view on click
-        $(options.selector + ' .tree a').live('click', function(event) {
-            smi.open_screen($(this).parent().data('jstree').path);
-
-            return false;
-        });
-
-        // If a content is selected, try to select its container
+        // If a content is loaded, try to select its container
         navigation.bind('content-smi', function (event, data) {
             uncollapse(data.navigation.parents);
         });
