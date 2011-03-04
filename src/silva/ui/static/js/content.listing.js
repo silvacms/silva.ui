@@ -602,9 +602,12 @@
         this.actions = new SMIActions(this);
         this.counter = new SMIViewCounter(this);
 
+        this.smi.shortcuts.new_shortcuts(name, $content);
+
         // Collapse feature
         {
             var $marker = this.$header.children('ins.ui-icon');
+            var $header = this.$header;
             var toggle_marker = function() {
                 // Update the jQueryUI class on the marker (would be
                 // too easy otherwise).
@@ -616,20 +619,30 @@
                     $marker.addClass('ui-icon-triangle-1-e');
                 };
             };
+            var toggle_collapsing = function () {
+                toggle_marker();
+                $header.toggleClass('collapsed');
+                $content.toggleClass('collapsed');
+                configuration.collapsed = !configuration.collapsed;
+                $header.trigger('collapsingchange-smilisting');
+            };
 
             if (configuration.collapsed) {
                 toggle_marker();
-                this.$header.addClass('collapsed');
+                $header.addClass('collapsed');
                 $content.addClass('collapsed');
-                this.$header.trigger('collapsingchange-smilisting');
+                $header.trigger('collapsingchange-smilisting');
             };
             this.$header.bind('click', function() {
-                toggle_marker();
-                this.$header.toggleClass('collapsed');
-                $content.toggleClass('collapsed');
-                configuration.collapsed = !configuration.collapsed;
-                this.$header.trigger('collapsingchange-smilisting');
-            }.scope(this));
+                toggle_collapsing();
+            });
+            $content.bind('focus-smi', function() {
+                if ($header.hasClass('collapsed')) {
+                    toggle_collapsing();
+                };
+                $content.parent().scrollTop(
+                    $content.position().top - $header.outerHeight());
+            });
         };
 
         // Add the hover style
@@ -701,11 +714,16 @@
         this.new_lines(data, true);
     };
 
+    // Called when the listing is cleaned
+    SMIListing.prototype.cleanup = function() {
+        this.smi.shortcuts.remove_shortcuts(this.name);
+    };
+
     /**
      * Trigger an event on the listing data.
      * @param event_name: name of the event to trigger
      */
-    SMIListing.prototype.trigger = function (event_name) {
+    SMIListing.prototype.trigger = function(event_name) {
         var total = this.$container.children('tr.item').length;
         var selected = this.$container.children('tr.item.selected').length;
 
@@ -934,9 +952,6 @@
                                 cell.addClass('ui-state-default');
                                 cell.append('<ins class="ui-icon ui-icon-triangle-2-n-s"></ins>');
                             };
-                            if (first_cfg.sortable == column.name) {
-                                cell.addClass('dragHandle');
-                            };
                             if (column.caption) {
                                 cell.text(column.caption);
                             };
@@ -1001,6 +1016,9 @@
                         };
                     },
                     cleanup: function() {
+                        $.each(this.listings, function(i, listing) {
+                            listing.cleanup();
+                        });
                         this.smi.clipboard.content = null;
                         this.content.empty();
                         this.content.enableTextSelect();

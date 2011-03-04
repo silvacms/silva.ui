@@ -73,10 +73,66 @@
      * A ShortcutManager let you bind, unbind, rebind collection of
      * shortcuts.
      */
-    var ShortcutManager = function () {
-        this.shortcuts = {'default': []};
-        this.current = 'default';
-        this.activated = true;
+    var ShortcutManager = function() {
+        this._shortcuts = {};
+        this._zones = {};
+        this._order = [];
+        this._selected = 0;
+
+        var make_unselect = function(direction) {
+            return function() {
+                if (this._order.length) {
+                    var previous_zone = this.get_current_zone();
+                    previous_zone.removeClass('focus');
+                    previous_zone.trigger('blur-smi');
+                    this._selected = (this._selected + direction) % this._order.length;
+                    if (this._selected < 0) {
+                        this._selected = this._order.length - 1;
+                    };
+                    var zone = this.get_current_zone();
+                    zone.addClass('focus');
+                    zone.trigger('focus-smi');
+                    zone.addClass('highlight');
+                    setTimeout(function() {zone.removeClass('highlight');}, 500);
+                };
+            }.scope(this);
+        }.scope(this);
+        shortcut.add('ctrl+shift+left', make_unselect(-1));
+        shortcut.add('ctrl+shift+right', make_unselect(1));
+    };
+
+    ShortcutManager.prototype.get_current = function () {
+        if (this._order.length) {
+            return this._order[this._selected];
+        };
+        return null;
+    };
+    ShortcutManager.prototype.get_current_zone = function() {
+        var current = this.get_current();
+
+        if (current) {
+            return this._zones[current];
+        };
+        return null;
+    };
+
+    ShortcutManager.prototype.new_shortcuts = function(name, zone) {
+        if (this._zones[name] === undefined) {
+            this._zones[name] = zone;
+            this._order.push(name);
+            this._shortcuts = [];
+        };
+    };
+
+    ShortcutManager.prototype.remove_shortcuts = function(name) {
+        if (this._zones[name] !== undefined) {
+            if (this.get_current() == name) {
+                this._selected = 0;
+            }
+            this._order.splice(this._order.indexOf(name), 1);
+            delete this._zones[name];
+            delete this._shortcuts[name];
+        };
     };
 
     /**
@@ -101,21 +157,6 @@
                 shortcut.remove(key);
             };
             delete this.shortcuts[this.current][key];
-        }
-    };
-
-    /**
-     * Switch active shortcuts to a new or existing collection.
-     * @param name: shortcut collection
-     */
-    ShortcutManager.prototype.use = function(name) {
-        if (name != this.current) {
-            this.disable();
-            this.current = name;
-            if (this.shortcuts[name] == undefined) {
-                this.shortcuts[name] = {};
-            };
-            this.activate();
         }
     };
 
@@ -343,35 +384,12 @@
         this.opening = {path: '', screen: ''}; // Screen being currently opened
         this.options = options;
         this.shortcuts = new ShortcutManager();
+        this.shortcuts.new_shortcuts('navigation', navigation);
         this.notifications = new NotificationManager(options.notifications);
         this.clipboard = new ClipBoard(this.notifications);
 
         navigation.SMINavigation(this, options.navigation);
-
-        this.workspace = workspace.SMIWorkspace(this, options.workspace);
-
-        // Bind keys to switch focus between navigation and workspace
-        // XXX: doesn't work for Sylvain
-        $(document).bind('keydown', function(e) {
-            if (e.ctrlKey && e.shiftKey) {
-                alert('flash');
-                navigation.addClass('highlight');
-                workspace.addClass('highlight');
-                if (e.keyCode == 37) {
-                    workspace.trigger('blur-smi');
-                    navigation.trigger('focus-smi');
-                } else if (e.keyCode == 39) {
-                    navigation.trigger('blur-smi');
-                    workspace.trigger('focus-smi');
-                }
-            }
-        });
-        $(document).bind('keyup', function(e) {
-            if (e.keyCode == 16 || e.keyCode == 17) {
-                navigation.removeClass('highlight');
-                workspace.removeClass('highlight');
-            }
-        });
+        workspace.SMIWorkspace(this, options.workspace);
 
         // By default, navigation is blue and workspace is focus
         navigation.trigger('blur-smi');

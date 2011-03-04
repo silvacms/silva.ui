@@ -72,27 +72,12 @@
         });
 
         // Listen to smi.blur and focus to activate/disable shortcuts.
-        // navigation.bind('blur.smi', function() {
-        //     var keybinds = $.extend(true, {}, $('body').SMI('getbinds'));
-
-        //     tree.data('keybinds', keybinds);
-        //     $.each(keybinds, function(key) {
-        //         $('body').SMI('unbind', key);
-        //     });
-        //     tree.jstree("disable_hotkeys");
-        //     navigation.removeClass("focus");
-        // });
-        // navigation.bind('focus.smi', function() {
-        //     var keybinds = $('#tree').data('keybinds');
-
-        //     if (keybinds) {
-        //         $.each(keybinds, function(key, fn) {
-        //             $('body').SMI('keybind', key, fn);
-        //         });
-        //     }
-        //     tree.jstree("enable_hotkeys");
-        //     navigation.addClass('focus');
-        // });
+        navigation.bind('blur-smi', function() {
+            tree.jstree("disable_hotkeys");
+        });
+        navigation.bind('focus-smi', function() {
+            tree.jstree("enable_hotkeys");
+        });
 
         // Open view on click
         $(options.selector + ' .tree a').live('click', function(event) {

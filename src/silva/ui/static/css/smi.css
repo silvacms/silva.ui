@@ -99,8 +99,7 @@ input, textarea {
   top:0px;
 }
 
-#navigation .focus .highlight,
-#workspace.focus.highlight {
+.focus.highlight {
   outline: 2px #fb0 solid;
 }
 

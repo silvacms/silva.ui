@@ -27,13 +27,13 @@
     <div id="notifications">
     </div>
     <div id="main">
-      <nav id="navigation" tabindex="1">
+      <nav id="navigation">
         <h1 i18n:translate="">
           <a href="#!/"><img src="${imgs_url}/silva.png" alt="Silva" /></a>
         </h1>
         <div class="tree"></div>
       </nav>
-      <div id="workspace" tabindex="0">
+      <div id="workspace">
         <div class="info">
           <ol class="actions admin-actions">
             <li>
