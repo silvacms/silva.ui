@@ -603,17 +603,34 @@
         this.counter = new SMIViewCounter(this);
 
         // Collapse feature
-        if (configuration.collapsed) {
-            this.$header.addClass('collapsed');
-            $content.addClass('collapsed');
-            this.$header.trigger('collapsingchange-smilisting');
+        {
+            var $marker = this.$header.children('ins.ui-icon');
+            var toggle_marker = function() {
+                // Update the jQueryUI class on the marker (would be
+                // too easy otherwise).
+                if ($marker.hasClass('ui-icon-triangle-1-e')) {
+                    $marker.removeClass('ui-icon-triangle-1-e');
+                    $marker.addClass('ui-icon-triangle-1-s');
+                } else {
+                    $marker.removeClass('ui-icon-triangle-1-s');
+                    $marker.addClass('ui-icon-triangle-1-e');
+                };
+            };
+
+            if (configuration.collapsed) {
+                toggle_marker();
+                this.$header.addClass('collapsed');
+                $content.addClass('collapsed');
+                this.$header.trigger('collapsingchange-smilisting');
+            };
+            this.$header.bind('click', function() {
+                toggle_marker();
+                this.$header.toggleClass('collapsed');
+                $content.toggleClass('collapsed');
+                configuration.collapsed = !configuration.collapsed;
+                this.$header.trigger('collapsingchange-smilisting');
+            }.scope(this));
         };
-        this.$header.bind('click', function() {
-            this.$header.toggleClass('collapsed');
-            $content.toggleClass('collapsed');
-            configuration.collapsed = !configuration.collapsed;
-            this.$header.trigger('collapsingchange-smilisting');
-        }.scope(this));
 
         // Add the hover style
         this.$container.delegate('tr.item', 'mouseenter', function() {

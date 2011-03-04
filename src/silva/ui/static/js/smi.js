@@ -354,6 +354,7 @@
         // XXX: doesn't work for Sylvain
         $(document).bind('keydown', function(e) {
             if (e.ctrlKey && e.shiftKey) {
+                alert('flash');
                 navigation.addClass('highlight');
                 workspace.addClass('highlight');
                 if (e.keyCode == 37) {

@@ -5,8 +5,8 @@
     </table>
   </div>
   <dl class="listing">
-    <dt class="publishables">
-      <ins class="handle"></ins>
+    <dt class="publishables ui-state-default">
+      <ins class="ui-icon ui-icon-triangle-1-s"></ins>
       <tal:msg i18n:translate="">Publishable(s)</tal:msg>
       <ins class="selector none">
       </ins>
@@ -16,8 +16,8 @@
         <tbody></tbody>
       </table>
     </dd>
-    <dt class="assets">
-      <ins class="handle"></ins>
+    <dt class="assets ui-state-default">
+      <ins class="ui-icon ui-icon-triangle-1-s"></ins>
       <tal:msg i18n:translate="">Asset(s)</tal:msg>
       <ins class="selector none">
       </ins>

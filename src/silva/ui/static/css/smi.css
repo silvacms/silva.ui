@@ -379,11 +379,7 @@ input, textarea {
   padding:0 5px;
   width:20px;
 }
-#workspace .content .listing td.moveable,
-#workspace .content .listing td.moveable ins {
-  cursor:move;
-}
-#workspace .content td ins.state {
+#workspace .content .listing td ins.state {
   background-image:url(../img/sprite.png);
   display:block;
   float:left;
@@ -420,15 +416,8 @@ input, textarea {
 #workspace .content .listing dt h4{
   padding-left: 12px;
 }
-#workspace .content .listing dt ins.handle {
-  width:20px;
-  height:20px;
-  display:block;
-  float:left;
-  margin-right: 4px;
-  margin-top: 2px;
-  background-image:url(../img/sprite.png);
-  background-position:-120px -140px;
+#workspace .content .listing dt ins.ui-icon {
+  margin: 4px 4px 0px 0px;
 }
 #workspace .content .listing dt ins.selector {
   width:20px;
@@ -437,9 +426,6 @@ input, textarea {
   float:right;
   margin-top: 2px;
   background-image:url(../img/sprite.png);
-}
-#workspace .content .listing dt.collapsed ins.handle {
-  background-position:-100px -140px;
 }
 
 #workspace .content .listing dd.collapsed {
@@ -461,6 +447,10 @@ input, textarea {
 #workspace .content .listing .static tr.item:active {
   background-color:#4d96e6!important;
   color:#fff;
+}
+#workspace .content .listing td.moveable,
+#workspace .content .listing td.moveable ins {
+  cursor:move;
 }
 #workspace .content .listing .dragging {
   background-color:#4d96e6!important;
