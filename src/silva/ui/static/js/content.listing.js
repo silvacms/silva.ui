@@ -33,57 +33,45 @@
 
     listingcolumns.register({
         name: 'action',
+        jsont: '<a rel="{column.action|htmltag}" href="{data.path|htmltag}">{value}</a>',
         render: function() {
-            var link = $('<a></a>');
+            var link = this.content.children('a');
 
-            link.text(this.data[this.column.name]);
-            link.attr('rel', this.column.action);
-            link.attr('href', this.data.path);
             link.bind('click', function(event) {
                 this.smi.open_screen_from_link(link);
                 return false;
             }.scope(this));
-            this.content.empty();
-            this.content.append(link);
         }
     });
 
     listingcolumns.register({
         name: 'text',
-        render: function(content, data) {
-            content.text(data[this.column.name]);
-        }
+        jsont: '{value}'
     });
 
     listingcolumns.register({
         name: 'icon',
+        html: '<ins class="icon"></ins>',
         render: function() {
-            var icon = $('<ins class="icon"></ins>');
-            var value = this.data[this.column.name];
+            var icon = this.content.children('ins');
 
-            if (value.indexOf('.') < 0) {
-                icon.addClass(value);
+            if (this.value.indexOf('.') < 0) {
+                icon.addClass(this.value);
             } else {
                 icon.attr(
                     'style',
-                    'background:url(' + value + ') no-repeat center center;');
-            }
-            this.content.empty();
-            this.content.append(icon);
+                    'background:url(' + this.value + ') no-repeat center center');
+            };
         }
     });
 
     listingcolumns.register({
         name: 'workflow',
+        html: '<ins class="state"></ins>',
         render: function() {
-            var icon = $('<ins class="state"></ins>');
-            var value = this.data[this.column.name];
-
-            if (value) {
-                icon.addClass(value);
-            }
-            this.content.empty();
-            this.content.append(icon);
+            if (this.value) {
+                this.content.children('ins').addClass(this.value);
+            };
         }
     });
 
@@ -92,15 +80,14 @@
         iface: 'content',
         name: 'action.smilisting',
         order: 0,
+        html: '<li><a class="close-selection ui-state-default" title="close selection">' +
+            '<ins class="ui-icon ui-icon-closethick"></ins></a></li>',
         render: function() {
-            var html = $('<li><a class="close-selection ui-state-default" title="close selection">' +
-                         '<ins class="ui-icon ui-icon-closethick"></ins></a></li>');
-            var link = html.children('a');
+            var link = this.content.find('a');
 
             link.bind('click', function() {
                 this.data.close();
             }.scope(this));
-            this.content.append(html);
         }
     });
 
@@ -109,9 +96,8 @@
         iface: 'content',
         name: 'clipboarditem.smilisting',
         render: function() {
-            var item = $('<li class="clipboard-item"></li>');
+            var item = $('<li class="clipboard-item '+ this.state + '"></li>');
 
-            item.addClass(this.state);
             if (this.data.title) {
                 if (this.data.path) {
                     var link = $('<a class="open-screen"></a>');
@@ -790,6 +776,8 @@
     SMIListing.prototype.add_line = function(data, selected) {
         // Add a data line to the table
         var line = $('<tr class="item"></tr>');
+        var sortable = this.configuration.sortable;
+        var smi = this.smi;
 
         $.each(this.configuration.columns, function(i, column) {
             var cell = $('<td></td>');
@@ -797,17 +785,19 @@
             if (!i) {
                 cell.addClass('first');
             };
-            if (this.configuration.sortable &&
-                this.configuration.sortable.columns.indexOf(column.name) >= 0) {
+            if (sortable &&
+                sortable.columns.indexOf(column.name) >= 0) {
                 cell.addClass('moveable');
             };
             listingcolumns.render(cell, {
                 data: data,
                 name: column.view,
-                extra: {smi: this.smi,
-                        column: column}});
+                ifaces: ['object'],
+                extra: {smi: smi,
+                        column: column,
+                        value: data[column.name]}});
             line.append(cell);
-        }.scope(this));
+        });
         if (selected) {
             line.addClass('selected');
         };
@@ -841,21 +831,20 @@
      */
     SMIListing.prototype.update_line = function(id, data) {
         var line = this.get_line(id);
+        var smi = this.smi;
+        var columns = this.configuration.columns;
 
         line.children().each(function(i, content) {
-            var cell = $(content);
-            var column = this.configuration.columns[i];
+            var column = columns[i];
 
-            if (this.configuration.sortable &&
-                this.configuration.sortable.columns.indexOf(column.name) >= 0) {
-                cell.addClass('moveable');
-            };
-            listingcolumns.render(cell, {
+            listingcolumns.render($(content), {
                 data: data,
                 name: column.view,
-                extra: {smi: this.smi,
-                        column: column}});
-        }.scope(this));
+                ifaces: ['object'],
+                extra: {smi: smi,
+                        column: column,
+                        value: data[column.name]}});
+        });
         line.data('smilisting', data);
     };
 

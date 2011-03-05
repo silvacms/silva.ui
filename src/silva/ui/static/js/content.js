@@ -3,8 +3,9 @@
 
     obviel.view({
         iface: 'title',
+        jsont: '<ins class="icon"></ins>{data.title}',
         render: function(content, data) {
-            var icon = $('<ins class="icon"></ins>');
+            var icon = this.content.children('ins');
 
             if (data.icon.indexOf('.') < 0) {
                 icon.addClass(data.icon);
@@ -13,8 +14,6 @@
                     'style',
                     'background:url(' + data.icon + ') no-repeat center center;');
             };
-            content.text(data.title);
-            content.prepend(icon);
         }
     });
 

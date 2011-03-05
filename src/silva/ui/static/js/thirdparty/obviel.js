@@ -156,22 +156,8 @@ var obviel = {};
         };
     };
 
-    // render the view
-    module.View.prototype._render = function(callback) {
-        this.content.triggerHandler('cleanup-obviel');
-
-        this._get_template(function(html) {
-            this._render_template(html, callback);
-            if (this.cleanup) {
-                this.content.one('cleanup-obviel', function(event) {
-                    this.cleanup();
-                }.scope(this));
-            };
-        }.scope(this));
-    };
-
-    // render the view using the given template
-    module.View.prototype._render_template = function(template, callback) {
+    // finish to render the view using the given template
+    module.View.prototype._finalize_rendering = function(template) {
         if (this.iframe) {
             var iframe = $('<iframe src="">');
 
@@ -211,8 +197,17 @@ var obviel = {};
     // template cache: mapping url or html to template instance or html
     module._template_cache = {};
 
-    // retrieve a template for a view
-    module.View.prototype._get_template = function(callback) {
+    // render the view: retrieve a template to render it and render it
+    module.View.prototype._render = function() {
+        // clean content if needed (call cleanup callback)
+        this.content.triggerHandler('cleanup-obviel');
+
+        if (this.cleanup) {
+            this.content.one('cleanup-obviel', function(event) {
+                this.cleanup();
+            }.scope(this));
+        };
+
         // resources
         var resources = this.data.html_resources || this.html_resources;
         if (resources) {
@@ -226,36 +221,34 @@ var obviel = {};
         if (this.data.html || (this.html && !this.data.html_url) ||
             this.data.jsont || (this.jsont && !this.data.jsont_url)) {
             var jsont = (this.data.jsont || this.jsont);
-            var html = null;
             if (jsont) {
                 var template = module._template_cache[jsont];
                 if (!template) {
-                    template = new jsontemplate.Template(jsont, this.template_options);
+                    template = new jsontemplate.Template(
+                        jsont, this.template_options);
                     module._template_cache[jsont] = template;
                 };
-                html = template.expand(this.data);
-            } else {
-                html = this.data.html || this.html;
+                return this._finalize_rendering(template.expand(this));
             };
-            callback(html);
-        } else if (this.data.html_url || this.html_url ||
-                   this.data.jsont_url || this.jsont_url) {
+            return this._finalize_rendering(this.data.html || this.html);
+        };
+
+        if (this.data.html_url || this.html_url ||
+            this.data.jsont_url || this.jsont_url) {
             // First look in the cache for data.
-            var jsont = (this.data.jsont_url || this.jsont_url);
-            var url = jsont;
-            if (jsont) {
-                var template = module._template_cache[jsont];
+            var url = (this.data.jsont_url || this.jsont_url);
+            var jsont = url;
+            if (url) {
+                var template = module._template_cache[url];
                 if (template) {
-                    callback(template.expand(this.data));
-                    return;
+                    return this._finalize_rendering(template.expand(this));
                 };
             } else {
                 url = (this.data.html_url || this.html_url);
                 if (!this.nocache) {
                     var template = module._template_cache[url];
                     if (template) {
-                        callback(template);
-                        return;
+                        return this._finalize_rendering(template);
                     };
                 }
             };
@@ -264,19 +257,21 @@ var obviel = {};
                 url: url,
                 success: function(data) {
                     if (jsont) {
-                        var template = new jsontemplate.Template(data, this.template_options);
-                        module._template_cache[jsont] = template;
+                        var template = new jsontemplate.Template(
+                            data, this.template_options);
+                        module._template_cache[url] = template;
                         data = template.expand(this.data);
                     } else {
                         module._template_cache[url] = data;
                     };
-                    callback(data);
+                    this._finalize_rendering(data);
                 }.scope(this)
             });
-        } else {
-            // no explicit content, just call the callback
-            callback();
+            return;
         };
+
+        // no explicit content, just call the callback
+        return this._finalize_rendering();
     };
 
     /**
@@ -336,7 +331,7 @@ var obviel = {};
 
     // Render the most specialized view for a JSON object
     module.Registry.prototype._render_data = function(element, data, args) {
-        var ifaces = module.ifaces(data);
+        var ifaces = args.ifaces || module.ifaces(data);
         var views = this._views[args.name];
         var to_render = null;
 
@@ -355,7 +350,7 @@ var obviel = {};
             };
         };
         if (to_render != null) {
-            to_render._render(args.callback);
+            to_render._render();
         } else if (window.console && console.log) {
             console.log('failed view lookup for args', args, 'and', data);
         };
@@ -363,7 +358,7 @@ var obviel = {};
 
     // Render all possible views for a given JSON object (viewlet like)
     module.Registry.prototype._render_every_data = function(element, data, args) {
-        var ifaces = module.ifaces(data);
+        var ifaces = args.ifaces || module.ifaces(data);
         var views = this._views[args.name];
         var seen_definitions = [];
         var to_render = [];
@@ -396,7 +391,7 @@ var obviel = {};
             return v1.order - v2.order;
         });
         $.each(to_render, function (i, view) {
-            view._render(args.callback);
+            view._render();
         });
     };
 

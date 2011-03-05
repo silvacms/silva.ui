@@ -34,18 +34,14 @@
                 obviel.view({
                     iface: 'editor',
                     name: 'content',
+                    jsont: '<textarea name="{data.name|htmltag}">{data.text}</textarea>',
                     init: function() {
                         this.editor = null;
                     },
                     render: function() {
-                        var textarea = $('<textarea></textarea>');
+                        var textarea = this.content.children('textarea').get(0);
 
-                        textarea.attr('name', this.data.name);
-                        textarea.val(this.data.text);
-
-                        this.content.append(textarea);
-
-                        this.editor = CKEDITOR.replace(textarea.get(0), settings);
+                        this.editor = CKEDITOR.replace(textarea, settings);
                         this.editor.on('instanceReady', function (event) {
                             // XXX Where the hell comes from those 5 pixels ?
                             var height = this.content.height() - 5;
