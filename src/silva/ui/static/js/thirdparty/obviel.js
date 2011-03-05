@@ -26,35 +26,19 @@ var obviel = {};
     // 'interface' implementation - interfaces are just strings that are
     // registered as a tree
     module._ifaces = {
-        'base': []
     };
 
     /**
      * Register an interface
      * @param name: interface name (string)
      */
-    module.iface = function(name) {
+    module.iface = function(name, bases) {
         if (module._ifaces[name]) {
             throw((new module.DuplicateInterfaces(name)));
         };
-        var bases = [];
-        if (arguments.length > 1) {
-            for (var i=arguments.length; i > 1; i--) {
-                bases.unshift(arguments[i-1]);
-            };
-        } else {
-            bases = ['base'];
+        if (!bases) {
+            bases = ['object'];
         };
-
-        for (var i=0; i < bases.length; i++) {
-            var basebases = module._ifaces[bases[i]];
-            if (basebases === undefined) {
-                throw(
-                    'while registering iface ' + name + ': ' +
-                    'base iface ' + bases[i] + ' not found!');
-            };
-        };
-
         module._ifaces[name] = bases;
     };
 
@@ -72,9 +56,6 @@ var obviel = {};
         var bases = [].concat(obj.ifaces);
         while (bases.length) {
             var base = bases.shift();
-            if (base == 'base') {
-                continue;
-            };
             var duplicate = false;
             for (var i=0; i < ret.length; i++) {
                 if (base == ret[i]) {
@@ -88,13 +69,9 @@ var obviel = {};
             ret.push(base);
             var basebases = module._ifaces[base];
             if (basebases) {
-                // XXX should we warn/error on unknown interfaces?
                 bases = bases.concat(basebases);
             };
         };
-        // XXX hrmph, dealing with base here to avoid having it in the list
-        // too early... does that make sense?
-        ret.push('base');
         ret.push(typeof obj);
         return ret;
     };

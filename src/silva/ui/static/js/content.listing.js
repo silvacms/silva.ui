@@ -905,6 +905,10 @@
             async: false,
             dataType: 'json',
             success:function(configuration) {
+                for (var iface in configuration.ifaces) {
+                    obviel.iface(iface, configuration.ifaces[iface]);
+                };
+
                 var action_url = jsontemplate.Template(smi.options.listing.action, {});
                 register_action_buttons(
                     configuration.actions,

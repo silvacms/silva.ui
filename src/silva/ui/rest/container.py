@@ -26,10 +26,10 @@ from zExceptions import NotFound
 
 
 CONTENT_IFACES = [
-    (interfaces.ISilvaObject, 'content'),
-    (interfaces.IAsset, 'asset'),
+    (interfaces.IVersionedContent, 'versioned'),
     (interfaces.IContainer, 'container'),
-    (interfaces.IVersionedContent, 'versioned')]
+    (interfaces.IAsset, 'asset'),
+    (interfaces.ISilvaObject, 'content')]
 
 
 class Adding(rest.REST):
@@ -73,6 +73,10 @@ class ColumnsContainerListing(UIREST):
 
     def GET(self):
         return self.json_response({
+                'ifaces': {'content': ['object'],
+                           'asset': ['content', 'object'],
+                           'container': ['content', 'object'],
+                           'versioned': ['content', 'object']},
                 'listing': [
                     {'name': 'publishables',
                      'layout': {'fixed': {0:16, 1:16}},
@@ -251,11 +255,10 @@ def get_content_status(content):
     return None
 
 def content_ifaces(content):
-    ifaces = []
     for interface, iface in CONTENT_IFACES:
         if interface.providedBy(content):
-            ifaces.append(iface)
-    return ifaces
+            return [iface]
+    return []
 
 
 class ContentSerializer(object):
@@ -265,8 +268,8 @@ class ContentSerializer(object):
     def __init__(self, rest, request):
         self.rest = rest
         self.request = request
-        self.intids = getUtility(IIntIds)
-        self.metadata = getUtility(IMetadataService)
+        self.get_id = getUtility(IIntIds).register
+        self.get_metadata = getUtility(IMetadataService).getMetadataValue
         self.check_permission = getSecurityManager().checkPermission
 
     def get_access(self, content):
@@ -280,16 +283,17 @@ class ContentSerializer(object):
 
     def __call__(self, content):
         previewable = content.get_previewable()
-        content_metadata = self.metadata.getMetadata(previewable)
         data = {
             'ifaces': content_ifaces(content),
-            'id': self.intids.register(content),
+            'id': self.get_id(content),
             'identifier': content.getId(),
             'path': self.rest.get_content_path(content),
             'icon': get_icon(content, self.request),
             'title': previewable.get_title_or_id(),
-            'author': content_metadata.get('silva-extra', 'lastauthor'),
-            'modified': format_date(content_metadata.get('silva-extra', 'modificationtime')),
+            'author': self.get_metadata(
+               previewable, 'silva-extra', 'lastauthor'),
+            'modified': format_date(self.get_metadata(
+                   previewable, 'silva-extra', 'modificationtime')),
             'access': self.get_access(content)}
         if interfaces.IPublishable.providedBy(content):
             data['status'] = get_content_status(content)
