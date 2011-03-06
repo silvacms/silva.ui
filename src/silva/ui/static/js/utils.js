@@ -1,4 +1,16 @@
 (function($) {
+
+    // First next elemeent that doesn't match the descriptor.
+    $.fn.nextOne = function(selector) {
+        var element = $(this);
+        var not_matching = element.nextUntil(selector);
+
+        if (not_matching.length) {
+            return not_matching.last().next();
+        };
+        return element.next();
+    };
+
     /**
      * Disable or enable text selection
      */

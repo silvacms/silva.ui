@@ -323,6 +323,44 @@
         this.status = status;
     };
 
+
+    var SMIFilterSelector = function(listing) {
+        this.$filter = listing.$header.find('.filter');
+        this.listing = listing;
+
+        // Hide filter if the header is hidden.
+        this.listing.$header.bind('collapsingchange-smilisting', function() {
+            this.$filter.fadeToggle();
+        }.scope(this));
+        if (this.listing.$header.is('.collapsed')) {
+            this.$filter.hide();
+        };
+
+        this.$filter.bind('keyup', function(event) {
+            var clear_field = false;
+
+            if (event.keyCode == 13) {
+                // Enter unfocus the field
+                this.$filter.blur()
+                return
+            } else if (event.keyCode == 27) {
+                // Escape clear the field
+                clear_field = true;
+                this.$filter.blur();
+            };
+            setTimeout(function() {
+                var value = '';
+
+                if (clear_field) {
+                    this.$filter.val('');
+                } else {
+                    value = this.$filter.val();
+                };
+                this.listing.filter(new RegExp(value, 'i'), false)
+            }.scope(this), 0);
+        }.scope(this));
+    };
+
     /**
      * View clipboard data.
      * @param container: container containing the info hook.
@@ -524,38 +562,58 @@
             this.listing.$container.children('tr.actions').each(function (i, item){
                 var action = $(item);
 
-                if (!action.prev().is(':selected')) {
+                if (!action.prev().is('.selected')) {
                     action.remove();
                 };
             });
-            var last_selected = this.listing.$container.children('tr.item.selected:first');
-            while (last_selected.length) {
-                var selected_items = last_selected.nextUntil(':not(.selected)').andSelf();
-                last_selected = selected_items.last();
-                var next = last_selected.next();
 
-                if (next.is('.actions')) {
+            var last_selected = this.listing.$container.children('.selected:first');
+            var selected_items = $();
+            var next_item = null;
+
+            while (last_selected.length) {
+                selected_items = selected_items.add(last_selected.nextUntil(':not(.selected)').andSelf());
+                last_selected = selected_items.last();
+                next_item = last_selected.next();
+
+                if (next_item.is('.hidden')) {
+                    next_item = next_item.nextOne(':not(.hidden)');
+                    if (next_item.is('.selected')) {
+                        last_selected = next_item;
+                        continue;
+                    };
+                };
+                var visible_selected_items = selected_items.filter(':not(.hidden)');
+
+                if (next_item.is('.actions')) {
                     // Next item is an action line.
-                    var next_actions = next.next();
-                    if (next_actions.is('.item.selected')) {
+                    var following = next_item.next();
+                    if (following.is('.hidden')) {
+                        following = following.nextOne(':not(.hidden)');
+                    };
+                    if (following.is('.selected')) {
                         // The after block is selected, remove the
                         // action line and continue.
-                        next.remove();
-                        last_selected = next_actions;
+                        next_item.remove();
+                        last_selected = following;
                         continue;
+                    } else if (!visible_selected_items.length) {
+                        // The selection is no longer visible
+                        next_item.remove()
                     } else {
                         // The selection might have got bigger from
                         // the top. Rerender actions.
-                        render_actions(selected_items, next_actions.find('ol'));
+                        render_actions(visible_selected_items, next_item.find('ol'));
                     };
-                } else {
-                    // Let's insert an action line here.
+                    next_item = following;
+                } else if (visible_selected_items.length) {
+                    // We have items, let's insert an action line
                     var action_line = $('<tr class="actions"><td><ol></ol></td></tr>');
                     var action_cell = action_line.children('td');
                     var actions = action_cell.children('ol');
 
                     action_cell.attr('colspan', this.listing.configuration.columns.length);
-                    render_actions(selected_items, actions);
+                    render_actions(visible_selected_items, actions);
                     actions.bind('actionrefresh-smilisting', function(event, data) {
                         // If an action is executed, rerender the action line.
                         var actions = $(this);
@@ -565,11 +623,8 @@
                     });
                     last_selected.after(action_line);
                 };
-                var following = next.nextUntil('.selected');
-                if (!following.length) {
-                    following = next;
-                }
-                last_selected = following.last().next();
+                selected_items = $();
+                last_selected = next_item.nextOne('.selected');
             };
         }.scope(this));
     };
@@ -584,9 +639,10 @@
         this.configuration = configuration;
         this.smi = smi;
 
-        this.selector = new SMIMultiSelector(this);
-        this.actions = new SMIActions(this);
-        this.counter = new SMIViewCounter(this);
+        new SMIMultiSelector(this);
+        new SMIFilterSelector(this);
+        new SMIActions(this);
+        new SMIViewCounter(this);
 
         this.smi.shortcuts.new_shortcuts(name, $content);
 
@@ -619,8 +675,14 @@
                 $content.addClass('collapsed');
                 $header.trigger('collapsingchange-smilisting');
             };
-            this.$header.bind('click', function() {
+            this.$header.bind('click', function(event) {
+                var target = $(event.target);
+                if (target.is('input')) {
+                    target.focus();
+                    return;
+                };
                 toggle_collapsing();
+                return false;
             });
             $content.bind('focus-smi', function() {
                 if ($header.hasClass('collapsed')) {
@@ -664,7 +726,7 @@
                         start = current_selected;
                         end = mouse_last_selected;
                     };
-                    row.parent().children().slice(start, end).toggleClass('selected');
+                    row.parent().children().slice(start, end).filter('.item').toggleClass('selected');
                     trigger('selectionchange-smilisting');
                 };
                 mouse_last_selected = current_selected;
@@ -873,6 +935,19 @@
         if (is_selection_changed) {
             this.trigger('selectionchange-smilisting');
         };
+    };
+
+    SMIListing.prototype.filter = function(pattern) {
+        this.$container.children('.item').each(function (i) {
+            var line = $(this);
+
+            if (line.data('smilisting').title.match(pattern)) {
+                line.removeClass('hidden');
+            } else {
+                line.addClass('hidden');
+            };
+        });
+        this.trigger('selectionchange-smilisting');
     };
 
     /**

@@ -426,6 +426,10 @@ input, textarea {
   margin-top: 2px;
   background-image:url(../img/sprite.png);
 }
+#workspace .content .listing dt input.filter {
+  float: right;
+  margin: 1px 4px;
+}
 
 #workspace .content .listing dd.collapsed {
   display: none;
@@ -435,6 +439,9 @@ input, textarea {
 }
 #workspace .content .listing .static tr.hover {
   background-color:#d2e5f9;
+}
+#workspace .content .listing .static tr.hidden {
+  display: none;
 }
 #workspace .content .listing .static tr.selected {
   background-color:#4d96e6;
