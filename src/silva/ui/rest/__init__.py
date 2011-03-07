@@ -3,3 +3,6 @@
 # See also LICENSE.txt
 # $Id$
 
+from silva.ui.rest.base import PageREST, PageWithTemplateREST
+
+__all__ = ['PageREST', 'PageWithTemplateREST']

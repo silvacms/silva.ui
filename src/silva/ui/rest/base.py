@@ -176,3 +176,21 @@ class PageREST(UIREST):
         return self.json_response(data)
 
     POST = GET
+
+
+class PageWithTemplateREST(PageREST):
+    grok.baseclass()
+
+    def default_namespace(self):
+        return {}
+
+    def namespace(self):
+        return {'rest': self}
+
+    def update(self):
+        pass
+
+    def payload(self):
+        self.update()
+        return {'ifaces': ['form'],
+                'html': self.template.render(self)}

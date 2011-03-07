@@ -1,0 +1,19 @@
+# -*- coding: utf-8 -*-
+# Copyright (c) 2011 Infrae. All rights reserved.
+# See also LICENSE.txt
+# $Id$
+
+
+import martian
+from grokcore.view.meta.views import TemplateGrokker
+from silva.ui.rest.base import PageWithTemplateREST
+
+class ViewletManagerTemplateGrokker(TemplateGrokker):
+    martian.component(PageWithTemplateREST)
+
+    def has_render(self, factory):
+        return factory.payload != PageWithTemplateREST.payload
+
+    def has_no_render(self, factory):
+        # always has a render method
+        return False
