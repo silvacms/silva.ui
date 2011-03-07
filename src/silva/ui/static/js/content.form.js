@@ -28,12 +28,12 @@
             });
 
             // Bind click submit
-            form.find('.form-controls input').bind('click', function() {
+            form.find('.form-controls a.form-control').bind('click', function() {
                 var button = $(this);
 
                 send([{
                     name: button.attr('name'),
-                    value: button.attr('value')
+                    value: button.text()
                 }]);
                 return false;
             });
