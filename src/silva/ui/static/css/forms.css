@@ -75,7 +75,8 @@ form {
   padding: 10px 20px 40px 10px;
 }
 
-.form-content a.form-control {
+.form-content a.form-control,
+.form-content a.form-button {
   -khtml-border-radius:3px;
   -moz-border-radius:3px;
   -ms-border-radius:3px;
@@ -86,12 +87,20 @@ form {
   border:1px #777 solid;
   display:block;
   color: #000;
-  float: right;
   line-height:17px;
   margin:5px 2px;
   padding:0 4px;
 }
-.form-content a.form-control:hover {
+
+.form-content a.form-control {
+  float: right;
+}
+.form-content a.form-button {
+  float: left;
+}
+
+.form-content a.form-control:hover,
+.form-content a.form-button:hover {
   background:#fff;
   border-color:#888;
   color:#222;
