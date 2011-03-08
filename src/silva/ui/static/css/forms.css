@@ -2,12 +2,18 @@ form {
   color: black;
 }
 
-.form-head h3, .form-head h4 {
+#workspace .form-content h3,
+#workspace .form-content h4,
+#workspace .form-content h5 {
   background-color: #efefef;
   border-bottom: 1px solid #ddd;
 }
+#workspace .form-content .form-head p {
+  border-left: 2px solid #ccc;
+  padding: 10px;
+}
 
-.form-head h3 {
+#workspace .form-content h3 {
   background-image: url('../img/gradientblack.png');
   color: #fff;
   font-weight: normal;
@@ -15,9 +21,14 @@ form {
   font-size: 130%;
 }
 
-.form-head h4 {
+#workspace .form-content h4 {
   padding: 5px;
   font-size: 120%;
+}
+
+#workspace .form-content h5 {
+  padding: 5px;
+  font-size: 110%;
 }
 
 .form-section, .form-head, .form-footer {
@@ -92,6 +103,7 @@ form {
 
 
 #workspace .form-content .form-controls {
+  border-left: 2px solid #ccc;
   border-bottom: 2px solid #eee;
   padding: 10px 20px 40px 10px;
 }
