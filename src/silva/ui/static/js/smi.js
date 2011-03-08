@@ -467,6 +467,16 @@
     };
 
     /**
+     * Return a given screen URL.
+     */
+    SMI.prototype.get_screen_url = function(screen) {
+        if (!screen) {
+            screen = this.opened;
+        };
+        return this._.screen_url.expand(screen);
+    };
+
+    /**
      * Send data to the server corresponding to the currently opened
      * tab.
      * @param data: dictionnary to be posted to the server.
@@ -474,7 +484,7 @@
     SMI.prototype.send_to_screen = function(data) {
         var query = {};
 
-        query['url'] = this._.screen_url.expand(this.opening);
+        query['url'] = this.get_screen_url(this.opening);
         query['dataType'] = 'json';
         query['success'] = function(data) {
             this.opened = this.opening;

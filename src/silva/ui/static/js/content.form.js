@@ -15,6 +15,8 @@
                 };
                 this.smi.send_to_screen(values);
             };
+            // Set submit URL for helper
+            form.attr('data-form-url', this.smi.get_screen_url());
 
             // Bind default submit
             form.bind('submit', function() {
@@ -39,7 +41,7 @@
             });
 
             // Send an event form loaded to init specific JS field
-            form.trigger('load-smiform');
+            form.trigger('load-smiform', this.data);
 
         },
         cleanup: function() {

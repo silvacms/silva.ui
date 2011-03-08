@@ -68,6 +68,12 @@ input, textarea {
   right:20px;
 }
 
+#footer {
+  position: absolute;
+  bottom: 0px;
+  right: 0px;
+}
+
 #navigation {
   position:absolute; top:0; bottom:0; left:0; width:280px; background:#fff;
   -khtml-box-shadow:#1c2e3d 0 3px 10px; -moz-box-shadow:#1c2e3d 0 3px 10px;
@@ -271,7 +277,8 @@ input, textarea {
   -webkit-box-shadow: none;
 }
 
-#workspace .info .actions {
+#workspace .info .actions,
+#footer .actions {
   list-style:none;
   margin:0;
   padding:0;
@@ -279,7 +286,8 @@ input, textarea {
 #workspace .info .actions ins.ui-icon {
   float: none;
 }
-#workspace .info .actions li {
+#workspace .info .actions li,
+#footer .actions li {
   float:left;
 }
 #workspace .info .actions li a {

@@ -67,7 +67,7 @@ class UIREST(rest.REST):
             message, target_language=self.language, context=self.request)
 
     def get_content_path(self, content):
-            return content.absolute_url_path()[len(self.root_path):]
+            return content.absolute_url_path()[len(self.root_path):] or '/'
 
     def get_notifications(self):
         messages = []

@@ -26,6 +26,10 @@
     </div>
     <div id="notifications">
     </div>
+    <dl id="help">
+      <dt>?</dt>
+      <dd></dd>
+    </dl>
     <div id="main">
       <nav id="navigation">
         <h1 i18n:translate="">
@@ -60,6 +64,9 @@
         <div class="content"></div>
       </div>
     </div>
+    <footer id="footer">
+      <ol class="actions session-actions"><li><a>Settings</a></li><li><a>Logout</a></li></ol>
+    </footer>
     <script type="text/javascript">
       $(document).ready(function() {
       smi = $('body').SMI({

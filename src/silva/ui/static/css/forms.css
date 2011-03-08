@@ -25,25 +25,26 @@ form {
   background-repeat: repeat;
 }
 
-.form-section {
+#workspace .form-content .form-section {
   padding: 10px;
+  border-left: 2px solid #ccc;
   border-bottom: 1px dotted #ccc;
 }
 
-.form-section p {
+#workspace .form-content .form-section p {
   font-style: italic;
 }
 
-.form-section .form-label label {
+#workspace .form-content .form-section .form-label label {
   font-weight: bold;
   font-size: 105%;
 }
 
-.form-section .form-label {
+#workspace .form-content .form-section .form-label {
   margin-bottom: 10px;
 }
 
-.form-required {
+#workspace .form-content .form-required {
   position: relative;
   top: -3px;
   display: inline-block;
@@ -55,22 +56,42 @@ form {
   color: white;
   border-radius: 2px;
   -moz-border-radius: 2px;
+  -o-border-radius: 2px;
+  -ms-border-radius: 2px;
   -webkit-border-radius: 2px;
 }
 
-.form-focus {
+#workspace .form-content .form-focus {
   background-image: none;
   border-left: 2px solid #0E7F2A;
-  padding-left: 20px;
-  font-size: 105%;
   background-color: #D8EED5;
 }
 
-.form-table {
+#workspace .form-content .form-error {
+  background-image: none;
+  border-left: 2px solid #DE2A2A;
+  background-color: #EFAAAA;
+}
+
+#workspace .form-content .form-error-detail {
+  background-image: url('../img/workspace_bg.png');
+  background-repeat: repeat;
+  padding: 4px;
+  margin: 2px 0px;
+  border: 2px solid #DE2A2A;
+  border-radius: 3px;
+  -moz-border-radius: 3px;
+  -o-border-radius: 3px;
+  -ms-border-radius: 3px;
+  -webkit-border-radius: 3px;
+}
+
+#workspace .form-content .form-table {
   padding: 10px;
 }
 
-.form-content .form-controls {
+
+#workspace .form-content .form-controls {
   border-bottom: 2px solid #eee;
   padding: 10px 20px 40px 10px;
 }
@@ -105,3 +126,4 @@ form {
   border-color:#888;
   color:#222;
 }
+
