@@ -7,6 +7,10 @@
   <include package="silva.core.layout" />
   <include package="silva.core.editor" />
 
-  <grok:grok package="." />
+  <!-- Grok grokkers -->
+  <grok:grok package=".martiansupport" />
+
+  <!-- Grok code -->
+  <grok:grok package="." exclude="martiansupport" />
 
 </configure>
