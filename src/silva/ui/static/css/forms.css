@@ -31,16 +31,26 @@ form {
   font-size: 110%;
 }
 
-.form-section, .form-head, .form-footer {
+.form-section, .form-head, .form-footer, .form-table {
   background-image: url('../img/workspace_bg.png');
   background-repeat: repeat;
 }
 
-#workspace .form-content .form-section {
+#workspace .form-content .form-section,
+#workspace .form-content .form-table {
   padding: 10px;
   border-left: 2px solid #ccc;
   border-bottom: 1px dotted #ccc;
 }
+
+#workspace .form-content .form-table th,
+#workspace .form-content .form-table td {
+  text-align: left;
+  padding: 5px;
+  border-right: 1px dotted #ccc;
+  border-bottom: 1px dotted #ccc;
+}
+
 
 #workspace .form-content .form-section p {
   font-style: italic;
@@ -100,16 +110,13 @@ form {
   -webkit-border-radius: 3px;
 }
 
-#workspace .form-content .form-table {
-  padding: 10px;
-}
-
-
 #workspace .form-content .form-controls {
   border-left: 2px solid #ccc;
   border-bottom: 2px solid #eee;
   padding: 10px 20px 40px 10px;
 }
+#workspace .form-table .form-controls td {
+  padding: 10px 20px 10px 10px;}
 
 #workspace .form-content a.form-control,
 #workspace .form-content a.form-button {
