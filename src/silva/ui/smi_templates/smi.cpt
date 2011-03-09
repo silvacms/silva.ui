@@ -36,6 +36,21 @@
           <a href="#!/"><img src="${imgs_url}/silva.png" alt="Silva" /></a>
         </h1>
         <div class="tree"></div>
+        <ol class="actions session-actions">
+          <li>
+            <a href="${view.root_url}/service_members/logout"
+               i18n:translate="">
+              Logout
+            </a>
+          </li>
+          <li>
+            <a class="form-popup"
+               href="${view.root_url}/++rest++silva.core.smi.userpreferences"
+               i18n:translate="">
+              User preferences
+            </a>
+          </li>
+        </ol>
       </nav>
       <div id="workspace">
         <div class="info">
@@ -64,9 +79,6 @@
         <div class="content"></div>
       </div>
     </div>
-    <footer id="footer">
-      <ol class="actions session-actions"><li><a>Settings</a></li><li><a>Logout</a></li></ol>
-    </footer>
     <script type="text/javascript">
       $(document).ready(function() {
       smi = $('body').SMI({

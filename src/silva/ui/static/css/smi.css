@@ -68,11 +68,6 @@ input, textarea {
   right:20px;
 }
 
-#footer {
-  position: absolute;
-  bottom: 0px;
-  right: 0px;
-}
 
 #navigation {
   position:absolute; top:0; bottom:0; left:0; width:280px; background:#fff;
@@ -112,7 +107,7 @@ input, textarea {
 #navigation .tree {
   position:absolute;
   top:60px;
-  bottom:0;
+  bottom:26px;
   left:0;
   right:0;
   overflow:auto;
@@ -148,6 +143,17 @@ input, textarea {
   #navigation .tree ul {
     width:auto;
   }
+}
+
+#navigation .session-actions {
+  position:absolute;
+  bottom:0;
+  left:0;
+  right:0;
+  heigth: 25px;
+  background:#fff url(../img/gradient25.png) repeat-x top;
+  border-top:1px #999 solid;
+
 }
 
 #workspace .ui-state-default,
@@ -278,7 +284,7 @@ input, textarea {
 }
 
 #workspace .info .actions,
-#footer .actions {
+#navigation .actions {
   list-style:none;
   margin:0;
   padding:0;
@@ -287,10 +293,11 @@ input, textarea {
   float: none;
 }
 #workspace .info .actions li,
-#footer .actions li {
+#navigation .actions li {
   float:left;
 }
-#workspace .info .actions li a {
+#workspace .info .actions li a,
+#navigation .actions li a {
   -khtml-border-radius:3px;
   -moz-border-radius:3px;
   -ms-border-radius:3px;
@@ -307,12 +314,16 @@ input, textarea {
   padding:0 4px;
 }
 #workspace .info .actions li a:hover,
-#workspace .info .actions li a.active {
+#workspace .info .actions li a.active,
+#navigation .actions li a:hover {
   background:#fff;
   border-color:#888;
   color:#222;
 }
 
+#navigation .session-actions li a {
+  margin: 3px 2px;
+}
 #workspace .info .settings-tabs {
   display: none;
 }
