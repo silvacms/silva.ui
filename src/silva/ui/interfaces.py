@@ -4,6 +4,9 @@
 # $Id$
 
 from zope.interface import Interface, Attribute
+
+from js import jqueryui
+
 from silva.core import conf as silvaconf
 from silva.core.editor.interfaces import ICKEditorResources
 from silva.core.references.widgets import IReferenceUIResources
@@ -28,6 +31,8 @@ class ISMIScripts(ICKEditorResources, IReferenceUIResources):
 
 
 class ISMIResources(ISMIScripts):
+    silvaconf.resource(jqueryui.smoothness)
+
     silvaconf.resource('css/style.css')
     silvaconf.resource('css/smi.css')
     silvaconf.resource('css/forms.css')
