@@ -55,7 +55,8 @@ form {
   margin-bottom: 10px;
 }
 
-#workspace .form-content .form-required {
+#workspace .form-content .form-required,
+#workspace .form-content .form-acquirable {
   position: relative;
   top: -3px;
   display: inline-block;
@@ -71,7 +72,9 @@ form {
   -ms-border-radius: 2px;
   -webkit-border-radius: 2px;
 }
-
+#workspace .form-content .form-acquirable {
+  background-color: #FF8C00;
+}
 #workspace .form-content .form-focus {
   background-image: none;
   border-left: 2px solid #0E7F2A;
