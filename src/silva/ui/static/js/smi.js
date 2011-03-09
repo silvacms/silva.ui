@@ -248,7 +248,9 @@
         // Listen to pull notification events.
         $(document).bind('refresh-feedback-smi', function() {
             $.getJSON(options.url, function(messages) {
-                this.notifies(messages);
+                if (messages) {
+                    this.notifies(messages);
+                };
             }.scope(this));
         }.scope(this));
 

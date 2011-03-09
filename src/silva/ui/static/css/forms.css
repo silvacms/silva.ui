@@ -2,13 +2,13 @@ form {
   color: black;
 }
 
-#workspace .form-content h3,
-#workspace .form-content h4,
-#workspace .form-content h5 {
+.form-content h3,
+.form-content h4,
+.form-content h5 {
   background-color: #efefef;
   border-bottom: 1px solid #ddd;
 }
-#workspace .form-content .form-head p {
+.form-content .form-head p {
   border-left: 2px solid #ccc;
   padding: 10px;
 }
@@ -31,13 +31,16 @@ form {
   font-size: 110%;
 }
 
-.form-section, .form-head, .form-footer, .form-table {
+#workspace .form-content .form-section,
+#workspace .form-content .form-head,
+#workspace .form-content .form-footer,
+#workspace .form-content .form-table {
   background-image: url('../img/workspace_bg.png');
   background-repeat: repeat;
 }
 
-#workspace .form-content .form-section,
-#workspace .form-content .form-table {
+.form-content .form-section,
+.form-content .form-table {
   padding: 10px;
   border-left: 2px solid #ccc;
   border-bottom: 1px dotted #ccc;
@@ -52,21 +55,21 @@ form {
 }
 
 
-#workspace .form-content .form-section p {
+.form-content .form-section p {
   font-style: italic;
 }
 
-#workspace .form-content .form-section .form-label label {
+.form-content .form-section .form-label label {
   font-weight: bold;
   font-size: 105%;
 }
 
-#workspace .form-content .form-section .form-label {
+.form-content .form-section .form-label {
   margin-bottom: 10px;
 }
 
-#workspace .form-content .form-required,
-#workspace .form-content .form-acquirable {
+.form-content .form-required,
+.form-content .form-acquirable {
   position: relative;
   top: -3px;
   display: inline-block;
@@ -82,22 +85,22 @@ form {
   -ms-border-radius: 2px;
   -webkit-border-radius: 2px;
 }
-#workspace .form-content .form-acquirable {
+.form-content .form-acquirable {
   background-color: #FF8C00;
 }
-#workspace .form-content .form-focus {
-  background-image: none;
+.form-content .form-focus {
+  background-image: none !important;
+  background-color: #D8EED5 !important;
   border-left: 2px solid #0E7F2A;
-  background-color: #D8EED5;
 }
 
-#workspace .form-content .form-error {
-  background-image: none;
+.form-content .form-error {
+  background-image: none !important;
+  background-color: #EFAAAA !important;
   border-left: 2px solid #DE2A2A;
-  background-color: #EFAAAA;
 }
 
-#workspace .form-content .form-error-detail {
+.form-content .form-error-detail {
   background-image: url('../img/workspace_bg.png');
   background-repeat: repeat;
   padding: 4px;
@@ -116,7 +119,8 @@ form {
   padding: 10px 20px 40px 10px;
 }
 #workspace .form-table .form-controls td {
-  padding: 10px 20px 10px 10px;}
+  padding: 10px 20px 10px 10px;
+}
 
 #workspace .form-content a.form-control,
 #workspace .form-content a.form-button {
