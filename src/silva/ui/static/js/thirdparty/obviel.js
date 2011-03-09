@@ -82,6 +82,7 @@ var obviel = {};
      */
     module.HTMLResources = function() {
         this._js = [];
+        this._css = [];
         $(document).ready(function() {
             this.populate();
         }.scope(this));
@@ -95,23 +96,67 @@ var obviel = {};
                 this._js.push(src);
             };
         }.scope(this));
+        $('link').each(function (i, link) {
+            link = $(link);
+            if (link.attr('rel') == 'stylesheet' && link.attr('type') == 'text/css') {
+                var src = link.attr('href');
+                if (src != undefined && !this.is_css_loaded(src)) {
+                    this._css.push(src);
+                };
+            };
+        }.scope(this));
     };
 
+    /**
+     * Return true if the given Javascript is already loaded.
+     * @param script: url of the Javascript file.
+     */
     module.HTMLResources.prototype.is_js_loaded = function(script) {
         return this._js.indexOf(script) >= 0;
     };
 
+    /**
+     * Return true if the given CSS is already loaded.
+     * @param css: url of the CSS file.
+     */
+    module.HTMLResources.prototype.is_css_loaded = function(css) {
+        return this._css.indexOf(css) >= 0;
+    };
+
+    /**
+     * Load a given JS file.
+     * @param script: url of the JS file.
+     */
     module.HTMLResources.prototype.load_js = function(script) {
         if (!this.is_js_loaded(script)) {
             // We don't use jQuery here, as does strange things with scripts.
-
             var head = document.getElementsByTagName('head')[0];
             var script_tag = document.createElement('script');
+
             script_tag.type = 'text/javascript';
             script_tag.src = script;
             head.appendChild(script_tag);
 
             this._js.push(script);
+        };
+    };
+
+    /**
+     * Load a given CSS file.
+     * @param css: url of the CSS file.
+     */
+    module.HTMLResources.prototype.load_css = function(css) {
+        if (!this.is_css_loaded(css)) {
+            // We don't use jQuery here, as does strange things with links.
+            var head = document.getElementsByTagName('head')[0];
+            var link_tag = document.createElement('link');
+
+            link_tag.rel = 'stylesheet';
+            link_tag.type = 'text/css';
+            link_tag.href = css;
+            head.appendChild(link_tag);
+
+            this._css.push(css);
         };
     };
 
@@ -191,6 +236,11 @@ var obviel = {};
             if (resources.js) {
                 $.each(resources.js, function(i, script) {
                     module._resources.load_js(script);
+                });
+            };
+            if (resources.css) {
+                $.each(resources.css, function(i, css) {
+                    module._resources.load_css(css);
                 });
             };
         };
