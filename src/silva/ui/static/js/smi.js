@@ -70,125 +70,6 @@
     });
 
     /**
-     * A ShortcutManager let you bind, unbind, rebind collection of
-     * shortcuts.
-     */
-    var ShortcutManager = function() {
-        this._shortcuts = {};
-        this._zones = {};
-        this._order = [];
-        this._selected = 0;
-
-        var make_unselect = function(direction) {
-            return function() {
-                if (this._order.length) {
-                    var previous_zone = this.get_current_zone();
-                    previous_zone.removeClass('focus');
-                    previous_zone.trigger('blur-smi');
-                    this._selected = (this._selected + direction) % this._order.length;
-                    if (this._selected < 0) {
-                        this._selected = this._order.length - 1;
-                    };
-                    var zone = this.get_current_zone();
-                    zone.addClass('focus');
-                    zone.trigger('focus-smi');
-                    zone.addClass('highlight');
-                    setTimeout(function() {zone.removeClass('highlight');}, 500);
-                };
-            }.scope(this);
-        }.scope(this);
-        shortcut.add('ctrl+shift+left', make_unselect(-1));
-        shortcut.add('ctrl+shift+right', make_unselect(1));
-    };
-
-    ShortcutManager.prototype.get_current = function () {
-        if (this._order.length) {
-            return this._order[this._selected];
-        };
-        return null;
-    };
-    ShortcutManager.prototype.get_current_zone = function() {
-        var current = this.get_current();
-
-        if (current) {
-            return this._zones[current];
-        };
-        return null;
-    };
-
-    ShortcutManager.prototype.new_shortcuts = function(name, zone) {
-        if (this._zones[name] === undefined) {
-            this._zones[name] = zone;
-            this._order.push(name);
-            this._shortcuts = [];
-        };
-    };
-
-    ShortcutManager.prototype.remove_shortcuts = function(name) {
-        if (this._zones[name] !== undefined) {
-            if (this.get_current() == name) {
-                this._selected = 0;
-            }
-            this._order.splice(this._order.indexOf(name), 1);
-            delete this._zones[name];
-            delete this._shortcuts[name];
-        };
-    };
-
-    /**
-     * Bind a shortbut to a key.
-     * @param key: shortcut key
-     * @param callback: callback to execute
-     */
-    ShortcutManager.prototype.bind = function(key, callback) {
-        if (this.activated) {
-            shortcut.add(key, callback);
-        };
-        this.shortcuts[this.current][key] = callback;
-    };
-
-    /**
-     * Unbind a shortcut.
-     * @param key: shortcut key
-     */
-    ShortcutManager.prototype.unbind = function(key) {
-        if (this.shortcuts[this.current][key]) {
-            if (this.activated) {
-                shortcut.remove(key);
-            };
-            delete this.shortcuts[this.current][key];
-        }
-    };
-
-    /**
-     * Activate the current shortcut collection.
-     */
-    ShortcutManager.prototype.activate = function() {
-        if (!this.activated) {
-            var collection = this.shortcuts[this.current];
-
-            for (key in collection) {
-                shortcut.add(key, collection[key]);
-            };
-            this.activated = true;
-        };
-    };
-
-    /**
-     * Disable the current shortcut collection.
-     */
-    ShortcutManager.prototype.disable = function() {
-        if (this.activated) {
-            var collection = this.shortcuts[this.current];
-
-            for (key in collection) {
-                shortcut.remove(key);
-            };
-            this.activated = false;
-        };
-    };
-
-    /**
      * Notification implement a notification.
      * @param container: container to insert notification.
      * @param messags: message used to render the notification.
@@ -386,7 +267,7 @@
         this.opening = {path: '', screen: ''}; // Screen being currently opened
         this.options = options;
         this.shortcuts = new ShortcutManager();
-        this.shortcuts.new_shortcuts('navigation', navigation);
+        this.shortcuts.create('navigation', navigation);
         this.notifications = new NotificationManager(options.notifications);
         this.clipboard = new ClipBoard(this.notifications);
 
@@ -543,6 +424,6 @@
         return new SMI(options);
     };
 
-})(jQuery, obviel, shortcut);
+})(jQuery, obviel);
 
 

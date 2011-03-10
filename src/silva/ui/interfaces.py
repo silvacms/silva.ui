@@ -21,12 +21,12 @@ class ISMIScripts(ICKEditorResources, IReferenceUIResources):
     """All required script to get the SMI working, without any CSS.
     """
     silvaconf.resource('js/thirdparty/obviel.js')
-    silvaconf.resource('js/thirdparty/shortcut.js')
     silvaconf.resource('js/thirdparty/jquery.hotkeys.js')
     silvaconf.resource('js/thirdparty/jquery.observehashchange.js')
     silvaconf.resource('js/thirdparty/jquery.jstree.js')
     silvaconf.resource('js/thirdparty/jquery.tablednd-0.5.min.js')
 
+    silvaconf.resource('js/shortcut.js')
     silvaconf.resource('js/utils.js')
     silvaconf.resource('js/content.js')
     silvaconf.resource('js/content.listing.js')

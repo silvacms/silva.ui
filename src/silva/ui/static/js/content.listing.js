@@ -341,8 +341,8 @@
 
             if (event.keyCode == 13) {
                 // Enter unfocus the field
-                this.$filter.blur()
-                return
+                this.$filter.blur();
+                return;
             } else if (event.keyCode == 27) {
                 // Escape clear the field
                 clear_field = true;
@@ -356,7 +356,7 @@
                 } else {
                     value = this.$filter.val();
                 };
-                this.listing.filter(new RegExp(value, 'i'), false)
+                this.listing.filter(new RegExp(value, 'i'), false);
             }.scope(this), 0);
         }.scope(this));
     };
@@ -599,7 +599,7 @@
                         continue;
                     } else if (!visible_selected_items.length) {
                         // The selection is no longer visible
-                        next_item.remove()
+                        next_item.remove();
                     } else {
                         // The selection might have got bigger from
                         // the top. Rerender actions.
@@ -644,7 +644,7 @@
         new SMIActions(this);
         new SMIViewCounter(this);
 
-        this.smi.shortcuts.new_shortcuts(name, $content);
+        this.smi.shortcuts.create(name, $content);
 
         // Collapse feature
         {
@@ -764,7 +764,7 @@
 
     // Called when the listing is cleaned
     SMIListing.prototype.cleanup = function() {
-        this.smi.shortcuts.remove_shortcuts(this.name);
+        this.smi.shortcuts.remove(this.name);
     };
 
     /**
