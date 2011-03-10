@@ -94,6 +94,10 @@ form {
   border-left: 2px solid #0E7F2A;
 }
 
+.form-content .form-field {
+  position: relative;
+}
+
 .form-content .form-error {
   background-image: none !important;
   background-color: #EFAAAA !important;
@@ -101,6 +105,11 @@ form {
 }
 
 .form-content .form-error-detail {
+  z-index: 150;
+  position: absolute;
+  top: -0.5em;
+  left: 400px;
+  width: 300px;
   background-image: url('../img/workspace_bg.png');
   background-repeat: repeat;
   padding: 4px;
