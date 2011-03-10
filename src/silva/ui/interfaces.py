@@ -4,16 +4,22 @@
 # $Id$
 
 from zope.interface import Interface, Attribute
+from zope import schema
 
 from js import jqueryui
 
 from silva.core import conf as silvaconf
 from silva.core.editor.interfaces import ICKEditorResources
 from silva.core.references.widgets import IReferenceUIResources
+from silva.core.interfaces import ISilvaLocalService
+from silva.core.conf import schema as silvaschema
+from silva.translations import translate as _
+
 
 # CKeditor already contains jquery and json-template
 class ISMIScripts(ICKEditorResources, IReferenceUIResources):
-
+    """All required script to get the SMI working, without any CSS.
+    """
     silvaconf.resource('js/thirdparty/obviel.js')
     silvaconf.resource('js/thirdparty/shortcut.js')
     silvaconf.resource('js/thirdparty/jquery.hotkeys.js')
@@ -31,12 +37,29 @@ class ISMIScripts(ICKEditorResources, IReferenceUIResources):
 
 
 class ISMIResources(ISMIScripts):
+    """Full SMI resources.
+    """
     silvaconf.resource(jqueryui.smoothness)
-
     silvaconf.resource('css/style.css')
     silvaconf.resource('css/smi.css')
     silvaconf.resource('css/forms.css')
 
+
+# Configuration service
+
+class IUIService(ISilvaLocalService):
+    """Configuration settings for the UI.
+    """
+    logo = silvaschema.Bytes(
+        title=_(u"Logo"),
+        description=_(u"Logo that appear at the top left of the SMI"),
+        required=False)
+    background = schema.TextLine(
+        title=_(u"Background color"),
+        required=False)
+
+
+# Menu items
 
 class IMenuItem(Interface):
     """A displayed tab.
