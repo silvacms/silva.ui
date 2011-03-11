@@ -81,11 +81,16 @@
         if (typeof(message.title) == 'string') {
             notification.prepend('<h3>' + message.title + '</h3>');
         };
-        if (typeof(message.message) == 'string') {
-            notification.append('<p>' + message.message + '</p>');
-        };
         if (typeof(message.category) == 'string') {
             notification.addClass(message.category);
+            switch (message.category) {
+            case 'error':
+                notification.append('<ins class="ui-icon ui-icon-alert" />');
+                break;
+            };
+        };
+        if (typeof(message.message) == 'string') {
+            notification.append('<p>' + message.message + '</p>');
         };
 
         // Bind the close event
@@ -134,9 +139,14 @@
                 };
             }.scope(this));
         }.scope(this));
-
-        $(document).bind('notify', function(event, message) {
-            this.notify(message);
+        // Display a notification
+        $(document).bind('notify-feedback-smi', function(event, data) {
+            this.mark_as_seen(); // Clear old notification first.
+            if (typeof(data) == "array") {
+                this.notifies(data);
+            } else {
+                this.notify(data);
+            };
         }.scope(this));
     };
 
@@ -215,9 +225,13 @@
         }.scope(this));
         $('body').trigger('contentchange-smiclipboard');
         if (!no_notification) {
-            this.notifications.notify({
+            var message = {
                 message: 'Cutted ' + count.toString() + ' content(s) in the clipboard.',
-                autoclose: 4000});
+                autoclose: 4000};
+            if (!count) {
+              message['category'] = 'error';
+            };
+            this.notifications.notify(message);
         };
     };
 
@@ -237,9 +251,13 @@
         }.scope(this));
         $('body').trigger('contentchange-smiclipboard');
         if (!no_notification) {
-            this.notifications.notify({
+            var message = {
                 message: 'Copied ' + count.toString() + ' content(s) in the clipboard.',
-                autoclose: 4000});
+                autoclose: 4000};
+            if (!count) {
+                message['category'] = 'error';
+            };
+            this.notifications.notify(message);
         };
     };
 
