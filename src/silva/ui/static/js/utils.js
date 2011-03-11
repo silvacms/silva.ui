@@ -69,7 +69,7 @@
                 target = distance;
             };
 
-            element.stop(true);
+            element.stop(true, true);
             element.animate({scrollTop: target}, speed);
         });
     };

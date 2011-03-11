@@ -639,10 +639,11 @@
         this.configuration = configuration;
         this.smi = smi;
 
-        new SMIMultiSelector(this);
-        new SMIFilterSelector(this);
-        new SMIActions(this);
-        new SMIViewCounter(this);
+        this.ui = {};
+        this.ui.selector = new SMIMultiSelector(this);
+        this.ui.filter = new SMIFilterSelector(this);
+        this.ui.actions = new SMIActions(this);
+        this.ui.counter = new SMIViewCounter(this);
 
         this.smi.shortcuts.create(name, $content);
 
@@ -701,12 +702,13 @@
 
             this.smi.shortcuts.bind(name, 'pagedown', function() {
                 viewport.SMISmoothScroll('slow', 'down', size);
+                return false;
             });
             this.smi.shortcuts.bind(name, 'pageup', function() {
                 viewport.SMISmoothScroll('slow', 'up', size);
+                return false;
             });
-        }
-
+        };
 
         {
             // Row selection
@@ -777,6 +779,7 @@
             // Keyboard row manipulation
             this.smi.shortcuts.bind(name, 'space shift+space', function(event) {
                 select_row(get_hovered_row(), event.shiftKey);
+                return false;
             });
             this.smi.shortcuts.bind(name, 'up', function() {
                 var row = get_hovered_row();
@@ -787,6 +790,7 @@
                     candidate = candidate.prev();
                 };
                 set_hovered_row(candidate);
+                return false;
             });
             this.smi.shortcuts.bind(name, 'down', function() {
                 var row = get_hovered_row();
@@ -797,7 +801,16 @@
                     candidate = candidate.next();
                 };
                 set_hovered_row(candidate);
+                return false;
             });
+            this.smi.shortcuts.bind(name, 'esc', function() {
+                this.unselect_all();
+                return false;
+            }.scope(this));
+            this.smi.shortcuts.bind(name, 'f', function() {
+                this.ui.filter.$filter.focus();
+                return false;
+            }.scope(this));
 
             if (this.configuration.sortable) {
                 var table = $content.find('table');
