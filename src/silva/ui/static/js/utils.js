@@ -88,17 +88,6 @@
         });
     };
 
-    $.fn.array_match = function(one, two) {
-        for (var i in one) {
-            for (var j in two) {
-                if (one[i] == two[j]) {
-                    return one[i];
-                }
-            }
-        }
-        return false;
-    };
-
     /**
      * Set a class name to table rows based on a sequence.
      *
@@ -112,25 +101,6 @@
             var length = classes.length;
             $(this).find('tr').removeClass(classes.join(' ')).each(function(i) {
                 $(this).addClass(classes[i % length]);
-            });
-        });
-    };
-
-    /**
-     * Set a class to each cell in one or more columns
-     *
-     * @param cols: Column number or list of numbers, zero-indexed
-     * @param classname: The class name to set
-     */
-    $.fn.setColumnClass = function(cols, classname) {
-        return this.each(function() {
-            if (typeof(cols) != 'object') {
-                cols = [cols];
-            }
-            $(this).find("tr").each(function() {
-                for (var i in cols) {
-                    $(this).find('th, td').eq(i).addClass(classname);
-                }
             });
         });
     };
@@ -206,18 +176,6 @@
                 });
             }
         });
-    };
-
-    $.fn.rangeFilter = function(elem, start, end) {
-        if (typeof(start) == 'object') {
-            return $(this).find(elem).filter(function(i) {
-                return ($.inArray(i, start) != -1);
-            });
-        } else if (end != null) {
-            return $(this).find(elem).slice(start, end);
-        } else {
-            return $(this).find(elem).slice(start);
-        }
     };
 
 })(jQuery);
