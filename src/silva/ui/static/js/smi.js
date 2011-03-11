@@ -217,7 +217,7 @@
         var count = 0;
 
         $.each(items, function(i, item) {
-            if (this._cutted_ids.indexOf(item.id) < 0) {
+            if ($.inArray(item.id, this._cutted_ids) < 0) {
                 this._cutted_ids.push(item.id);
                 this.cutted.push(item);
                 count += 1;
@@ -243,7 +243,7 @@
         var count = 0;
 
         $.each(items, function(i, item) {
-            if (this._copied_ids.indexOf(item.id) < 0) {
+            if ($.inArray(item.id, this._copied_ids) < 0) {
                 this._copied_ids.push(item.id);
                 this.copied.push(item);
                 count += 1;

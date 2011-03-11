@@ -1,3 +1,4 @@
+
 var obviel = {};
 
 (function($, module) {
@@ -112,7 +113,7 @@ var obviel = {};
      * @param script: url of the Javascript file.
      */
     module.HTMLResources.prototype.is_js_loaded = function(script) {
-        return this._js.indexOf(script) >= 0;
+        return $.inArray(script, this._js) >= 0;
     };
 
     /**
@@ -120,7 +121,7 @@ var obviel = {};
      * @param css: url of the CSS file.
      */
     module.HTMLResources.prototype.is_css_loaded = function(css) {
-        return this._css.indexOf(css) >= 0;
+        return $.inArray(css, this._css) >= 0;
     };
 
     /**
@@ -397,7 +398,7 @@ var obviel = {};
             var definitions = views[iface];
             if (definitions) {
                 $.each(definitions, function(e, definition) {
-                    if (seen_definitions.indexOf(definition['__obviel_uid__']) < 0) {
+                    if ($.inArray(definition['__obviel_uid__'], seen_definitions) < 0) {
                         var view_definition = {};
                         $.extend(view_definition, definition);
                         if (args.extra) {

@@ -15,7 +15,7 @@
             var missing = false;
 
             for (var property in conditions) {
-                if (conditions[property].indexOf(item[property]) < 0) {
+                if ($.inArray(item[property], conditions[property]) < 0) {
                     missing = true;
                     break;
                 };
@@ -488,7 +488,7 @@
             var local_data = $(item).data('smilisting');
 
             for (var e=0; e < local_data.ifaces.length; e++) {
-                if (this.ifaces.indexOf(local_data.ifaces[e]) < 0) {
+                if ($.inArray(local_data.ifaces[e], this.ifaces) < 0) {
                     this.ifaces.push(local_data.ifaces[e]);
                 };
             };
@@ -851,7 +851,7 @@
                 cell.addClass('first');
             };
             if (sortable &&
-                sortable.columns.indexOf(column.name) >= 0) {
+                $.inArray(column.name, sortable.columns) >= 0) {
                 cell.addClass('moveable');
             };
             listingcolumns.render(cell, {

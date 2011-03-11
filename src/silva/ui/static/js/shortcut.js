@@ -78,7 +78,7 @@ var ShortcutManager = function() {
             if (this.get_current_name() == name) {
                 this._selected = 0;
             }
-            this._order.splice(this._order.indexOf(name), 1);
+            this._order.splice($.inArray(name, this._order), 1);
             delete this._zones[name];
             delete this._handlers[name];
         };
