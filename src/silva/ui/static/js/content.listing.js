@@ -688,10 +688,25 @@
                 if ($header.hasClass('collapsed')) {
                     toggle_collapsing();
                 };
-                $content.parent().scrollTop(
+                $content.parent().SMISmoothScroll(
+                    'slow', 'absolute',
                     $content.position().top - $header.outerHeight());
             });
         };
+
+        {
+            // Page up / down movement
+            var viewport = $content.parent();
+            var size = viewport.height() / 2;
+
+            this.smi.shortcuts.bind(name, 'pagedown', function() {
+                viewport.SMISmoothScroll('slow', 'down', size);
+            });
+            this.smi.shortcuts.bind(name, 'pageup', function() {
+                viewport.SMISmoothScroll('slow', 'up', size);
+            });
+        }
+
 
         {
             // Row selection

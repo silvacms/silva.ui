@@ -29,7 +29,7 @@ var ShortcutManager = function() {
                     this.activate();
                     var zone = this.get_current_zone();
                     zone.addClass('highlight');
-                    setTimeout(function() {zone.removeClass('highlight');}, 500);
+                    setTimeout(function() {zone.removeClass('highlight');}, 1000);
                     event.preventDefault();
                     return false;
                 };

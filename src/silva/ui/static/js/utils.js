@@ -41,50 +41,36 @@
      * Smoothly scroll an element vertically, snapping to an interval size
      *
      * @param speed: Animation speed in ms, or one of the jQuery speed string values
-     * @param direction: 'up', 'down', 'left' or 'right'
+     * @param direction: 'up' or 'down'
      * @param distance: Distance to scroll in pixels
      * @param interval: Size in pixels to round the scrolling off to
      */
-    $.fn.smartScroll = function(speed, direction, distance, interval) {
-        var curpos;
-        var newpos;
+    $.fn.SMISmoothScroll = function(speed, direction, distance, interval) {
         return $(this).each(function() {
-            if (!$(this).data('smartScroll_active')) {
-                $(this).data('smartScroll_active', true);
-                if (direction == 'up' || direction == 'down') {
-                    curpos = $(this).scrollTop();
-                    if (direction == 'up') {
-                        newpos = curpos - distance;
-                        if (interval) {
-                            newpos -= newpos % interval;
-                        }
-                    } else {
-                        newpos = curpos + distance;
-                        if (interval && newpos % interval != 0) {
-                            newpos += interval - (newpos % interval);
-                        }
-                    }
-                    $(this).animate({scrollTop: newpos}, speed, function() {
-                        $(this).data('smartScroll_active', false);
-                    });
-                } else {
-                    curpos = $(this).scrollLeft();
-                    if (direction == 'left') {
-                        newpos = curpos - distance;
-                        if (interval) {
-                            newpos -= newpos % interval;
-                        }
-                    } else {
-                        newpos = curpos + distance;
-                        if (interval && newpos % interval != 0) {
-                            newpos += interval - (newpos % interval);
-                        }
-                    }
-                    $(this).animate({scrollLeft: newpos}, speed, function() {
-                        $(this).data('smartScroll_active', false);
-                    });
-                }
-            }
+            var element = $(this);
+            var position = element.scrollTop();
+            var target;
+
+            switch (direction) {
+            case 'up':
+                target = position - distance;
+                if (interval) {
+                    target -= target % interval;
+                };
+                break;
+            case 'down':
+                target = position + distance;
+                if (interval && position % interval != 0) {
+                    target += interval - (target % interval);
+                };
+                break;
+            case 'absolute':
+            default:
+                target = distance;
+            };
+
+            element.stop(true);
+            element.animate({scrollTop: target}, speed);
         });
     };
 

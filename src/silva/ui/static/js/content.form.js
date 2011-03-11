@@ -18,6 +18,7 @@
                 event.preventDefault();
                 return false;
             }.scope(this);
+
             // Create a shortcuts
             this.smi.shortcuts.create(form_prefix, form);
             this.smi.shortcuts.bind(form_prefix, 'ctrl+down', focus_next_form);
@@ -28,7 +29,7 @@
             // If the form is focused
             form.bind('focus-smi', function() {
                 // Scroll into view and select the first field
-                this.content.scrollTop(form.position().top);
+                this.content.SMISmoothScroll('slow', 'absolute', form.position().top);
                 this.focus_first_form_field(form);
             }.scope(this));
 
