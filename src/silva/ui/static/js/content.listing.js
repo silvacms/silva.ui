@@ -781,7 +781,7 @@
                 select_row(get_hovered_row(), event.shiftKey);
                 return false;
             });
-            this.smi.shortcuts.bind(name, 'up', function() {
+            this.smi.shortcuts.bind(name, 'up shift+up', function(event) {
                 var row = get_hovered_row();
                 var candidate = row.prev();
 
@@ -790,9 +790,12 @@
                     candidate = candidate.prev();
                 };
                 set_hovered_row(candidate);
+                if (event.shiftKey) {
+                    select_row(candidate);
+                };
                 return false;
             });
-            this.smi.shortcuts.bind(name, 'down', function() {
+            this.smi.shortcuts.bind(name, 'down shift+down', function(event) {
                 var row = get_hovered_row();
                 var candidate = row.next();
 
@@ -801,6 +804,9 @@
                     candidate = candidate.next();
                 };
                 set_hovered_row(candidate);
+                if (event.shiftKey) {
+                    select_row(candidate);
+                };
                 return false;
             });
             this.smi.shortcuts.bind(name, 'esc', function() {
