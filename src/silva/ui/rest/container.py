@@ -65,6 +65,9 @@ class TemplateContainerListing(rest.REST):
     def GET(self):
         return self.template.render(self)
 
+icon_width = 20
+pubstate_width = 16
+
 
 class ColumnsContainerListing(UIREST):
     grok.context(interfaces.IContainer)
@@ -79,7 +82,7 @@ class ColumnsContainerListing(UIREST):
                            'versioned': ['content', 'object']},
                 'listing': [
                     {'name': 'publishables',
-                     'layout': {'fixed': {0:20, 1:16}},
+                     'layout': {'fixed': {0:icon_width, 1:pubstate_width}},
                      'columns': [
                             {'name': 'icon',
                              'view': 'icon'},
@@ -107,7 +110,8 @@ class ColumnsContainerListing(UIREST):
                                    {'access': ['manage', 'publish', 'write']}}},
                      'collapsed': False},
                     {'name': 'assets',
-                     'layout': {'fixed': {0:32}, 'skip': {1:True}},
+                     'layout': {'fixed':
+                        {0:icon_width+pubstate_width}, 'skip': {1:True}},
                      'columns': [
                             {'name': 'icon',
                              'view': 'icon'},
