@@ -79,7 +79,7 @@ class ColumnsContainerListing(UIREST):
                            'versioned': ['content', 'object']},
                 'listing': [
                     {'name': 'publishables',
-                     'layout': {'fixed': {0:16, 1:16}},
+                     'layout': {'fixed': {0:20, 1:16}},
                      'columns': [
                             {'name': 'icon',
                              'view': 'icon'},
