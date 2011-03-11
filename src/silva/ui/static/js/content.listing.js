@@ -645,9 +645,6 @@
         new SMIViewCounter(this);
 
         this.smi.shortcuts.create(name, $content);
-        this.smi.shortcuts.bind(name, 'space', function() {
-            alert('space');
-        });
 
         // Collapse feature
         {
@@ -696,69 +693,121 @@
             });
         };
 
-        // Add the hover style
-        this.$container.delegate('tr.item', 'mouseenter', function() {
-            $(this).addClass("hover");
-        });
-        this.$container.delegate('tr.item', 'mouseleave', function() {
-            $(this).removeClass("hover");
-        });
+        {
+            // Row selection
+            var last_selected_index = null;
+            var trigger = this.trigger.scope(this);
+            var hovered_row = null;
 
-        // Row selection with mouse
-        var mouse_last_selected = null;
-        var trigger = this.trigger.scope(this);
-        this.$container.delegate('tr.item', 'click', function(event) {
-            var row = $(this);
-
-            if (mouse_last_selected === null || !event.shiftKey) {
-                mouse_last_selected = row.index();
-                row.toggleClass('selected');
-                trigger('selectionchange-smilisting');
-            } else {
-                // Shift is pressed, and a column have been previously selected.
-                var current_selected = row.index();
-
-                if (current_selected != mouse_last_selected) {
-                    var start = 0;
-                    var end = 0;
-
-                    if (current_selected > mouse_last_selected) {
-                        start = mouse_last_selected + 1;
-                        end = current_selected + 1;
-                    } else {
-                        start = current_selected;
-                        end = mouse_last_selected;
-                    };
-                    row.parent().children().slice(start, end).filter('.item').toggleClass('selected');
-                    trigger('selectionchange-smilisting');
+            var get_hovered_row = function() {
+                if (hovered_row === null) {
+                    hovered_row = $container.children('tr.item:first');
+                    hovered_row.addClass("hover");
                 };
-                mouse_last_selected = current_selected;
+                return hovered_row;
             };
-        });
+            var clear_hovered_row = function() {
+                if (hovered_row !== null) {
+                    hovered_row.removeClass("hover");
+                };
+                hovered_row = null;
+            };
+            var set_hovered_row = function(row) {
+                if (row.length) {
+                    clear_hovered_row();
+                    hovered_row = row;
+                    hovered_row.addClass("hover");
+                };
+            };
+            var select_row = function(row, multiple) {
+                if (last_selected_index === null || !multiple) {
+                    last_selected_index = row.index();
+                    row.toggleClass('selected');
+                    trigger('selectionchange-smilisting');
+                } else {
+                    // Multiple selection
+                    var current_index = row.index();
 
-        if (this.configuration.sortable) {
-            var table = $content.find('table');
+                    if (current_index != last_selected_index) {
+                        var start = 0;
+                        var end = 0;
 
-            // Add the sorting if the table is sortable
-            table.tableDnD({
-                dragHandle: "moveable",
-                onDragClass: "dragging",
-                onDragStart: function(table, row) {
-                    // Reset hover style and mouse mouse_last_selected
-                    $(row).removeClass('hover');
-                    mouse_last_selected = null;
-                    $(table).removeClass('static');
-                },
-                onDrop: function(table, row) {
-                    // XXX Send new order to server
-                    $(table).addClass('static');
-                    this.trigger('selectionchange-smilisting');
-                }.scope(this)
+                        if (current_index > last_selected_index) {
+                            start = last_selected_index + 1;
+                            end = current_index + 1;
+                        } else {
+                            start = current_index;
+                            end = last_selected_index;
+                        };
+                        row.parent().children().slice(start, end).filter('.item').toggleClass('selected');
+                        trigger('selectionchange-smilisting');
+                    };
+                    last_selected_index = current_index;
+                };
+            };
+
+            // Set the hover column on hovering
+            this.$container.delegate('tr.item', 'mouseenter', function() {
+                set_hovered_row($(this));
             });
-            // If content change, reinitialize the DND
-            $content.bind('contentchange-smilisting', function() {
-                table.tableDnDUpdate();
+            this.$container.delegate('tr.item', 'mouseleave', function() {
+                clear_hovered_row();
             });
+
+            // Row selection with mouse
+            this.$container.delegate('tr.item', 'click', function(event) {
+                select_row($(this), event.shiftKey);
+            });
+
+            // Keyboard row manipulation
+            this.smi.shortcuts.bind(name, 'space shift+space', function(event) {
+                select_row(get_hovered_row(), event.shiftKey);
+            });
+            this.smi.shortcuts.bind(name, 'up', function() {
+                var row = get_hovered_row();
+                var candidate = row.prev();
+
+                while (candidate.length &&
+                       (candidate.is('.hidden') || candidate.is('.actions'))) {
+                    candidate = candidate.prev();
+                };
+                set_hovered_row(candidate);
+            });
+            this.smi.shortcuts.bind(name, 'down', function() {
+                var row = get_hovered_row();
+                var candidate = row.next();
+
+                while (candidate.length &&
+                       (candidate.is('.hidden') || candidate.is('.actions'))) {
+                    candidate = candidate.next();
+                };
+                set_hovered_row(candidate);
+            });
+
+            if (this.configuration.sortable) {
+                var table = $content.find('table');
+
+                // Add the sorting if the table is sortable
+                table.tableDnD({
+                    dragHandle: "moveable",
+                    onDragClass: "dragging",
+                    onDragStart: function(table, row) {
+                        // Reset hover style and mouse last_selected_index
+                        $(row).removeClass('hover');
+                        last_selected_index = null;
+                        $(table).removeClass('static');
+                    },
+                    onDrop: function(table, row) {
+                        // XXX Send new order to server
+                        $(table).addClass('static');
+                        this.trigger('selectionchange-smilisting');
+                    }.scope(this)
+                });
+                // If content change, reinitialize the DND
+                $content.bind('contentchange-smilisting', function() {
+                    table.tableDnDUpdate();
+                });
+            };
         };
 
         // Add default data
