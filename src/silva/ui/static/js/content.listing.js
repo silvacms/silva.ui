@@ -645,6 +645,9 @@
         new SMIViewCounter(this);
 
         this.smi.shortcuts.create(name, $content);
+        this.smi.shortcuts.bind(name, 'space', function() {
+            alert('space');
+        });
 
         // Collapse feature
         {
