@@ -18,6 +18,10 @@ form {
   bottom: 0px;
 }
 
+.portlets p {
+  padding: 5px;
+}
+
 .form-content h3,
 .form-content h4,
 .form-content h5 {
@@ -175,3 +179,24 @@ form {
   color:#222;
 }
 
+
+/* Image information orientation */
+
+.portlets p span.orientation {
+  display: block;
+  margin-top: 0.3em;
+  border: 1px dotted black;
+  text-align: center;
+}
+.portlets p span.portrait {
+  width: 4.5em;
+  height: 6em;
+}
+.portlets p span.landscape {
+  width: 6.5em;
+  height: 3.5em;
+}
+.portlets p span.square {
+  width: 4em;
+  height: 4em;
+}
