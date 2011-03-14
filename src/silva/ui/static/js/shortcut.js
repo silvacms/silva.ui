@@ -19,18 +19,17 @@ var ShortcutManager = function() {
         var make_unselect = function(direction) {
             return function(event) {
                 if (this._order.length) {
-                    this.disable();
+                    this.disable(true);
 
                     this._selected = (this._selected + direction) % this._order.length;
                     if (this._selected < 0) {
                         this._selected = this._order.length - 1;
                     };
 
-                    this.activate();
+                    this.activate(true);
                     var zone = this.get_current_zone();
                     zone.addClass('highlight');
                     setTimeout(function() {zone.removeClass('highlight');}, 1000);
-                    event.preventDefault();
                     return false;
                 };
             }.scope(this);
@@ -76,6 +75,7 @@ var ShortcutManager = function() {
     ShortcutManager.prototype.remove = function(name) {
         if (this._zones[name] !== undefined) {
             if (this.get_current_name() == name) {
+                this.disable();
                 this._selected = 0;
             }
             this._order.splice($.inArray(name, this._order), 1);
@@ -113,13 +113,15 @@ var ShortcutManager = function() {
     /**
      * Activate the current shortcut collection.
      */
-    ShortcutManager.prototype.activate = function() {
+    ShortcutManager.prototype.activate = function(event) {
         var handlers = this.get_current_handlers();
         var zone = this.get_current_zone();
 
-        $(document).focus();
-        zone.addClass('focus');
-        zone.trigger('focus-smi');
+        if (event) {
+            $(document).focus();
+            zone.addClass('focus');
+            zone.trigger('focus-smi');
+        };
         for (var key in handlers) {
             if (key)
                 $(document).bind('keydown', key, handlers[key]);
@@ -129,7 +131,7 @@ var ShortcutManager = function() {
     /**
      * Disable the current shortcut collection.
      */
-    ShortcutManager.prototype.disable = function() {
+    ShortcutManager.prototype.disable = function(event) {
         var handlers = this.get_current_handlers();
         var zone = this.get_current_zone();
 
@@ -137,8 +139,10 @@ var ShortcutManager = function() {
             if (key)
                 $(document).unbind('keydown', handlers[key]);
         };
-        zone.trigger('blur-smi');
-        zone.removeClass('focus');
+        if (event) {
+            zone.trigger('blur-smi');
+            zone.removeClass('focus');
+        };
     };
 
 })(jQuery);
