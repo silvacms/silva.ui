@@ -58,6 +58,26 @@
     });
 
     obviel.view({
+        iface: 'message',
+        render: function() {
+            var message = $('<div></div>');
+
+            if (this.data.title) {
+                message.attr('title', this.data.title);
+            };
+            message.html(this.data.message);
+            message.dialog({
+                modal: true,
+                buttons: {
+                    Continue: function() {
+                        $(this).dialog('close');
+                    }
+                }
+            });
+        }
+    });
+
+    obviel.view({
         iface: 'content',
         render: function() {
             this.smi.notifications.mark_as_seen();

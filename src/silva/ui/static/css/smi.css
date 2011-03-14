@@ -171,7 +171,8 @@ input, textarea {
   border: inherit;
 }
 
-#workspace ins.ui-icon {
+#workspace ins.ui-icon,
+.message ins.ui-icon {
   float: left;
 }
 #workspace .info {

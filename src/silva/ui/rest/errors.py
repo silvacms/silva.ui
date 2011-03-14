@@ -4,24 +4,40 @@
 # $Id$
 
 from five import grok
-from zope.publisher.interfaces import INotFound
-from silva.ui.interfaces import ISMIScripts
+from zope.i18n import translate
+from zope.cachedescriptors.property import CachedProperty
+from zope.i18n.interfaces import IUserPreferredLanguages
+import simplejson
 
 
 class ErrorREST(grok.View):
     grok.baseclass()
-    grok.layer(ISMIScripts)
     grok.name('error.html')
 
-    def message(self):
-        template = getattr(self, 'message_template', None)
-        if template is not None:
-            return template.render(self)
+    @CachedProperty
+    def language(self):
+        adapter = IUserPreferredLanguages(self.request)
+        languages = adapter.getPreferredLanguages()
+        if languages:
+            return languages[0]
+        return 'en'
+
+    def translate(self, message):
+        return translate(
+            message, target_language=self.language, context=self.request)
 
     def render(self):
-        data = {'ifaces': ['dialog'],
-                'message': self.message()}
+        data = {'ifaces': ['message'],
+                'message': self._render_template()}
+        if hasattr(self, 'title'):
+            data['title'] = self.translate(self.title)
         self.response.setHeader('Content-Type', 'application/json')
         return simplejson.dumps(data)
 
+    render.base_method = True
 
+    def __call__(self):
+        self.update()
+        if self.request.response.getStatus() in (302, 303):
+            return
+        return self.render()
