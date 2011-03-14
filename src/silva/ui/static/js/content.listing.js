@@ -126,6 +126,37 @@
         }
     });
 
+    obviel.view({
+        iface: ['actionresult'],
+        render: function() {
+            for (var post_action in this.data.post_actions) {
+                switch(post_action) {
+                case 'remove':
+                    this.selection.remove(this.data.post_actions.remove);
+                    break;
+                case 'update':
+                    var need_refresh = this.selection.update(this.data.post_actions.update);
+                    // The update of the data might have trigger some data changes
+                    // in the selection.
+                    if (need_refresh) {
+                        this.content.triggerHandler(
+                            'actionrefresh-smilisting', {data: this.selection});
+                    };
+                    break;
+                case 'new_data':
+                    this.content.trigger('newdata-smilisting', this.data.post_actions.new_data);
+                    break;
+                case 'clear_clipboard':
+                    this.smi.clipboard.clear(true);
+                    break;
+                };
+            };
+            if (this.data.notifications) {
+                this.smi.notifications.notifies(this.data.notifications);
+            };
+        }
+    });
+
 
     /**
      * Register action buttons in obviel given the configuration.
@@ -225,31 +256,9 @@
                             dataType: 'json',
                             data: payload,
                             success: function(result) {
-                                for (var post_action in result.post_actions) {
-                                    switch(post_action) {
-                                    case 'remove':
-                                        this.data.remove(result.post_actions.remove);
-                                        break;
-                                    case 'update':
-                                        var need_refresh = this.data.update(result.post_actions.update);
-                                        // The update of the data might have trigger some data changes
-                                        // in the selection.
-                                        if (need_refresh) {
-                                            this.content.triggerHandler(
-                                                'actionrefresh-smilisting', {data: this.data});
-                                        };
-                                        break;
-                                    case 'new_data':
-                                        this.content.trigger('newdata-smilisting', result.post_actions.new_data);
-                                        break;
-                                    case 'clear_clipboard':
-                                        this.smi.clipboard.clear(true);
-                                        break;
-                                    };
-                                };
-                                if (result.notifications) {
-                                    this.smi.notifications.notifies(result.notifications);
-                                };
+                                this.content.render({data: result,
+                                                     extra: {selection: this.data,
+                                                             smi: this.smi}});
                             }.scope(this)
                         });
                     };

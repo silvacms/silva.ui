@@ -369,7 +369,7 @@ class ActionREST(UIREST):
     def POST(self):
         data = self.payload()
         return self.json_response({
-                'ifaces': ['result_action'],
+                'ifaces': ['actionresult'],
                 'post_actions': data,
                 'notifications': self.get_notifications()})
 
