@@ -118,8 +118,21 @@
             var creator = this.bootstrap_form.scope(this);
             var focuser = this.focus_form_field.scope(this);
 
+            // Add content
+            this.content.addClass('form-content');
+            if (this.data.portlets) {
+                var content = $('<div class="forms"></div>');
+                this.content.append(content);
+                var portlets = $('<div class="portlets"></div>');
+                portlets.html(this.data.portlets);
+                this.content.append(portlets);
+            } else {
+                var content = this.content;
+            };
+            content.html(this.data.forms);
+
             // Find and bootstrap forms
-            this.forms = this.content.find('form');
+            this.forms = content.find('form');
             this.forms.each(function () {
                 creator($(this));
             });
@@ -138,6 +151,7 @@
             this.forms.each(function (index, element) {
                 this.smi.shortcuts.remove($(element).attr('name'));
             }.scope(this));
+            this.content.removeClass('form-content');
             this.content.undelegate('.form-section', 'focusin');
             this.content.undelegate('.form-section', 'click');
             this.content.empty();
