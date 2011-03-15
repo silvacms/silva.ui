@@ -69,7 +69,7 @@
             message.dialog({
                 modal: true,
                 buttons: {
-                    Continue: function() {
+                    Ok: function() {
                         $(this).dialog('close');
                     }
                 }
@@ -88,6 +88,15 @@
             }
         }
     });
+
+    // Error handler used by AJAX requests. Build a message and render it.
+    var error_handler = function(request) {
+        var data = this.options.errors[request.status];
+        if (!data) {
+            data = this.options.errors[500];
+        };
+        $(document).render({data: data, extra: {smi: this}});
+    };
 
     /**
      * Notification implement a notification.
@@ -411,9 +420,7 @@
             this.opened = this.opening;
             $(document).render({data: data, extra: {smi: this}});
         }.scope(this);
-        query['error'] = function(request, status, error) {
-            alert('Error '  + request.status.toString() + ' please reboot: ' + error);
-        };
+        query['error'] = error_handler.scope(this);
         if (data) {
             query['type'] = 'POST';
             query['data'] = data;
@@ -437,9 +444,7 @@
         query['success'] = function(data) {
             $(document).render({data: data, extra: {smi: this}});
         }.scope(this);
-        query['error'] = function(request, status, error) {
-            alert('Error '  + request.status.toString() + ' please reboot: ' + error);
-        };
+        query['error'] = error_handler.scope(this);
         $.ajax(query);
     };
 
