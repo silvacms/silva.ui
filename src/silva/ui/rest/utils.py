@@ -66,9 +66,17 @@ class DocumentEdit(PageREST):
 
     def payload(self):
         version = self.context.get_editable()
-        text = version.body.render(version, self.request, IInputEditorFilter)
+        if version is not None:
+            text = version.body.render(version, self.request, IInputEditorFilter)
 
-        return {"ifaces": ["editor"],
-                "name": "body",
-                "text": text}
+            return {"ifaces": ["editor"],
+                    "name": "body",
+                    "text": text}
+
+        html = u""
+        version = self.context.get_previewable()
+        if version is not None:
+            html = version.body.render(version, self.request)
+        return {"ifaces": ["preview"],
+                "html": html}
 
