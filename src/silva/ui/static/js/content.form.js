@@ -40,18 +40,19 @@
                     values = values.concat(extra);
                 };
                 this.smi.send_to_screen(values);
-            };
+                return false;
+            }.scope(this);
             var default_submit = function() {
                 var extra = [];
 
                 if (this.data['default']) {
                     extra.push({name: this.data['default'], value:'Default'});
                 };
-                submit(extra);
-                return false;
-            };
+                return submit(extra);
+            }.scope(this);
 
-            // Bind default submit
+            // Bind default submit and refresh
+            form.bind('refresh-smi', submit);
             form.bind('submit', default_submit);
             this.smi.shortcuts.bind(form_prefix, 'enter', default_submit);
 
