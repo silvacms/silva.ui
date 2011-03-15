@@ -4,6 +4,7 @@
 # $Id$
 
 from zope.interface import Interface, Attribute
+from zope.publisher.interfaces.browser import IDefaultBrowserLayer
 from zope import schema
 
 from js import jqueryui
@@ -36,7 +37,7 @@ class ISMIScripts(ICKEditorResources, IReferenceUIResources):
     silvaconf.resource('js/smi.js')
 
 
-class ISMIResources(ISMIScripts):
+class ISMIResources(IDefaultBrowserLayer):
     """Full SMI resources.
     """
     silvaconf.resource(jqueryui.smoothness)

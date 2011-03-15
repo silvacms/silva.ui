@@ -5,9 +5,12 @@
 
 from AccessControl import getSecurityManager
 
+from pkg_resources import iter_entry_points
+
 from five import grok
 from silva.core.interfaces import ISilvaObject
 from silva.core.views.interfaces import IVirtualSite
+from silva.fanstatic import need
 
 from zope.component import getUtility
 from zope.i18n.interfaces import IUserPreferredLanguages
@@ -38,6 +41,10 @@ class SMI(grok.View):
         smi_skin_name = self.context.get_root()._smi_skin
         smi_skin = getUtility(Interface, smi_skin_name)
         applySkin(self.request, smi_skin)
+
+        for load_entry in iter_entry_points('silva.ui.resources'):
+            resource = load_entry.load()
+            need(resource)
 
         # Prepare values for template
         languages = IUserPreferredLanguages(self.request).getPreferredLanguages()

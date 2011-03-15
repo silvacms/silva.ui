@@ -27,5 +27,7 @@ setup(name='silva.ui',
       ],
       entry_points="""
       # -*- Entry points: -*-
+      [silva.ui.resources]
+      smi = silva.ui.interfaces:ISMIScripts
       """,
       )

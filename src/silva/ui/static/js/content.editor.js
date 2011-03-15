@@ -59,6 +59,7 @@
                         if (this.editor) {
                             try {
                                 this.editor.destroy(true);
+                                this.editor = null;
                             } catch(error) {
                                 if (window.console && console.log) {
                                     console.log('Error while destroying editor', error);
