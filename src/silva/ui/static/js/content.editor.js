@@ -57,7 +57,13 @@
                     cleanup: function() {
                         this.content.empty();
                         if (this.editor) {
-                            this.editor.destroy(true);
+                            try {
+                                this.editor.destroy(true);
+                            } catch(error) {
+                                if (window.console && console.log) {
+                                    console.log('Error while destroying editor', error);
+                                };
+                            };
                         }
                     }
                 });
