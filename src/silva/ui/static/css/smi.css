@@ -411,6 +411,9 @@ input, textarea {
   display:block;
   float:left;
 }
+#workspace .content .listing tr.item input {
+  width: 100%;
+}
 
 /* Table listing */
 #workspace .content .header {

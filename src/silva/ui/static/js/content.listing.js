@@ -263,6 +263,11 @@
                         });
                     };
                     break;
+                case 'rename':
+                    definition['action'] = function () {
+                        this.data.inputize(action.action.rename);
+                    };
+                    break;
                 case 'cut':
                     definition['action'] = function () {
                         this.smi.clipboard.cut(this.data.data);
@@ -337,6 +342,12 @@
         this.$filter = listing.$header.find('.filter');
         this.listing = listing;
 
+        // Nothing is filterable, don't initialize the feature.
+        if (!listing.filterables) {
+            this.$filter.hide();
+            return;
+        };
+
         // Hide filter if the header is hidden.
         this.listing.$header.bind('collapsingchange-smilisting', function() {
             this.$filter.fadeToggle();
@@ -365,7 +376,7 @@
                 } else {
                     value = this.$filter.val();
                 };
-                this.listing.filter(new RegExp(value, 'i'), false);
+                this.listing.filter_lines(new RegExp(value, 'i'));
             }.scope(this), 0);
         }.scope(this));
     };
@@ -531,6 +542,35 @@
         return false;
     };
 
+    SMISelection.prototype.inputize = function(names) {
+        var columns = this.listing.configuration.columns;
+
+        var column_index = function(name) {
+            for (var i=0; i < columns.length; i++) {
+                if (name == columns[i].name)
+                    return i;
+            };
+            return -1;
+        };
+
+        $.each(this._raw_items, function(i, line) {
+            var $line = $(line);
+            var tabindex = names.length * $line.index() + 1;
+            $.each(names, function(e, name) {
+                var index = column_index(name);
+                var data = $line.data('smilisting')[name];
+                var $cell = $line.children(':eq(' + index + ')');
+                var $input = $('<input type="text"/ >');
+                $input.attr('tabindex', tabindex);
+                tabindex += 1;
+                $input.val(data);
+                $cell.empty();
+                $cell.append($input);
+            });
+            $line.addClass('inputized');
+        });
+    };
+
     /**
      * Remove some items associated to the selection.
      * @param ids: content id of the line to remove.
@@ -646,7 +686,15 @@
         this.$container = $container;
         this.content = content;
         this.configuration = configuration;
+        this.filterables = [];
+        this.sortable = configuration.sortable;
         this.smi = smi;
+
+        $.each(configuration.columns, function(i, column) {
+            if (column.filterable) {
+                this.filterables.push(column.name);
+            };
+        }.scope(this));
 
         this.ui = {};
         this.ui.selector = new SMIMultiSelector(this);
@@ -782,6 +830,11 @@
 
             // Row selection with mouse
             this.$container.delegate('tr.item', 'click', function(event) {
+                var target = $(event.target);
+                if (target.is('input[type="text"]')) {
+                    target.focus();
+                    return;
+                };
                 select_row($(this), event.shiftKey);
             });
 
@@ -977,21 +1030,20 @@
      */
     SMIListing.prototype.update_lines = function(data) {
         $.each(data, function(i, line) {
-            this.update_line(line['id'], line);
+            this.update_line(this.get_line(line['id']), line);
         }.scope(this));
     };
 
     /**
      * Update a line with more recent data.
-     * @param id: line id to update
+     * @param line: line to update
      * @param data: data to update the line with
      */
-    SMIListing.prototype.update_line = function(id, data) {
-        var line = this.get_line(id);
+    SMIListing.prototype.update_line = function($line, data) {
         var smi = this.smi;
         var columns = this.configuration.columns;
 
-        line.children().each(function(i, content) {
+        $line.children().each(function(i, content) {
             var column = columns[i];
 
             listingcolumns.render($(content), {
@@ -1002,7 +1054,8 @@
                         column: column,
                         value: data[column.name]}});
         });
-        line.data('smilisting', data);
+        $line.removeClass('inputized');
+        $line.data('smilisting', data);
     };
 
     /**
@@ -1032,14 +1085,22 @@
         };
     };
 
-    SMIListing.prototype.filter = function(pattern) {
+    SMIListing.prototype.filter_lines = function(pattern) {
+        var names = this.filterables;
+        var match = function(data) {
+            for (var i=0; i < names.length ; i++) {
+                if (data[names[i]].match(pattern))
+                    return true;
+            };
+            return false;
+        };
         this.$container.children('.item').each(function (i) {
-            var line = $(this);
+            var $line = $(this);
 
-            if (line.data('smilisting').title.match(pattern)) {
-                line.removeClass('hidden');
+            if (match($line.data('smilisting'))) {
+                $line.removeClass('hidden');
             } else {
-                line.addClass('hidden');
+                $line.addClass('hidden');
             };
         });
         this.trigger('selectionchange-smilisting');
@@ -1047,10 +1108,14 @@
 
     /**
      * Unselect the given items.
-     * @param items: items to unselect.
+     * @param $lines: lines to unselect.
      */
-    SMIListing.prototype.unselect = function(items) {
-        items.removeClass('selected');
+    SMIListing.prototype.unselect = function($lines) {
+        $lines.filter('.inputized').each(function(i, line) {
+            var $line = $(line);
+            this.update_line($line, $line.data('smilisting'));
+        }.scope(this));
+        $lines.removeClass('selected');
         this.trigger('selectionchange-smilisting');
     };
 
