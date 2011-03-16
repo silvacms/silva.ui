@@ -26,7 +26,7 @@ class NotificationPoll(UIREST):
 
 
 class ViewREST(UIREST):
-    grok.name('silva.ui.view')
+    grok.name('silva.ui.actions.view')
     grok.context(ISilvaObject)
 
     def GET(self):
