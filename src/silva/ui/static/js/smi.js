@@ -440,7 +440,9 @@
             path = this.opened.path;
         };
         query['url'] = this._.action_url.expand({path: path, action: action});
+        query['data'] = this.opened;
         query['dataType'] = 'json';
+        query['type'] = 'POST';
         query['success'] = function(data) {
             $(document).render({data: data, extra: {smi: this}});
         }.scope(this);
