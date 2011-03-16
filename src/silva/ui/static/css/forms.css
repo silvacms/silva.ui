@@ -163,12 +163,6 @@ form {
   line-height:17px;
   margin:5px 2px;
   padding:0 4px;
-}
-
-#workspace .form-content a.form-control {
-  float: right;
-}
-#workspace .form-content a.form-button {
   float: left;
 }
 
