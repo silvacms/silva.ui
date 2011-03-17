@@ -143,8 +143,8 @@
                             'actionrefresh-smilisting', {data: this.selection});
                     };
                     break;
-                case 'new_data':
-                    this.content.trigger('newdata-smilisting', this.data.post_actions.new_data);
+                case 'add':
+                    this.content.trigger('newdata-smilisting', this.data.post_actions.add);
                     break;
                 case 'clear_clipboard':
                     this.smi.clipboard.clear(true);

@@ -3,8 +3,6 @@
 # See also LICENSE.txt
 # $Id$
 
-import operator
-
 from five import grok
 from infrae import rest
 from megrok.chameleon.components import ChameleonPageTemplate
@@ -20,7 +18,6 @@ from silva.ui.rest.base import PageREST, UIREST
 from silva.translations import translate as _
 from silva.core.services.utils import walk_silva_tree
 
-from Acquisition import aq_parent
 from AccessControl import getSecurityManager
 from Products.SilvaMetadata.interfaces import IMetadataService
 from zExceptions import NotFound
@@ -348,6 +345,14 @@ class ActionREST(UIREST):
     grok.context(interfaces.IContainer)
     grok.require('silva.ChangeSilvaContent')
 
+    def __init__(self, *args):
+        super(ActionREST, self).__init__(*args)
+        self.__serializer = ContentSerializer(self, self.request)
+        self.__removed = []
+        self.__added_publishables = []
+        self.__added_nonpublishables = []
+        self.__updated = []
+
     def get_selected_content(self, key='content', recursive=False):
         ids = self.request.form.get(key)
         if ids is not None:
@@ -371,12 +376,34 @@ class ActionREST(UIREST):
     def payload(self):
         raise NotImplementedError
 
+    def add_to_listing(self, content):
+        if interfaces.IPublishable.providedBy(content):
+            self.__added_publishables.append(self.__serializer(content))
+        elif interfaces.INonPublishable.providedBy(content):
+            self.__added_nonpublishables.append(self.__serializer(content))
+
+    def update_in_listing(self, content):
+        self.__updated.append(self.__serializer(content))
+
+    def remove_from_listing(self, identifier):
+        self.__removed.append(identifier)
+
     def notify(self, message, type=u""):
         service = getUtility(IMessageService)
         service.send(message, self.request, namespace=type)
 
     def POST(self):
         data = self.payload()
+        if self.__removed:
+            data['remove'] = self.__removed
+        if self.__updated:
+            data['update'] = self.__updated
+        if self.__added_publishables or self.__added_nonpublishables:
+            data['add'] = {}
+            if self.__added_publishables:
+                data['add']['publishables'] = self.__added_publishables
+            else:
+                data['add']['assets'] = self.__added_nonpublishables
         return self.json_response({
                 'ifaces': ['actionresult'],
                 'post_actions': data,
@@ -435,17 +462,15 @@ class DeleteActionREST(ActionREST):
     grok.name('silva.ui.listing.delete')
 
     def payload(self):
-        removed = []
         success = ContentCounter(self)
         failures = ContentCounter(self)
         manager = interfaces.IContainerManager(self.context)
 
         with manager.deleter() as deleter:
-            # Collect information
             for identifier, content in self.get_selected_content():
                 if deleter.add(content):
                     success.append(content)
-                    removed.append(identifier)
+                    self.remove_from_listing(identifier)
                 else:
                     failures.append(content)
 
@@ -464,7 +489,7 @@ class DeleteActionREST(ActionREST):
             self.notify(
                 _(u'Could not delete ${not_deleted}.',
                   mapping={'not_deleted': failures}))
-        return {'remove': removed}
+        return {}
 
 
 class PasteActionREST(ActionREST):
@@ -475,17 +500,8 @@ class PasteActionREST(ActionREST):
         copied_success = ContentCounter(self)
         moved_failures = ContentCounter(self)
         moved_success = ContentCounter(self)
-        added_publishables = []
-        added_assets = []
 
-        serializer = ContentSerializer(self, self.request)
         manager = interfaces.IContainerManager(self.context)
-
-        def add(content):
-            if interfaces.IPublishable.providedBy(content):
-                added_publishables.append(serializer(content))
-            elif interfaces.INonPublishable.providedBy(content):
-                added_assets.append(serializer(content))
 
         with manager.copier() as copier:
             for identifier, content in self.get_selected_content('copied'):
@@ -495,7 +511,7 @@ class PasteActionREST(ActionREST):
                 else:
                     copied_success.append(copy)
                     if is_new:
-                        add(copy)
+                        self.add_to_listing(copy)
 
         with manager.mover() as mover:
             for identifier, content in self.get_selected_content('cutted'):
@@ -505,7 +521,7 @@ class PasteActionREST(ActionREST):
                 else:
                     moved_success.append(moved_content)
                     if is_new:
-                        add(moved_content)
+                        self.add_to_listing(moved_content)
 
         # Notifications
         if copied_success:
@@ -538,33 +554,36 @@ class PasteActionREST(ActionREST):
                   mapping={'not_moved': moved_failures}))
 
         # Response
-        data = {'clear_clipboard': True}
-        append = {}
-        if added_publishables:
-            append['publishables'] = added_publishables
-        if added_assets:
-            append['assets'] = added_assets
-        if append:
-            data['new_data'] = append
-        return data
+        return {'clear_clipboard': True}
 
 
 class RenameActionREST(ActionREST):
     grok.name('silva.ui.listing.rename')
 
     def payload(self):
-        renamed = []
-        renamed_titles = ContentCounter(self)
-        not_renamed_titles = ContentCounter(self)
-        serializer = ContentSerializer(self, self.request)
+        success = ContentCounter(self)
+        failures = ContentCounter(self)
+
+        manager = interfaces.IContainerManager(self.context)
+
         form = self.request.form
         total = int(form.get('values', 0))
         get_content = getUtility(IIntIds).getObject
 
-        for position in range(total):
-            content = get_content(int(form['values.%d.id' % position]))
-            identifier = form['values.%d.identifier' % position]
-            title = form['values.%d.title' % position]
+        with manager.renamer() as renamer:
+            for position in range(total):
+                id = int(form['values.%d.id' % position])
+                content = get_content(id)
+                identifier = form['values.%d.identifier' % position]
+                title = form['values.%d.title' % position]
+                renamed_content = renamer.add((content, identifier, title))
+                if renamed_content is None:
+                    failures.append(content)
+                else:
+                    success.append(renamed_content)
+                    self.delete_from_listing(id)
+                    self.add_to_listing(renamed_content)
+
         return {}
 
 
@@ -572,52 +591,48 @@ class PublishActionREST(ActionREST):
     grok.name('silva.ui.listing.publish')
 
     def payload(self):
-        published = []
-        published_titles = ContentCounter(self)
-        not_published_titles = ContentCounter(self)
-        serializer = ContentSerializer(self, self.request)
+        success = ContentCounter(self)
+        failures = ContentCounter(self)
 
         for identifier, content in self.get_selected_content(recursive=True):
             workflow = interfaces.IPublicationWorkflow(content, None)
             if workflow is not None:
                 try:
-                    workflow.approve()
+                    workflow.publish()
                 except interfaces.PublicationWorkflowError:
-                    not_published_titles.append(content)
+                    failures.append(content)
                 else:
                     if identifier is not None:
-                        published.append(serializer(content))
-                    published_titles.append(content)
+                        self.update_in_listing(content)
+                    success.append(content)
             else:
-                not_published_titles.append(content)
+                failures.append(content)
 
         # Notifications
-        if published_titles:
-            if not_published_titles:
+        if success:
+            if failures:
                 self.notify(
                     _(u'Published ${published}, but could not publish ${not_published}.',
-                      mapping={'published': published_titles,
-                               'not_published': not_published_titles}))
+                      mapping={'published': success,
+                               'not_published': failures}))
             else:
                 self.notify(
                     _(u'Published ${published}.',
-                      mapping={'published': published_titles}))
-        elif not_published_titles:
+                      mapping={'published': success}))
+        elif failures:
             self.notify(
                 _(u'Could not publish ${not_published}.',
-                  mapping={'not_published': not_published_titles}))
+                  mapping={'not_published': failures}))
 
-        return {'update': published}
+        return {}
 
 
 class CloseActionREST(ActionREST):
     grok.name('silva.ui.listing.close')
 
     def payload(self):
-        closed = []
-        closed_titles = ContentCounter(self)
-        not_closed_titles = ContentCounter(self)
-        serializer = ContentSerializer(self, self.request)
+        success = ContentCounter(self)
+        failures = ContentCounter(self)
 
         for identifier, content in self.get_selected_content(recursive=True):
             workflow = interfaces.IPublicationWorkflow(content, None)
@@ -625,41 +640,39 @@ class CloseActionREST(ActionREST):
                 try:
                     workflow.close()
                 except interfaces.PublicationWorkflowError:
-                    not_closed_titles.append(content)
+                    failures.append(content)
                 else:
                     if identifier is not None:
-                        closed.append(serializer(content))
-                    closed_titles.append(content)
+                        self.update_in_listing(content)
+                    success.append(content)
             else:
-                not_closed_titles.append(content)
+                failures.append(content)
 
         # Notifications
-        if closed_titles:
-            if not_closed_titles:
+        if success:
+            if failures:
                 self.notify(
                     _(u'Closed ${closed}, but could not close ${not_closed}.',
-                      mapping={'closed': closed_titles,
-                               'not_closed': not_closed_titles}))
+                      mapping={'closed': success,
+                               'not_closed': failures}))
             else:
                 self.notify(
                     _(u'Closed ${closed}.',
-                      mapping={'closed': closed_titles}))
-        elif not_closed_titles:
+                      mapping={'closed': success}))
+        elif failures:
             self.notify(
                 _(u'Could not close ${not_closed}.',
-                  mapping={'not_closed': not_closed_titles}))
+                  mapping={'not_closed': failures}))
 
-        return {'update': closed}
+        return {}
 
 
 class NewVersionActionREST(ActionREST):
     grok.name('silva.ui.listing.newversion')
 
     def payload(self):
-        newversion = []
-        newversion_titles = ContentCounter(self)
-        not_newversion_titles = ContentCounter(self)
-        serializer = ContentSerializer(self, self.request)
+        success = ContentCounter(self)
+        failures = ContentCounter(self)
 
         for ignored, content in self.get_selected_content():
             workflow = interfaces.IPublicationWorkflow(content, None)
@@ -667,29 +680,29 @@ class NewVersionActionREST(ActionREST):
                 try:
                     workflow.new_version()
                 except interfaces.PublicationWorkflowError:
-                    not_newversion_titles.append(content)
+                    failures.append(content)
                 else:
-                    newversion.append(serializer(content))
-                    newversion_titles.append(content)
+                    self.update_in_listing(content)
+                    success.append(content)
             else:
-                not_newversion_titles.append(content)
+                failures.append(content)
 
         # Notifications
-        if newversion_titles:
-            if not_newversion_titles:
+        if success:
+            if failures:
                 self.notify(
                     _(u'New version(s) created for ${newversion}, '
                       u'but could do it for ${not_newversion}.',
-                      mapping={'newversion': newversion_titles,
-                               'not_newversion': not_newversion_titles}))
+                      mapping={'newversion': success,
+                               'not_newversion': failures}))
             else:
                 self.notify(
                     _(u'New version(s) created for ${newversion}.',
-                      mapping={'newversion': newversion_titles}))
-        elif not_newversion_titles:
+                      mapping={'newversion': success}))
+        elif failures:
             self.notify(
                 _(u'Could not create new version(s) for ${not_newversion}.',
-                  mapping={'not_newversion': not_newversion_titles}))
+                  mapping={'not_newversion': failures}))
 
-        return {'update': newversion}
+        return {}
 
