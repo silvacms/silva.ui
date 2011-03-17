@@ -3,6 +3,7 @@
 # See also LICENSE.txt
 # $Id$
 
+import operator
 
 from five import grok
 from infrae import rest
@@ -392,11 +393,19 @@ class ContentCounter(object):
         self.size = 0
         self.titles = []
 
+    def _get_title(self, content):
+        previewable = content.get_previewable()
+        return previewable.get_title_or_id()
+
     def append(self, content):
         if not (self.size > self.MAX_TITLES):
-            previewable = content.get_previewable()
-            self.titles.append(previewable.get_title_or_id())
+            self.titles.append(self._get_title(content))
         self.size += 1
+
+    def extend(self, contents):
+        if not ((self.size + len(contents)) > self.MAX_TITLES):
+            self.titles.extend(map(self._get_title, contents))
+        self.size += len(contents)
 
     def __len__(self):
         return self.size
@@ -427,23 +436,20 @@ class DeleteActionREST(ActionREST):
 
     def payload(self):
         removed = []
-        to_remove = []
         removed_titles = ContentCounter(self)
-        kept = []
         kept_titles = ContentCounter(self)
+        delete = interfaces.IContainerManager(self.context).delete()
 
         # Collect information
-        for intid, content in self.get_selected_content():
-            if content.is_deletable():
-                removed.append(intid)
+        for identifier, content in self.get_selected_content():
+            if delete.add(content):
                 removed_titles.append(content)
-                to_remove.append(content.getId())
+                removed.append(identifier)
             else:
-                kept.append(intid)
                 kept_titles.append(content)
 
-        # Remove objects
-        self.context.manage_delObjects(to_remove)
+        # Finish delete.
+        delete.finish()
 
         # Compute notification message
         if removed_titles:
