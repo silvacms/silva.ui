@@ -170,6 +170,9 @@
                 ifaces: action.ifaces,
                 name: name,
                 order: action.order,
+                init: function() {
+                    this.collecting = false;
+                },
                 render: function() {
                     var html = $('<li><a class="action ui-state-default"></a></li>');
                     var link = html.children('a');
@@ -249,6 +252,25 @@
                                 payload.push({name: 'copied', value: item.id});
                             });
                             break;
+                        case 'item_values':
+                            var names = action.action.rest.values;
+                            var counter = 0;
+
+                            if (!this.collecting) {
+                                this.data.inputs(names);
+                                this.collecting = true;
+                                return;
+                            };
+                            this.data.values(names, function(data) {
+                                var prefix = 'values.' + counter.toString() + '.';
+                                for (var key in data) {
+                                    payload.push({name: prefix + key, value: data[key]});
+                                };
+                                counter += 1;
+                            });
+                            payload.push({name: 'values', value: counter.toString()});
+                            this.collecting = false;
+                            break;
                         }
                         $.ajax({
                             url: url,
@@ -261,11 +283,6 @@
                                                              smi: this.smi}});
                             }.scope(this)
                         });
-                    };
-                    break;
-                case 'rename':
-                    definition['action'] = function () {
-                        this.data.inputize(action.action.rename);
                     };
                     break;
                 case 'cut':
@@ -542,16 +559,24 @@
         return false;
     };
 
-    SMISelection.prototype.inputize = function(names) {
-        var columns = this.listing.configuration.columns;
+    SMISelection.prototype.values = function(names, processor) {
+        var column_index = this.listing.configuration.column_index;
 
-        var column_index = function(name) {
-            for (var i=0; i < columns.length; i++) {
-                if (name == columns[i].name)
-                    return i;
-            };
-            return -1;
-        };
+        $.each(this._raw_items, function(i, line) {
+            var $line = $(line);
+            var collected = {};
+            collected['id'] = $line.data('smilisting')['id'];
+            $.each(names, function(e, name) {
+                var index = column_index(name);
+                var $input = $line.children(':eq(' + index + ')').children('input');
+                collected[name] = $input.val();
+            });
+            processor(collected);
+        });
+    };
+
+    SMISelection.prototype.inputs = function(names) {
+        var column_index = this.listing.configuration.column_index;
 
         $.each(this._raw_items, function(i, line) {
             var $line = $(line);
@@ -1135,6 +1160,7 @@
     };
 
     $(document).bind('load-smiplugins', function(event, smi) {
+
         $.ajax({
             url: smi.options.listing.configuration,
             async: false,
@@ -1153,6 +1179,16 @@
                     configuration.clipboard_actions,
                     action_url,
                     'clipboardaction.smilisting');
+
+                $.each(configuration.listing, function(i, lst_configuration) {
+                    lst_configuration.column_index = function(name) {
+                        for (var i=0; i < this.columns.length; i++) {
+                            if (name == this.columns[i].name)
+                                return i;
+                        };
+                        return -1;
+                    }.scope(lst_configuration);
+                });
 
                 obviel.view({
                     iface: 'listing',

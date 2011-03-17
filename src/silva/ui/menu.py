@@ -11,6 +11,7 @@ from five import grok
 from silva.translations import translate as _
 from silva.core.interfaces import IContent, IContainer
 from silva.core.interfaces import ISilvaObject, INonPublishable
+from silva.core.interfaces import IAddableContents
 from silva.ui.interfaces import IMenuItem
 from silva.ui.interfaces import IContentMenuItem, IActionMenuItem
 from silva.ui.interfaces import IViewMenuItem, ISettingsMenuItem
@@ -129,10 +130,10 @@ class AddMenu(ExpendableContentMenuItem):
 
     def get_submenu_items(self):
         entries = []
-        for addable in self.context.get_silva_addables():
+        for addable in IAddableContents(self.context).get_authorized_addables():
             entries.append({
-                    'name': addable['name'],
-                    'screen': '/'.join((self.screen, addable['name']))})
+                    'name': addable,
+                    'screen': '/'.join((self.screen, addable))})
         return entries
 
 

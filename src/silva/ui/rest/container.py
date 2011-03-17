@@ -154,7 +154,11 @@ class ColumnsContainerListing(UIREST):
                     {'title': self.translate(_(u'Rename')),
                      'icon': 'pencil',
                      'order': 10,
-                     'action': {'rename': ['identifier', 'title']},
+                     'action':
+                         {'rest':
+                              {'action': 'rename',
+                               'send': 'item_values',
+                               'values': ['identifier', 'title']}},
                      'available':
                          {'content_match':
                               {'access': ['manage', 'publish', 'write']}},
@@ -346,13 +350,13 @@ class ActionREST(UIREST):
     def get_selected_content(self, key='content', recursive=False):
         ids = self.request.form.get(key)
         if ids is not None:
-            intids = getUtility(IIntIds)
+            get_content = getUtility(IIntIds).getObject
             if not isinstance(ids, list):
                 # If only one item have been submitted we won't get a list
                 ids = [ids]
             for id in ids:
                 try:
-                    content = intids.getObject(int(id))
+                    content = get_content(int(id))
                 except (KeyError, ValueError):
                     pass
                 else:
@@ -508,6 +512,25 @@ class PasteActionREST(ActionREST):
         if append:
             data['new_data'] = append
         return data
+
+
+class RenameActionREST(ActionREST):
+    grok.name('silva.ui.listing.rename')
+
+    def payload(self):
+        renamed = []
+        renamed_titles = ContentCounter(self)
+        not_renamed_titles = ContentCounter(self)
+        serializer = ContentSerializer(self, self.request)
+        form = self.request.form
+        total = int(form.get('values', 0))
+        get_content = getUtility(IIntIds).getObject
+
+        for position in range(total):
+            content = get_content(int(form['values.%d.id' % position]))
+            identifier = form['values.%d.identifier' % position]
+            title = form['values.%d.title' % position]
+        return {}
 
 
 class PublishActionREST(ActionREST):
