@@ -436,36 +436,34 @@ class DeleteActionREST(ActionREST):
 
     def payload(self):
         removed = []
-        removed_titles = ContentCounter(self)
-        kept_titles = ContentCounter(self)
-        delete = interfaces.IContainerManager(self.context).delete()
+        success = ContentCounter(self)
+        failures = ContentCounter(self)
+        manager = interfaces.IContainerManager(self.context)
 
-        # Collect information
-        for identifier, content in self.get_selected_content():
-            if delete.add(content):
-                removed_titles.append(content)
-                removed.append(identifier)
-            else:
-                kept_titles.append(content)
-
-        # Finish delete.
-        delete.finish()
+        with manager.deleter() as deleter:
+            # Collect information
+            for identifier, content in self.get_selected_content():
+                if deleter.add(content):
+                    success.append(content)
+                    removed.append(identifier)
+                else:
+                    failures.append(content)
 
         # Compute notification message
-        if removed_titles:
-            if kept_titles:
+        if success:
+            if failures:
                 self.notify(
                     _(u'Deleted ${deleted} but could not delete ${not_deleted}.',
-                      mapping={'deleted': removed_titles,
-                               'not_deleted': kept_titles}))
+                      mapping={'deleted': success,
+                               'not_deleted': failures}))
             else:
                 self.notify(
                     _(u'Deleted ${deleted}.',
-                      mapping={'deleted': removed_titles}))
-        else:
+                      mapping={'deleted': success}))
+        elif failures:
             self.notify(
                 _(u'Could not delete ${not_deleted}.',
-                  mapping={'not_deleted': kept_titles}))
+                  mapping={'not_deleted': failures}))
         return {'remove': removed}
 
 
@@ -473,48 +471,79 @@ class PasteActionREST(ActionREST):
     grok.name('silva.ui.listing.paste')
 
     def payload(self):
-        target = self.context
-        tokens = []
-        copied_titles = ContentCounter(self)
-        moved_titles = ContentCounter(self)
-        pasted_publishables = []
-        pasted_assets = []
-        serializer = ContentSerializer(self, self.request)
+        copied_failures = ContentCounter(self)
+        copied_success = ContentCounter(self)
+        moved_failures = ContentCounter(self)
+        moved_success = ContentCounter(self)
+        added_publishables = []
+        added_assets = []
 
-        # Zope 2 API to copy and paster is not really great for this
-        for intid, content in self.get_selected_content('copied'):
-            parent = aq_parent(content)
-            tokens.append(parent.manage_copyObjects([content.getId()]))
-            copied_titles.append(content)
-        for intid, content in self.get_selected_content('cutted'):
-            parent = aq_parent(content)
-            tokens.append(parent.manage_cutObjects([content.getId()]))
-            moved_titles.append(content)
-        for token in tokens:
-            for id_info in target.manage_pasteObjects(token):
-                content = target[id_info['new_id']]
-                if interfaces.IPublishable.providedBy(content):
-                    pasted_publishables.append(serializer(content))
-                elif interfaces.INonPublishable.providedBy(content):
-                    pasted_assets.append(serializer(content))
+        serializer = ContentSerializer(self, self.request)
+        manager = interfaces.IContainerManager(self.context)
+
+        def add(content):
+            if interfaces.IPublishable.providedBy(content):
+                added_publishables.append(serializer(content))
+            elif interfaces.INonPublishable.providedBy(content):
+                added_assets.append(serializer(content))
+
+        with manager.copier() as copier:
+            for identifier, content in self.get_selected_content('copied'):
+                is_new, copy = copier.add(content)
+                if copy is None:
+                    copied_failures.append(content)
+                else:
+                    copied_success.append(copy)
+                    if is_new:
+                        add(copy)
+
+        with manager.mover() as mover:
+            for identifier, content in self.get_selected_content('cutted'):
+                is_new, moved_content = mover.add(content)
+                if moved_content is None:
+                    moved_failures.append(content)
+                else:
+                    moved_success.append(moved_content)
+                    if is_new:
+                        add(moved_content)
 
         # Notifications
-        if copied_titles:
+        if copied_success:
+            if copied_failures:
+                self.notify(
+                    _(u'Pasted as a copy ${copied} but could not copy ${not_copied}.',
+                      mapping={'copied': copied_success,
+                               'not_copied': copied_failures}))
+            else:
+                self.notify(
+                    _(u'Pasted as a copy ${copied}.',
+                      mapping={'copied': copied_success}))
+        elif copied_failures:
             self.notify(
-                _(u'Pasted as a copy ${copied}.',
-                  mapping={'copied': copied_titles}))
-        if moved_titles:
+                _(u'Could not copy ${not_copied}.',
+                  mapping={'not_copied': copied_failures}))
+        if moved_success:
+            if moved_failures:
+                self.notify(
+                    _(u"Moved ${moved} but could not move ${not_moved}.",
+                      mapping={'moved': moved_success,
+                               'not_moved': moved_failures}))
+            else:
+                self.notify(
+                    _(u'Moved ${moved}.',
+                      mapping={'moved': moved_success}))
+        elif moved_failures:
             self.notify(
-                _(u'Moved ${moved}.',
-                  mapping={'moved': moved_titles}))
+                _(u'Could not move ${not_moved}.',
+                  mapping={'not_moved': moved_failures}))
 
         # Response
         data = {'clear_clipboard': True}
         append = {}
-        if pasted_publishables:
-            append['publishables'] = pasted_publishables
-        if pasted_assets:
-            append['assets'] = pasted_assets
+        if added_publishables:
+            append['publishables'] = added_publishables
+        if added_assets:
+            append['assets'] = added_assets
         if append:
             data['new_data'] = append
         return data
