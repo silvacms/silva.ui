@@ -36,7 +36,8 @@ class Adding(rest.REST):
     grok.require('silva.ChangeSilvaContent')
 
     def publishTraverse(self, request, name):
-        if name in self.context.get_silva_addables_allowed_in_container():
+        addables = interfaces.IAddableContents(self.context).get_container_addables()
+        if name in addables:
             factory = queryUtility(IFactory, name=name)
             if factory is not None:
                 factory = factory(self.context, request)
