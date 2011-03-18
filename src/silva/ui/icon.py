@@ -15,7 +15,7 @@ ICON_SPRITE = {
     'Silva Ghost Folder': 'silvaghostfolder',
     'Silva File': 'silvafile',
     'Silva Find': 'silvafind',
-    'Silva Document': 'silvadoc',
+    'Silva new Document': 'silvadocument',
     'Silva Link': 'link',
     'Silva Indexer': 'silvaindexer'
     }

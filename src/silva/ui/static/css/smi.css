@@ -607,12 +607,12 @@ ins.news_filter { background-position:-60px -100px!important; }
 ins.news_source { background-position:-160px -100px!important; }
 ins.news_viewer { background-position:-80px -100px!important; }
 ins.rss_aggregator { background-position:-100px -120px!important; }
-ins.silvadoc { background-position:-0px -100px!important; }
+ins.silvadocument { background-position:-0px -100px!important; }
 ins.silvafile { background-position:-80px -120px!important; }
 ins.silvafind { background-position:-140px -80px!important; }
 ins.silvafolder { background-position:-20px -100px!important; }
 ins.silvaghost { background-position:-0px -120px!important; }
-ins.silvaghost_folder { background-position:-20px -120px!important; }
+ins.silvaghostfolder { background-position:-20px -120px!important; }
 ins.silvaimage { background-position:-40px -100px!important; }
 ins.silvaindexer { background-position:-120px -120px!important; }
 ins.silvalogo { background-position:-160px -60px!important; }
