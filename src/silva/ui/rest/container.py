@@ -373,9 +373,6 @@ class ActionREST(UIREST):
                     else:
                         yield id, content
 
-    def payload(self):
-        raise NotImplementedError
-
     def add_to_listing(self, content):
         if interfaces.IPublishable.providedBy(content):
             self.__added_publishables.append(self.__serializer(content))
@@ -391,6 +388,9 @@ class ActionREST(UIREST):
     def notify(self, message, type=u""):
         service = getUtility(IMessageService)
         service.send(message, self.request, namespace=type)
+
+    def payload(self):
+        raise NotImplementedError
 
     def POST(self):
         data = self.payload()
@@ -557,6 +557,42 @@ class PasteActionREST(ActionREST):
         return {'clear_clipboard': True}
 
 
+class PasteAsGhostActionREST(ActionREST):
+    grok.name('silva.ui.listing.pasteasghost')
+
+    def payload(self):
+        success = ContentCounter(self)
+        failures = ContentCounter(self)
+
+        manager = interfaces.IContainerManager(self.context)
+
+        with manager.ghoster() as ghoster:
+            for identifier, content in self.get_selected_content('copied'):
+                ghost = ghoster.add(content)
+                if ghost is None:
+                    failures.append(content)
+                else:
+                    success.append(ghost)
+                    self.add_to_listing(ghost)
+
+        # Notifications
+        if success:
+            if failures:
+                self.notify(
+                    _(u"Created ghost for ${ghosted} but could do it for ${not_ghosted}",
+                      mapping={'ghosted': success,
+                               'not_ghosted': failures}))
+            else:
+                self.notify(
+                    _(u"Created ghost for ${ghosted}.",
+                      mapping={'ghosted': success}))
+        elif failures:
+            self.notify(
+                _(u"Could not create ghost for ${not_ghosted}.",
+                  mapping={'not_ghosted': failures}))
+        return {}
+
+
 class RenameActionREST(ActionREST):
     grok.name('silva.ui.listing.rename')
 
@@ -581,8 +617,24 @@ class RenameActionREST(ActionREST):
                     failures.append(content)
                 else:
                     success.append(renamed_content)
-                    self.delete_from_listing(id)
+                    self.remove_from_listing(id)
                     self.add_to_listing(renamed_content)
+
+        # Notifications
+        if success:
+            if failures:
+                self.notify(
+                    _(u'Renamed ${renamed}, but could not rename ${not_renamed}.',
+                      mapping={'renamed': success,
+                               'not_renamed': failures}))
+            else:
+                self.notify(
+                    _(u'Renamed ${renamed}.',
+                      mapping={'renamed': success}))
+        elif failures:
+            self.notify(
+                _(u'Could not rename ${not_renamed}.',
+                  mapping={'not_renamed': failures}))
 
         return {}
 
