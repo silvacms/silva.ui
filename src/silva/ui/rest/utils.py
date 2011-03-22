@@ -4,13 +4,14 @@
 # $Id$
 
 from five import grok
-from zope.component import getUtility
+from zope.component import getUtility, getMultiAdapter
 from zope.intid.interfaces import IIntIds
 
 from silva.ui.icon import get_icon
 from silva.ui.rest.base import Screen, UIREST, PageREST
 from silva.core.interfaces import IContainer
 from silva.app.document.interfaces import IDocument
+from silva.core.views.interfaces import ISilvaURL
 from silva.core.editor.transform.interfaces import IInputEditorFilter
 
 from Products.Silva.ExtensionRegistry import meta_types_for_interface
@@ -62,10 +63,8 @@ class DocumentEdit(PageREST):
                     "name": "body",
                     "text": text}
 
-        html = u""
-        version = self.context.get_previewable()
-        if version is not None:
-            html = version.body.render(version, self.request)
+
+        url = getMultiAdapter((self.context, self.request), ISilvaURL).preview()
         return {"ifaces": ["preview"],
-                "html": html}
+                "html_url": url}
 
