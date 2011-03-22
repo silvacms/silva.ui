@@ -12,7 +12,7 @@ from zope.intid.interfaces import IIntIds
 from silva.core import interfaces
 from silva.core.messages.interfaces import IMessageService
 from silva.ui.icon import get_icon
-from silva.ui.rest.base import PageREST, UIREST
+from silva.ui.rest.base import Screen, PageREST, UIREST
 from silva.translations import translate as _
 from silva.core.services.utils import walk_silva_tree
 
@@ -290,9 +290,9 @@ class ContentSerializer(object):
         return data
 
 
-class ContainerListing(PageREST):
-    grok.context(interfaces.IContainer)
-    grok.name('silva.ui.content')
+class Container(PageREST):
+    grok.adapts(Screen, interfaces.IContainer)
+    grok.name('content')
     grok.require('silva.ReadSilvaContent')
 
     def get_publishable_content(self):

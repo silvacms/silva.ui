@@ -3,6 +3,9 @@
 # See also LICENSE.txt
 # $Id$
 
-from silva.ui.rest.base import UIREST, PageREST, PageWithTemplateREST
+from infrae.rest import REST
 
-__all__ = ['UIREST', 'PageREST', 'PageWithTemplateREST']
+from silva.ui.rest.base import Screen, UIREST, PageREST, PageWithTemplateREST
+from silva.ui.rest.base import RedirectToPage
+
+__all__ = ['Screen', 'REST', 'UIREST', 'PageREST', 'PageWithTemplateREST', 'RedirectToPage']

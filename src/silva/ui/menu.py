@@ -66,10 +66,13 @@ class MenuItem(grok.MultiSubscription):
     def available(self):
         return True
 
-    def describe(self, page):
+    def describe(self, page, path=None):
         data = {'name': page.translate(self.name)}
         if self.screen is not None:
-            data['screen'] = self.screen
+            screen = self.screen
+            if not isinstance(screen, basestring):
+                screen = grok.name.bind().get(self.screen)
+            data['screen'] = '/'.join((path, screen)) if path else screen
         if self.action is not None:
             data['action'] = self.action
         if self.description is not None:
@@ -90,12 +93,15 @@ class ExpendableMenuItem(MenuItem):
     def available(self):
         return len(self.submenu) != 0
 
-    def describe(self, page):
+    def describe(self, page, path=None):
         data = super(ExpendableMenuItem, self).describe(page)
         data['entries'] = entries = []
+        if path is None:
+            path = self.screen
+        else:
+            path = '/'.join((path, self.screen))
         for item in self.submenu:
             if IMenuItem.providedBy(item):
-                entries.append(item.describe(page))
-            else:
-                entries.append(item)
+                item = item.describe(page, path)
+            entries.append(item)
         return data

@@ -16,13 +16,19 @@ from zope.intid.interfaces import IIntIds
 
 from Acquisition import aq_parent
 
-from silva.core.interfaces import IRoot
+from silva.core.interfaces import IRoot, ISilvaObject
 from silva.core.messages.interfaces import IMessageService
 from silva.core.views.interfaces import IVirtualSite
 from silva.ui.icon import get_icon
 from silva.ui.menu import ContentMenu, ViewMenu, ActionMenu
 
 import fanstatic
+
+
+
+class Screen(rest.REST):
+    grok.context(ISilvaObject)
+    grok.name('silva.ui')
 
 
 class PageException(Exception):

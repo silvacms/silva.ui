@@ -8,7 +8,7 @@ from zope.component import getUtility
 from zope.intid.interfaces import IIntIds
 
 from silva.ui.icon import get_icon
-from silva.ui.rest.base import UIREST, PageREST
+from silva.ui.rest.base import Screen, UIREST, PageREST
 from silva.core.interfaces import IContainer
 from silva.app.document.interfaces import IDocument
 from silva.core.editor.transform.interfaces import IInputEditorFilter
@@ -49,8 +49,8 @@ class NavigationListing(UIREST):
 
 
 class DocumentEdit(PageREST):
-    grok.context(IDocument)
-    grok.name('silva.ui.content')
+    grok.adapts(Screen, IDocument)
+    grok.name('content')
     grok.require('silva.ChangeSilvaContent')
 
     def payload(self):

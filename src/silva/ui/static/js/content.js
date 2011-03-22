@@ -59,7 +59,7 @@
                             link.removeClass('active');
                         };
                     });
-                    link.bind('click', function () {
+                    link.children('ins').bind('click', function () {
                         container.fadeToggle();
                         if (!is_current) {
                             link.toggleClass('active');

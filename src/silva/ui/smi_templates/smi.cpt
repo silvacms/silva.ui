@@ -76,7 +76,7 @@
     <script type="text/javascript">
       $(document).ready(function() {
       smi = $('body').SMI({
-          screen: "${view.root_url}/{path}/++rest++silva.ui.{screen}",
+          screen: "${view.root_url}/{path}/++rest++silva.ui/{screen}",
           action:"${view.root_url}/{path}/++rest++silva.ui.actions.{action}",
           errors: {
               401: {
