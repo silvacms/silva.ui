@@ -10,7 +10,7 @@ from five import grok
 
 from silva.ui.interfaces import IMenuItem, IMenu
 from silva.ui.interfaces import IActionMenu, IViewMenu, IContentMenu
-
+from infrae.rest.interfaces import IRESTComponent
 
 def get_menu_items(menu, content):
     security = getSecurityManager()
@@ -27,12 +27,24 @@ def get_menu_items(menu, content):
         grok.queryOrderedMultiSubscriptions((menu, content), IMenuItem))
 
 
+class MenuEntries(list):
+
+    def describe(self, page):
+        actives = set([page.__class__])
+        active  = page.__parent__
+        while IRESTComponent.providedBy(active):
+            actives.add(active.__class__)
+            active = active.__parent__
+
+        return map(lambda e: e.describe(page, None, actives), self)
+
+
 class Menu(object):
     grok.implements(IMenu)
 
     @classmethod
-    def get_items(cls, content):
-        return get_menu_items(cls(), content)
+    def get_entries(cls, content):
+        return MenuEntries(get_menu_items(cls(), content))
 
 
 class ContentMenu(Menu):
@@ -66,11 +78,13 @@ class MenuItem(grok.MultiSubscription):
     def available(self):
         return True
 
-    def describe(self, page, path=None):
+    def describe(self, page, path, actives):
         data = {'name': page.translate(self.name)}
         if self.screen is not None:
             screen = self.screen
-            if not isinstance(screen, basestring):
+            if IRESTComponent.implementedBy(self.screen):
+                if screen in actives:
+                    data['active'] = True
                 screen = grok.name.bind().get(self.screen)
             data['screen'] = '/'.join((path, screen)) if path else screen
         if self.action is not None:
@@ -93,15 +107,14 @@ class ExpendableMenuItem(MenuItem):
     def available(self):
         return len(self.submenu) != 0
 
-    def describe(self, page, path=None):
-        data = super(ExpendableMenuItem, self).describe(page)
+    def describe(self, page, path, actives):
+        data = super(ExpendableMenuItem, self).describe(page, path, actives)
         data['entries'] = entries = []
-        if path is None:
-            path = self.screen
-        else:
-            path = '/'.join((path, self.screen))
+        entry_path = data.get('screen')
+        if path:
+            entry_path = '/'.join((path, entry_path))
         for item in self.submenu:
             if IMenuItem.providedBy(item):
-                item = item.describe(page, path)
+                item = item.describe(page, entry_path, actives)
             entries.append(item)
         return data

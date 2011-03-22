@@ -129,20 +129,8 @@ class PageREST(UIREST):
                 'parents': parents}
 
     def get_metadata_menu(self, menu):
-        tabs = []
-        active = None
-        current = self.__name__
-        if '/' in current:
-            current = current.split('/', 1)[0]
-        if current.startswith('silva.ui.'):
-            current = current[9:]
-        for tab in menu.get_items(self.context):
-            tabs.append(tab.describe(self))
-            if tab.screen == current:
-                active = tab.screen
         return {'ifaces': ['menu'],
-                'active': active,
-                'entries': tabs}
+                'entries': menu.get_entries(self.context).describe(self)}
 
     def GET(self):
         try:

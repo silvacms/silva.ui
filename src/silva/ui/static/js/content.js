@@ -26,7 +26,7 @@
             if (info.screen) {
                 link.addClass('open-screen');
                 link.attr('rel', info.screen);
-                if (info.screen == this.data.active) {
+                if (info.active) {
                     link.addClass('active');
                 };
             } else if (info.action) {
