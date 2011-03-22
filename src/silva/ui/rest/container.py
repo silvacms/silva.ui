@@ -7,8 +7,6 @@ from five import grok
 from infrae import rest
 from megrok.chameleon.components import ChameleonPageTemplate
 from zope.component import getUtility
-from zope.component import queryUtility
-from zope.component.interfaces import IFactory
 from zope.intid.interfaces import IIntIds
 
 from silva.core import interfaces
@@ -20,7 +18,6 @@ from silva.core.services.utils import walk_silva_tree
 
 from AccessControl import getSecurityManager
 from Products.SilvaMetadata.interfaces import IMetadataService
-from zExceptions import NotFound
 
 
 CONTENT_IFACES = [
@@ -29,23 +26,6 @@ CONTENT_IFACES = [
     (interfaces.IAsset, 'asset'),
     (interfaces.ISilvaObject, 'content')]
 
-
-class Adding(rest.REST):
-    grok.context(interfaces.IContainer)
-    grok.name('silva.ui.adding')
-    grok.require('silva.ChangeSilvaContent')
-
-    def publishTraverse(self, request, name):
-        addables = interfaces.IAddableContents(self.context).get_container_addables()
-        if name in addables:
-            factory = queryUtility(IFactory, name=name)
-            if factory is not None:
-                factory = factory(self.context, request)
-                # Set parent for security check.
-                factory.__name__ = '/'.join((self.__name__, name))
-                factory.__parent__ = self
-                return factory
-        raise NotFound(name)
 
 
 class TemplateContainerListing(rest.REST):
@@ -106,9 +86,8 @@ class ColumnsContainerListing(UIREST):
                              'action': 'properties'}],
                      'sortable':
                          {'columns': ['icon', 'status'],
-                          'available':
-                              {'content_match':
-                                   {'access': ['manage', 'publish', 'write']}}},
+                          'available': {'access': ['manage', 'publish', 'write']},
+                          'action': 'order'},
                      'collapsed': False},
                     {'name': 'assets',
                      'layout': {'fixed':

@@ -8,16 +8,46 @@ from zExceptions import Unauthorized
 
 from five import grok
 
-from silva.translations import translate as _
-from silva.core.interfaces import IContent, IContainer
-from silva.core.interfaces import ISilvaObject, INonPublishable
-from silva.core.interfaces import IAddableContents
-from silva.ui.interfaces import IMenuItem
-from silva.ui.interfaces import IContentMenuItem, IActionMenuItem
-from silva.ui.interfaces import IViewMenuItem, ISettingsMenuItem
+from silva.ui.interfaces import IMenuItem, IMenu
+from silva.ui.interfaces import IActionMenu, IViewMenu, IContentMenu
 
 
-class MenuItem(grok.Subscription):
+def get_menu_items(menu, content):
+    security = getSecurityManager()
+
+    def validate(menu):
+        try:
+            security.validate(content, content, None, menu)
+            return True
+        except Unauthorized:
+            return False
+
+    return filter(
+        lambda m: validate(m) and m.available(),
+        grok.queryOrderedMultiSubscriptions((menu, content), IMenuItem))
+
+
+class Menu(object):
+    grok.implements(IMenu)
+
+    @classmethod
+    def get_items(cls, content):
+        return get_menu_items(cls(), content)
+
+
+class ContentMenu(Menu):
+    grok.implements(IContentMenu)
+
+
+class ViewMenu(Menu):
+    grok.implements(IViewMenu)
+
+
+class ActionMenu(Menu):
+    grok.implements(IActionMenu)
+
+
+class MenuItem(grok.MultiSubscription):
     grok.baseclass()
     grok.implements(IMenuItem)
     grok.provides(IMenuItem)
@@ -27,8 +57,9 @@ class MenuItem(grok.Subscription):
     screen = None
     action = None
 
-    def __init__(self, content):
-        super(MenuItem, self).__init__(content)
+    def __init__(self, menu, content):
+        self.content = content
+        self.menu = menu
         # For the security check
         self.__parent__ = content
 
@@ -49,13 +80,12 @@ class MenuItem(grok.Subscription):
 class ExpendableMenuItem(MenuItem):
     grok.baseclass()
 
-    def __init__(self, content):
-        super(ExpendableMenuItem, self).__init__(content)
+    def __init__(self, menu, content):
+        super(ExpendableMenuItem, self).__init__(menu, content)
         self.submenu = self.get_submenu_items()
 
     def get_submenu_items(self):
-        provides = grok.provides.bind().get(self)
-        return get_menu_items(self, provides)
+        return get_menu_items(self, self.content)
 
     def available(self):
         return len(self.submenu) != 0
@@ -69,92 +99,3 @@ class ExpendableMenuItem(MenuItem):
             else:
                 entries.append(item)
         return data
-
-
-class ExpendableContentMenuItem(ExpendableMenuItem):
-    grok.baseclass()
-    grok.implements(IContentMenuItem)
-    grok.provides(IContentMenuItem)
-
-
-class ContentMenuItem(MenuItem):
-    grok.baseclass()
-    grok.implements(IContentMenuItem)
-    grok.provides(IContentMenuItem)
-
-
-class ActionMenuItem(MenuItem):
-    grok.baseclass()
-    grok.implements(IActionMenuItem)
-    grok.provides(IActionMenuItem)
-
-
-class ViewMenuItem(MenuItem):
-    grok.baseclass()
-    grok.implements(IViewMenuItem)
-    grok.provides(IViewMenuItem)
-
-
-class SettingsMenuItem(MenuItem):
-    grok.baseclass()
-    grok.implements(ISettingsMenuItem)
-    grok.provides(ISettingsMenuItem)
-
-
-class EditMenu(ContentMenuItem):
-    grok.context(IContent)
-    grok.order(10)
-    name = _('Edit')
-    screen = 'content'
-
-
-class EditAssetMenu(ContentMenuItem):
-    grok.context(INonPublishable)
-    grok.order(10)
-    name = _(u'Edit')
-    screen = 'content'
-
-
-class ContainerMenu(ContentMenuItem):
-    grok.context(IContainer)
-    grok.order(10)
-    name = _('Content')
-    screen = 'content'
-
-
-class AddMenu(ExpendableContentMenuItem):
-    grok.context(IContainer)
-    grok.order(15)
-    name = _('Add')
-    screen = 'adding'
-
-    def get_submenu_items(self):
-        entries = []
-        for addable in IAddableContents(self.context).get_authorized_addables():
-            entries.append({
-                    'name': addable,
-                    'screen': '/'.join((self.screen, addable))})
-        return entries
-
-
-class ViewMenu(ViewMenuItem):
-    grok.context(ISilvaObject)
-    grok.order(20)
-    name = _('View')
-    description = _(u'view content in a new window')
-    action = 'view'
-
-
-def get_menu_items(content, menu):
-    security = getSecurityManager()
-
-    def validate(menu):
-        try:
-            security.validate(content, content, None, menu)
-            return True
-        except Unauthorized:
-            return False
-
-    return filter(
-        lambda m: validate(m) and m.available(),
-        grok.queryOrderedSubscriptions(content, menu))

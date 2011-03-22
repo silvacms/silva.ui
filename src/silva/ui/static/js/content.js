@@ -83,7 +83,6 @@
             // Update header
             this.content.children('h2').render({data: this.data.title});
             this.content.children('.content-tabs').render({data: this.data.menu.content});
-            this.content.children('.settings-tabs').render({data: this.data.menu.settings});
             this.content.children('.view-actions').render({data: this.data.menu.view});
             this.content.children('.content-actions').render({data: this.data.menu.actions});
 
@@ -121,26 +120,6 @@
 
         // Disable text selection
         workspace.children('.info').disableTextSelect();
-
-        // Bind the settings display tool
-        {
-            var settings_switcher = workspace.find('.admin-actions a.settings');
-            var settings_menu = workspace.find('.settings-tabs');
-            var content_menu = workspace.find('.content-tabs');
-
-            settings_switcher.bind('click', function() {
-                if (content_menu.is(':visible')) {
-                    content_menu.hide();
-                    settings_menu.show();
-                    settings_switcher.toggleClass('active');
-                } else {
-                    content_menu.show();
-                    settings_menu.hide();
-                    settings_switcher.toggleClass('active');
-                };
-                return false;
-            });
-        };
 
         // New workspace is loaded
         workspace.bind('content-smi', function (event, data) {

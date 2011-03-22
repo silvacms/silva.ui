@@ -60,14 +60,8 @@
                 <ins class="ui-icon ui-icon-arrowreturnthick-1-n"></ins>
               </a>
             </li>
-            <li>
-              <a class="settings tool ui-state-default" href="" rel="">
-                <ins class="ui-icon ui-icon-wrench"></ins>
-              </a>
-            </li>
           </ol>
           <ol class="tabs content-tabs"></ol>
-          <ol class="tabs settings-tabs"></ol>
           <ol class="actions view-actions"></ol>
           <h2>
             <ins class="icon loading"></ins>

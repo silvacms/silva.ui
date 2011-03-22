@@ -77,21 +77,27 @@ class IMenuItem(Interface):
         """
 
 
-class IContentMenuItem(IMenuItem):
-    """Menu to work on content (left).
+class IMenu(Interface):
+    """Represent a menu.
+    """
+
+    def get_menu_items(content):
+        """Class method that return the menu items for the given
+        content.
+        """
+
+
+class IContentMenu(IMenu):
+    """Menu to work on content.
     """
 
 
-class IActionMenuItem(IMenuItem):
+class IActionMenu(IMenu):
     """Menu that contains action on the content.
     """
 
 
-class IViewMenuItem(IMenuItem):
+class IViewMenu(IMenu):
     """Menu to work on content (right).
     """
 
-
-class ISettingsMenuItem(IMenuItem):
-    """Menu to work on settings.
-    """

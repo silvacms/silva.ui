@@ -906,28 +906,40 @@
             }.scope(this));
 
             if (this.configuration.sortable) {
-                var table = $content.find('table');
+                if (objects_match([this.content], this.configuration.sortable.available)) {
+                    var table = $content.find('table');
 
-                // Add the sorting if the table is sortable
-                table.tableDnD({
-                    dragHandle: "moveable",
-                    onDragClass: "dragging",
-                    onDragStart: function(table, row) {
-                        // Reset hover style and mouse last_selected_index
-                        $(row).removeClass('hover');
-                        last_selected_index = null;
-                        $(table).removeClass('static');
-                    },
-                    onDrop: function(table, row) {
-                        // XXX Send new order to server
-                        $(table).addClass('static');
-                        this.trigger('selectionchange-smilisting');
-                    }.scope(this)
-                });
-                // If content change, reinitialize the DND
-                $content.bind('contentchange-smilisting', function() {
-                    table.tableDnDUpdate();
-                });
+                    // Add the sorting if the table is sortable
+                    table.tableDnD({
+                        dragHandle: "moveable",
+                        onDragClass: "dragging",
+                        onDragStart: function(table, row) {
+                            // Reset hover style and mouse last_selected_index
+                            $(row).removeClass('hover');
+                            last_selected_index = null;
+                            $(table).removeClass('static');
+                        },
+                        onDrop: function(table, row) {
+                            var $line = $(row);
+                            var data = $line.data('smilisting');
+
+                            $.ajax({
+                                url: url,
+                                type: 'POST',
+                                dataType: 'json',
+                                data: [{name: 'content', data: data['id']},
+                                       {name: 'position', data: $line.index()}]
+                            });
+
+                            $(table).addClass('static');
+                            this.trigger('selectionchange-smilisting');
+                        }.scope(this)
+                    });
+                    // If content change, reinitialize the DND
+                    $content.bind('contentchange-smilisting', function() {
+                        table.tableDnDUpdate();
+                    });
+                };
             };
         };
 
