@@ -711,8 +711,13 @@
                                                 action: configuration.sortable.action}),
                                             type: 'POST',
                                             dataType: 'json',
-                                            data: [{name: 'content', data: data['id']},
-                                                   {name: 'position', data: $line.index() - 1}]
+                                            data: [{name: 'content', value: data['id']},
+                                                   {name: 'position', value: $line.index() - 1}],
+                                            success: function(data) {
+                                                if (data.notifications) {
+                                                    listing.smi.notifications.notifies(data.notifications);
+                                                };
+                                            }
                                         });
 
                                         $(table).addClass('static');
@@ -743,7 +748,7 @@
                                     if (!e) {
                                         $cell.addClass('first');
                                     };
-                                    if ((i ^ initial) &&
+                                    if ((!initial || (initial && i)) &&
                                         configuration.sortable &&
                                         $.inArray(column.name, configuration.sortable.columns) >= 0) {
                                         $cell.addClass('moveable');
