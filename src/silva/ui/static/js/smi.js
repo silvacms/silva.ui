@@ -245,6 +245,7 @@
     ClipBoard.prototype.cut = function(items, no_notification) {
         var count = 0;
 
+        this._clear();
         $.each(items, function(i, item) {
             if ($.inArray(item.id, this._cutted_ids) < 0) {
                 this._cutted_ids.push(item.id);
@@ -271,6 +272,7 @@
     ClipBoard.prototype.copy = function(items, no_notification) {
         var count = 0;
 
+        this._clear();
         $.each(items, function(i, item) {
             if ($.inArray(item.id, this._copied_ids) < 0) {
                 this._copied_ids.push(item.id);

@@ -39,12 +39,12 @@
                         this.editor = null;
                     },
                     render: function() {
-                        var textarea = this.content.children('textarea').get(0);
+                        var textarea = this.$content.children('textarea').get(0);
 
                         this.editor = CKEDITOR.replace(textarea, settings);
                         this.editor.on('instanceReady', function (event) {
                             // XXX Where the hell comes from those 5 pixels ?
-                            var height = this.content.height() - 5;
+                            var height = this.$content.height() - 5;
 
                             height -= $('#cke_top_body').outerHeight();
                             height -= $('#cke_bottom_body').outerHeight();
@@ -55,7 +55,7 @@
                         }.scope(this));
                     },
                     cleanup: function() {
-                        this.content.empty();
+                        this.$content.empty();
                         if (this.editor) {
                             try {
                                 this.editor.destroy(true);

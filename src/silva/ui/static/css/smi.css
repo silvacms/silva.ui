@@ -449,18 +449,6 @@ input, textarea {
 #workspace .content .listing dt ins.ui-icon {
   margin: 4px 4px 0px 0px;
 }
-#workspace .content .listing dt ins.selector {
-  width:20px;
-  height:20px;
-  display:block;
-  float:right;
-  margin-top: 2px;
-  background-image:url(../img/sprite.png);
-}
-#workspace .content .listing dt input.filter {
-  float: right;
-  margin: 1px 4px;
-}
 
 #workspace .content .listing dd.collapsed {
   display: none;
@@ -496,10 +484,6 @@ input, textarea {
 #workspace .content .listing tr.empty td {
   padding: 0px 8px;
 }
-#workspace .content .listing .actions ol {
-  list-style:none;
-  margin-left: 0px;
-}
 
 
 /* Table listing footer */
@@ -508,18 +492,31 @@ input, textarea {
   border-top:1px #999 solid;
   bottom:0;
   color:#333;
-  font-size:0.8em;
   height:25px;
   left:0;
   line-height:25px;
   position:absolute;
   right:0;
 }
-#workspace .content .footer p {
-  padding: 0px 15px;
-  display: inline;
+#workspace .content .footer ol.actions {
+  list-style:none;
+  margin-left: 0px;
 }
-#workspace .content .footer .clipboard-info a.stat ins {
+#workspace .content .footer ol.actions li a {
+  margin: 3px 2px;
+}
+#workspace .content .footer a.inactive {
+  color: #999;
+}
+#workspace .content .footer ins.selector {
+  width:20px;
+  height:20px;
+  display:block;
+  float:left;
+  margin-top: 2px;
+  background-image:url(../img/sprite.png);
+}
+#workspace .content .footer .clipboard-info a.detail ins {
   margin-top: 4px;
 }
 #workspace .content .footer .clipboard-info .popup {

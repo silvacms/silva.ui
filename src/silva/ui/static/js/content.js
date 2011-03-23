@@ -5,7 +5,7 @@
         iface: 'title',
         jsont: '<ins class="icon"></ins>{data.title}',
         render: function(content, data) {
-            var icon = this.content.children('ins');
+            var icon = this.$content.children('ins');
 
             if (data.icon.indexOf('.') < 0) {
                 icon.addClass(data.icon);
@@ -67,27 +67,27 @@
                         return false;
                     });
                 };
-                this.content.append(tab);
+                this.$content.append(tab);
             }.scope(this));
         },
         cleanup: function() {
-            this.content.empty();
+            this.$content.empty();
         }
     });
 
     obviel.view({
         iface: 'metadata',
         render: function() {
-            var  parent_link = this.content.find('a.parent');
+            var  parent_link = this.$content.find('a.parent');
 
             // Update header
-            this.content.children('h2').render({data: this.data.title});
-            this.content.children('.content-tabs').render({data: this.data.menu.content});
-            this.content.children('.view-actions').render({data: this.data.menu.view});
-            this.content.children('.content-actions').render({data: this.data.menu.actions});
+            this.$content.children('h2').render({data: this.data.title});
+            this.$content.children('.content-tabs').render({data: this.data.menu.content});
+            this.$content.children('.view-actions').render({data: this.data.menu.view});
+            this.$content.children('.content-actions').render({data: this.data.menu.actions});
 
             // Update content link hidden link
-            this.content.children('#content-url').attr('href', this.url.expand({path: this.data.path}));
+            this.$content.children('#content-url').attr('href', this.url.expand({path: this.data.path}));
 
             // Update parent link
             if (this.data.up != null) {
@@ -108,7 +108,7 @@
         iframe: true,
         nocache: true,
         cleanup: function() {
-            this.content.empty();
+            this.$content.empty();
         }
     });
 

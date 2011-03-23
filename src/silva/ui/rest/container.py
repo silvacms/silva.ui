@@ -70,13 +70,11 @@ class ColumnsContainerListing(UIREST):
                             {'name': 'identifier',
                              'caption': self.translate(_(u'Identifier')),
                              'view': 'action',
-                             'action': 'content',
-                             'filterable': True},
+                             'action': 'content'},
                             {'name': 'title',
                              'caption': self.translate(_(u'Title')),
                              'view': 'action',
-                             'action': 'preview',
-                             'filterable': True},
+                             'action': 'preview'},
                             {'name': 'modified',
                              'caption': self.translate(_(u'Modified')),
                              'view': 'text'},
@@ -119,16 +117,47 @@ class ColumnsContainerListing(UIREST):
                      'order': 5,
                      'action':
                          {'cut': True},
+                     'active':
+                         {'min_items': 1,
+                          'items_provides': 'content'},
                      'available':
                          {'content_match':
                               {'access': ['manage', 'publish', 'write']}},
-                     'ifaces': ['content']},
+                     'ifaces': ['object']},
                     {'title': self.translate(_(u'Copy')),
                      'icon': 'copy',
                      'order': 6,
                      'action':
                          {'copy': True},
-                     'ifaces': ['content']},
+                     'active':
+                         {'min_items': 1,
+                          'items_provides': 'content'},
+                     'ifaces': ['object']},
+                    {'title': self.translate(_(u'Paste')),
+                     'icon': 'clipboard',
+                     'order': 7,
+                     'action':
+                         {'rest':
+                              {'action': 'paste',
+                               'send': 'clipboard_ids'}},
+                     'active':
+                         {'clipboard_min_items': 1},
+                     'available':
+                         {'content_match':
+                              {'access': ['manage', 'publish', 'write']}},
+                     'ifaces': ['object']},
+                    {'title': self.translate(_(u'Paste as Ghost')),
+                     'icon': 'link',
+                     'order': 8,
+                     'action':
+                         {'rest':
+                              {'action': 'pasteasghost',
+                               'send': 'clipboard_ids'}},
+                     'active': {'clipboard_min_items': 1},
+                     'available':
+                         {'content_match':
+                              {'access': ['manage', 'publish', 'write']}},
+                     'ifaces': ['object']},
                     {'title': self.translate(_(u'Rename')),
                      'icon': 'pencil',
                      'order': 10,
@@ -137,10 +166,13 @@ class ColumnsContainerListing(UIREST):
                               {'action': 'rename',
                                'send': 'item_values',
                                'values': ['identifier', 'title']}},
+                     'active': {
+                            'min_items': 1,
+                            'items_provides': 'content'},
                      'available':
                          {'content_match':
                               {'access': ['manage', 'publish', 'write']}},
-                     'ifaces': ['content']},
+                     'ifaces': ['object']},
                     {'title': self.translate(_(u'New version')),
                      'icon': 'document',
                      'order': 50,
@@ -148,11 +180,14 @@ class ColumnsContainerListing(UIREST):
                          {'rest':
                               {'action': 'newversion',
                                'send': 'selected_ids'}},
+                     'active': {'min_items': 1,
+                                'items_provides': 'versioned',
+                                'items_match':
+                                    {'status': ['published', 'closed']}},
                      'available':
-                         {'items_match':
-                              {'status': ['published', 'closed'],
-                               'access': ['manage', 'publish', 'write']}},
-                     'ifaces': ['versioned']},
+                         {'content_match':
+                              {'access': ['manage', 'publish', 'write']}},
+                     'ifaces': ['object']},
                     {'title': self.translate(_(u'Publish')),
                      'icon': 'check',
                      'order': 51,
@@ -160,11 +195,15 @@ class ColumnsContainerListing(UIREST):
                          {'rest':
                               {'action': 'publish',
                                'send': 'selected_ids'}},
+                     'active':
+                         {'min_items': 1,
+                          'items_provides': ['container', 'versioned'],
+                          'items_match':
+                              {'status': ['draft', 'approved', 'pending', None]}},
                      'available':
-                         {'items_match':
-                              {'status': ['draft', 'approved', 'pending', None],
-                               'access': ['manage', 'publish']}},
-                     'ifaces': ['container', 'versioned']},
+                         {'content_match':
+                              {'access': ['manage', 'publish']}},
+                     'ifaces': ['object']},
                     {'title': self.translate(_(u'Close')),
                      'icon': 'close',
                      'order': 52,
@@ -172,11 +211,14 @@ class ColumnsContainerListing(UIREST):
                          {'rest':
                               {'action': 'close',
                                'send': 'selected_ids'}},
+                     'active':
+                         {'min_items': 1,
+                          'items_provides': ['container', 'versioned'],
+                          'items_match': {'status': ['published', None]}},
                      'available':
-                         {'items_match':
-                              {'status': ['published', None],
-                               'access': ['manage', 'publish']}},
-                     'ifaces': ['container', 'versioned']},
+                         {'content_match':
+                              {'access': ['manage', 'publish']}},
+                     'ifaces': ['object']},
                     {'title': self.translate(_(u'Delete')),
                      'icon': 'trash',
                      'order': 100,
@@ -184,40 +226,13 @@ class ColumnsContainerListing(UIREST):
                          {'rest':
                               {'action': 'delete',
                                'send': 'selected_ids'}},
+                     'active':
+                         {'min_items': 1,
+                          'items_provides': 'content'},
                      'available':
                          {'content_match':
                               {'access': ['manage', 'publish', 'write']}},
-                     'ifaces': ['content']},
-                    ],
-                'clipboard_actions': [
-                    {'title': self.translate(_(u'Paste')),
-                     'icon': 'clipboard',
-                     'order': 6,
-                     'action':
-                         {'rest':
-                              {'action': 'paste',
-                               'send': 'clipboard_ids'}},
-                     'available': {'min_items': 1,
-                                   'content_match':
-                                       {'access': ['manage', 'publish', 'write']}},
-                     'ifaces': ['clipboard']},
-                    {'title': self.translate(_(u'Paste as Ghost')),
-                     'icon': 'link',
-                     'order': 7,
-                     'action':
-                         {'rest':
-                              {'action': 'pasteasghost',
-                               'send': 'clipboard_ids'}},
-                     'available':
-                         {'min_items': 1,
-                          'content_match':
-                              {'access': ['manage', 'publish', 'write']}},
-                     'ifaces': ['clipboard']},
-                    {'title': self.translate(_(u'Clear clipboard')),
-                     'icon': 'trash',
-                     'order': 8,
-                     'action': {'clear_clipboard': True},
-                     'ifaces': ['clipboard']},
+                     'ifaces': ['object']},
                     ]})
 
 

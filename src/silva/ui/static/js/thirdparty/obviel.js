@@ -77,6 +77,18 @@ var obviel = {};
         return ret;
     };
 
+    /**
+     * Returns true of obj implements base, false otherwise
+     */
+    module.provides = function(obj, base) {
+        var ifaces = module.ifaces(obj);
+        for (var i=0; i < ifaces.length; i++) {
+            if (ifaces[i] == base) {
+                return true;
+            };
+        };
+        return false;
+    };
 
     /**
      * HTMLResource, load extra JS or CSS at run time.
@@ -171,7 +183,7 @@ var obviel = {};
      */
     module.View = function(definition, element, data) {
         $.extend(this, definition);
-        this.content = element;
+        this.$content = element;
         this.data = data;
 
         if (this.init) {
@@ -184,9 +196,9 @@ var obviel = {};
         if (this.iframe) {
             var iframe = $('<iframe src="">');
 
-            iframe.height(this.content.height());
-            iframe.width(this.content.width());
-            this.content.html(iframe);
+            iframe.height(this.$content.height());
+            iframe.width(this.$content.width());
+            this.$content.html(iframe);
             if (template) {
                 if (template.indexOf('<html') < 0 &&
                     template.indexOf('<HTML') < 0) {
@@ -197,22 +209,22 @@ var obviel = {};
                 var template_document = template_window.document;
                 template_window.onload = function() {
                     if (this.render) {
-                        this.render(this.content, this.data);
+                        this.render(this.$content, this.data);
                     };
                 }.scope(this);
                 template_document.write(template);
                 template_document.close();
             } else {
                 if (this.render) {
-                    this.render(this.content, this.data);
+                    this.render(this.$content, this.data);
                 };
             };
         } else {
             if (template) {
-                this.content.html(template);
+                this.$content.html(template);
             };
             if (this.render) {
-                this.render(this.content, this.data);
+                this.render(this.$content, this.data);
             }
         };
     };
@@ -223,10 +235,10 @@ var obviel = {};
     // render the view: retrieve a template to render it and render it
     module.View.prototype._render = function() {
         // clean content if needed (call cleanup callback)
-        this.content.triggerHandler('cleanup-obviel');
+        this.$content.triggerHandler('cleanup-obviel');
 
         if (this.cleanup) {
-            this.content.one('cleanup-obviel', function(event) {
+            this.$content.one('cleanup-obviel', function(event) {
                 this.cleanup();
             }.scope(this));
         };

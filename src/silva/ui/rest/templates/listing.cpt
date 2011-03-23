@@ -8,9 +8,6 @@
     <dt class="publishables ui-state-default">
       <ins class="ui-icon ui-icon-triangle-1-s"></ins>
       <tal:msg i18n:translate="">Publishable(s)</tal:msg>
-      <ins class="selector none">
-      </ins>
-      <input class="filter" type="search" placeholder="Filter ..." />
     </dt>
     <dd class="publishables">
       <table class="static">
@@ -20,9 +17,6 @@
     <dt class="assets ui-state-default">
       <ins class="ui-icon ui-icon-triangle-1-s"></ins>
       <tal:msg i18n:translate="">Asset(s)</tal:msg>
-      <ins class="selector none">
-      </ins>
-      <input  class="filter" type="search" placeholder="Filter ..." />
     </dt>
     <dd class="assets">
       <table class="static">
@@ -31,42 +25,16 @@
     </dd>
   </dl>
   <div class="footer">
-    <p class="counters publishables">
-      <span class="total"
-            i18n:translate="">
-        <span class="count"
-              i18n:name="count">0</span>
-        publishable(s) content(s)
-      </span>
-      <span class="selected"
-            i18n:translate="">
-        with
-        <span class="count"
-              i18n:name="count">0</span>
-        selected
-      </span>
-    </p>
-    <p class="counters assets">
-      <span class="total"
-            i18n:translate="">
-        <span class="count"
-              i18n:name="count">0</span>
-        asset(s)
-      </span>
-      <span class="selected"
-            i18n:translate="">
-        with
-        <span class="count"
-              i18n:name="count">0</span>
-        selected
-      </span>
-    </p>
+    <ins class="selector none">
+    </ins>
+    <ol class="actions">
+    </ol>
 
     <div class="clipboard-info"
        i18n:translate="">
       <ol class="popup">
       </ol>
-      <a class="stat ui-state-default">
+      <a class="detail ui-state-default">
         <ins class="ui-icon ui-icon-triangle-1-n"></ins>
         <span class="count"
               i18n:name="count">0</span>

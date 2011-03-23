@@ -26,10 +26,6 @@
     </div>
     <div id="notifications">
     </div>
-    <dl id="help">
-      <dt>?</dt>
-      <dd></dd>
-    </dl>
     <div id="main">
       <nav id="navigation">
         <h1 i18n:translate="">
