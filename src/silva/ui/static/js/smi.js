@@ -40,7 +40,7 @@
 })(jQuery);
 
 
-(function($, obviel, shortcut) {
+(function($, obviel) {
     var HASH_REGEXP = /#([^!]*)!?(.*)/;
 
     obviel.view({
@@ -315,8 +315,6 @@
         this.opened = {path: '', screen: ''}; // Currently opened screen
         this.opening = {path: '', screen: ''}; // Screen being currently opened
         this.options = options;
-        this.shortcuts = new ShortcutManager();
-        this.shortcuts.create('navigation', navigation);
         this.notifications = new NotificationManager(options.notifications);
         this.clipboard = new ClipBoard(this.notifications);
 

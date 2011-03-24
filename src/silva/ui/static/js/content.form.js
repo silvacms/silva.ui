@@ -8,22 +8,6 @@
         bootstrap_form: function($form) {
             var form_prefix = $form.attr('name');
 
-            var focus_next_form =  function(event) {
-                this.focus_next_form_field($form);
-                return false;
-            }.scope(this);
-            var focus_prev_form = function(event) {
-                this.focus_prev_form_field($form);
-                return false;
-            }.scope(this);
-
-            // Create a shortcuts
-            this.smi.shortcuts.create(form_prefix, $form);
-            this.smi.shortcuts.bind(form_prefix, 'ctrl+down', focus_next_form);
-            this.smi.shortcuts.bind(form_prefix, 'ctrl+shift+down', focus_next_form);
-            this.smi.shortcuts.bind(form_prefix, 'ctrl+up', focus_prev_form);
-            this.smi.shortcuts.bind(form_prefix, 'ctrl+shift+up', focus_prev_form);
-
             // If the form is focused
             $form.bind('focus-smi', function() {
                 // Scroll into view and select the first field
@@ -52,7 +36,6 @@
             // Bind default submit and refresh
             $form.bind('refresh-smi', submit);
             $form.bind('submit', default_submit);
-            this.smi.shortcuts.bind(form_prefix, 'enter', default_submit);
 
             // Bind click submit
             $form.find('.form-controls a.form-control').bind('click', function() {
@@ -148,9 +131,6 @@
             this.focus_first_form_field(this.$forms.first());
         },
         cleanup: function() {
-            this.$forms.each(function (index, element) {
-                this.smi.shortcuts.remove($(element).attr('name'));
-            }.scope(this));
             this.$content.removeClass('form-content');
             this.$content.undelegate('.form-section', 'focusin');
             this.$content.undelegate('.form-section', 'click');

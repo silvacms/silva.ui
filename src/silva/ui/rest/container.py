@@ -151,24 +151,26 @@ class ColumnsContainerListing(UIREST):
                     {'title': self.translate(_(u'Paste')),
                      'icon': 'clipboard',
                      'order': 7,
+                     'children': [
+                            {'title': self.translate(_(u'Paste as Ghost')),
+                             'icon': 'link',
+                             'order': 8,
+                             'action':
+                                 {'rest':
+                                      {'action': 'pasteasghost',
+                                       'send': 'clipboard_ids'}},
+                             'active': {'clipboard_min_items': 1},
+                             'available':
+                                 {'content_match':
+                                      {'access': ['manage', 'publish', 'write']}},
+                             'ifaces': ['object']},
+                            ],
                      'action':
                          {'rest':
                               {'action': 'paste',
                                'send': 'clipboard_ids'}},
                      'active':
                          {'clipboard_min_items': 1},
-                     'available':
-                         {'content_match':
-                              {'access': ['manage', 'publish', 'write']}},
-                     'ifaces': ['object']},
-                    {'title': self.translate(_(u'Paste as Ghost')),
-                     'icon': 'link',
-                     'order': 8,
-                     'action':
-                         {'rest':
-                              {'action': 'pasteasghost',
-                               'send': 'clipboard_ids'}},
-                     'active': {'clipboard_min_items': 1},
                      'available':
                          {'content_match':
                               {'access': ['manage', 'publish', 'write']}},
@@ -187,39 +189,56 @@ class ColumnsContainerListing(UIREST):
                          {'content_match':
                               {'access': ['manage', 'publish', 'write']}},
                      'ifaces': ['object']},
-                    {'title': self.translate(_(u'New version')),
-                     'icon': 'document',
-                     'order': 50,
-                     'action':
-                         {'rest':
-                              {'action': 'newversion',
-                               'send': 'selected_ids'}},
-                     'active': {'min_items': 1,
-                                'items_provides': 'versioned',
-                                'items_match':
-                                    {'status': ['published', 'closed']}},
-                     'available':
-                         {'content_match':
-                              {'access': ['manage', 'publish', 'write']}},
-                     'ifaces': ['object']},
-                    {'title': self.translate(_(u'Close')),
-                     'icon': 'close',
-                     'order': 51,
-                     'action':
-                         {'rest':
-                              {'action': 'close',
-                               'send': 'selected_ids'}},
-                     'active':
-                         {'min_items': 1,
-                          'items_provides': ['container', 'versioned'],
-                          'items_match': {'status': ['published', None]}},
-                     'available':
-                         {'content_match':
-                              {'access': ['manage', 'publish']}},
-                     'ifaces': ['object']},
                     {'title': self.translate(_(u'Publish')),
                      'icon': 'check',
                      'order': 52,
+                     'children': [
+                            {'title': self.translate(_(u'New version')),
+                             'icon': 'document',
+                             'order': 50,
+                             'action':
+                                 {'rest':
+                                      {'action': 'newversion',
+                                       'send': 'selected_ids'}},
+                             'active': {'min_items': 1,
+                                        'items_provides': 'versioned',
+                                        'items_match':
+                                            {'status': ['published', 'closed']}},
+                             'available':
+                                 {'content_match':
+                                      {'access': ['manage', 'publish', 'write']}},
+                             'ifaces': ['object']},
+                            {'title': self.translate(_(u'Approve')),
+                             'icon': 'document',
+                             'order': 51,
+                             'action':
+                                 {'rest':
+                                      {'action': 'approve',
+                                       'send': 'selected_ids'}},
+                             'active': {'min_items': 1,
+                                        'items_provides': 'versioned',
+                                        'items_match':
+                                            {'status': ['published', 'closed']}},
+                             'available':
+                                 {'content_match':
+                                      {'access': ['manage', 'publish', 'write']}},
+                             'ifaces': ['object']},
+                            {'title': self.translate(_(u'Close')),
+                             'icon': 'close',
+                             'order': 52,
+                             'action':
+                                 {'rest':
+                              {'action': 'close',
+                               'send': 'selected_ids'}},
+                             'active':
+                                 {'min_items': 1,
+                                  'items_provides': ['container', 'versioned'],
+                                  'items_match': {'status': ['published', None]}},
+                             'available':
+                                 {'content_match':
+                                      {'access': ['manage', 'publish']}},
+                             'ifaces': ['object']},
+                            ],
                      'action':
                          {'rest':
                               {'action': 'publish',

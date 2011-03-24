@@ -197,17 +197,17 @@
 
 
     /**
-     * Register action buttons in obviel given the configuration.
+     * Create button kind-of-view that can be used to render actions.
      * @param action_defintions: describe action (title, icon, what to do...)
      * @param url_template: base URL to use for REST-type actions
      * @param name: name used to register actions in obviel
      */
-    var register_action_buttons = function(action_definitions, url_template, name) {
-        $.each(action_definitions, function(i, action) {
+    var build_actions_renderer = function(action_definitions, url_template) {
+        var prototypes = [];
+
+        $.each(action_definitions, function(i, action_definition) {
             var definition = {
-                ifaces: action.ifaces,
-                name: name,
-                order: action.order,
+                order: action_definition.order,
                 init: function() {
                     this.collecting = false;
                 },
@@ -219,14 +219,26 @@
                     if (this.active != undefined && !this.active()) {
                         is_active = false;
                     };
-                    if (action.title) {
-                        link.text(action.title);
+                    if (action_definition.title) {
+                        link.text(action_definition.title);
                     };
-                    if (action.icon) {
+                    if (action_definition.icon) {
                         link.prepend(
-                            '<ins class=" ui-icon  ui-icon-' +
-                                action.icon +
+                            '<ins class="ui-icon ui-icon-' +
+                                action_definition.icon +
                                 '"></ins>');
+                    };
+                    if (this.render_children) {
+                        var $opener = $('<ins class="ui-icon ui-icon-triangle-1-n"></ins>');
+                        var $children = $('<ol class="popup"></ol>');
+
+                        this.render_children($children, this.data, {smi: this.smi});
+                        $opener.bind('click', function() {
+                            $children.fadeToggle();
+                            return false;
+                        });
+                        link.prepend($opener);
+                        link.prepend($children);
                     };
                     if (!is_active) {
                         link.addClass('inactive');
@@ -239,21 +251,25 @@
                     this.$content.append(html);
                 }
             };
-            if (action.available) {
-                definition['available'] = predicates_evaluator(action.available);
+            if (action_definition.available) {
+                definition['available'] = predicates_evaluator(action_definition.available);
             };
-            if (action.active) {
-                definition['active'] = predicates_evaluator(action.active);
+            if (action_definition.active) {
+                definition['active'] = predicates_evaluator(action_definition.active);
             };
-            for (var action_type in action.action) {
+            if (action_definition.children) {
+                definition['render_children'] = build_actions_renderer(
+                    action_definition.children, url_template);
+            };
+            for (var action_type in action_definition.action) {
                 switch(action_type) {
                 case 'rest':
                     definition['action'] = function() {
                         var url = url_template.expand({
                             path: this.smi.opened.path,
-                            action: action.action.rest.action});
+                            action: action_definition.action.rest.action});
                         var payload = [];
-                        switch(action.action.rest.send) {
+                        switch(action_definition.action.rest.send) {
                         case 'selected_ids':
                             $.each(this.data.items(), function(i, item) {
                                 payload.push({name: 'content', value: item.id});
@@ -268,7 +284,7 @@
                             });
                             break;
                         case 'item_values':
-                            var names = action.action.rest.values;
+                            var names = action_definition.action.rest.values;
                             var counter = 0;
 
                             if (!this.collecting) {
@@ -316,8 +332,28 @@
                     break;
                 };
             };
-            obviel.view(definition);
+            prototypes.push(definition);
         });
+
+        prototypes.sort(function (p1, p2) {
+            return p1.order - p2.order;
+        });
+
+        var Action = function(definition, $content, data, extra) {
+            $.extend(this, definition);
+            $.extend(this, extra);
+            this.$content = $content,
+            this.data = data;
+
+            this.init();
+        };
+
+        return function($content, data, extra) {
+            $.each(prototypes, function() {
+                var action = new Action(this, $content, data, extra);
+                action.render();
+            });
+        };
     };
 
     /**
@@ -562,11 +598,9 @@
                     }.scope(lst_configuration);
                 });
 
-                var action_url = jsontemplate.Template(smi.options.listing.action, {});
-                register_action_buttons(
+                var render_actions = build_actions_renderer(
                     configuration.actions,
-                    action_url,
-                    'action.smilisting');
+                    jsontemplate.Template(smi.options.listing.action, {}));
 
                 var create_container = function(name, configuration, data, listing) {
                     var $content = $('dd.' + name);
@@ -926,24 +960,20 @@
 
                         // Render actions
                         var $actions = this.$content.find('.footer .actions');
-                        $actions.render({
-                            every: new SMISelection(this, this.data.content, $([])),
-                            name: 'action.smilisting',
-                            extra: {smi: this.smi}
-                        });
+                        render_actions(
+                            $actions,
+                            new SMISelection(this, this.data.content, $([])),
+                            {smi: this.smi});
                         this.$content.bind('selectionchange-smilisting', function(event, changes) {
                             $actions.empty();
-                            $actions.render({
-                                every: new SMISelection(this, this.data.content, changes.items),
-                                name: 'action.smilisting',
-                                extra: {smi: this.smi}});
+                            render_actions(
+                                $actions,
+                                new SMISelection(this, this.data.content, changes.items),
+                                {smi: this.smi});
                         }.scope(this));
                         this.$content.bind('actionrefresh-smilisting', function(event, data) {
                             $actions.empty();
-                            $actions.render({
-                                every: data.data,
-                                name: 'action.smilisting',
-                                extra: {smi: this.smi}});
+                            render_actions($actions, data.data, {smi: this.smi});
                             event.stopPropagation();
                             event.preventDefault();
                         }.scope(this));

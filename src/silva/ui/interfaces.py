@@ -27,7 +27,6 @@ class ISMIScripts(ICKEditorResources, IReferenceUIResources):
     silvaconf.resource('js/thirdparty/jquery.jstree.js')
     silvaconf.resource('js/thirdparty/jquery.tablednd-0.5.min.js')
 
-    silvaconf.resource('js/shortcut.js')
     silvaconf.resource('js/utils.js')
     silvaconf.resource('js/content.js')
     silvaconf.resource('js/content.listing.js')

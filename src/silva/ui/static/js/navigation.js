@@ -54,7 +54,7 @@
             core: {
                 animation: 100
             },
-            plugins: ["json_data", "ui", "hotkeys"],
+            plugins: ["json_data", "ui"],
             json_data: {
                 ajax: {
                     url: function (node) {
@@ -79,14 +79,6 @@
         tree.delegate('a', 'click', function(event) {
             smi.open_screen($(this).parent().data('jstree').path);
             return false;
-        });
-
-        // Listen to smi.blur and focus to activate/disable shortcuts.
-        navigation.bind('blur-smi', function() {
-            tree.jstree("disable_hotkeys");
-        });
-        navigation.bind('focus-smi', function() {
-            tree.jstree("enable_hotkeys");
         });
 
         // If a content is loaded, try to select its container

@@ -556,7 +556,7 @@ input, textarea {
 #workspace .content .footer .clipboard-info a.detail ins {
   margin-top: 4px;
 }
-#workspace .content .footer .clipboard-info .popup {
+#workspace .content .footer .popup {
   -khtml-border-radius:3px 3px 0px 0px;
   -moz-border-radius:3px 3px 0px 0px;
   -ms-border-radius:3px 3px 0px 0px;
@@ -565,7 +565,6 @@ input, textarea {
   position:absolute;
   width: 200px;
   bottom: 25px;
-  right: 0px;
   display:block;
   background:#fff;
   border-radius:3px 3px 0px 0px;
