@@ -228,6 +228,9 @@
                                 action_definition.icon +
                                 '"></ins>');
                     };
+                    if (action_definition.accesskey) {
+                        link.attr('accesskey', action_definition.accesskey);
+                    };
                     if (this.render_children) {
                         var $opener = $('<ins class="ui-icon ui-icon-triangle-1-n"></ins>');
                         var $children = $('<ol class="popup"></ol>');

@@ -114,6 +114,7 @@ class ColumnsContainerListing(UIREST):
                 'actions': [
                     {'title': self.translate(_(u'Rename')),
                      'icon': 'pencil',
+                     'accesskey': 'r',
                      'order': 4,
                      'action':
                          {'rest':
@@ -129,6 +130,7 @@ class ColumnsContainerListing(UIREST):
                      'ifaces': ['object']},
                     {'title': self.translate(_(u'Cut')),
                      'icon': 'scissors',
+                     'accesskey': 'x',
                      'order': 5,
                      'action':
                          {'cut': True},
@@ -141,6 +143,7 @@ class ColumnsContainerListing(UIREST):
                      'ifaces': ['object']},
                     {'title': self.translate(_(u'Copy')),
                      'icon': 'copy',
+                     'accesskey': 'c',
                      'order': 6,
                      'action':
                          {'copy': True},
@@ -150,10 +153,12 @@ class ColumnsContainerListing(UIREST):
                      'ifaces': ['object']},
                     {'title': self.translate(_(u'Paste')),
                      'icon': 'clipboard',
+                     'accesskey': 'v',
                      'order': 7,
                      'children': [
                             {'title': self.translate(_(u'Paste as Ghost')),
                              'icon': 'link',
+                             'accesskey': 'g',
                              'order': 8,
                              'action':
                                  {'rest':
@@ -177,6 +182,7 @@ class ColumnsContainerListing(UIREST):
                      'ifaces': ['object']},
                     {'title': self.translate(_(u'Delete')),
                      'icon': 'trash',
+                     'accesskey': 'd',
                      'order': 9,
                      'action':
                          {'rest':
@@ -191,6 +197,7 @@ class ColumnsContainerListing(UIREST):
                      'ifaces': ['object']},
                     {'title': self.translate(_(u'Publish')),
                      'icon': 'check',
+                     'accesskey': 'p',
                      'order': 52,
                      'children': [
                             {'title': self.translate(_(u'New version')),
@@ -208,7 +215,7 @@ class ColumnsContainerListing(UIREST):
                                  {'content_match':
                                       {'access': ['manage', 'publish', 'write']}},
                              'ifaces': ['object']},
-                            {'title': self.translate(_(u'Approve')),
+                            {'title': self.translate(_(u'Approve for future')),
                              'icon': 'document',
                              'order': 51,
                              'action':
@@ -225,6 +232,7 @@ class ColumnsContainerListing(UIREST):
                              'ifaces': ['object']},
                             {'title': self.translate(_(u'Close')),
                              'icon': 'close',
+                             'accesskey': 'l',
                              'order': 52,
                              'action':
                                  {'rest':
