@@ -38,6 +38,9 @@
             if (info.description) {
                 link.attr('title', info.description);
             };
+            if (info.accesskey) {
+                link.attr('accesskey', info.accesskey);
+            };
             return tab;
         },
         render: function() {
