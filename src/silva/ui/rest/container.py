@@ -112,6 +112,21 @@ class ColumnsContainerListing(UIREST):
                              'action': 'properties'}],
                      'collapsed': True},],
                 'actions': [
+                    {'title': self.translate(_(u'Rename')),
+                     'icon': 'pencil',
+                     'order': 4,
+                     'action':
+                         {'rest':
+                              {'action': 'rename',
+                               'send': 'item_values',
+                               'values': ['identifier', 'title']}},
+                     'active': {
+                            'min_items': 1,
+                            'items_provides': 'content'},
+                     'available':
+                         {'content_match':
+                              {'access': ['manage', 'publish', 'write']}},
+                     'ifaces': ['object']},
                     {'title': self.translate(_(u'Cut')),
                      'icon': 'scissors',
                      'order': 5,
@@ -158,17 +173,16 @@ class ColumnsContainerListing(UIREST):
                          {'content_match':
                               {'access': ['manage', 'publish', 'write']}},
                      'ifaces': ['object']},
-                    {'title': self.translate(_(u'Rename')),
-                     'icon': 'pencil',
-                     'order': 10,
+                    {'title': self.translate(_(u'Delete')),
+                     'icon': 'trash',
+                     'order': 9,
                      'action':
                          {'rest':
-                              {'action': 'rename',
-                               'send': 'item_values',
-                               'values': ['identifier', 'title']}},
-                     'active': {
-                            'min_items': 1,
-                            'items_provides': 'content'},
+                              {'action': 'delete',
+                               'send': 'selected_ids'}},
+                     'active':
+                         {'min_items': 1,
+                          'items_provides': 'content'},
                      'available':
                          {'content_match':
                               {'access': ['manage', 'publish', 'write']}},
@@ -188,25 +202,9 @@ class ColumnsContainerListing(UIREST):
                          {'content_match':
                               {'access': ['manage', 'publish', 'write']}},
                      'ifaces': ['object']},
-                    {'title': self.translate(_(u'Publish')),
-                     'icon': 'check',
-                     'order': 51,
-                     'action':
-                         {'rest':
-                              {'action': 'publish',
-                               'send': 'selected_ids'}},
-                     'active':
-                         {'min_items': 1,
-                          'items_provides': ['container', 'versioned'],
-                          'items_match':
-                              {'status': ['draft', 'approved', 'pending', None]}},
-                     'available':
-                         {'content_match':
-                              {'access': ['manage', 'publish']}},
-                     'ifaces': ['object']},
                     {'title': self.translate(_(u'Close')),
                      'icon': 'close',
-                     'order': 52,
+                     'order': 51,
                      'action':
                          {'rest':
                               {'action': 'close',
@@ -219,20 +217,22 @@ class ColumnsContainerListing(UIREST):
                          {'content_match':
                               {'access': ['manage', 'publish']}},
                      'ifaces': ['object']},
-                    {'title': self.translate(_(u'Delete')),
-                     'icon': 'trash',
-                     'order': 100,
+                    {'title': self.translate(_(u'Publish')),
+                     'icon': 'check',
+                     'order': 52,
                      'action':
                          {'rest':
-                              {'action': 'delete',
+                              {'action': 'publish',
                                'send': 'selected_ids'}},
                      'active':
                          {'min_items': 1,
-                          'items_provides': 'content'},
+                          'items_provides': ['container', 'versioned'],
+                          'items_match':
+                              {'status': ['draft', 'approved', 'pending', None]}},
                      'available':
                          {'content_match':
-                              {'access': ['manage', 'publish', 'write']}},
-                     'ifaces': ['object']},
+                              {'access': ['manage', 'publish']}},
+                     'ifaces': ['object']}
                     ]})
 
 
