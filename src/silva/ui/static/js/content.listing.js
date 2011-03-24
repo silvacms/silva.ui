@@ -366,64 +366,71 @@
      * View clipboard data.
      * @param container: container containing the info hook.
      */
-    var SMIViewClipboard = function($info, smi) {
-        this.smi = smi;
-        this.$popup = $info.children('.popup');
-        this._uptodate = false;
+    var view_clipboard = function($info, smi) {
+        var $popup = $info.children('.popup');
         var $detail = $info.children('.detail');
+        var $icon = $detail.children('ins');
         var $count = $info.find('.count');
+        var is_uptodate = false;
+
+        var update = function() {
+            $popup.empty();
+            $.each(smi.clipboard.cutted, function(i, item) {
+                $popup.render({
+                    data: item,
+                    name: 'clipboarditem.smilisting',
+                    extra: {state: 'cutted'}});
+            });
+            $.each(smi.clipboard.copied, function(i, item) {
+                $popup.render({
+                    data: item,
+                    name: 'clipboarditem.smilisting',
+                    extra: {state: 'copied'}});
+            });
+            is_uptodate = true;
+        };
+
+        var onchange = function() {
+            var length = smi.clipboard.length();
+
+            $count.text(length.toString());
+            if ($popup.is(':visible')) {
+                update();
+            } else {
+                is_uptodate = false;
+            };
+            if (length) {
+                $icon.show();
+            } else {
+                $icon.hide();
+            };
+        };
 
         // Set default clipboard count on creation
-        $count.text(smi.clipboard.length().toString());
-
+        onchange();
         // Update count when clipboard is changed
-        $('body').bind('contentchange-smiclipboard', function() {
-            $count.text(smi.clipboard.length().toString());
-            if (this.$popup.is(':visible')) {
-                this.update();
-            } else {
-                this._uptodate = false;
+        $('body').bind('contentchange-smiclipboard', onchange);
+
+        var toggle = function() {
+            var is_visible = $popup.is(':visible');
+            var is_unfoldable = $icon.is(':visible');
+
+            if (!is_uptodate && !is_visible) {
+                update();
             };
-        }.scope(this));
-
-        // Show actions when you click on the info.
-        $detail.bind('click', function() {
-            this.toggle();
-            return false;
-        }.scope(this));
-        this.$popup.bind('mouseleave', function() {
-            this.$popup.fadeOut();
-        }.scope(this));
-    };
-
-    SMIViewClipboard.prototype.toggle = function() {
-        if (!this._uptodate && !this.$popup.is(':visible')) {
-            this.update();
+            if (is_visible || is_unfoldable) {
+                $popup.fadeToggle();
+            };
         };
-        this.$popup.fadeToggle();
-    };
 
-    SMIViewClipboard.prototype.hide = function() {
-        this.$popup.fadeOut();
-    };
-
-    SMIViewClipboard.prototype.update = function() {
-        var $popup = this.$popup;
-
-        $popup.empty();
-        $.each(this.smi.clipboard.cutted, function(i, item) {
-            $popup.render({
-                data: item,
-                name: 'clipboarditem.smilisting',
-                extra: {state: 'cutted'}});
+        // Show actions when you click on the info, hide it when you leave.
+        $detail.bind('click', function() {
+            toggle();
+            return false;
         });
-        $.each(this.smi.clipboard.copied, function(i, item) {
-            $popup.render({
-                data: item,
-                name: 'clipboarditem.smilisting',
-                extra: {state: 'copied'}});
+        $popup.bind('mouseleave', function() {
+            $popup.fadeOut();
         });
-        this._uptodate = true;
     };
 
     /**
@@ -808,7 +815,7 @@
                             var $empty_line = $('<tr class="empty"></tr>');
                             var $empty_cell = $('<td>There is no items here.</td>');
 
-                            $empty_cell.attr('colspan', this.configuration.columns.length);
+                            $empty_cell.attr('colspan', configuration.columns.length);
                             $empty_line.append($empty_cell);
                             $container.append($empty_line);
                         };
@@ -899,7 +906,7 @@
 
                         // Clipboard info
                         this.smi.clipboard.content = this.data.content;
-                        new SMIViewClipboard(this.$content.find('.clipboard-info'), this.smi);
+                        view_clipboard(this.$content.find('.clipboard-info'), this.smi);
 
                         // Multi selector
                         new SMIMultiSelector(this.$content.find('.footer .selector'), this);
