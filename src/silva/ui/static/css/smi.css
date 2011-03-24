@@ -211,24 +211,15 @@ input, textarea {
   margin:0;
   padding:0;
 }
+
 #workspace .info .tabs li {
-  position:relative;
   display:block;
   float:left;
 }
-#workspace .info .tabs li a ins.ui-icon {
-  margin-top: 5px;
-}
-#workspace .info .tabs li a {
-  color:#222;
-  display:block;
-  height:26px;
-  line-height:25px;
-  margin-right: 5px;
-  padding:4px 12px 1px 12px;
-}
-#workspace .info .tabs li a:hover,
-#workspace .info .tabs li a.active {
+
+#workspace .info .tabs li div.inner {
+  border-radius:0 0 3px 3px;
+  box-shadow: inset 0 0 2px #aaa;
   -khtml-border-radius:0 0 3px 3px;
   -khtml-box-shadow:inset 0 0 2px #aaa;
   -moz-border-radius:0 0 3px 3px;
@@ -239,24 +230,60 @@ input, textarea {
   -o-box-shadow:inset 0 0 2px #aaa;
   -webkit-border-radius:0 0 3px 3px;
   -webkit-box-shadow:inset 0 0 2px #aaa;
-  background:#fff;
-  border-radius:0 0 3px 3px;
-  border:1px #999 solid;
-  border-top:0;
-  box-shadow: inset 0 0 2px #aaa;
+  position: relative;
+  background:url('../img/gradient-tab.png') repeat-x;
+  color:#222;
+  display:block;
   height:26px;
   line-height:25px;
-  padding:4px 11px 0px 11px;
-}
-#workspace .info .tabs li.openable a {
-  padding:4px 12px 1px 3px;
-}
-#workspace .info .tabs li.openable a:hover,
-#workspace .info .tabs li.openable a.active {
-  padding:4px 11px 0px 2px;
+  margin-right: 5px;
+  border: 1px solid #555;
+  border-top: 0;
 }
 
-#workspace .info .tabs .subtabs {
+#workspace .info .tabs li div.outer {
+  position: relative;
+}
+
+#workspace .info .tabs li div.inner a {
+  display: block;
+  height: 26px;
+  line-height: 25px;
+  padding: 0px 10px 0px 10px;
+}
+
+#workspace .info .tabs li.openable div.inner a {
+  border-right: 1px solid #555;
+}
+
+#workspace .info .tabs li div.inner a.active {
+  background:url('../img/gradient-tab-selected.png') repeat-x;
+  color: white;
+  text-shadow: #373737 1px 1px 1px;
+  font-weight: bold;
+}
+
+#workspace .info .tabs li.openable div.inner {
+  padding-right: 25px;
+}
+
+#workspace .info .tabs li ins {
+  background: url('../img/arrow-down.png') no-repeat;
+  background-position: 0px 0px;
+  position: absolute;
+  right: 0px;
+  display: block;
+  height: 25px;
+  width: 25px;
+}
+
+#workspace .info .tabs li div.inner ins:hover,
+#workspace .info .tabs li div.inner ins.active {
+  cursor: pointer;
+}
+
+
+#workspace .info .tabs ol.subtabs {
   -khtml-border-radius:3px 3px 3px 3px;
   -moz-border-radius:3px 3px 3px 3px;
   -ms-border-radius:3px 3px 3px 3px;
@@ -265,31 +292,41 @@ input, textarea {
   position:absolute;
   width: 200px;
   top: 32px;
-  left: 3px;
+  left: 0px;
   display:block;
   background:#fff;
   border-radius:3px 3px 3px 3px;
-  border:1px #999 solid;
+  border:1px #ddd solid;
   margin-left: 0px;
   display: none;
   z-index: 100;
 }
 
 #workspace .info .tabs .subtabs li {
+  background: #fff;
   float: none;
 }
+#workspace .info .tabs .subtabs li {
+  background-image: none;
+  border: 0;
+}
+
 #workspace .info .tabs .subtabs li a,
 #workspace .info .tabs .subtabs li a:hover {
-  line-height: 20px;
-  height: 20px;
-  border: 0px;
+  display: block;
+  height: auto;
+  border: none;
+  padding: 0px 5px;
   box-shadow: none;
-  padding: 2px 5px;
   -khtml-box-shadow: none;
   -moz-box-shadow: none;
   -ms-box-shadow: none;
   -o-box-shadow: none;
   -webkit-box-shadow: none;
+}
+
+#workspace .info .tabs .subtabs li a:hover {
+  background-color: #eee;
 }
 
 #workspace .info .actions,

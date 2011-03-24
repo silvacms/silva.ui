@@ -19,10 +19,12 @@
 
     obviel.view({
         iface: 'menu',
-        create: function(info) {
-            var tab = $('<li><a class="ui-state-default">' + info.name + '</a></li>');
-            var link = tab.children('a');
-
+        create: function(info, base) {
+            if (base === undefined)
+                base = '<li><a/></li>';
+            var tab = $(base);
+            var link = $('a', tab);
+            link.text(info.name);
             if (info.screen) {
                 link.addClass('open-screen');
                 link.attr('rel', info.screen);
@@ -40,30 +42,25 @@
         },
         render: function() {
             $.each(this.data.entries, function(i, info) {
-                var tab = this.create(info);
+                var tab = this.create(info,
+                    '<li><div class="outer"><div class="inner"><a/></div></div></li>');
 
                 if (info.entries) {
                     var container = $('<ol class="subtabs"></ol>');
-                    var link = tab.children('a');
+                    var link = $('a', tab);
                     var is_current = link.hasClass('active');
 
                     $.each(info.entries, function(i, entry) {
                         container.append(this.create(entry));
                     }.scope(this));
                     tab.addClass('openable');
-                    tab.append(container);
-                    link.prepend('<ins class="ui-icon ui-icon-triangle-1-s"></ins>');
+                    $('div.outer', tab).append(container);
+                    $('div.inner', tab).prepend('<ins/>');
                     container.bind('mouseleave', function() {
-                        container.fadeOut();
-                        if (!is_current) {
-                            link.removeClass('active');
-                        };
+                        container.fadeOut('fast');
                     });
-                    link.children('ins').bind('click', function () {
-                        container.fadeToggle();
-                        if (!is_current) {
-                            link.toggleClass('active');
-                        };
+                    $('ins', tab).bind('click', function () {
+                        container.show();
                         return false;
                     });
                 };
