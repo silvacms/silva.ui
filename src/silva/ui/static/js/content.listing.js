@@ -601,9 +601,8 @@
                     }.scope(lst_configuration);
                 });
 
-                var render_actions = build_actions_renderer(
-                    configuration.actions,
-                    jsontemplate.Template(smi.options.listing.action, {}));
+                var action_url_template = jsontemplate.Template(smi.options.listing.action, {});
+                var render_actions = build_actions_renderer(configuration.actions, action_url_template);
 
                 var create_container = function(name, configuration, data, listing) {
                     var $content = $('dd.' + name);
@@ -750,7 +749,7 @@
                                         var data = $line.data('smilisting');
 
                                         $.ajax({
-                                            url: action_url.expand({
+                                            url: action_url_template.expand({
                                                 path: listing.smi.opened.path,
                                                 action: configuration.sortable.action}),
                                             type: 'POST',
