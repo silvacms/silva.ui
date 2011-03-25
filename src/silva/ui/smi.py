@@ -3,13 +3,12 @@
 # See also LICENSE.txt
 # $Id$
 
-from AccessControl import getSecurityManager
-
 from pkg_resources import iter_entry_points
 
 from five import grok
 from silva.core.interfaces import ISilvaObject
 from silva.core.views.interfaces import IVirtualSite
+from silva.ui.interfaces import IUIService
 from silva.fanstatic import need
 
 from zope.component import getUtility
@@ -46,10 +45,16 @@ class SMI(grok.View):
             resource = load_entry.load()
             need(resource)
 
+        # Customization from service.
+        ui_service = getUtility(IUIService)
+        if ui_service.logo != None:
+            self.logo_url = '/'.join((absoluteURL(ui_service, self.request), 'logo'))
+        else:
+            self.logo_url = self.static['img']['silva.png']()
+        self.background = ui_service.background if ui_service.background else '#7996ac'
+
         # Prepare values for template
         languages = IUserPreferredLanguages(self.request).getPreferredLanguages()
 
         self.lang = languages[0] if languages else 'en'
         self.root_url = root_url
-        self.can_manage = getSecurityManager().checkPermission(
-            'View Management Screens', self.context)

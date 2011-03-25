@@ -312,6 +312,10 @@
         this._.workspace = workspace;
         this._.navigation = navigation;
 
+        if (options.theme && options.theme.background) {
+            $('html').css('background-color', options.theme.background);
+        };
+
         this.opened = {path: '', screen: ''}; // Currently opened screen
         this.opening = {path: '', screen: ''}; // Screen being currently opened
         this.options = options;

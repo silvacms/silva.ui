@@ -10,6 +10,8 @@ from silva.core.services.base import SilvaService
 from silva.ui.interfaces import IUIService
 from zeam.form import silva as silvaforms
 
+from OFS.Image import Image as ZopeImage
+
 
 class UIService(SilvaService):
     grok.implements(IUIService)
@@ -32,4 +34,21 @@ class UISettings(silvaforms.ZMIForm):
     description = u"You can from here modify SMI settings."
     ignoreContent = False
     fields = silvaforms.Fields(IUIService)
-    actions = silvaforms.Actions(silvaforms.EditAction())
+
+    @silvaforms.action(u'Save')
+    def save(self):
+        data, errors = self.extractData()
+        if errors:
+            self.status = u"There were errors."
+            return silvaforms.FAILURE
+        background = data['background']
+        logo = data['logo']
+        self.context.background = background if background != silvaforms.NO_VALUE else None
+        if logo != silvaforms.NO_VALUE:
+            if logo != silvaforms.NO_CHANGE:
+                self.context.logo = ZopeImage('logo', 'SMI Logo', logo)
+        else:
+            self.context.logo = None
+        self.status = u"Modification saved."
+        return silvaforms.SUCCESS
+

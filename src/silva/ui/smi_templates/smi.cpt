@@ -29,7 +29,7 @@
     <div id="main">
       <nav id="navigation">
         <h1 i18n:translate="">
-          <a href="#!/"><img src="${imgs_url}/silva.png" alt="Silva" /></a>
+          <a href="#!/"><img src="${view.logo_url}" alt="Silva" /></a>
         </h1>
         <div class="tree"></div>
         <ol class="actions session-actions">
@@ -72,6 +72,9 @@
     <script type="text/javascript">
       $(document).ready(function() {
       smi = $('body').SMI({
+          theme: {
+            background: "${view.background}"
+          },
           screen: "${view.root_url}/{path}/++rest++silva.ui/{screen}",
           action:"${view.root_url}/{path}/++rest++silva.ui.actions.{action}",
           errors: {

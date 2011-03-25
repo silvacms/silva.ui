@@ -30,10 +30,10 @@ def get_menu_items(menu, content):
 class MenuEntries(list):
 
     def describe(self, page):
-        actives = set([page.__class__])
+        actives = [page]
         active  = page.__parent__
         while IRESTComponent.providedBy(active):
-            actives.add(active.__class__)
+            actives.append(active)
             active = active.__parent__
 
         return map(lambda e: e.describe(page, None, actives), self)
@@ -84,8 +84,9 @@ class MenuItem(grok.MultiSubscription):
         if self.screen is not None:
             screen = self.screen
             if IRESTComponent.implementedBy(self.screen):
-                if screen in actives:
-                    data['active'] = True
+                for active in actives:
+                    if isinstance(active, screen):
+                        data['active'] = True
                 screen = grok.name.bind().get(self.screen)
             data['screen'] = '/'.join((path, screen)) if path else screen
         if self.action is not None:
