@@ -236,7 +236,7 @@ input, textarea {
   display:block;
   height:26px;
   line-height:25px;
-  margin-right: 5px;
+  margin-right: 10px;
   border: 1px solid #555;
   border-top: 0;
 }

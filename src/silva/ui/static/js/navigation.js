@@ -25,14 +25,18 @@
             function open_node(remaining) {
                 var parent_node = $("#" + remaining[0]);
                 var left = remaining.slice(1);
-                if (parent_node.length) {
-                    if (left.length) {
-                        tree.jstree(
-                            'open_node',
-                            parent_node,
-                            function(){ open_node(left); });
+                if (parent_node.length > 0) {
+                    if (left.length > 0) {
+                        if (tree.jstree('is_closed', parent_node)) {
+                            tree.jstree(
+                                'open_node',
+                                parent_node,
+                                function(){ open_node(left); });
+                        } else {
+                            open_node(left);
+                        }
                     } else {
-                        tree.jstree('select_node', parent_node, true);
+                        tree.jstree('select_node', parent_node);
                     };
                     return true;
                 };
@@ -41,6 +45,24 @@
             if (!open_node(parents)) {
                 tree.jstree('deselect_all');
             };
+        };
+
+        var remove = function(info) {
+            if (info.target === undefined)
+                return;
+            var node = $('#' + info.target, tree);
+            if (node.length > 0) {
+                tree.jstree('delete_node', node);
+            }
+        };
+
+        var add = function(info) {
+            if (info.parent === undefined)
+                return;
+            var parent = $('#' + info.parent, tree);
+            if (parent.length > 0) {
+                tree.jstree('refresh', parent);
+            }
         };
 
         // Disable text selection on tree
@@ -81,8 +103,26 @@
             return false;
         });
 
+        // Listen to smi.blur and focus to activate/disable shortcuts.
+        navigation.bind('blur-smi', function() {
+            tree.jstree('disable_hotkeys');
+        });
+        navigation.bind('focus-smi', function() {
+            tree.jstree('enable_hotkeys');
+        });
+
         // If a content is loaded, try to select its container
         navigation.bind('content-smi', function (event, data) {
+            if (data.navigation.invalidation.length > 0) {
+                $.each(data.navigation.invalidation, function(index, datum){
+                    switch(datum['action']) {
+                        case 'remove':
+                            remove(datum['info']);
+                        case 'add':
+                            add(datum['info']);
+                    }
+                });
+            }
             uncollapse(data.navigation.parents);
         });
     };
