@@ -12,20 +12,28 @@ from js import jqueryui
 from silva.core import conf as silvaconf
 from silva.core.interfaces import ISilvaLocalService
 from silva.core.conf import schema as silvaschema
+from silva.core.layout.jsontemplate import IJsonTemplateResources
 from silva.translations import translate as _
 
 
-# CKeditor already contains jquery and json-template
-class ISMIScripts(IDefaultBrowserLayer):
+class ISilvaUIDependencies(IJsonTemplateResources):
+    """Dependencies required by Silva UI and Silva UI plugins.
+
+    Every Silva UI plugin should depend on those resources.
+    """
+    silvaconf.resource(jqueryui.jqueryui)
+    silvaconf.resource('js/thirdparty/obviel.js')
+    silvaconf.resource('js/utils.js')
+
+
+class ISilvaUI(ISilvaUIDependencies):
     """All required script to get the SMI working, without any CSS.
     """
-    silvaconf.resource('js/thirdparty/obviel.js')
     silvaconf.resource('js/thirdparty/jquery.hotkeys.js')
     silvaconf.resource('js/thirdparty/jquery.observehashchange.js')
     silvaconf.resource('js/thirdparty/jquery.jstree.js')
     silvaconf.resource('js/thirdparty/jquery.tablednd-0.5.min.js')
 
-    silvaconf.resource('js/utils.js')
     silvaconf.resource('js/content.js')
     silvaconf.resource('js/content.listing.js')
     silvaconf.resource('js/content.form.js')
@@ -33,8 +41,8 @@ class ISMIScripts(IDefaultBrowserLayer):
     silvaconf.resource('js/smi.js')
 
 
-class ISMIResources(IDefaultBrowserLayer):
-    """Full SMI resources.
+class ISilvaUITheme(IDefaultBrowserLayer):
+    """Default UI theme.
     """
     silvaconf.resource(jqueryui.smoothness)
     silvaconf.resource('css/style.css')

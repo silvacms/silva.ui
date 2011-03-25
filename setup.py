@@ -23,11 +23,20 @@ setup(name='silva.ui',
       include_package_data=True,
       zip_safe=True,
       install_requires=[
+          'fanstatic',
+          'five.grok',
+          'infrae.rest',
           'setuptools',
+          'silva.core.interfaces',
+          'silva.core.views',
+          'silva.translations',
+          'zope.interface',
+          'zope.component',
+          'zope.i18n',
       ],
       entry_points="""
       # -*- Entry points: -*-
       [silva.ui.resources]
-      smi = silva.ui.interfaces:ISMIScripts
+      smi = silva.ui.interfaces:ISilvaUI
       """,
       )
