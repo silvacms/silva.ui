@@ -10,15 +10,13 @@ from zope import schema
 from js import jqueryui
 
 from silva.core import conf as silvaconf
-from silva.core.editor.interfaces import ICKEditorResources
-from silva.core.references.widgets import IReferenceUIResources
 from silva.core.interfaces import ISilvaLocalService
 from silva.core.conf import schema as silvaschema
 from silva.translations import translate as _
 
 
 # CKeditor already contains jquery and json-template
-class ISMIScripts(ICKEditorResources, IReferenceUIResources):
+class ISMIScripts(IDefaultBrowserLayer):
     """All required script to get the SMI working, without any CSS.
     """
     silvaconf.resource('js/thirdparty/obviel.js')
@@ -30,7 +28,6 @@ class ISMIScripts(ICKEditorResources, IReferenceUIResources):
     silvaconf.resource('js/utils.js')
     silvaconf.resource('js/content.js')
     silvaconf.resource('js/content.listing.js')
-    silvaconf.resource('js/content.editor.js')
     silvaconf.resource('js/content.form.js')
     silvaconf.resource('js/navigation.js')
     silvaconf.resource('js/smi.js')
