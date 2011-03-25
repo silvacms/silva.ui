@@ -4,15 +4,12 @@
 # $Id$
 
 from five import grok
-from zope.component import getUtility, getMultiAdapter
+from zope.component import getUtility
 from zope.intid.interfaces import IIntIds
 
 from silva.ui.icon import get_icon
-from silva.ui.rest.base import Screen, UIREST, PageREST
+from silva.ui.rest.base import UIREST
 from silva.core.interfaces import IContainer
-from silva.app.document.interfaces import IDocument
-from silva.core.views.interfaces import ISilvaURL
-from silva.core.editor.transform.interfaces import IInputEditorFilter
 
 from Products.Silva.ExtensionRegistry import meta_types_for_interface
 
@@ -48,23 +45,4 @@ class NavigationListing(UIREST):
             children.append(info)
         return self.json_response(children)
 
-
-class DocumentEdit(PageREST):
-    grok.adapts(Screen, IDocument)
-    grok.name('content')
-    grok.require('silva.ChangeSilvaContent')
-
-    def payload(self):
-        version = self.context.get_editable()
-        if version is not None:
-            text = version.body.render(version, self.request, IInputEditorFilter)
-
-            return {"ifaces": ["editor"],
-                    "name": "body",
-                    "text": text}
-
-
-        url = getMultiAdapter((self.context, self.request), ISilvaURL).preview()
-        return {"ifaces": ["preview"],
-                "html_url": url}
 
