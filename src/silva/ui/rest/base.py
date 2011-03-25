@@ -229,16 +229,23 @@ class NavigationSynchronizer(object):
 
 @grok.subscribe(ISilvaObject, IObjectAddedEvent)
 def register_add(target, event):
-    if IContainer.providedBy(target):
-        intids = getUtility(IIntIds)
-        def nav_id(ob):
-            return 'nav' + str(intids.register(ob))
+    if event.object != target:
+        return
+    if not IContainer.providedBy(target):
+        return
+    if IRoot.providedBy(target):
+        return
 
-        mem_slice = MemcacheSlice(NavigationSynchronizer.namespace)
-        mem_slice.push({'action': 'add',
-                        'info': {'parent': nav_id(event.newParent),
-                                 'target': nav_id(target),
-                                 'position': -1}})
+    service = getUtility(IIntIds)
+
+    def nav_id(ob):
+        return 'nav' + str(service.register(ob))
+
+    mem_slice = MemcacheSlice(NavigationSynchronizer.namespace)
+    mem_slice.push({'action': 'add',
+                    'info': {'parent': nav_id(event.newParent),
+                             'target': nav_id(target),
+                             'position': -1}})
 
 
 # TODO: add ContentPositionChangedEvent handler
@@ -247,12 +254,20 @@ def register_add(target, event):
 # as no more int id
 @grok.subscribe(ISilvaObject, IObjectWillBeRemovedEvent)
 def register_remove(target, event):
-    if target == event.object and IContainer.providedBy(event.object):
-        intids = getUtility(IIntIds)
-        def nav_id(ob):
-            return 'nav' + str(intids.register(ob))
-        mem_slice = MemcacheSlice(NavigationSynchronizer.namespace)
-        mem_slice.push({'action': 'remove',
-                        'info': {'target': nav_id(target)}})
+    if event.object != target:
+        return
+    if not IContainer.providedBy(target):
+        return
+    if IRoot.providedBy(target):
+        return
+
+    service = getUtility(IIntIds)
+
+    def nav_id(ob):
+        return 'nav' + str(service.register(ob))
+
+    mem_slice = MemcacheSlice(NavigationSynchronizer.namespace)
+    mem_slice.push({'action': 'remove',
+                    'info': {'target': nav_id(target)}})
 
 
