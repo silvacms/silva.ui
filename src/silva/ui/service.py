@@ -23,6 +23,10 @@ class UIService(SilvaService):
         {'label': 'UI settings',
          'action': 'manage_settings'},) + SilvaService.manage_options
 
+    # Default values
+    logo = None
+    background = None
+
 
 class UISettings(silvaforms.ZMIForm):
     """Update the settings.
