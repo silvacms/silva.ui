@@ -310,7 +310,7 @@
 				if(this._get_settings().core.rtl) {
 					this.get_container().addClass("jstree-rtl").css("direction", "rtl");
 				}
-				this.get_container().html("<ul><li class='jstree-last jstree-leaf'><ins></ins><a class='jstree-loading' href='#'><ins class='jstree-icon'></ins>" + this._get_settings().core.strings.loading + "</a></li></ul>");
+				this.get_container().html("<ul><li class='jstree-last jstree-leaf'><ins>&#160;</ins><a class='jstree-loading' href='#'><ins class='jstree-icon'>&#160;</ins>" + this._get_settings().core.strings.loading + "</a></li></ul>");
 				this.data.core.li_height = this.get_container().find("ul li.jstree-closed, ul li.jstree-leaf").eq(0).height() || 18;
 
 				this.get_container()
@@ -605,14 +605,14 @@
 						tmp.attr(m.attr)[ s.html_titles ? "html" : "text" ](m.title);
 						if(m.language) { tmp.addClass(m.language); }
 					}
-					tmp.prepend("<ins class='jstree-icon'></ins>");
+					tmp.prepend("<ins class='jstree-icon'>&#160;</ins>");
 					if(m.icon) { 
 						if(m.icon.indexOf("/") === -1) { tmp.children("ins").addClass(m.icon); }
 						else { tmp.children("ins").css("background","url('" + m.icon + "') center center no-repeat"); }
 					}
 					d.append(tmp);
 				});
-				d.prepend("<ins class='jstree-icon'></ins>");
+				d.prepend("<ins class='jstree-icon'>&#160;</ins>");
 				if(obj === -1) {
 					obj = this.get_container();
 					if(position === "before") { position = "first"; }
@@ -1464,7 +1464,7 @@
 							tmp.attr(m.attr)[ t ? "html" : "text" ](m.title);
 							if(m.language) { tmp.addClass(m.language); }
 						}
-						tmp.prepend("<ins class='jstree-icon'></ins>");
+						tmp.prepend("<ins class='jstree-icon'>&#160;</ins>");
 						if(!m.icon && js.icon) { m.icon = js.icon; }
 						if(m.icon) { 
 							if(m.icon.indexOf("/") === -1) { tmp.children("ins").addClass(m.icon); }
@@ -1472,7 +1472,7 @@
 						}
 						d.append(tmp);
 					});
-					d.prepend("<ins class='jstree-icon'></ins>");
+					d.prepend("<ins class='jstree-icon'>&#160;</ins>");
 					if(js.children) { 
 						if(s.progressive_render && js.state !== "open") {
 							d.addClass("jstree-closed").data("jstree-children", js.children);
@@ -2255,7 +2255,7 @@
 				obj.each(function () {
 					t = $(this);
 					c = t.is("li") && t.hasClass("jstree-checked") ? "jstree-checked" : "jstree-unchecked";
-					t.find("a").not(":has(.jstree-checkbox)").prepend("<ins class='jstree-checkbox'></ins>").parent().not(".jstree-checked, .jstree-unchecked").addClass(c);
+					t.find("a").not(":has(.jstree-checkbox)").prepend("<ins class='jstree-checkbox'>&#160;</ins>").parent().not(".jstree-checked, .jstree-unchecked").addClass(c);
 				});
 				if(obj.is("li")) { this._repair_state(obj); }
 				else { obj.find("> ul > li").each(function () { _this._repair_state(this); }); }
@@ -2329,12 +2329,11 @@
 			hide_checkboxes : function () { this.get_container().children("ul").addClass("jstree-no-checkboxes"); },
 
 			_repair_state : function (obj) {
-				obj = this._get_node(obj);
+				obj = this._get_node(obj).first();
 				if(!obj.length) { return; }
 				var a = obj.find("> ul > .jstree-checked").length,
 					b = obj.find("> ul > .jstree-undetermined").length,
 					c = obj.find("> ul > li").length;
-
 				if(c === 0) { if(obj.hasClass("jstree-undetermined")) { this.check_node(obj); } }
 				else if(a === 0 && b === 0) { this.uncheck_node(obj); }
 				else if(a === c) { this.check_node(obj); }
@@ -2867,7 +2866,7 @@
 				str += "<li class='" + (val._class || "") + (val._disabled ? " jstree-contextmenu-disabled " : "") + "'><ins ";
 				if(val.icon && val.icon.indexOf("/") === -1) { str += " class='" + val.icon + "' "; }
 				if(val.icon && val.icon.indexOf("/") !== -1) { str += " style='background:url(" + val.icon + ") center center no-repeat;' "; }
-				str += "></ins><a href='#' rel='" + i + "'>";
+				str += ">&#160;</ins><a href='#' rel='" + i + "'>";
 				if(val.submenu) {
 					str += "<span style='float:right;'>&raquo;</span>";
 				}
@@ -3280,7 +3279,7 @@
 							this.get_container()
 								.children("ul").empty()
 								.append(this.data.html_data.original_container_html)
-								.find("li, a").filter(function () { return this.firstChild.tagName !== "INS"; }).prepend("<ins class='jstree-icon'></ins>").end()
+								.find("li, a").filter(function () { return this.firstChild.tagName !== "INS"; }).prepend("<ins class='jstree-icon'>&#160;</ins>").end()
 								.filter("a").children("ins:first-child").not(".jstree-icon").addClass("jstree-icon");
 							this.clean_node();
 						}
@@ -3292,7 +3291,7 @@
 							if(!d.is("ul")) { d = $("<ul>").append(d); }
 							this.get_container()
 								.children("ul").empty().append(d.children())
-								.find("li, a").filter(function () { return this.firstChild.tagName !== "INS"; }).prepend("<ins class='jstree-icon'></ins>").end()
+								.find("li, a").filter(function () { return this.firstChild.tagName !== "INS"; }).prepend("<ins class='jstree-icon'>&#160;</ins>").end()
 								.filter("a").children("ins:first-child").not(".jstree-icon").addClass("jstree-icon");
 							this.clean_node();
 						}
@@ -3322,8 +3321,8 @@
 							if(d) {
 								d = $(d);
 								if(!d.is("ul")) { d = $("<ul>").append(d); }
-								if(obj == -1 || !obj) { this.get_container().children("ul").empty().append(d.children()).find("li, a").filter(function () { return this.firstChild.tagName !== "INS"; }).prepend("<ins class='jstree-icon'></ins>").end().filter("a").children("ins:first-child").not(".jstree-icon").addClass("jstree-icon"); }
-								else { obj.children(".jstree-loading").removeClass("jstree-loading"); obj.append(d).find("li, a").filter(function () { return this.firstChild.tagName !== "INS"; }).prepend("<ins class='jstree-icon'></ins>").end().filter("a").children("ins:first-child").not(".jstree-icon").addClass("jstree-icon"); obj.data("jstree-is-loading",false); }
+								if(obj == -1 || !obj) { this.get_container().children("ul").empty().append(d.children()).find("li, a").filter(function () { return this.firstChild.tagName !== "INS"; }).prepend("<ins class='jstree-icon'>&#160;</ins>").end().filter("a").children("ins:first-child").not(".jstree-icon").addClass("jstree-icon"); }
+								else { obj.children(".jstree-loading").removeClass("jstree-loading"); obj.append(d).find("li, a").filter(function () { return this.firstChild.tagName !== "INS"; }).prepend("<ins class='jstree-icon'>&#160;</ins>").end().filter("a").children("ins:first-child").not(".jstree-icon").addClass("jstree-icon"); obj.data("jstree-is-loading",false); }
 								this.clean_node(obj);
 								if(s_call) { s_call.call(this); }
 							}
