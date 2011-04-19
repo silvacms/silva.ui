@@ -394,7 +394,7 @@
     SMI.prototype.open_screen_from_link = function(link) {
         var path = link.attr('href');
 
-        if (!path) {
+        if (!path || path == "#") {
             path = this.opened.path;
         };
         this.open_screen(path, link.attr('rel'));
