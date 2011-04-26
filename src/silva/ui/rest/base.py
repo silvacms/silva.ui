@@ -124,9 +124,12 @@ class PageREST(UIREST):
         def identifier(content):
             return 'nav' + str(service.register(content))
 
-        while content and not IRoot.providedBy(content):
+        while content:
             parents.append(identifier(content))
+            if IRoot.providedBy(content):
+                break
             content = aq_parent(content)
+
         parents.reverse()
         return {'selected': identifier(self.context.get_container()),
                 'parents': parents,

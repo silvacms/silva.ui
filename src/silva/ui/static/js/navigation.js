@@ -81,7 +81,7 @@
                 ajax: {
                     url: function (node) {
                         if (node == -1) {
-                            return url.expand({path: ''});
+                            return url.expand({path: ''}) + '.root';
                         };
                         return url.expand({path: node.data('jstree').path});
                     }
