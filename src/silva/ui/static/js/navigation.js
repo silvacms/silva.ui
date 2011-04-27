@@ -5,6 +5,7 @@
     $.fn.SMINavigation = function(smi, options) {
         var navigation = this;
         var tree = navigation.children('.tree');
+        var root_url = options.root_url;
         var url = new jsontemplate.Template(options.url, {});
         var parents_url = new jsontemplate.Template(options.parents_url, {});
         /**
@@ -81,7 +82,7 @@
                 ajax: {
                     url: function (node) {
                         if (node == -1) {
-                            return url.expand({path: ''}) + '.root';
+                            return root_url;
                         };
                         return url.expand({path: node.data('jstree').path});
                     }

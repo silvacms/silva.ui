@@ -102,6 +102,7 @@
           navigation: {
               selector: "#navigation",
               url: "${view.root_url}/{path}/++rest++silva.ui.navigation",
+              root_url: "${view.root_url}/{path}/++rest++silva.ui.navigation.root",
               parents_url: "${view.root_url}/{path}/++rest++parents"
           },
           workspace: {
