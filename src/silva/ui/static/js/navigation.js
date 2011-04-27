@@ -70,7 +70,12 @@
         tree.disableTextSelect();
 
         // Load the tree.
-        tree.jstree({
+        tree.bind('loaded.jstree', function(){
+            var root = $('ul li', this).first();
+            if (root !== undefined){
+                tree.jstree('open_node', root);
+            }
+        }).jstree({
             ui: {
                 select_limit: 1
             },
