@@ -47,7 +47,10 @@ class ISilvaUITheme(IDefaultBrowserLayer):
     silvaconf.resource(jqueryui.smoothness)
     silvaconf.resource('css/style.css')
     silvaconf.resource('css/smi.css')
+    silvaconf.resource('css/navigation.css')
+    silvaconf.resource('css/actions.css')
     silvaconf.resource('css/forms.css')
+    silvaconf.resource('css/listing.css')
 
 
 # Configuration service

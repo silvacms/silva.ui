@@ -5,12 +5,12 @@
         iface: 'title',
         jsont: '<ins class="icon"></ins>{data.title}',
         render: function(content, data) {
-            var icon = this.$content.children('ins');
+            var $icon = this.$content.children('ins');
 
             if (data.icon.indexOf('.') < 0) {
-                icon.addClass(data.icon);
+                $icon.addClass(data.icon);
             } else {
-                icon.attr(
+                $icon.attr(
                     'style',
                     'background:url(' + data.icon + ') no-repeat center center;');
             };
@@ -76,29 +76,44 @@
     });
 
     obviel.view({
-        iface: 'metadata',
+        iface: 'object',
+        name: 'header',
         render: function() {
-            var  parent_link = this.$content.find('a.parent');
+            var metadata = this.data.metadata;
+            var  $parent = this.$content.find('a.parent');
 
             // Update header
-            this.$content.children('h2').render({data: this.data.title});
-            this.$content.children('.content-tabs').render({data: this.data.menu.content});
-            this.$content.children('.view-actions').render({data: this.data.menu.view});
-            this.$content.children('.content-actions').render({data: this.data.menu.actions});
+            this.$content.children('h2').render({data: metadata.title});
+            this.$content.children('.content-tabs').render(
+                {data: metadata.menu.content});
+            this.$content.find('.view-actions ol').render(
+                {data: metadata.menu.view});
+            this.$content.children('.toolbar').render(
+                {data: this.data, name: 'toolbar', extra: {smi: this.smi, view: this.view}});
 
             // Update content link hidden link
-            this.$content.children('#content-url').attr('href', this.url.expand({path: this.data.path}));
+            this.$content.children('#content-url').attr('href', this.url.expand({path: metadata.path}));
 
             // Update parent link
-            if (this.data.up != null) {
-                parent_link.attr('href', this.data.up ||'/');
-                parent_link.attr('rel', this.smi.opened.tab);
-                parent_link.removeClass('ui-state-disabled');
-                parent_link.addClass('ui-state-default');
+            if (metadata.up != null) {
+                $parent.attr('href', metadata.up ||'/');
+                $parent.attr('rel', this.smi.opened.tab);
+                $parent.removeClass('ui-state-disabled');
+                $parent.addClass('ui-state-default');
             } else {
-                parent_link.addClass('ui-state-disabled');
-                parent_link.removeClass('ui-state-default');
+                $parent.addClass('ui-state-disabled');
+                $parent.removeClass('ui-state-default');
             };
+        }
+    });
+
+    obviel.view({
+        iface: 'object',
+        name: 'toolbar',
+        html: '<div class="actions content-actions"><ol></ol></div>',
+        render: function() {
+            this.$content.find('.content-actions ol').render(
+                {data: this.data.metadata.menu.actions});
         }
     });
 
@@ -112,32 +127,32 @@
         }
     });
 
-    var SMIWorkspace = function(workspace, smi, options) {
-        this._ = smi;
-        this.workspace = workspace;
-        this.options = options;
-        var url = jsontemplate.Template(options.url, {});
-
-        // Disable text selection
-        workspace.children('.info').disableTextSelect();
-
-        // New workspace is loaded
-        workspace.bind('content-smi', function (event, data) {
-            var workspace = $(this);
-            var info = workspace.children('.info');
-            var content = workspace.children('.content');
-
-            // Update content area
-            info.render({data: data.metadata, extra: {smi: smi, url: url}});
-            content.render({data: data.content, name:'content', extra: {smi: smi}});
-        });
-    };
-
     /**
      * Folder navigation tree using JSTree plugin.
      */
     $.fn.SMIWorkspace = function(smi, options) {
-        return new SMIWorkspace(this, smi, options);
+        var $workspace = $(this);
+        var url = jsontemplate.Template(options.url, {});
+        var $header = $workspace.children('.header');
+        var $content = $workspace.children('.content');
+
+        // Disable text selection
+        $header.disableTextSelect();
+
+        // New workspace is loaded
+        $workspace.bind('content-smi', function (event, data) {
+            // Update content area
+            $content.render({
+                data: data.content,
+                name: 'content',
+                extra: {smi: smi},
+                onrender: function(view) {
+                    $header.render({
+                        data: data.content,
+                        name: 'header',
+                        extra: {smi: smi, url: url, view: view}});
+                }});
+        });
     };
 
 })(jQuery, obviel);

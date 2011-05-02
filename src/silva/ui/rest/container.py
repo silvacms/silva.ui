@@ -44,6 +44,24 @@ class TemplateContainerListing(rest.REST):
     def GET(self):
         return self.template.render(self)
 
+
+class TemplateToolbarContainerListing(rest.REST):
+    grok.context(interfaces.IContainer)
+    grok.name('silva.ui.listing.template.toolbar')
+    grok.require('silva.ReadSilvaContent')
+
+    template = ChameleonPageTemplate(filename="templates/listingtoolbar.cpt")
+
+    def default_namespace(self):
+        return {}
+
+    def namespace(self):
+        return {'rest': self}
+
+    def GET(self):
+        return self.template.render(self)
+
+
 icon_width = 20
 pubstate_width = 16
 

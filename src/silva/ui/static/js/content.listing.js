@@ -583,7 +583,7 @@
 
     var render_header = function(configuration, $content) {
         var first_configuration = configuration.listing[0];
-        var $header = $content.find('div.header tr');
+        var $header = $content.find('div.listing-header tr');
         $.each(first_configuration.columns, function(i, column) {
             var $cell = $('<th></th>');
 
@@ -874,8 +874,40 @@
 
                 obviel.view({
                     iface: 'listing',
+                    name: 'toolbar',
+                    html_url: smi.options.listing.templates.toolbar,
+                    render: function() {
+                        // Multi selector
+                        new SMIMultiSelector(
+                            this.$content.find('.selector ins'),
+                            this.view);
+
+                        // Render actions
+                        var $actions = this.$content.find('.actions ol');
+                        render_actions(
+                            $actions,
+                            new SMISelection(this.view, this.data.content, $([])),
+                            {smi: this.smi});
+                        this.$content.bind('selectionchange-smilisting', function(event, changes) {
+                            $actions.empty();
+                            render_actions(
+                                $actions,
+                                new SMISelection(this.view, this.data.content, changes.items),
+                                {smi: this.smi});
+                        }.scope(this));
+                        this.$content.bind('actionrefresh-smilisting', function(event, data) {
+                            $actions.empty();
+                            render_actions($actions, data.data, {smi: this.smi});
+                            event.stopPropagation();
+                            event.preventDefault();
+                        }.scope(this));
+                    }
+                });
+
+                obviel.view({
+                    iface: 'listing',
                     name: 'content',
-                    html_url: smi.options.listing.template,
+                    html_url: smi.options.listing.templates.content,
                     init: function() {
                         this.configuration = configuration;
                         this.$containers = $([]);
@@ -949,9 +981,6 @@
                         this.smi.clipboard.content = this.data.content;
                         view_clipboard(this.$content.find('.clipboard-info'), this.smi);
 
-                        // Multi selector
-                        new SMIMultiSelector(this.$content.find('.header .selector'), this);
-
                         // Render header
                         render_header(this.configuration, this.$content);
 
@@ -963,26 +992,6 @@
                                 this);
                             this.$containers = this.$containers.add(container);
                             this.by_name[configuration.name] = container;
-                        }.scope(this));
-
-                        // Render actions
-                        var $actions = this.$content.find('.header .actions');
-                        render_actions(
-                            $actions,
-                            new SMISelection(this, this.data.content, $([])),
-                            {smi: this.smi});
-                        this.$content.bind('selectionchange-smilisting', function(event, changes) {
-                            $actions.empty();
-                            render_actions(
-                                $actions,
-                                new SMISelection(this, this.data.content, changes.items),
-                                {smi: this.smi});
-                        }.scope(this));
-                        this.$content.bind('actionrefresh-smilisting', function(event, data) {
-                            $actions.empty();
-                            render_actions($actions, data.data, {smi: this.smi});
-                            event.stopPropagation();
-                            event.preventDefault();
                         }.scope(this));
 
                         // Handle new data added to the listing
@@ -1004,7 +1013,7 @@
                     },
                     update_widths: function() {
                         var $containers = this.by_name;
-                        var $header = this.$content.find('div.header table');
+                        var $header = this.$content.find('div.listing-header table');
                         var $reference = null;
                         var layout = null;
                         var others = [];

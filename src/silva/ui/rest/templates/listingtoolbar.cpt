@@ -1,0 +1,14 @@
+<tal:toolbar i18n:domain="silva">
+  <div class="selector">
+    <ins class="none">
+    </ins>
+  </div>
+  <div class="filter">
+    <input type="search" placeholder="Filter ..."
+           i18n:attributes="placeholder" />
+  </div>
+  <div class="actions">
+    <ol>
+    </ol>
+  </div>
+</tal:toolbar>

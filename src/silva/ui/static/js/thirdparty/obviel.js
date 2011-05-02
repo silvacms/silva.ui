@@ -192,7 +192,7 @@ var obviel = {};
     };
 
     // finish to render the view using the given template
-    module.View.prototype._finalize_rendering = function(template) {
+    module.View.prototype._render = function(template, render) {
         if (this.iframe) {
             var iframe = $('<iframe src="">');
 
@@ -208,24 +208,18 @@ var obviel = {};
                 var template_window = iframe.get(0).contentWindow;
                 var template_document = template_window.document;
                 template_window.onload = function() {
-                    if (this.render) {
-                        this.render(this.$content, this.data);
-                    };
-                }.scope(this);
+                    render();
+                };
                 template_document.write(template);
                 template_document.close();
             } else {
-                if (this.render) {
-                    this.render(this.$content, this.data);
-                };
+                render();
             };
         } else {
             if (template) {
                 this.$content.html(template);
             };
-            if (this.render) {
-                this.render(this.$content, this.data);
-            }
+            render();
         };
     };
 
@@ -233,7 +227,7 @@ var obviel = {};
     module._template_cache = {};
 
     // render the view: retrieve a template to render it and render it
-    module.View.prototype._render = function() {
+    module.View.prototype._fetch_and_render = function(callback) {
         // clean content if needed (call cleanup callback)
         this.$content.triggerHandler('cleanup-obviel');
 
@@ -242,6 +236,14 @@ var obviel = {};
                 this.cleanup();
             }.scope(this));
         };
+
+        // make a finalizer that call render and the callback
+        var finalizer = function() {
+            if (this.render != undefined)
+                this.render(this.$content, this.data);
+            if (callback != undefined)
+                callback(this);
+        }.scope(this);
 
         // resources
         var resources = this.data.html_resources || this.html_resources;
@@ -268,9 +270,9 @@ var obviel = {};
                         jsont, this.template_options);
                     module._template_cache[jsont] = template;
                 };
-                return this._finalize_rendering(template.expand(this));
+                return this._render(template.expand(this), finalizer);
             };
-            return this._finalize_rendering(this.data.html || this.html);
+            return this._render(this.data.html || this.html, finalizer);
         };
 
         if (this.data.html_url || this.html_url ||
@@ -281,14 +283,14 @@ var obviel = {};
             if (url) {
                 var template = module._template_cache[url];
                 if (template) {
-                    return this._finalize_rendering(template.expand(this));
+                    return this._render(template.expand(this), finalizer);
                 };
             } else {
                 url = (this.data.html_url || this.html_url);
                 if (!this.nocache) {
                     var template = module._template_cache[url];
                     if (template) {
-                        return this._finalize_rendering(template);
+                        return this._render(template, finalizer);
                     };
                 }
             };
@@ -304,14 +306,14 @@ var obviel = {};
                     } else {
                         module._template_cache[url] = data;
                     };
-                    this._finalize_rendering(data);
+                    this._render(undefined, finalizer);
                 }.scope(this)
             });
-            return;
+            return this;
         };
 
         // no explicit content, just call the callback
-        return this._finalize_rendering();
+        return this._render(undefined, finalizer);
     };
 
     /**
@@ -390,7 +392,7 @@ var obviel = {};
             };
         };
         if (to_render != null) {
-            to_render._render();
+            to_render._fetch_and_render(args['onrender']);
         } else if (window.console && console.log) {
             console.log('failed view lookup for args', args, 'and', data);
         };
@@ -431,7 +433,7 @@ var obviel = {};
             return v1.order - v2.order;
         });
         $.each(to_render, function (i, view) {
-            view._render();
+            view._fetch_and_render(args['onrender']);
         });
     };
 

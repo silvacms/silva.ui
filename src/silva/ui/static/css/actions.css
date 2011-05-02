@@ -1,0 +1,62 @@
+
+/* Action and action group */
+
+div.actions {
+  -khtml-border-radius: 3px;
+  -moz-border-radius: 3px;
+  -ms-border-radius: 3px;
+  -o-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  background: #fff url(../img/gradient20m.png) repeat-x top;
+  border-radius: 3px;
+  border: 1px #777 solid;
+  color: #000;
+  float: left;
+  height: 20px;
+  margin: 2px 5px;
+}
+
+div.actions ol {
+  list-style: none;
+  margin-left: 0px;
+}
+div.actions ol li {
+  float: left;
+}
+
+div.actions ol li a {
+  display: block;
+  border-right: 1px #777 solid;
+  line-height: 20px;
+  padding: 0px 4px 0px 4px;
+}
+div.actions ol li:last-child a {
+  border-right: 0px;
+}
+div.actions ol li a.inactive {
+  color: #999;
+}
+div.actions ol li a.active,
+div.actions ol li a:hover {
+  background: #fff;
+  border-color: #888;
+  color: #222;
+}
+
+div.actions .popup {
+  -khtml-border-radius:3px 3px 0px 0px;
+  -moz-border-radius:3px 3px 0px 0px;
+  -ms-border-radius:3px 3px 0px 0px;
+  -o-border-radius:3px 3px 0px 0px;
+  -webkit-border-radius:3px 3px 0px 0px;
+  position:absolute;
+  width: 200px;
+  bottom: 25px;
+  display:block;
+  background:#fff;
+  border-radius:3px 3px 0px 0px;
+  border:1px #999 solid;
+  margin-left: 0px;
+  list-style:none;
+  display: none;
+}

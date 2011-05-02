@@ -28,42 +28,53 @@
     </div>
     <div id="main">
       <nav id="navigation">
-        <h1 i18n:translate="">
-          <a href="#!/"><img src="${view.logo_url}" alt="Silva" /></a>
-        </h1>
+        <div class="header">
+          <h1 i18n:translate="">
+            <a href="#!/"><img src="${view.logo_url}" alt="Silva" /></a>
+          </h1>
+        </div>
         <div class="tree"></div>
-        <ol class="actions session-actions">
-          <li>
-            <a href="${view.root_url}/service_members/logout"
-               i18n:translate="">
-              Logout
-            </a>
-          </li>
-          <li>
-            <a class="form-popup"
-               href="${view.root_url}/++rest++silva.core.smi.userpreferences"
-               i18n:translate="">
-              User preferences
-            </a>
-          </li>
-        </ol>
+        <div class="footer">
+          <div class="actions">
+            <ol>
+              <li>
+                <a href="${view.root_url}/service_members/logout"
+                   i18n:translate="">
+                  Logout
+                </a>
+              </li>
+              <li>
+                <a class="form-popup"
+                   href="${view.root_url}/++rest++silva.core.smi.userpreferences"
+                   i18n:translate="">
+                  User preferences
+                </a>
+              </li>
+            </ol>
+          </div>
+        </div>
       </nav>
       <div id="workspace">
-        <div class="info">
-          <ol class="actions admin-actions">
-            <li>
-              <a class="parent open-screen tool ui-state-default" href="" rel="">
-                <ins class="ui-icon ui-icon-arrowreturnthick-1-n"></ins>
-              </a>
-            </li>
-          </ol>
+        <div class="header">
+          <div class="actions admin-actions">
+            <ol>
+              <li>
+                <a class="parent open-screen ui-state-default" href="" rel="">
+                  <ins class="ui-icon ui-icon-arrowreturnthick-1-n"></ins>
+                </a>
+              </li>
+            </ol>
+          </div>
           <ol class="tabs content-tabs"></ol>
-          <ol class="actions view-actions"></ol>
+          <div class="actions view-actions">
+            <ol></ol>
+          </div>
           <h2>
             <ins class="icon loading"></ins>
             <tal:msg i18n:translate="">Loading...</tal:msg>
           </h2>
-          <ol class="actions content-actions"></ol>
+          <div class="toolbar">
+          </div>
           <a href="#" id="content-url"></a>
         </div>
         <div class="content"></div>
@@ -116,7 +127,10 @@
           listing: {
               configuration: "${view.root_url}/++rest++silva.ui.listing.configuration",
               action: "${view.root_url}/{path}/++rest++silva.ui.listing.{action}",
-              template: "${view.root_url}/++rest++silva.ui.listing.template"
+              templates: {
+                content: "${view.root_url}/++rest++silva.ui.listing.template",
+                toolbar: "${view.root_url}/++rest++silva.ui.listing.template.toolbar"
+              }
           },
           editor: {
               configuration: "${view.root_url}/++rest++silva.core.editor.configuration"

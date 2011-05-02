@@ -10,18 +10,6 @@ form {
   border-right: 1px dotted #ccc;
 }
 
-.portlets {
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 250px;
-  bottom: 0px;
-}
-
-.portlets p {
-  padding: 5px;
-}
-
 .form-content h3,
 .form-content h4,
 .form-content h5 {
@@ -173,6 +161,19 @@ form {
   color:#222;
 }
 
+/* Portlets */
+
+.portlets {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 250px;
+  bottom: 0px;
+}
+
+.portlets p {
+  padding: 5px;
+}
 
 /* Image information orientation */
 

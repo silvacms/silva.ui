@@ -75,7 +75,7 @@ class UIREST(rest.REST):
             message, target_language=self.language, context=self.request)
 
     def get_content_path(self, content):
-            return content.absolute_url_path()[len(self.root_path):] or '/'
+        return content.absolute_url_path()[len(self.root_path):] or '/'
 
     def get_notifications(self):
         messages = []
@@ -133,7 +133,7 @@ class PageREST(UIREST):
         parents.reverse()
         return {'selected': identifier(self.context.get_container()),
                 'parents': parents,
-                'invalidation': 
+                'invalidation':
                     NavigationSynchronizer(self.request).get_changes()}
 
     def get_metadata_menu(self, menu):
@@ -146,24 +146,26 @@ class PageREST(UIREST):
         except PageException as error:
             return self.json_response(error.payload(self))
 
+        metadata = {
+            'ifaces': ['metadata'],
+            'title': {
+                'ifaces': ['title'],
+                'title': self.context.get_title_or_id(),
+                'icon': get_icon(self.context, self.request),
+                },
+            'menu': {
+                'content': self.get_metadata_menu(ContentMenu),
+                'view': self.get_metadata_menu(ViewMenu),
+                'actions': self.get_metadata_menu(ActionMenu),
+                },
+            'path': self.get_content_path(self.context),
+            }
+        payload['metadata'] = metadata
+
         data = {
             'ifaces': ['content'],
             'content': payload,
-            'navigation': self.get_navigation(),
-            'metadata': {
-                'ifaces': ['metadata'],
-                'title': {
-                    'ifaces': ['title'],
-                    'title': self.context.get_title_or_id(),
-                    'icon': get_icon(self.context, self.request),
-                    },
-                'menu': {
-                        'content': self.get_metadata_menu(ContentMenu),
-                        'view': self.get_metadata_menu(ViewMenu),
-                        'actions': self.get_metadata_menu(ActionMenu),
-                        },
-                'path': self.get_content_path(self.context),
-                }}
+            'navigation': self.get_navigation()}
         notifications =  self.get_notifications()
         if notifications is not None:
             data['notifications'] = notifications
@@ -171,7 +173,7 @@ class PageREST(UIREST):
         if resources is not None:
             data['html_resources'] = resources
         if not IRoot.providedBy(self.context):
-            data['metadata']['up'] = self.get_content_path(aq_parent(self.context))
+            metadata['up'] = self.get_content_path(aq_parent(self.context))
         return self.json_response(data)
 
     POST = GET

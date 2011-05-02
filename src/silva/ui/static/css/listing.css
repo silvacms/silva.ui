@@ -1,0 +1,143 @@
+
+/* Header */
+#workspace .content .listing-header {
+  background: #eee url(../img/gradient25.png) repeat-x bottom;
+  border-bottom: 1px #999 solid;
+  height: 25x;
+  overflow: hidden;
+  padding-right: 17px;
+  position: relative;
+}
+
+/* Toolbar */
+
+#workspace .header .toolbar .selector {
+  float:left;
+}
+
+#workspace .header .toolbar .selector ins {
+  width:20px;
+  height:20px;
+  margin-top: 2px;
+  display: block;
+  background-image:url(../img/sprite.png);
+}
+#workspace .header .toolbar .selector ins.none { background-position:-0px -60px; }
+#workspace .header .toolbar .selector ins.single { background-position:-40px -60px; }
+#workspace .header .toolbar .selector ins.partial { background-position:-40px -60px; }
+#workspace .header .toolbar .selector ins.all { background-position:-20px -60px; }
+#workspace .header .toolbar .selector ins.disabled { background-position:-60px -60px; }
+
+#workspace .header .toolbar .filter {
+  float: right;
+  margin: 1px 4px;
+}
+
+
+/* Listing */
+#workspace .content table {
+  width: 100%;
+  border-collapse: collapse;
+}
+#workspace .content .listing-header th {
+  line-height:24px;
+}
+#workspace .content .listing td,
+#workspace .content .listing-header th {
+  padding:0 5px 0 5px;
+  line-height:22px;
+  text-align:left;
+  white-space:nowrap;
+  vertical-align: middle;
+  overflow:hidden;
+}
+#workspace .content .listing td ins.state {
+  background-image:url(../img/sprite.png);
+  display:block;
+  float:left;
+}
+#workspace .content .listing tr.item input {
+  width: 100%;
+}
+
+
+/* Table listing */
+#workspace .content .listing {
+  -ms-overflow-x: hidden;
+  top: 25px;
+  bottom: 25px;
+  right: 0;
+  left: 0;
+  overflow-x: hidden;
+  overflow-y: scroll;
+  position: absolute;
+}
+#workspace .content .listing dt {
+  padding-left: 8px;
+  padding-right: 8px;
+  line-height: 24px;
+  border-bottom: 1px solid #999999;
+}
+#workspace .content .listing dt h4{
+  padding-left: 12px;
+}
+#workspace .content .listing dt ins.ui-icon {
+  margin: 4px 4px 0px 0px;
+}
+
+#workspace .content .listing dd.collapsed {
+  display: none;
+}
+#workspace .content .listing .static tr:nth-child(even) {
+  background-color:#f3f7fb;
+}
+#workspace .content .listing .static tr.hover {
+  background-color:#d2e5f9;
+}
+#workspace .content .listing .static tr.hidden {
+  display: none;
+}
+#workspace .content .listing .static tr.selected {
+  background-color:#4d96e6;
+  color:#fff;
+}
+#workspace .content .listing .static tr.selected.hover {
+  background-color:#5fa2ea;
+}
+#workspace .content .listing .static tr.item:active {
+  background-color:#4d96e6!important;
+  color:#fff;
+}
+#workspace .content .listing td.moveable,
+#workspace .content .listing td.moveable ins {
+  cursor:move;
+}
+#workspace .content .listing .dragging {
+  background-color:#4d96e6!important;
+  color:#fff;
+}
+#workspace .content .listing tr.empty td {
+  padding: 0px 8px;
+}
+
+
+/* Table listing footer */
+#workspace .content .listing-footer {
+  background:#fff url(../img/gradient25.png) repeat-x top;
+  border-top:1px #999 solid;
+  bottom:0;
+  color:#333;
+  height:25px;
+  left:0;
+  line-height:25px;
+  position:absolute;
+  right:0;
+}
+#workspace .content .listing-footer .clipboard-info a.detail ins {
+  margin-top: 4px;
+}
+#workspace .content .listing-footer .clipboard-info {
+  padding: 0px 15px;
+  float:right;
+  position: relative;
+}
