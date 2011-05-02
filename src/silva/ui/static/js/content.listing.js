@@ -221,159 +221,148 @@
      * @param url_template: base URL to use for REST-type actions
      * @param name: name used to register actions in obviel
      */
-    var build_actions_renderer = function(action_definitions, url_template) {
-        var prototypes = [];
+    var build_actions_renderer = function(group_definitions, url_template) {
+        var renderers = [];
 
-        $.each(action_definitions, function(i, action_definition) {
-            var definition = {
-                order: action_definition.order,
-                init: function() {
-                    this.collecting = false;
-                },
-                render: function() {
-                    var html = $('<li><a class="action ui-state-default"></a></li>');
-                    var link = html.children('a');
-                    var is_active = true;
+        $.each(group_definitions, function(i, group_definition) {
+            var group = new obviel.Registry();
 
-                    if (this.active != undefined && !this.active()) {
-                        is_active = false;
-                    };
-                    if (action_definition.title) {
-                        link.text(action_definition.title);
-                    };
-                    if (action_definition.icon) {
-                        link.prepend(
-                            '<ins class="ui-icon ui-icon-' +
-                                action_definition.icon +
-                                '"></ins>');
-                    };
-                    if (action_definition.accesskey) {
-                        link.attr('accesskey', action_definition.accesskey);
-                    };
-                    if (this.render_children) {
-                        var $opener = $('<ins class="ui-icon ui-icon-triangle-1-n"></ins>');
-                        var $children = $('<ol class="popup"></ol>');
+            $.each(group_definition, function(i, action_definition) {
+                var definition = {
+                    order: action_definition.order,
+                    init: function() {
+                        this.collecting = false;
+                    },
+                    render: function() {
+                        var html = $('<li><a class="ui-state-default"></a></li>');
+                        var link = html.children('a');
 
-                        this.render_children($children, this.data, {smi: this.smi});
-                        $opener.bind('click', function() {
-                            $children.fadeToggle();
-                            return false;
-                        });
-                        link.prepend($opener);
-                        link.prepend($children);
-                    };
-                    if (!is_active) {
-                        link.addClass('inactive');
+                        if (action_definition.title) {
+                            link.text(action_definition.title);
+                        };
+                        if (action_definition.icon) {
+                            link.prepend(
+                                '<ins class="ui-icon ui-icon-' +
+                                    action_definition.icon +
+                                    '"></ins>');
+                        };
+                        this.$content.append(html);
+                        if (this.render_children) {
+                            var $opener = $('<ins class="ui-icon ui-icon-triangle-1-s"></ins>');
+                            var $children = $('<ol class="popup"></ol>');
+
+                            this.render_children($children, this.data, {smi: this.smi});
+                            $opener.bind('click', function() {
+                                $children.fadeToggle();
+                                return false;
+                            });
+                            link.append($opener);
+                            link.append($children);
+                        };
+                        if (this.action != undefined) {
+                            link.bind('click', function() {
+                                this.action();
+                            }.scope(this));
+                        };
+                        if (action_definition.accesskey) {
+                            link.attr('accesskey', action_definition.accesskey);
+                        };
                     }
-                    if (is_active && this.action != undefined) {
-                        link.bind('click', function() {
-                            this.action();
-                        }.scope(this));
-                    };
-                    this.$content.append(html);
-                }
-            };
-            if (action_definition.available) {
-                definition['available'] = predicates_evaluator(action_definition.available);
-            };
-            if (action_definition.active) {
-                definition['active'] = predicates_evaluator(action_definition.active);
-            };
-            if (action_definition.children) {
-                definition['render_children'] = build_actions_renderer(
-                    action_definition.children, url_template);
-            };
-            for (var action_type in action_definition.action) {
-                switch(action_type) {
-                case 'rest':
-                    definition['action'] = function() {
-                        var url = url_template.expand({
-                            path: this.smi.opened.path,
-                            action: action_definition.action.rest.action});
-                        var payload = [];
-                        switch(action_definition.action.rest.send) {
-                        case 'selected_ids':
-                            $.each(this.data.items(), function(i, item) {
-                                payload.push({name: 'content', value: item.id});
-                            });
-                            break;
-                        case 'clipboard_ids':
-                            $.each(this.smi.clipboard.cutted, function(i, item) {
-                                payload.push({name: 'cutted', value: item.id});
-                            });
-                            $.each(this.smi.clipboard.copied, function(i, item) {
-                                payload.push({name: 'copied', value: item.id});
-                            });
-                            break;
-                        case 'item_values':
-                            var names = action_definition.action.rest.values;
-                            var counter = 0;
-
-                            if (!this.collecting) {
-                                this.data.inputs(names);
-                                this.collecting = true;
-                                return;
-                            };
-                            this.data.values(names, function(data) {
-                                var prefix = 'values.' + counter.toString() + '.';
-                                for (var key in data) {
-                                    payload.push({name: prefix + key, value: data[key]});
-                                };
-                                counter += 1;
-                            });
-                            payload.push({name: 'values', value: counter.toString()});
-                            this.collecting = false;
-                            break;
-                        }
-                        $.ajax({
-                            url: url,
-                            type: 'POST',
-                            dataType: 'json',
-                            data: payload,
-                            success: function(result) {
-                                this.$content.render({data: result,
-                                                      extra: {selection: this.data,
-                                                              smi: this.smi}});
-                            }.scope(this)
-                        });
-                    };
-                    break;
-                case 'cut':
-                    definition['action'] = function () {
-                        this.smi.clipboard.cut(this.data.data);
-                        this.$content.trigger(
-                            'actionrefresh-smilisting', {data: this.data});
-                    };
-                    break;
-                case 'copy':
-                    definition['action'] = function () {
-                        this.smi.clipboard.copy(this.data.data);
-                        this.$content.trigger(
-                            'actionrefresh-smilisting', {data: this.data});
-                    };
-                    break;
                 };
-            };
-            prototypes.push(definition);
+                if (action_definition.available) {
+                    definition['available'] = predicates_evaluator(action_definition.available);
+                };
+                if (action_definition.children) {
+                    definition['render_children'] = build_actions_renderer(
+                        action_definition.children, url_template);
+                };
+                for (var action_type in action_definition.action) {
+                    switch(action_type) {
+                    case 'rest':
+                        definition['action'] = function() {
+                            var url = url_template.expand({
+                                path: this.smi.opened.path,
+                                action: action_definition.action.rest.action});
+                            var payload = [];
+                            switch(action_definition.action.rest.send) {
+                            case 'selected_ids':
+                                $.each(this.data.items(), function(i, item) {
+                                    payload.push({name: 'content', value: item.id});
+                                });
+                                break;
+                            case 'clipboard_ids':
+                                $.each(this.smi.clipboard.cutted, function(i, item) {
+                                    payload.push({name: 'cutted', value: item.id});
+                                });
+                                $.each(this.smi.clipboard.copied, function(i, item) {
+                                    payload.push({name: 'copied', value: item.id});
+                                });
+                                break;
+                            case 'item_values':
+                                var names = action_definition.action.rest.values;
+                                var counter = 0;
+
+                                if (!this.collecting) {
+                                    this.data.inputs(names);
+                                    this.collecting = true;
+                                    return;
+                                };
+                                this.data.values(names, function(data) {
+                                    var prefix = 'values.' + counter.toString() + '.';
+                                    for (var key in data) {
+                                        payload.push({name: prefix + key, value: data[key]});
+                                    };
+                                    counter += 1;
+                                });
+                                payload.push({name: 'values', value: counter.toString()});
+                                this.collecting = false;
+                                break;
+                            }
+                            $.ajax({
+                                url: url,
+                                type: 'POST',
+                                dataType: 'json',
+                                data: payload,
+                                success: function(result) {
+                                    this.$content.render({data: result,
+                                                          extra: {selection: this.data,
+                                                                  smi: this.smi}});
+                                }.scope(this)
+                            });
+                        };
+                        break;
+                    case 'cut':
+                        definition['action'] = function () {
+                            this.smi.clipboard.cut(this.data.data);
+                            this.$content.trigger(
+                                'actionrefresh-smilisting', {data: this.data});
+                        };
+                        break;
+                    case 'copy':
+                        definition['action'] = function () {
+                            this.smi.clipboard.copy(this.data.data);
+                            this.$content.trigger(
+                                'actionrefresh-smilisting', {data: this.data});
+                        };
+                        break;
+                    };
+                };
+                group.register(definition);
+            });
+            renderers.push(function($content, data, extra) {
+                var $actions = $('<div class="actions"><ol></ol></div>');
+
+                var rendered = group.render($actions.children('ol'), {every: data, extra: extra});
+                if (rendered.length) {
+                    $content.append($actions);
+                };
+            });
         });
-
-        prototypes.sort(function (p1, p2) {
-            return p1.order - p2.order;
-        });
-
-        var Action = function(definition, $content, data, extra) {
-            $.extend(this, definition);
-            $.extend(this, extra);
-            this.$content = $content,
-            this.data = data;
-
-            this.init();
-        };
 
         return function($content, data, extra) {
-            $.each(prototypes, function() {
-                var action = new Action(this, $content, data, extra);
-                action.render();
+            $content.children('div.actions').remove();
+            $.each(renderers, function() {
+                this($content, data, extra);
             });
         };
     };
@@ -883,23 +872,20 @@
                             this.view);
 
                         // Render actions
-                        var $actions = this.$content.find('.actions ol');
                         render_actions(
-                            $actions,
+                            this.$content,
                             new SMISelection(this.view, this.data.content, $([])),
                             {smi: this.smi});
-                        this.$content.bind('selectionchange-smilisting', function(event, changes) {
-                            $actions.empty();
-                            render_actions(
-                                $actions,
-                                new SMISelection(this.view, this.data.content, changes.items),
-                                {smi: this.smi});
+                        this.view.$content.bind('selectionchange-smilisting', function(event, changes) {
+                           render_actions(
+                               this.$content,
+                               new SMISelection(this.view, this.data.content, changes.items),
+                               {smi: this.smi});
                         }.scope(this));
-                        this.$content.bind('actionrefresh-smilisting', function(event, data) {
-                            $actions.empty();
-                            render_actions($actions, data.data, {smi: this.smi});
-                            event.stopPropagation();
-                            event.preventDefault();
+                        this.view.$content.bind('actionrefresh-smilisting', function(event, data) {
+                           render_actions(this.$content, data.data, {smi: this.smi});
+                           event.stopPropagation();
+                           event.preventDefault();
                         }.scope(this));
                     }
                 });

@@ -375,7 +375,7 @@ var obviel = {};
     module.Registry.prototype._render_data = function(element, data, args) {
         var ifaces = args.ifaces || module.ifaces(data);
         var views = this._views[args.name];
-        var to_render = null;
+        var to_render = undefined;
 
         if (views) {
             for (var i=0; i < ifaces.length; i++) {
@@ -391,11 +391,12 @@ var obviel = {};
                 };
             };
         };
-        if (to_render != null) {
+        if (to_render != undefined) {
             to_render._fetch_and_render(args['onrender']);
         } else if (window.console && console.log) {
             console.log('failed view lookup for args', args, 'and', data);
         };
+        return to_render;
     };
 
     // Render all possible views for a given JSON object (viewlet like)
@@ -406,7 +407,7 @@ var obviel = {};
         var to_render = [];
 
         if (views == undefined) {
-            return;
+            return [];
         };
         $.each(ifaces, function (i, iface) {
             var definitions = views[iface];
@@ -435,6 +436,7 @@ var obviel = {};
         $.each(to_render, function (i, view) {
             view._fetch_and_render(args['onrender']);
         });
+        return to_render;
     };
 
     // Fetch an JSON object and render it.
@@ -442,11 +444,12 @@ var obviel = {};
         $.ajax({
             type: 'GET',
             url: url,
-            success: function(obj) {
-                this._render_data(element, obj, args);
+            success: function(data) {
+                this._render_data(element, data, args);
             }.scope(this),
             dataType: 'json'
         });
+        return undefined;
     };
 
     /**
@@ -470,11 +473,11 @@ var obviel = {};
         };
 
         if (args.data) {
-            this._render_data(element, args.data, args);
+            return this._render_data(element, args.data, args);
         } else if (args.every) {
-            this._render_every_data(element, args.every, args);
+            return this._render_every_data(element, args.every, args);
         } else if(args.url) {
-            this._render_url(element, args.url, args);
+            return this._render_url(element, args.url, args);
         } else {
             throw((new module.InvalidOptions(args)));
         };

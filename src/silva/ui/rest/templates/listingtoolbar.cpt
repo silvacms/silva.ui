@@ -7,8 +7,4 @@
     <input type="search" placeholder="Filter ..."
            i18n:attributes="placeholder" />
   </div>
-  <div class="actions">
-    <ol>
-    </ol>
-  </div>
 </tal:toolbar>

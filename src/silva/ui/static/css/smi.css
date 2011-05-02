@@ -295,25 +295,6 @@ ins.loading {
   background:#fff url(../img/loading.gif) no-repeat center center!important;
 }
 
-ins.arrow.up { background-position:-0px -20px; }
-ins.arrow.down { background-position:-20px -20px; }
-ins.arrow.left { background-position:-40px -20px; }
-ins.arrow.right { background-position:-60px -20px; }
-ins.arrow.top { background-position:-80px -20px; }
-ins.arrow.bottom { background-position:-1000px -20px; }
-ins.arrow.first { background-position:-120px -20px; }
-ins.arrow.last { background-position:-140px -20px; }
-ins.arrow.reload { background-position:-160px -20px; }
-
-ins.action.confirm { background-position:-0px -40px; }
-ins.action.cancel { background-position:-20px -40px; }
-ins.action.add { background-position:-40px -40px; }
-ins.action.remove { background-position:-60px -40px; }
-ins.action.plus { background-position:-80px -40px; }
-ins.action.minus { background-position:-100px -40px; }
-
-ins.sort.asc { background-position:-120px -40px; }
-ins.sort.desc { background-position:-140px -40px; }
 
 /* Silva Content Types - uses !important to override default jstree-icon */
 ins.agenda_filter { background-position:-60px -80px!important; }
