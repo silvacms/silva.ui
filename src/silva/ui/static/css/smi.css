@@ -424,6 +424,16 @@ input, textarea {
   width:100%;
   border-collapse:collapse;
 }
+#workspace .content .header {
+  background:#eee url(../img/gradient25.png) repeat-x bottom;
+  border-bottom:1px #999 solid;
+  height50px;
+  overflow:hidden;
+  padding-right:17px;
+}
+#workspace .content .header th {
+  line-height:24px;
+}
 #workspace .content .listing td,
 #workspace .content .header th {
   padding:0 5px 0 5px;
@@ -435,6 +445,28 @@ input, textarea {
 }
 #workspace .content .header th.ui-state-default {
   padding: 0px 2px 0px 8px;
+}
+#workspace .content .header ol.actions {
+  list-style:none;
+  margin-left: 0px;
+}
+#workspace .content .header ol.actions li a {
+  margin: 3px 2px;
+}
+#workspace .content .header a.inactive {
+  color: #999;
+}
+#workspace .content .header ins.selector {
+  width:20px;
+  height:20px;
+  display:block;
+  float:left;
+  margin-top: 2px;
+  background-image:url(../img/sprite.png);
+}
+#workspace .content .header input.filter {
+  float: right;
+  margin: 1px 4px;
 }
 #workspace .content .listing a.close-selection ins {
   margin-top: 6px;
@@ -453,20 +485,9 @@ input, textarea {
 }
 
 /* Table listing */
-#workspace .content .header {
-  background:#eee url(../img/gradient25.png) repeat-x bottom;
-  border-bottom:1px #999 solid;
-  height:24px;
-  overflow:hidden;
-  padding-right:17px;
-}
-#workspace .content .header th {
-  line-height:24px;
-}
-
 #workspace .content .listing {
   -ms-overflow-x:hidden;
-  top:25px;
+  top:50px;
   bottom:25px;
   right:0;
   left:0;
@@ -535,28 +556,10 @@ input, textarea {
   position:absolute;
   right:0;
 }
-#workspace .content .footer ol.actions {
-  list-style:none;
-  margin-left: 0px;
-}
-#workspace .content .footer ol.actions li a {
-  margin: 3px 2px;
-}
-#workspace .content .footer a.inactive {
-  color: #999;
-}
-#workspace .content .footer ins.selector {
-  width:20px;
-  height:20px;
-  display:block;
-  float:left;
-  margin-top: 2px;
-  background-image:url(../img/sprite.png);
-}
 #workspace .content .footer .clipboard-info a.detail ins {
   margin-top: 4px;
 }
-#workspace .content .footer .popup {
+#workspace .content .popup {
   -khtml-border-radius:3px 3px 0px 0px;
   -moz-border-radius:3px 3px 0px 0px;
   -ms-border-radius:3px 3px 0px 0px;

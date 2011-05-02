@@ -1,5 +1,10 @@
 <tal:listing i18n:domain="silva">
   <div class="header">
+    <ins class="selector none">
+    </ins>
+    <ol class="actions">
+    </ol>
+    <input class="filter" type="search" placeholder="Filter ..." />
     <table>
       <thead><tr></tr></thead>
     </table>
@@ -7,7 +12,7 @@
   <dl class="listing">
     <dt class="publishables ui-state-default">
       <ins class="ui-icon ui-icon-triangle-1-s"></ins>
-      <tal:msg i18n:translate="">Publishable(s)</tal:msg>
+      <tal:msg i18n:translate="">Structual content(s)</tal:msg>
     </dt>
     <dd class="publishables">
       <table class="static">
@@ -25,11 +30,6 @@
     </dd>
   </dl>
   <div class="footer">
-    <ins class="selector none">
-    </ins>
-    <ol class="actions">
-    </ol>
-
     <div class="clipboard-info"
        i18n:translate="">
       <ol class="popup">

@@ -105,8 +105,6 @@
     $.fn.updateTableColumnsWidths = function(options, reference) {
         return this.each(function() {
             var colComputedWidths = {};
-            var colWidths = {};
-            var colOuterWidths = {};
             var fixedWidths = {};
             var totalWidth = 0;
 
@@ -116,26 +114,14 @@
             }
             if (reference !== undefined) {
                 var regex = /width: ([0-9]+)([pxem%]*)/;
-                var minus = 0;
 
                 reference.find('tr:first').find('td, th').each(function(i) {
                     var match = $(this).attr('style').toLowerCase().match(regex);
                     var width = parseInt(match[1]);
                     var fixed = match[2];
 
-                    colWidths[i] = width;
-                    colOuterWidths[i] = $(this).outerWidth();
-                    if (options.skip &&
-                        options.skip[i] &&
-                        i - minus &&
-                        fixedWidths[i - (minus + 1)] == fixed) {
-                        minus += 1;
-                        colComputedWidths[i - minus] +=
-                           colOuterWidths[i - 1] - colWidths[i - 1] + width;
-                    } else {
-                        colComputedWidths[i - minus] = width;
-                        fixedWidths[i - minus] = fixed;
-                    };
+                    colComputedWidths[i] = width;
+                    fixedWidths[i] = fixed;
                 });
             } else {
                 $(this).find('tr:first').find('td').each(function(i) {

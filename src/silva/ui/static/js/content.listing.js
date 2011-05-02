@@ -89,10 +89,10 @@
         name: 'action',
         jsont: '<a rel="{column.action|htmltag}" href="{data.path|htmltag}">{value}</a>',
         render: function() {
-            var link = this.$content.children('a');
+            var $link = this.$content.children('a');
 
-            link.bind('click', function(event) {
-                this.smi.open_screen_from_link(link);
+            $link.bind('click', function(event) {
+                this.smi.open_screen_from_link($link);
                 return false;
             }.scope(this));
         }
@@ -104,18 +104,37 @@
     });
 
     listingcolumns.register({
-        name: 'icon',
-        html: '<ins class="icon"></ins>',
+        name: 'move',
+        html: '...',
         render: function() {
-            var icon = this.$content.children('ins');
+            this.$content.addClass('moveable');
+        }
+    });
+
+    listingcolumns.register({
+        name: 'nothing',
+        html: ''
+    });
+
+    listingcolumns.register({
+        name: 'action-icon',
+        jsont: '<a href="{data.path|htmltag}" rel="{column.action|htmltag}" title="{data.title|htmltag}"><ins class="icon"></ins></a>',
+        render: function() {
+            var $icon = this.$content.find('ins');
+            var $link = this.$content.children('a');
 
             if (this.value.indexOf('.') < 0) {
-                icon.addClass(this.value);
+                $icon.addClass(this.value);
             } else {
-                icon.attr(
+                $icon.attr(
                     'style',
                     'background:url(' + this.value + ') no-repeat center center');
             };
+
+            $link.bind('click', function(event) {
+                this.smi.open_screen_from_link($link);
+                return false;
+            }.scope(this));
         }
     });
 
@@ -562,17 +581,12 @@
         this.listing.unselect(this._raw_items);
     };
 
-
     var render_header = function(configuration, $content) {
         var first_configuration = configuration.listing[0];
         var $header = $content.find('div.header tr');
         $.each(first_configuration.columns, function(i, column) {
             var $cell = $('<th></th>');
 
-            if (!i) {
-                $cell.addClass('ui-state-default');
-                $cell.append('<ins class="ui-icon ui-icon-triangle-2-n-s"></ins>');
-            };
             if (column.caption) {
                 $cell.text(column.caption);
             };
@@ -787,15 +801,6 @@
 
                                 $.each(configuration.columns, function(e, column) {
                                     var $cell = $('<td></td>');
-
-                                    if (!e) {
-                                        $cell.addClass('first');
-                                    };
-                                    if ((!initial || (initial && i)) &&
-                                        configuration.sortable &&
-                                        $.inArray(column.name, configuration.sortable.columns) >= 0) {
-                                        $cell.addClass('moveable');
-                                    };
                                     $cell.bind('updatecell-smilisting', function(event, data) {
                                         listingcolumns.render($(this), {
                                             data: data,
@@ -945,7 +950,7 @@
                         view_clipboard(this.$content.find('.clipboard-info'), this.smi);
 
                         // Multi selector
-                        new SMIMultiSelector(this.$content.find('.footer .selector'), this);
+                        new SMIMultiSelector(this.$content.find('.header .selector'), this);
 
                         // Render header
                         render_header(this.configuration, this.$content);
@@ -961,7 +966,7 @@
                         }.scope(this));
 
                         // Render actions
-                        var $actions = this.$content.find('.footer .actions');
+                        var $actions = this.$content.find('.header .actions');
                         render_actions(
                             $actions,
                             new SMISelection(this, this.data.content, $([])),
