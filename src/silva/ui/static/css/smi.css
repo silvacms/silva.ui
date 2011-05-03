@@ -255,6 +255,9 @@ input, textarea {
 #workspace .header .view-actions {
   float:right;
 }
+#workspace .header .admin-actions {
+  margin: 5px 10px 0px 0px;
+}
 #workspace .header .admin-actions li a {
   padding: 2px 2px;
 }

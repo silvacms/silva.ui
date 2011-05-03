@@ -120,6 +120,7 @@
     obviel.view({
         iface: 'preview',
         name: 'content',
+        data_template: true,
         iframe: true,
         nocache: true,
         cleanup: function() {

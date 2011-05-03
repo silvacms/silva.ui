@@ -49,7 +49,7 @@ var obviel = {};
      */
     module.ifaces = function(obj) {
         /* return the interfaces of an obj, breadth first
-        */
+         */
         if (!obj.ifaces) {
             return [typeof obj];
         };
@@ -192,7 +192,18 @@ var obviel = {};
     };
 
     // finish to render the view using the given template
-    module.View.prototype._render = function(template, render) {
+    module.View.prototype._render = function(render, template) {
+        // Clean content if needed (call cleanup callback)
+        this.$content.triggerHandler('cleanup-obviel');
+
+        if (this.cleanup) {
+            // Install new cleanup callback
+            this.$content.one('cleanup-obviel', function(event) {
+                this.cleanup();
+            }.scope(this));
+        };
+
+        // Insert content and call render.
         if (this.iframe) {
             var iframe = $('<iframe src="">');
 
@@ -228,16 +239,8 @@ var obviel = {};
 
     // render the view: retrieve a template to render it and render it
     module.View.prototype._fetch_and_render = function(callback) {
-        // clean content if needed (call cleanup callback)
-        this.$content.triggerHandler('cleanup-obviel');
 
-        if (this.cleanup) {
-            this.$content.one('cleanup-obviel', function(event) {
-                this.cleanup();
-            }.scope(this));
-        };
-
-        // make a finalizer that call render and the callback
+        // Make a finalizer that call render and the callback
         var finalizer = function() {
             if (this.render != undefined)
                 this.render(this.$content, this.data);
@@ -245,7 +248,7 @@ var obviel = {};
                 callback(this);
         }.scope(this);
 
-        // resources
+        // Resources
         var resources = this.data.html_resources || this.html_resources;
         if (resources) {
             if (resources.js) {
@@ -260,60 +263,69 @@ var obviel = {};
             };
         };
 
-        if (this.data.html || (this.html && !this.data.html_url) ||
-            this.data.jsont || (this.jsont && !this.data.jsont_url)) {
-            var jsont = (this.data.jsont || this.jsont);
-            if (jsont) {
-                var template = module._template_cache[jsont];
-                if (!template) {
-                    template = new jsontemplate.Template(
-                        jsont, this.template_options);
-                    module._template_cache[jsont] = template;
-                };
-                return this._render(template.expand(this), finalizer);
-            };
-            return this._render(this.data.html || this.html, finalizer);
-        };
+        // Remote JSON
+        var jsont_url = this.data_template && this.data.jsont_url || this.jsont_url;
+        if (jsont_url) {
+            var template = module._template_cache[jsont_url];
 
-        if (this.data.html_url || this.html_url ||
-            this.data.jsont_url || this.jsont_url) {
-            // First look in the cache for data.
-            var url = (this.data.jsont_url || this.jsont_url);
-            var jsont = url;
-            if (url) {
-                var template = module._template_cache[url];
-                if (template) {
-                    return this._render(template.expand(this), finalizer);
-                };
-            } else {
-                url = (this.data.html_url || this.html_url);
-                if (!this.nocache) {
-                    var template = module._template_cache[url];
-                    if (template) {
-                        return this._render(template, finalizer);
-                    };
-                }
+            if (template) {
+                return this._render(finalizer, template.expand(this));
             };
             $.ajax({
                 type: 'GET',
-                url: url,
+                url: jsont_url,
                 success: function(data) {
-                    if (jsont) {
-                        var template = new jsontemplate.Template(
-                            data, this.template_options);
-                        module._template_cache[url] = template;
-                        data = template.expand(this.data);
-                    } else {
-                        module._template_cache[url] = data;
-                    };
-                    this._render(undefined, finalizer);
+                    var template = new jsontemplate.Template(data, this.template_options);
+                    module._template_cache[jsont_url] = template;
+                    data = template.expand(this.data);
+                    this._render(finalizer, data);
                 }.scope(this)
             });
             return this;
         };
 
-        // no explicit content, just call the callback
-        return this._render(undefined, finalizer);
+        // Remote HTML
+        var html_url = this.data_template && this.data.html_url || this.html_url;
+        if (html_url) {
+            // First look in the cache for data.
+            if (!this.nocache) {
+                var template = module._template_cache[html_url];
+                if (template) {
+                    return this._render(finalizer, template);
+                };
+            };
+            $.ajax({
+                type: 'GET',
+                url: html_url,
+                success: function(data) {
+                    module._template_cache[html_url] = data;
+                    this._render(finalizer, data);
+                }.scope(this)
+            });
+            return this;
+        };
+
+        // Local JSON
+        var jsont = this.data_template && this.data.jsont || this.jsont;
+        if (jsont) {
+            var template = module._template_cache[jsont];
+
+            if (!template) {
+                template = new jsontemplate.Template(
+                    jsont, this.template_options);
+                module._template_cache[jsont] = template;
+            };
+            return this._render(finalizer, template.expand(this));
+        };
+
+        // Local HTML
+        var html = this.data_template && this.data.html || this.html;
+        if (html) {
+            return this._render(finalizer, html);
+        };
+
+        // No explicit content, just call render.
+        return this._render(finalizer);
     };
 
     /**
@@ -455,17 +467,17 @@ var obviel = {};
     /**
      * Render a View.
 
-       arguments are provided as an object:
+     arguments are provided as an object:
 
-       * data - the object to render using the view
-       * every - alternative object
-       * url - alternative url
-       * name - the name of the view to render, optional, defaults to
-        'default'
-       * callback - optional, a function that is called after the
-         rendering has completed, with args 'element' (the JQuery-wrapped
-         element that the view is executed on), 'view' (the view
-         instance) and 'context' (a reference to 'obj')
+     * data - the object to render using the view
+     * every - alternative object
+     * url - alternative url
+     * name - the name of the view to render, optional, defaults to
+     'default'
+     * callback - optional, a function that is called after the
+     rendering has completed, with args 'element' (the JQuery-wrapped
+     element that the view is executed on), 'view' (the view
+     instance) and 'context' (a reference to 'obj')
     */
     module.Registry.prototype.render = function(element, args) {
         if (!args.name) {
