@@ -132,8 +132,10 @@
   left:0;
   line-height:25px;
   position:absolute;
+  overflow: hidden; /* fix overflow bug in webkit */
   right:0;
 }
+
 #workspace .listing-footer p {
   padding: 0px 15px;
   display: inline;
@@ -144,10 +146,12 @@
   float: right;
   position: relative;
 }
+
 #workspace .listing-footer .clipboard-info ins {
   margin-top: 4px;
   float: left;
 }
+
 #workspace .listing-footer .clipboard-info .clipboard-content {
   -khtml-border-radius:3px 3px 0px 0px;
   -moz-border-radius:3px 3px 0px 0px;
