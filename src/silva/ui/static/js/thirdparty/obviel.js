@@ -218,9 +218,7 @@ var obviel = {};
                 };
                 var template_window = iframe.get(0).contentWindow;
                 var template_document = template_window.document;
-                template_window.onload = function() {
-                    render();
-                };
+                $(template_document).ready(render);
                 template_document.write(template);
                 template_document.close();
             } else {
