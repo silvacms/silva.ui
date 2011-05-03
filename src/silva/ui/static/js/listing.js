@@ -2,86 +2,6 @@
 
 (function($, obviel) {
 
-    /**
-     * Helper that return true if one object in data match all conditions.
-     * @param data: list of object with properties
-     * @param conditions: object with properties that are list of
-     *        possible values that a data object must have in order to
-     *        match.
-     */
-    var objects_match = function(data, conditions) {
-        for (var i=0; i < data.length; i++) {
-            var item = data[i];
-            var missing = false;
-
-            for (var property in conditions) {
-                if ($.inArray(item[property], conditions[property]) < 0) {
-                    missing = true;
-                    break;
-                };
-            };
-            if (!missing) {
-                return true;
-            };
-        };
-        return false;
-    };
-
-    /**
-     * Return a function that evalute a list of JSON predicate.
-     * @param predicates: list of predicates to evaluate.
-     */
-    var predicates_evaluator = function(predicates) {
-        var conditions = [];
-
-        for (var predicate in predicates) {
-            switch(predicate) {
-            case 'content_match':
-                conditions.push(function() {
-                    return objects_match([this.data.content], predicates.content_match);
-                });
-                break;
-            case 'items_provides':
-                conditions.push(function() {
-                    if (typeof(predicates.items_provides) === "string")
-                        return obviel.provides(this.data, predicates.items_provides);
-                    for (var i=0; i < predicates.items_provides.length; i++)
-                        if (obviel.provides(this.data, predicates.items_provides[i]))
-                            return true;
-                    return false;
-                });
-                break;
-            case 'items_match':
-                conditions.push(function() {
-                    return objects_match(this.data.items(), predicates.items_match);
-                });
-                break;
-            case 'min_items':
-                conditions.push(function() {
-                    return this.data.length() >= predicates.min_items;
-                });
-                break;
-            case 'max_items':
-                conditions.push(function() {
-                    return this.data.length() <= predicates.max_items;
-                });
-                break;
-            case 'clipboard_min_items':
-                conditions.push(function() {
-                    return this.smi.clipboard.length() >= predicates.clipboard_min_items;
-                });
-                break;
-            };
-        };
-        return function() {
-            for (var i=0; i < conditions.length; i++) {
-                if (!conditions[i].apply(this))
-                    return false;
-            };
-            return true;
-        };
-    };
-
     // Define columns renderers
     var listingcolumns = new obviel.Registry();
 
@@ -148,449 +68,6 @@
         }
     });
 
-    // Display a element in the clipboard
-    obviel.view({
-        iface: 'content',
-        name: 'clipboarditem.smilisting',
-        render: function() {
-            var item = $('<li class="clipboard-item '+ this.state + '"></li>');
-
-            if (this.data.title) {
-                if (this.data.path) {
-                    var link = $('<a class="open-screen"></a>');
-
-                    link.attr('href', this.data.path);
-                    link.text(this.data.title);
-                    item.append(link);
-                } else {
-                    item.text(this.data.title);
-                };
-            };
-            if (this.data.icon) {
-                var icon = $('<ins class="icon"></icon>');
-
-                if (this.data.icon.indexOf('.') < 0) {
-                    icon.addClass(this.data.icon);
-                } else {
-                    icon.attr(
-                        'style',
-                        'background:url(' + this.data.icon + ') no-repeat center center;');
-                };
-                item.prepend(icon);
-            };
-
-            this.$content.append(item);
-        }
-    });
-
-    obviel.view({
-        iface: ['actionresult'],
-        render: function() {
-            var need_refresh = false;
-
-            for (var post_action in this.data.post_actions) {
-                switch(post_action) {
-                case 'remove':
-                    need_refresh |= this.selection.remove(this.data.post_actions.remove);
-                    break;
-                case 'update':
-                    need_refresh |= this.selection.update(this.data.post_actions.update);
-                    break;
-                case 'add':
-                    this.$content.trigger('newdata-smilisting', this.data.post_actions.add);
-                    break;
-                case 'clear_clipboard':
-                    this.smi.clipboard.clear(true);
-                    break;
-                };
-            };
-            if (need_refresh) {
-                this.$content.trigger(
-                    'actionrefresh-smilisting', {data: this.selection});
-            };
-            if (this.data.notifications) {
-                this.smi.notifications.notifies(this.data.notifications);
-            };
-        }
-    });
-
-
-    /**
-     * Create button kind-of-view that can be used to render actions.
-     * @param action_defintions: describe action (title, icon, what to do...)
-     * @param url_template: base URL to use for REST-type actions
-     * @param name: name used to register actions in obviel
-     */
-    var build_actions_renderer = function(group_definitions, url_template) {
-        var renderers = [];
-
-        var build_group = function(group_definition) {
-            var group = new obviel.Registry();
-
-            $.each(group_definition, function(i, action_definition) {
-                var definition = {
-                    order: action_definition.order
-                };
-                if (action_definition.title != null) {
-                    definition['init'] = function() {
-                        this.collecting = false;
-                    };
-                    definition['render'] = function() {
-                        var $action = $('<li><a class="ui-state-default"><span>' +
-                                        action_definition.title + '</span></a></li>');
-                        var $trigger = $action.children('a');
-
-                        if (action_definition.icon) {
-                            $trigger.prepend(
-                                '<div class="action-icon"><ins class="ui-icon ui-icon-' +
-                                    action_definition.icon +
-                                    '"></ins></div>');
-                        };
-                        if (action_definition.accesskey) {
-                            $trigger.attr('accesskey', action_definition.accesskey);
-                        };
-                        this.$content.append($action);
-                        if (this.action != undefined) {
-                            $trigger.bind('click', function() {
-                                this.action();
-                            }.scope(this));
-                        };
-                    };
-                    if (action_definition.action != undefined) {
-                        for (var action_type in action_definition.action) {
-                            switch(action_type) {
-                            case 'rest':
-                                definition['action'] = function() {
-                                    var url = url_template.expand({
-                                        path: this.smi.opened.path,
-                                        action: action_definition.action.rest.action});
-                                    var payload = [];
-                                    switch(action_definition.action.rest.send) {
-                                    case 'selected_ids':
-                                        $.each(this.data.items(), function(i, item) {
-                                            payload.push({name: 'content', value: item.id});
-                                        });
-                                        break;
-                                    case 'clipboard_ids':
-                                        $.each(this.smi.clipboard.cutted, function(i, item) {
-                                            payload.push({name: 'cutted', value: item.id});
-                                        });
-                                        $.each(this.smi.clipboard.copied, function(i, item) {
-                                            payload.push({name: 'copied', value: item.id});
-                                        });
-                                        break;
-                                    case 'item_values':
-                                        var names = action_definition.action.rest.values;
-                                        var counter = 0;
-
-                                        if (!this.collecting) {
-                                            this.data.inputs(names);
-                                            this.collecting = true;
-                                            return;
-                                        };
-                                        this.data.values(names, function(data) {
-                                            var prefix = 'values.' + counter.toString() + '.';
-                                            for (var key in data) {
-                                                payload.push({name: prefix + key, value: data[key]});
-                                            };
-                                            counter += 1;
-                                        });
-                                        payload.push({name: 'values', value: counter.toString()});
-                                        this.collecting = false;
-                                        break;
-                                    }
-                                    $.ajax({
-                                        url: url,
-                                        type: 'POST',
-                                        dataType: 'json',
-                                        data: payload,
-                                        success: function(result) {
-                                            this.$content.render({data: result,
-                                                                  extra: {selection: this.data,
-                                                                          smi: this.smi}});
-                                        }.scope(this)
-                                    });
-                                };
-                                break;
-                            case 'cut':
-                                definition['action'] = function () {
-                                    this.smi.clipboard.cut(this.data.data);
-                                    this.$content.trigger(
-                                        'actionrefresh-smilisting', {data: this.data});
-                                };
-                                break;
-                            case 'copy':
-                                definition['action'] = function () {
-                                    this.smi.clipboard.copy(this.data.data);
-                                    this.$content.trigger(
-                                        'actionrefresh-smilisting', {data: this.data});
-                                };
-                                break;
-                            };
-                        };
-                    };
-                } else {
-                    var subgroup = build_group(action_definition.actions);
-
-                    definition['render'] = function() {
-                        var $dropdown = $('<div class="dropdown"><ol></ol></div');
-
-                        subgroup.render(
-                            $dropdown.children('ol'),
-                            {every: this.data, extra: {smi: this.smi}});
-
-                        // Take the first action and use it as top-level action.
-                        var $first = $dropdown.find('li:first');
-                        if ($first.length) {
-                            var $action = $first.detach();
-
-                            if ($dropdown.find('li:first').length) {
-                                var $trigger = $action.children('a');
-                                var $opener = $('<div class="dropdown-icon"><ins class="ui-icon ui-icon-triangle-1-s"></ins></div>');
-
-                                $opener.bind('click', function() {
-                                    $dropdown.fadeToggle();
-                                    return false;
-                                });
-                                $trigger.prepend($opener);
-                                $action.append($dropdown);
-                            };
-                            this.$content.append($action);
-                        };
-                    };
-                };
-                if (action_definition.available) {
-                    definition['available'] = predicates_evaluator(action_definition.available);
-                };
-                group.register(definition);
-            });
-            return group;
-        };
-
-        $.each(group_definitions, function(i, group_definition) {
-            var group = build_group(group_definition);
-
-            renderers.push(function($content, data, extra) {
-                var $actions = $('<div class="actions"><ol></ol></div>');
-
-                group.render($actions.children('ol'), {every: data, extra: extra});
-                if ($actions.find('li:first').length) {
-                    $content.append($actions);
-                };
-            });
-        });
-
-        return function($content, data, extra) {
-            $content.children('div.actions').remove();
-            $.each(renderers, function() {
-                this($content, data, extra);
-            });
-        };
-    };
-
-    /**
-     * Manage a selector that can unselect / select all
-     * element in a listing, and view selection status.
-     * @param listing: managed listing
-     */
-    var SMIMultiSelector = function($selector, listing) {
-        this.$selector = $selector;
-        this.status = 'none';
-        this.listing = listing;
-
-        // Update selector on selection change
-        this.listing.$content.bind('selectionchange-smilisting', function(event, changes) {
-            if (changes.selected == 0) {
-                this.set('none');
-            } else if (changes.selected == changes.total) {
-                this.set('all');
-            } else if (changes.selected == 1) {
-                this.set('single');
-            } else {
-                this.set('partial');
-            };
-            return false;
-        }.scope(this));
-
-        // Clicking on the selector change the selection.
-        this.$selector.bind('click', function() {
-            if (this.status == 'none') {
-                this.listing.select_all();
-            } else {
-                this.listing.unselect_all();
-            };
-            return false;
-        }.scope(this));
-    };
-
-    SMIMultiSelector.prototype.set = function(status) {
-        this.$selector.removeClass(this.status);
-        this.$selector.addClass(status);
-        this.status = status;
-    };
-
-
-    /**
-     * View clipboard data.
-     * @param container: container containing the info hook.
-     */
-    var view_clipboard = function($info, smi) {
-        var $popup = $info.children('.popup');
-        var $detail = $info.children('.detail');
-        var $icon = $detail.children('ins');
-        var $count = $info.find('.count');
-        var is_uptodate = false;
-
-        var update = function() {
-            $popup.empty();
-            $.each(smi.clipboard.cutted, function(i, item) {
-                $popup.render({
-                    data: item,
-                    name: 'clipboarditem.smilisting',
-                    extra: {state: 'cutted'}});
-            });
-            $.each(smi.clipboard.copied, function(i, item) {
-                $popup.render({
-                    data: item,
-                    name: 'clipboarditem.smilisting',
-                    extra: {state: 'copied'}});
-            });
-            is_uptodate = true;
-        };
-
-        var onchange = function() {
-            var length = smi.clipboard.length();
-
-            $count.text(length.toString());
-            if ($popup.is(':visible')) {
-                update();
-            } else {
-                is_uptodate = false;
-            };
-            if (length) {
-                $icon.show();
-            } else {
-                $icon.hide();
-            };
-        };
-
-        // Set default clipboard count on creation
-        onchange();
-        // Update count when clipboard is changed
-        $('body').bind('contentchange-smiclipboard', onchange);
-
-        var toggle = function() {
-            var is_visible = $popup.is(':visible');
-            var is_unfoldable = $icon.is(':visible');
-
-            if (!is_uptodate && !is_visible) {
-                update();
-            };
-            if (is_visible || is_unfoldable) {
-                $popup.fadeToggle();
-            };
-        };
-
-        // Show actions when you click on the info, hide it when you leave.
-        $detail.bind('click', function() {
-            toggle();
-            return false;
-        });
-        $popup.bind('mouseleave', function() {
-            $popup.fadeOut();
-        });
-    };
-
-    /**
-     * Represent a selection of multiple items in a listing.
-     * @param items: selected rows (must have the .item class).
-     */
-    var SMISelection = function(listing, content, items) {
-        this.listing = listing;
-        this.content = content;
-
-        this._raw_items = items;
-        this._refresh_data();
-    };
-
-    // Compute selection data
-    SMISelection.prototype._refresh_data = function () {
-        this.ifaces = [];
-        this.data = [];
-
-        $.each(this._raw_items, function (i, item) {
-            var local_data = $(item).data('smilisting');
-
-            for (var e=0; e < local_data.ifaces.length; e++) {
-                if ($.inArray(local_data.ifaces[e], this.ifaces) < 0) {
-                    this.ifaces.push(local_data.ifaces[e]);
-                };
-            };
-            this.data.push(local_data);
-        }.scope(this));
-    };
-
-    /**
-     * Return the size of the selection.
-     */
-    SMISelection.prototype.length = function() {
-        return this._raw_items.length;
-    };
-
-    /**
-     * Return the items of the selection.
-     */
-    SMISelection.prototype.items = function() {
-        return this.data;
-    };
-
-    /**
-     * Update some selected items.
-     */
-    SMISelection.prototype.update = function(items) {
-        if (items.length) {
-            this.listing.update_lines(items);
-            this._refresh_data();
-            return true;
-        };
-        return false;
-    };
-
-    SMISelection.prototype.values = function(names, processor) {
-        var column_index = this.listing.configuration.column_index;
-
-        $.each(this._raw_items, function(i, line) {
-            var $line = $(line);
-            var collected = {};
-            collected['id'] = $line.data('smilisting')['id'];
-            $.each(names, function(e, name) {
-                var index = column_index(name);
-                var $input = $line.children(':eq(' + index + ')').children('input');
-                collected[name] = $input.val();
-            });
-            processor(collected);
-        });
-    };
-
-    SMISelection.prototype.inputs = function(names) {
-        this._raw_items.trigger('inputline-smilisting', {names: names});
-    };
-
-    /**
-     * Remove some items associated to the selection.
-     * @param ids: content id of the line to remove.
-     */
-    SMISelection.prototype.remove = function(ids) {
-        this.listing.remove_lines(ids);
-    };
-
-    /**
-     * Close the current selection (unselect it).
-     */
-    SMISelection.prototype.close = function() {
-        this.listing.unselect(this._raw_items);
-    };
-
     var render_header = function(configuration, $content) {
         var first_configuration = configuration.listing[0];
         var $header = $content.find('div.listing-header tr');
@@ -625,8 +102,9 @@
                     }.scope(lst_configuration);
                 });
 
+                $(document).trigger('load-smilisting', {smi: smi, configuration: configuration});
+
                 var action_url_template = jsontemplate.Template(smi.options.listing.action, {});
-                var render_actions = build_actions_renderer(configuration.actions, action_url_template);
 
                 var create_container = function(name, configuration, data, listing) {
                     var $content = $('dd.' + name);
@@ -756,7 +234,8 @@
                         });
 
                         if (configuration.sortable) {
-                            if (objects_match([listing.data.content], configuration.sortable.available)) {
+                            if (true) {
+                            //if (objects_match([listing.data.content], configuration.sortable.available)) {
                                 var table = $content.find('table');
 
                                 // Add the sorting if the table is sortable
@@ -884,35 +363,6 @@
 
                 obviel.view({
                     iface: 'listing',
-                    name: 'toolbar',
-                    html_url: smi.options.listing.templates.toolbar,
-                    render: function() {
-                        // Multi selector
-                        new SMIMultiSelector(
-                            this.$content.find('.selector ins'),
-                            this.view);
-
-                        // Render actions
-                        render_actions(
-                            this.$content,
-                            new SMISelection(this.view, this.data.content, $([])),
-                            {smi: this.smi});
-                        this.view.$content.bind('selectionchange-smilisting', function(event, changes) {
-                            render_actions(
-                                this.$content,
-                                new SMISelection(this.view, this.data.content, changes.items),
-                                {smi: this.smi});
-                        }.scope(this));
-                        this.view.$content.bind('actionrefresh-smilisting', function(event, data) {
-                            render_actions(this.$content, data.data, {smi: this.smi});
-                            event.stopPropagation();
-                            event.preventDefault();
-                        }.scope(this));
-                    }
-                });
-
-                obviel.view({
-                    iface: 'listing',
                     name: 'content',
                     html_url: smi.options.listing.templates.content,
                     init: function() {
@@ -984,13 +434,10 @@
                         // Disable text selection
                         this.$content.disableTextSelect();
 
-                        // Clipboard info
-                        this.smi.clipboard.content = this.data.content;
-                        view_clipboard(this.$content.find('.clipboard-info'), this.smi);
-
                         // Render header
                         render_header(this.configuration, this.$content);
 
+                        // Create containers
                         $.each(this.configuration.listing, function(i, configuration) {
                             var container = create_container(
                                 configuration.name,
@@ -1017,6 +464,10 @@
                         this.$content.bind('collapsingchange-smilisting', function() {
                             this.update_widths();
                         }.scope(this));
+
+                        // Render footer
+                        this.$content.find('.listing-footer').render(
+                            {data: this.data, name: 'footer', extra: {smi: this.smi, view: this}});
                     },
                     update_widths: function() {
                         var $containers = this.by_name;
@@ -1049,13 +500,11 @@
                         };
                     },
                     cleanup: function() {
-                        this.smi.clipboard.content = null;
                         this.$content.empty();
                         this.$content.enableTextSelect();
                         this.$content.unbind('newdata-smilisting');
                         this.$content.unbind('collapsingchange-smilisting');
                         this.$content.unbind('selectionchange-smilisting');
-                        this.$content.unbind('actionrefresh-smilisting');
                     }
                 });
 

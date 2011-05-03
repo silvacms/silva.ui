@@ -25,11 +25,25 @@
     </dd>
   </dl>
   <div class="listing-footer">
-    <div class="clipboard-info"
-         i18n:translate="">
-      <ol class="popup">
+    <p class="counters">
+      <span class="publishables"
+            i18n:translate="">
+        <span class="count"
+              i18n:name="count">0</span>
+        structural(s) content(s),
+      </span>
+      <span class="assets"
+            i18n:translate="">
+        <span class="count"
+              i18n:name="count">0</span>
+        assets(s).
+      </span>
+    </p>
+    <div class="clipboard-info">
+      <ol class="clipboard-content">
       </ol>
-      <a class="detail ui-state-default">
+      <a class="ui-state-default"
+         i18n:translate="">
         <ins class="ui-icon ui-icon-triangle-1-n"></ins>
         <span class="count"
               i18n:name="count">0</span>

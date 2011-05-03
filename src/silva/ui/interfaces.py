@@ -34,11 +34,13 @@ class ISilvaUI(ISilvaUIDependencies):
     silvaconf.resource('js/thirdparty/jquery.jstree.js')
     silvaconf.resource('js/thirdparty/jquery.tablednd-0.5.min.js')
 
-    silvaconf.resource('js/content.js')
-    silvaconf.resource('js/content.listing.js')
-    silvaconf.resource('js/content.form.js')
-    silvaconf.resource('js/navigation.js')
     silvaconf.resource('js/smi.js')
+    silvaconf.resource('js/navigation.js')
+    silvaconf.resource('js/workspace.js')
+    silvaconf.resource('js/form.js')
+    silvaconf.resource('js/listing.js')
+    silvaconf.resource('js/listingtoolbar.js')
+    silvaconf.resource('js/listingutils.js')
 
 
 class ISilvaUITheme(IDefaultBrowserLayer):
