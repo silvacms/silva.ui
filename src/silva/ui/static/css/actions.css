@@ -53,9 +53,21 @@ div.actions .popup {
   position:absolute;
   background:#fff;
   border-radius:0px 0px 3px 3px;
-  border:1px #999 solid;
+  border: 1px #999 solid;
   margin-left: 0px;
   list-style:none;
   display: none;
   z-index: 50;
+}
+
+div.actions div.dropdown-icon {
+  float: right;
+  border-left: 1px #999 dotted;
+  margin: 0px 0px 0px 3px;
+  padding: 2px 0px 2px 1px;
+}
+
+div.actions div.action-icon {
+  padding: 2px 0px 2px 0px;
+  float: left;
 }

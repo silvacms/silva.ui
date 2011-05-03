@@ -242,13 +242,13 @@
                         };
                         if (action_definition.icon) {
                             link.prepend(
-                                '<ins class="ui-icon ui-icon-' +
+                                '<div class="action-icon"><ins class="ui-icon ui-icon-' +
                                     action_definition.icon +
-                                    '"></ins>');
+                                    '"></ins></div>');
                         };
                         this.$content.append(html);
                         if (this.render_children) {
-                            var $opener = $('<ins class="ui-icon ui-icon-triangle-1-s"></ins>');
+                            var $opener = $('<div class="dropdown-icon"><ins class="ui-icon ui-icon-triangle-1-s"></ins></div>');
                             var $children = $('<ol class="popup"></ol>');
 
                             this.render_children($children, this.data, {smi: this.smi});

@@ -83,6 +83,7 @@
 }
 #workspace .content .listing dt ins.ui-icon {
   margin: 4px 4px 0px 0px;
+  float: left;
 }
 
 #workspace .content .listing dd.collapsed {
