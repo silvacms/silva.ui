@@ -150,33 +150,32 @@ class ColumnsContainerListing(UIREST):
                          'available':
                              {'min_items': 1},
                          'ifaces': ['content']},
-                        {'title': self.translate(_(u'Paste')),
-                         'icon': 'clipboard',
-                         'accesskey': 'v',
+                        {'title': None,
                          'order': 7,
-                         'children': [
-                            {'title': self.translate(_(u'Paste as Ghost')),
-                             'icon': 'link',
-                             'accesskey': 'g',
-                             'order': 8,
-                             'action':
-                                 {'rest':
-                                      {'action': 'pasteasghost',
-                                       'send': 'clipboard_ids'}},
-                             'available':
-                                 {'content_match':
-                                      {'access': ['manage', 'publish', 'write']},
-                                  'clipboard_min_items': 1},
-                             'ifaces': ['object']},
-                            ],
-                         'action':
-                             {'rest':
-                                  {'action': 'paste',
-                                   'send': 'clipboard_ids'}},
                          'available':
                              {'content_match':
                                   {'access': ['manage', 'publish', 'write']},
                               'clipboard_min_items': 1},
+                         'actions': [
+                                {'title': self.translate(_(u'Paste')),
+                                 'icon': 'clipboard',
+                                 'accesskey': 'v',
+                                 'order': 10,
+                                 'action':
+                                     {'rest':
+                                          {'action': 'paste',
+                                           'send': 'clipboard_ids'}},
+                                 'ifaces': ['object']},
+                                {'title': self.translate(_(u'Paste as Ghost')),
+                                 'icon': 'link',
+                                 'accesskey': 'g',
+                                 'order': 20,
+                                 'action':
+                                     {'rest':
+                                          {'action': 'pasteasghost',
+                                           'send': 'clipboard_ids'}},
+                                 'ifaces': ['object']},
+                                ],
                          'ifaces': ['object']},
                         {'title': self.translate(_(u'Delete')),
                          'icon': 'trash',
@@ -194,7 +193,7 @@ class ColumnsContainerListing(UIREST):
                         {'title': self.translate(_(u'Rename')),
                          'icon': 'pencil',
                          'accesskey': 'r',
-                         'order': 4,
+                         'order': 10,
                          'action':
                              {'rest':
                               {'action': 'rename',
@@ -206,14 +205,41 @@ class ColumnsContainerListing(UIREST):
                               'min_items': 1},
                          'ifaces': ['content']},
                         ], [
-                        {'title': self.translate(_(u'Publish')),
-                         'icon': 'check',
-                         'accesskey': 'p',
-                         'order': 52,
-                         'children': [
+                        {'title': None,
+                         'available':
+                             {'min_items': 1},
+                         'actions': [
+                                {'title': self.translate(_(u'Publish')),
+                                 'icon': 'check',
+                                 'accesskey': 'p',
+                                 'order': 10,
+                                 'action':
+                                     {'rest':
+                                          {'action': 'publish',
+                                           'send': 'selected_ids'}},
+                                 'available':
+                                     {'content_match':
+                                          {'access': ['manage', 'publish']},
+                                      'items_match':
+                                          {'status': ['draft', 'approved', 'pending', None]}},
+                                 'ifaces': ['container', 'versioned']},
+                                {'title': self.translate(_(u'Close')),
+                                 'icon': 'close',
+                                 'accesskey': 'l',
+                                 'order': 15,
+                                 'action':
+                                 {'rest':
+                                      {'action': 'close',
+                                       'send': 'selected_ids'}},
+                                 'available':
+                                     {'content_match':
+                                          {'access': ['manage', 'publish']},
+                                      'items_match':
+                                          {'status': ['published', None]}},
+                                 'ifaces': ['container', 'versioned']},
                                 {'title': self.translate(_(u'New version')),
                                  'icon': 'document',
-                                 'order': 50,
+                                 'order': 20,
                                  'action':
                                      {'rest':
                                           {'action': 'newversion',
@@ -222,13 +248,12 @@ class ColumnsContainerListing(UIREST):
                                  'available':
                                      {'content_match':
                                           {'access': ['manage', 'publish', 'write']},
-                                      'min_items': 1,
                                       'items_match':
                                           {'status': ['published', 'closed']}},
                                  'ifaces': ['versioned']},
                                 {'title': self.translate(_(u'Approve for future')),
                                  'icon': 'document',
-                                 'order': 51,
+                                 'order': 25,
                                  'action':
                                      {'rest':
                                           {'action': 'approve',
@@ -236,37 +261,11 @@ class ColumnsContainerListing(UIREST):
                                  'available':
                                      {'content_match':
                                           {'access': ['manage', 'publish', 'write']},
-                                      'min_items': 1,
                                       'items_match':
                                           {'status': ['published', 'closed']}},
                                  'ifaces': ['versioned']},
-                                {'title': self.translate(_(u'Close')),
-                                 'icon': 'close',
-                                 'accesskey': 'l',
-                                 'order': 52,
-                                 'action':
-                                 {'rest':
-                                      {'action': 'close',
-                                       'send': 'selected_ids'}},
-                                 'available':
-                                     {'content_match':
-                                          {'access': ['manage', 'publish']},
-                                      'min_items': 1,
-                                      'items_match':
-                                          {'status': ['published', None]}},
-                                 'ifaces': ['container', 'versioned']},
                                 ],
-                         'action':
-                             {'rest':
-                                  {'action': 'publish',
-                                   'send': 'selected_ids'}},
-                         'available':
-                             {'content_match':
-                                  {'access': ['manage', 'publish']},
-                              'min_items': 1,
-                              'items_match':
-                                  {'status': ['draft', 'approved', 'pending', None]}},
-                         'ifaces': ['container', 'versioned']}
+                         'ifaces': ['object']},
                         ]]})
 
 

@@ -40,14 +40,14 @@
               <li>
                 <a href="${view.root_url}/service_members/logout"
                    i18n:translate="">
-                  Logout
+                  <span>Logout</span>
                 </a>
               </li>
               <li>
                 <a class="form-popup"
                    href="${view.root_url}/++rest++silva.core.smi.userpreferences"
                    i18n:translate="">
-                  User preferences
+                  <span>User preferences</span>
                 </a>
               </li>
             </ol>
