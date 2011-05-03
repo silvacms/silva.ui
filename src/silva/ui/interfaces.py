@@ -8,6 +8,7 @@ from zope.publisher.interfaces.browser import IDefaultBrowserLayer
 from zope import schema
 
 from js import jqueryui
+from infrae.rest.interfaces import IRESTComponent
 
 from silva.core import conf as silvaconf
 from silva.core.interfaces import ISilvaLocalService
@@ -110,3 +111,9 @@ class IViewMenu(IMenu):
     """Menu to work on content (right).
     """
 
+
+# Screens
+
+class IUIScreen(IRESTComponent):
+    """Represent a screen in the interface.
+    """

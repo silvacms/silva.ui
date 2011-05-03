@@ -8,6 +8,7 @@ from zExceptions import Unauthorized
 
 from five import grok
 
+from silva.ui.interfaces import IUIScreen
 from silva.ui.interfaces import IMenuItem, IMenu
 from silva.ui.interfaces import IActionMenu, IViewMenu, IContentMenu
 from infrae.rest.interfaces import IRESTComponent
@@ -79,16 +80,21 @@ class MenuItem(grok.MultiSubscription):
     def available(self):
         return True
 
+    def identifier(self):
+        if IRESTComponent.implementedBy(self.screen):
+            return grok.name.bind().get(self.screen)
+        return None
+
     def describe(self, page, path, actives):
         data = {'name': page.translate(self.name)}
         if self.screen is not None:
-            screen = self.screen
             if IRESTComponent.implementedBy(self.screen):
                 for active in actives:
-                    if isinstance(active, screen):
+                    if isinstance(active, self.screen):
                         data['active'] = True
-                screen = grok.name.bind().get(self.screen)
-            data['screen'] = '/'.join((path, screen)) if path else screen
+            if IUIScreen.implementedBy(self.screen):
+                screen = self.identifier()
+                data['screen'] = '/'.join((path, screen)) if path else screen
         if self.action is not None:
             data['action'] = self.action
         if self.description is not None:
@@ -114,7 +120,7 @@ class ExpendableMenuItem(MenuItem):
     def describe(self, page, path, actives):
         data = super(ExpendableMenuItem, self).describe(page, path, actives)
         data['entries'] = entries = []
-        entry_path = data.get('screen')
+        entry_path = self.identifier()
         if path:
             entry_path = '/'.join((path, entry_path))
         for item in self.submenu:

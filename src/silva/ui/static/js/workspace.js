@@ -19,55 +19,70 @@
 
     obviel.view({
         iface: 'menu',
-        create: function(info, base) {
-            if (base === undefined)
-                base = '<li><a/></li>';
-            var tab = $(base);
-            var link = $('a', tab);
-            link.text(info.name);
+        create: function(info) {
+            var $tab = $('<li><a><span>' + info.name + '</span></a></li>');
+            var $link = $tab.children('a');
+
             if (info.screen) {
-                link.addClass('open-screen');
-                link.attr('rel', info.screen);
-                if (info.active) {
-                    link.addClass('active');
-                };
+                $link.addClass('open-screen');
+                $link.attr('rel', info.screen);
             } else if (info.action) {
-                link.addClass('open-action');
-                link.attr('rel', info.action);
+                $link.addClass('open-action');
+                $link.attr('rel', info.action);
+            };
+            if (info.active) {
+                $link.addClass('active');
             };
             if (info.description) {
-                link.attr('title', info.description);
+                $link.attr('title', info.description);
             };
             if (info.accesskey) {
-                link.attr('accesskey', info.accesskey);
+                $link.attr('accesskey', info.accesskey);
             };
-            return tab;
+            return $tab;
         },
-        render: function() {
+        render: function($content, data) {
+            var create = this.create;
+
             $.each(this.data.entries, function(i, info) {
-                var tab = this.create(info,
-                    '<li><div class="outer"><div class="inner"><a/></div></div></li>');
+                var $tab = create(info, true);
+                var $link = $tab.children('a');
+
+                if (info.screen) {
+                    $link.addClass('top-screen');
+                } else {
+                    $link.addClass('top-label');
+                };
 
                 if (info.entries) {
-                    var container = $('<ol class="subtabs"></ol>');
-                    var link = $('a', tab);
-                    var is_current = link.hasClass('active');
+                    var $container = $('<ol></ol>');
+                    var $opener = $('<div class="subtab-icon"><ins></ins></div>');
 
                     $.each(info.entries, function(i, entry) {
-                        container.append(this.create(entry));
-                    }.scope(this));
-                    tab.addClass('openable');
-                    $('div.outer', tab).append(container);
-                    $('div.inner', tab).prepend('<ins/>');
-                    container.bind('mouseleave', function() {
-                        container.fadeOut('fast');
+                        $container.append(create(entry));
                     });
-                    $('ins', tab).bind('click', function () {
-                        container.show();
-                        return false;
+
+                    $container.bind('mouseleave', function() {
+                       $container.fadeOut('fast');
                     });
+                    if (info.screen) {
+                        $opener.bind('click', function () {
+                            $container.toggle();
+                            return false;
+                        });
+                    } else {
+                        $link.bind('click', function () {
+                            $container.toggle();
+                            return false;
+                        });
+                    };
+
+                    $link.prepend($opener);
+                    $tab.append($container);
                 };
-                this.$content.append(tab);
+                $link.addClass('top-entry');
+                $tab.addClass('top-level');
+                $content.append($tab);
             }.scope(this));
         },
         cleanup: function() {
@@ -110,10 +125,13 @@
     obviel.view({
         iface: 'object',
         name: 'toolbar',
-        html: '<div class="actions content-actions"><ol></ol></div>',
-        render: function() {
-            this.$content.find('.content-actions ol').render(
-                {data: this.data.metadata.menu.actions});
+        render: function($content, data) {
+            var actions = data.metadata.menu.actions;
+
+            if (actions && actions.length) {
+                $content.html('<div class="actions content-actions"><ol></ol></div>');
+                $content.find('.content-actions ol').render({data: actions});
+            };
         }
     });
 

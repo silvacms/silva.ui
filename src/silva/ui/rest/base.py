@@ -23,6 +23,7 @@ from silva.core.cache.memcacheutils import MemcacheSlice
 from silva.core.interfaces import IRoot, IContainer, ISilvaObject
 from silva.core.messages.interfaces import IMessageService
 from silva.core.views.interfaces import IVirtualSite
+from silva.ui.interfaces import IUIScreen
 from silva.ui.icon import get_icon
 from silva.ui.menu import ContentMenu, ViewMenu, ActionMenu
 
@@ -114,6 +115,7 @@ def get_resources(request):
 
 class PageREST(UIREST):
     grok.baseclass()
+    grok.implements(IUIScreen)
     grok.require('silva.ReadSilvaContent')
 
     def get_navigation(self):

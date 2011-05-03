@@ -5,6 +5,7 @@
     obviel.view({
         iface: 'form',
         name: 'content',
+        data_template: true,
         bootstrap_form: function($form) {
             var form_prefix = $form.attr('name');
 
