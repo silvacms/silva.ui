@@ -48,10 +48,14 @@
                 var $tab = create(info, true);
                 var $link = $tab.children('a');
 
-                if (info.screen) {
-                    $link.addClass('top-screen');
-                } else {
-                    $link.addClass('top-label');
+                if (this.tabsmode) {
+                    if (info.screen) {
+                        $link.addClass('top-screen');
+                    } else {
+                        $link.addClass('top-label');
+                    };
+                    $link.addClass('top-entry');
+                    $tab.addClass('top-level');
                 };
 
                 if (info.entries) {
@@ -80,8 +84,6 @@
                     $link.prepend($opener);
                     $tab.append($container);
                 };
-                $link.addClass('top-entry');
-                $tab.addClass('top-level');
                 $content.append($tab);
             }.scope(this));
         },
@@ -100,7 +102,7 @@
             // Update header
             this.$content.children('h2').render({data: metadata.title});
             this.$content.children('.content-tabs').render(
-                {data: metadata.menu.content});
+                {data: metadata.menu.content, extra: {tabsmode: true}});
             this.$content.find('.view-actions ol').render(
                 {data: metadata.menu.view});
             this.$content.children('.toolbar').render(
@@ -128,7 +130,7 @@
         render: function($content, data) {
             var actions = data.metadata.menu.actions;
 
-            if (actions && actions.length) {
+            if (actions && actions.entries.length) {
                 $content.html('<div class="actions content-actions"><ol></ol></div>');
                 $content.find('.content-actions ol').render({data: actions});
             };
