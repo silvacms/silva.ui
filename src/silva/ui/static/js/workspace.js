@@ -95,21 +95,22 @@
     obviel.view({
         iface: 'object',
         name: 'header',
-        render: function() {
-            var metadata = this.data.metadata;
-            var  $parent = this.$content.find('a.parent');
+        render: function($content, data) {
+            var metadata = data.metadata;
+            var $metadata = $content.children('.metadata');
+            var $parent = $content.find('a.parent');
 
             // Update header
-            this.$content.children('h2').render({data: metadata.title});
-            this.$content.children('.content-tabs').render(
+            $metadata.children('h2').render({data: metadata.title});
+            $metadata.children('.content-tabs').render(
                 {data: metadata.menu.content, extra: {tabsmode: true}});
-            this.$content.find('.view-actions ol').render(
+            $metadata.find('.view-actions ol').render(
                 {data: metadata.menu.view});
-            this.$content.children('.toolbar').render(
-                {data: this.data, name: 'toolbar', extra: {smi: this.smi, view: this.view}});
+            $content.children('.toolbar').render(
+                {data: data, name: 'toolbar', extra: {smi: this.smi, view: this.view}});
 
             // Update content link hidden link
-            this.$content.children('#content-url').attr('href', this.url.expand({path: metadata.path}));
+            $metadata.children('#content-url').attr('href', this.url.expand({path: metadata.path}));
 
             // Update parent link
             if (metadata.up != null) {
@@ -132,6 +133,7 @@
 
             if (actions && actions.entries.length) {
                 $content.html('<div class="actions content-actions"><ol></ol></div>');
+                $content.disableTextSelect();
                 $content.find('.content-actions ol').render({data: actions});
             };
         }
@@ -157,8 +159,8 @@
         var $header = $workspace.children('.header');
         var $content = $workspace.children('.content');
 
-        // Disable text selection
-        $header.disableTextSelect();
+        // Disable text selection in metadata
+        $header.children('.metadata').disableTextSelect();
 
         // New workspace is loaded
         $workspace.bind('content-smi', function (event, data) {

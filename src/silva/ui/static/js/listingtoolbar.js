@@ -275,7 +275,7 @@
 
             renderers.push(function($content, data, extra) {
                 var $actions = $('<div class="actions"><ol></ol></div>');
-                // $actions.disableTextSelect();
+                $actions.disableTextSelect();
 
                 group.render($actions.children('ol'), {every: data, extra: extra});
                 if ($actions.find('li:first').length) {
@@ -338,6 +338,9 @@
      * @param listing: Listing to operate on
      */
     var render_filter = function($filter, listing) {
+        // We use a timeout of 100ms for fast typing people on poor computers.
+        var timeout = null;
+
         $filter.bind('keyup', function(event) {
             var clear = false;
 
@@ -350,7 +353,10 @@
                 clear = true;
                 $filter.blur();
             };
-            setTimeout(function() {
+            if (timeout) {
+                clearTimeout(timeout);
+            };
+            timeout = setTimeout(function() {
                 var value = '';
 
                 if (clear) {
@@ -359,7 +365,8 @@
                     value = $filter.val();
                 };
                 listing.filter_lines(value);
-            }, 0);
+                timeout = null;
+            }, 100);
         });
     };
 

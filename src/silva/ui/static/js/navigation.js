@@ -3,11 +3,12 @@
      * Folder navigation tree using JSTree plugin.
      */
     $.fn.SMINavigation = function(smi, options) {
-        var navigation = this;
-        var tree = navigation.children('.tree');
+        var $navigation = this;
+        var $tree = $navigation.children('.tree');
         var root_url = options.root_url;
         var url = new jsontemplate.Template(options.url, {});
         var parents_url = new jsontemplate.Template(options.parents_url, {});
+
         /**
          * Scroll the tree container horizontally to allow for unlimited node depth.
          */
@@ -16,7 +17,7 @@
                 if(depth < 0) {
                     depth = 0;
                 }
-                tree.scrollLeft(21 * depth);
+                $tree.scrollLeft(21 * depth);
             });
         };
 
@@ -28,8 +29,8 @@
                 var left = remaining.slice(1);
                 if (parent_node.length > 0) {
                     if (left.length > 0) {
-                        if (tree.jstree('is_closed', parent_node)) {
-                            tree.jstree(
+                        if ($tree.jstree('is_closed', parent_node)) {
+                            $tree.jstree(
                                 'open_node',
                                 parent_node,
                                 function(){ open_node(left); });
@@ -37,43 +38,40 @@
                             open_node(left);
                         }
                     } else {
-                        tree.jstree('select_node', parent_node);
+                        $tree.jstree('select_node', parent_node);
                     };
                     return true;
                 };
                 return false;
             };
             if (!open_node(parents)) {
-                tree.jstree('deselect_all');
+                $tree.jstree('deselect_all');
             };
         };
 
         var remove = function(info) {
             if (info.target === undefined)
                 return;
-            var node = $('#' + info.target, tree);
+            var node = $('#' + info.target, $tree);
             if (node.length > 0) {
-                tree.jstree('delete_node', node);
+                $tree.jstree('delete_node', node);
             }
         };
 
         var add = function(info) {
             if (info.parent === undefined)
                 return;
-            var parent = $('#' + info.parent, tree);
+            var parent = $('#' + info.parent, $tree);
             if (parent.length > 0) {
-                tree.jstree('refresh', parent);
+                $tree.jstree('refresh', parent);
             }
         };
 
-        // Disable text selection on tree
-        tree.disableTextSelect();
-
         // Load the tree.
-        tree.bind('loaded.jstree', function(){
+        $tree.bind('loaded.jstree', function(){
             var root = $('ul li', this).first();
             if (root !== undefined){
-                tree.jstree('open_node', root);
+                $tree.jstree('open_node', root);
             }
         }).jstree({
             ui: {
@@ -82,7 +80,7 @@
             core: {
                 animation: 100
             },
-            plugins: ["json_data", "ui"],
+            plugins: ["json_data", "ui", "hotkeys"],
             json_data: {
                 ajax: {
                     url: function (node) {
@@ -96,29 +94,32 @@
         });
 
         // Bind JStree event to set the autoscroll.
-        tree.bind("open_node.jstree", function(event, data) {
+        $tree.bind("open_node.jstree", function(event, data) {
             scroll($(this), data.rslt.obj.parents('ul').length - 2);
         });
-        tree.bind("close_node.jstree", function(event, data) {
+        $tree.bind("close_node.jstree", function(event, data) {
             scroll($(this), data.rslt.obj.parents('ul').length - 3);
         });
 
         // Open view on click
-        tree.delegate('a', 'click', function(event) {
+        $tree.delegate('a', 'click', function(event) {
             smi.open_screen($(this).parent().data('jstree').path);
             return false;
         });
 
+        // Disable text selection on tree
+        $navigation.disableTextSelect();
+
         // Listen to smi.blur and focus to activate/disable shortcuts.
-        navigation.bind('blur-smi', function() {
-            tree.jstree('disable_hotkeys');
+        $navigation.bind('blur-smi', function() {
+            $tree.jstree('disable_hotkeys');
         });
-        navigation.bind('focus-smi', function() {
-            tree.jstree('enable_hotkeys');
+        $navigation.bind('focus-smi', function() {
+            $tree.jstree('enable_hotkeys');
         });
 
         // If a content is loaded, try to select its container
-        navigation.bind('content-smi', function (event, data) {
+        $navigation.bind('content-smi', function (event, data) {
             if (data.navigation.invalidation.length > 0) {
                 $.each(data.navigation.invalidation, function(index, datum){
                     switch(datum['action']) {

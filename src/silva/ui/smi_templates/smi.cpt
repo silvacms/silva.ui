@@ -56,26 +56,28 @@
       </nav>
       <div id="workspace">
         <div class="header">
-          <div class="actions admin-actions">
-            <ol>
-              <li>
-                <a class="parent open-screen ui-state-default" href="" rel="">
-                  <ins class="ui-icon ui-icon-arrowreturnthick-1-n"></ins>
-                </a>
-              </li>
-            </ol>
+          <div class="metadata">
+            <div class="actions admin-actions">
+              <ol>
+                <li>
+                  <a class="parent open-screen ui-state-default" href="" rel="">
+                    <ins class="ui-icon ui-icon-arrowreturnthick-1-n"></ins>
+                  </a>
+                </li>
+              </ol>
+            </div>
+            <ol class="tabs content-tabs"></ol>
+            <div class="actions view-actions">
+              <ol></ol>
+            </div>
+            <h2>
+              <ins class="icon loading"></ins>
+              <tal:msg i18n:translate="">Loading...</tal:msg>
+            </h2>
+            <a href="#" id="content-url"></a>
           </div>
-          <ol class="tabs content-tabs"></ol>
-          <div class="actions view-actions">
-            <ol></ol>
-          </div>
-          <h2>
-            <ins class="icon loading"></ins>
-            <tal:msg i18n:translate="">Loading...</tal:msg>
-          </h2>
           <div class="toolbar">
           </div>
-          <a href="#" id="content-url"></a>
         </div>
         <div class="content"></div>
       </div>
