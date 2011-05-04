@@ -71,6 +71,8 @@
     var render_header = function(configuration, $content) {
         var first_configuration = configuration.listing[0];
         var $header = $content.find('div.listing-header tr');
+
+        $header.disableTextSelect();
         $.each(first_configuration.columns, function(i, column) {
             var $cell = $('<th></th>');
 
@@ -92,14 +94,31 @@
                     obviel.iface(iface, configuration.ifaces[iface]);
                 };
 
-                $.each(configuration.listing, function(i, lst_configuration) {
-                    lst_configuration.column_index = function(name) {
+                $.each(configuration.listing, function(i, configuration) {
+                    // Add column_index function
+                    configuration.column_index = function(name) {
                         for (var i=0; i < this.columns.length; i++) {
                             if (name == this.columns[i].name)
                                 return i;
                         };
                         return -1;
-                    }.scope(lst_configuration);
+                    }.scope(configuration);
+
+                    // Add filter_entry function
+                    var names = [];
+
+                    $.each(configuration.columns, function(e, column) {
+                        if (column.filterable) {
+                            names.push(column.name);
+                        }
+                    });
+                    configuration.filter_entry = function(pattern, data) {
+                        for (var i=0; i < names.length ; i++) {
+                            if (data[names[i]].match(pattern))
+                                return true;
+                        };
+                        return false;
+                    };
                 });
 
                 $(document).trigger('load-smilisting', {smi: smi, configuration: configuration});
@@ -132,6 +151,7 @@
                             $content.toggleClass('collapsed');
                             configuration.collapsed = !configuration.collapsed;
                             $header.trigger('collapsingchange-smilisting');
+                            trigger('selectionchange-smilisting');
                         };
 
                         if (configuration.collapsed) {
@@ -402,6 +422,24 @@
                             this.trigger('selectionchange-smilisting');
                         };
                     },
+                    filter_lines: function(value) {
+                        var pattern = new RegExp(value, 'i');
+
+                        $.each(configuration.listing, function(i, configuration) {
+                            var $container = this.by_name[configuration.name];
+
+                            $container.children('.item').each(function (i) {
+                                var $line = $(this);
+
+                                if (configuration.filter_entry(pattern, $line.data('smilisting'))) {
+                                    $line.show();
+                                } else {
+                                    $line.hide();
+                                };
+                            });
+                        }.scope(this));
+                        this.trigger('selectionchange-smilisting');
+                    },
                     unselect: function($lines) {
                         $lines.filter('.inputized').each(function(i, line) {
                             var $line = $(line);
@@ -411,29 +449,28 @@
                         this.trigger('selectionchange-smilisting');
                     },
                     unselect_all: function() {
-                        this.unselect(this.$containers.children('tr.item.selected'));
+                        this.unselect(this.$containers.children('tr.item.selected:visible'));
                     },
                     select_all: function() {
-                        this.$containers.children('tr.item').addClass('selected');
+                        this.$containers.children('tr.item:visible').addClass('selected');
                         this.trigger('selectionchange-smilisting');
                     },
                     trigger: function(event_name, $content) {
-                        var total = this.$containers.children('tr.item').length;
-                        var items = this.$containers.children('tr.item.selected');
+                        var $items = this.$containers.children('tr.item');
+                        var $visible = $items.filter(':visible');
+                        var $selected = $visible.filter('.selected');
 
                         if ($content === undefined) {
                             $content = this.$content;
                         }
                         $content.trigger(event_name, {
-                            total: total,
-                            selected: items.length,
-                            items: items
+                            total: $items.length,
+                            visible: $visible.length,
+                            selected: $selected.length,
+                            items: $selected
                         });
                     },
                     render: function() {
-                        // Disable text selection
-                        this.$content.disableTextSelect();
-
                         // Render header
                         render_header(this.configuration, this.$content);
 
@@ -501,7 +538,6 @@
                     },
                     cleanup: function() {
                         this.$content.empty();
-                        this.$content.enableTextSelect();
                         this.$content.unbind('newdata-smilisting');
                         this.$content.unbind('collapsingchange-smilisting');
                         this.$content.unbind('selectionchange-smilisting');

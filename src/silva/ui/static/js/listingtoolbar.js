@@ -275,6 +275,7 @@
 
             renderers.push(function($content, data, extra) {
                 var $actions = $('<div class="actions"><ol></ol></div>');
+                // $actions.disableTextSelect();
 
                 group.render($actions.children('ol'), {every: data, extra: extra});
                 if ($actions.find('li:first').length) {
@@ -294,6 +295,7 @@
     /**
      * Manage a selector that can unselect / select all
      * element in a listing, and view selection status.
+     * @param $selector: JQuery object representing the selector
      * @param listing: managed listing
      */
     var render_multi_selector = function($selector, listing) {
@@ -310,7 +312,7 @@
             'selectionchange-smilisting', function(event, changes) {
                 if (changes.selected == 0) {
                     set_status('none');
-                } else if (changes.selected == changes.total) {
+                } else if (changes.selected == changes.visible) {
                     set_status('all');
                 } else if (changes.selected == 1) {
                     set_status('single');
@@ -327,6 +329,37 @@
                 listing.unselect_all();
             };
             return false;
+        });
+    };
+
+    /**
+     * Manage the filter field.
+     * @param $filter: JQuery object representing the filter field
+     * @param listing: Listing to operate on
+     */
+    var render_filter = function($filter, listing) {
+        $filter.bind('keyup', function(event) {
+            var clear = false;
+
+            if (event.keyCode == 13) {
+                // Enter unfocus the field
+                $filter.blur();
+                return;
+            } else if (event.keyCode == 27) {
+                // Escape clear the field
+                clear = true;
+                $filter.blur();
+            };
+            setTimeout(function() {
+                var value = '';
+
+                if (clear) {
+                    $filter.val('');
+                } else {
+                    value = $filter.val();
+                };
+                listing.filter_lines(value);
+            }, 0);
         });
     };
 
@@ -435,9 +468,6 @@
                 var listing = this.view;
                 var smi = this.smi;
 
-                // Render multi selector
-                render_multi_selector($content.find('.selector ins'), listing);
-
                 // Render actions
                 render_actions(
                     $content,
@@ -454,6 +484,13 @@
                         new SMISelection(listing, data.content, changes.items),
                         {smi: smi});
                 });
+
+                // Render multi selector
+                render_multi_selector($content.find('.selector ins'), listing);
+
+                // Render filter
+                render_filter($content.find('.filter input'), listing);
+
             },
             cleanup: function() {
                 this.$content.empty();

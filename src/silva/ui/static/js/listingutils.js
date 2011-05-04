@@ -130,6 +130,9 @@
         render: function($content, data) {
             var listing = this.view;
 
+            // Disable text selection in all footer
+            $content.disableTextSelect();
+
             // Render clipboard info
             this.smi.clipboard.content = data.content;
             render_clipboard($content.find('.clipboard-info'), this.smi);
