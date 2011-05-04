@@ -154,6 +154,11 @@ form {
   float: left;
 }
 
+#workspace .form-content a.form-control ins,
+#workspace .form-content a.form-button ins {
+  float: left;
+}
+
 #workspace .form-content a.form-control:hover,
 #workspace .form-content a.form-button:hover {
   background:#fff;

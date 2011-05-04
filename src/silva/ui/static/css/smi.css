@@ -155,13 +155,14 @@ input, textarea {
   display:block;
   float:left;
   margin-right: 10px;
-  border: 1px solid #555;
+  border: 1px solid #777;
   border-top: 0;
 }
 
 #workspace .header .tabs a.top-entry {
   display:block;
   height: 26px;
+  line-height: 26px;
 }
 
 #workspace .header .tabs a.top-entry .subtab-icon {
@@ -217,7 +218,7 @@ input, textarea {
   left: 0px;
   background:#fff;
   border-radius:3px 3px 3px 3px;
-  border:1px #ddd solid;
+  border:1px #777 solid;
   margin: 0px;
   list-style:none;
   display: none;
