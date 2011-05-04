@@ -252,6 +252,9 @@
                                     $dropdown.fadeToggle();
                                     return false;
                                 });
+                                $dropdown.bind('mouseleave', function() {
+                                    $dropdown.fadeOut('fast');
+                                });
                                 $trigger.prepend($opener);
                                 $action.append($dropdown);
                             };
