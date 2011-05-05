@@ -97,7 +97,7 @@
                     need_refresh |= this.selection.update(this.data.post_actions.update);
                     break;
                 case 'add':
-                    this.$content.trigger('newdata-smilisting', this.data.post_actions.add);
+                    this.selection.add(this.data.post_actions.add);
                     break;
                 case 'clear_clipboard':
                     this.smi.clipboard.clear(true);
@@ -404,6 +404,13 @@
      */
     SMISelection.prototype.length = function() {
         return this._raw_items.length;
+    };
+
+    /**
+     * Add data to the listing (and selection).
+     */
+    SMISelection.prototype.add = function(data) {
+        this.listing.add_lines(data);
     };
 
     /**

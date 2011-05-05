@@ -8,28 +8,36 @@ from infrae import rest
 from megrok.chameleon.components import ChameleonPageTemplate
 from zope.component import getUtility
 from zope.intid.interfaces import IIntIds
+from zope.lifecycleevent.interfaces import IObjectAddedEvent
+from zope.lifecycleevent.interfaces import IObjectModifiedEvent
+from OFS.interfaces import IObjectWillBeRemovedEvent
 
-from silva.core import interfaces
+from silva.core.cache.memcacheutils import MemcacheSlice
+from silva.core.interfaces import IPublishable, INonPublishable
+from silva.core.interfaces import IRoot, IContainer, ISilvaObject
+from silva.core.interfaces import IVersion, IVersionedContent
 from silva.core.messages.interfaces import IMessageService
+from silva.core.services.utils import walk_silva_tree
+from silva.core.views.interfaces import IVirtualSite
+from silva.translations import translate as _
 from silva.ui.icon import get_icon
 from silva.ui.rest.base import UIREST
-from silva.translations import translate as _
-from silva.core.services.utils import walk_silva_tree
 
 from AccessControl import getSecurityManager
+from Acquisition import aq_parent
 from Products.SilvaMetadata.interfaces import IMetadataService
 
 
 CONTENT_IFACES = [
-    (interfaces.IVersionedContent, 'versioned'),
-    (interfaces.IContainer, 'container'),
-    (interfaces.IAsset, 'asset'),
-    (interfaces.ISilvaObject, 'content')]
+    (IVersionedContent, 'versioned'),
+    (IContainer, 'container'),
+    (INonPublishable, 'asset'),
+    (ISilvaObject, 'content')]
 
 
 
 class TemplateContainerListing(rest.REST):
-    grok.context(interfaces.IContainer)
+    grok.context(IContainer)
     grok.name('silva.ui.listing.template')
     grok.require('silva.ReadSilvaContent')
 
@@ -46,7 +54,7 @@ class TemplateContainerListing(rest.REST):
 
 
 class TemplateToolbarContainerListing(rest.REST):
-    grok.context(interfaces.IContainer)
+    grok.context(IContainer)
     grok.name('silva.ui.listing.template.toolbar')
     grok.require('silva.ReadSilvaContent')
 
@@ -67,7 +75,7 @@ pubstate_width = 16
 
 
 class ColumnsContainerListing(UIREST):
-    grok.context(interfaces.IContainer)
+    grok.context(IContainer)
     grok.name('silva.ui.listing.configuration')
     grok.require('silva.ReadSilvaContent')
 
@@ -275,7 +283,7 @@ def format_date(date):
     return ''
 
 def get_content_status(content):
-    if interfaces.IVersionedContent.providedBy(content):
+    if IVersionedContent.providedBy(content):
         next_status = content.get_next_version_status()
 
         if next_status == 'not_approved':
@@ -306,7 +314,9 @@ class ContentSerializer(object):
     def __init__(self, rest, request):
         self.rest = rest
         self.request = request
-        self.get_id = getUtility(IIntIds).register
+        service = getUtility(IIntIds)
+        self.get_id = service.register
+        self.get_content = service.getObject
         self.get_metadata = getUtility(IMetadataService).getMetadataValue
         self.check_permission = getSecurityManager().checkPermission
 
@@ -319,11 +329,15 @@ class ContentSerializer(object):
                 return access
         return None
 
-    def __call__(self, content):
+    def __call__(self, content=None, id=None):
+        if content is None:
+            content = self.get_content(id)
+        elif id is None:
+            id = self.get_id(content)
         previewable = content.get_previewable()
         data = {
             'ifaces': content_ifaces(content),
-            'id': self.get_id(content),
+            'id': id,
             'identifier': content.getId(),
             'path': self.rest.get_content_path(content),
             'icon': get_icon(content, self.request),
@@ -333,7 +347,7 @@ class ContentSerializer(object):
             'modified': format_date(self.get_metadata(
                    previewable, 'silva-extra', 'modificationtime')),
             'access': self.get_access(content)}
-        if interfaces.IPublishable.providedBy(content):
+        if IPublishable.providedBy(content):
             data['status'] = get_content_status(content)
         return data
 
@@ -342,16 +356,8 @@ class ActionREST(UIREST):
     """Base class for REST-based listing actions.
     """
     grok.baseclass()
-    grok.context(interfaces.IContainer)
+    grok.context(IContainer)
     grok.require('silva.ChangeSilvaContent')
-
-    def __init__(self, *args):
-        super(ActionREST, self).__init__(*args)
-        self.__serializer = ContentSerializer(self, self.request)
-        self.__removed = []
-        self.__added_publishables = []
-        self.__added_nonpublishables = []
-        self.__updated = []
 
     def get_selected_content(self, key='content', recursive=False):
         ids = self.request.form.get(key)
@@ -366,24 +372,12 @@ class ActionREST(UIREST):
                 except (KeyError, ValueError):
                     pass
                 else:
-                    if recursive and interfaces.IContainer.providedBy(content):
+                    if recursive and IContainer.providedBy(content):
                         for content in walk_silva_tree(content):
                             yield id, content
                             id = None
                     else:
                         yield id, content
-
-    def add_to_listing(self, content):
-        if interfaces.IPublishable.providedBy(content):
-            self.__added_publishables.append(self.__serializer(content))
-        elif interfaces.INonPublishable.providedBy(content):
-            self.__added_nonpublishables.append(self.__serializer(content))
-
-    def update_in_listing(self, content):
-        self.__updated.append(self.__serializer(content))
-
-    def remove_from_listing(self, identifier):
-        self.__removed.append(identifier)
 
     def notify(self, message, type=u""):
         service = getUtility(IMessageService)
@@ -394,16 +388,39 @@ class ActionREST(UIREST):
 
     def POST(self):
         data = self.payload()
-        if self.__removed:
-            data['remove'] = self.__removed
-        if self.__updated:
-            data['update'] = self.__updated
-        if self.__added_publishables or self.__added_nonpublishables:
-            data['add'] = {}
-            if self.__added_publishables:
-                data['add']['publishables'] = self.__added_publishables
+
+        serializer = ContentSerializer(self, self.request)
+        container = serializer.get_id(self.context)
+
+        listing = ListingSynchronizer()
+        updated = []
+        removed = []
+        added_publishables = []
+        added_nonpublishables = []
+        for info in listing.get_changes(self.request, container):
+            if info['action'] == 'remove':
+                removed.append(info['content'])
             else:
-                data['add']['assets'] = self.__added_nonpublishables
+                content_data = serializer(id=info['content'])
+                if info['action'] == 'add':
+                    if info['listing'] == 'publishables':
+                        added_publishables.append(content_data)
+                    else:
+                        added_nonpublishables.append(content_data)
+                else:
+                    updated.append(content_data)
+
+        if removed:
+            data['remove'] = removed
+        if updated:
+            data['update'] = updated
+        if added_publishables or added_nonpublishables:
+            data['add'] = {}
+            if added_publishables:
+                data['add']['publishables'] = added_publishables
+            else:
+                data['add']['assets'] = added_nonpublishables
+        print data
         return self.json_response({
                 'ifaces': ['actionresult'],
                 'post_actions': data,
@@ -457,3 +474,80 @@ class ContentCounter(object):
                          'content': quotify(self.titles[-1])})
         return self.rest.translate(what)
 
+
+
+class ListingSynchronizer(object):
+
+    namespace = 'silva.listing.invalidation'
+
+    def get_path(self, request):
+        return IVirtualSite(request).get_root().absolute_url_path()
+
+    def get_client_version(self, request):
+        try:
+            return int(request.cookies.get(self.namespace, None))
+        except TypeError:
+            return 1
+
+    def set_client_version(self, request, version):
+        request.response.setCookie(
+            self.namespace, str(version), path=self.get_path(request))
+
+    def get_changes(self, request, container):
+        storage = MemcacheSlice(self.namespace)
+        storage_version = storage.get_index()
+        client_version = self.get_client_version(request)
+
+        if client_version != storage_version:
+            self.set_client_version(request, storage_version)
+
+        if client_version is not None and client_version < storage_version:
+            return filter(
+                lambda r: r['container'] == container,
+                storage[client_version+1:storage_version+1])
+
+        return []
+
+# XXX Do position.
+
+def register_change(target, event, action):
+    service = getUtility(IIntIds)
+    container = aq_parent(target)
+    data = {
+        'action': action,
+        'listing': 'publishables' if IPublishable.providedBy(target) else 'assets',
+        'container': service.register(container),
+        'content': service.register(target)}
+    MemcacheSlice(ListingSynchronizer.namespace).push(data)
+
+
+@grok.subscribe(ISilvaObject, IObjectModifiedEvent)
+def register_update(target, event):
+    register_change(target, event, 'update')
+
+
+@grok.subscribe(IVersion, IObjectModifiedEvent)
+def register_version_update(target, event):
+    register_change(target.get_content(), event, 'update')
+
+
+@grok.subscribe(ISilvaObject, IObjectAddedEvent)
+def register_add(target, event):
+    if event.object != target:
+        return
+    if IRoot.providedBy(target):
+        return
+    register_change(target, event, 'add')
+
+
+# TODO: add ContentPositionChangedEvent handler
+
+# don't use zope.lifecycleevent.IObjectRemovedEvent because the object
+# as no more int id
+@grok.subscribe(ISilvaObject, IObjectWillBeRemovedEvent)
+def register_remove(target, event):
+    if event.object != target:
+        return
+    if IRoot.providedBy(target):
+        return
+    register_change(target, event, 'remove')

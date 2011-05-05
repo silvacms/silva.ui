@@ -393,6 +393,15 @@
                     get_line: function(id) {
                         return this.$containers.children('#list' + id.toString());
                     },
+                    add_lines: function(data) {
+                        for (var name in this.by_name) {
+                            var lines = data[name];
+
+                            if (lines && lines.length) {
+                                this.by_name[name].trigger('addline-smilisting', {lines: lines});
+                            };
+                        };
+                    },
                     update_lines: function(datas) {
                         var get_line = this.get_line.scope(this);
 
@@ -485,17 +494,6 @@
                             this.by_name[configuration.name] = container;
                         }.scope(this));
 
-                        // Handle new data added to the listing
-                        this.$content.bind('newdata-smilisting', function(event, data) {
-                            for (var name in this.by_name) {
-                                var lines = data[name];
-
-                                if (lines && lines.length) {
-                                    this.by_name[name].trigger('addline-smilisting', {lines: lines});
-                                };
-                            };
-                        }.scope(this));
-
                         // Bind and update the listing column sizes
                         this.update_widths();
                         this.$content.bind('collapsingchange-smilisting', function() {
@@ -538,7 +536,6 @@
                     },
                     cleanup: function() {
                         this.$content.empty();
-                        this.$content.unbind('newdata-smilisting');
                         this.$content.unbind('collapsingchange-smilisting');
                         this.$content.unbind('selectionchange-smilisting');
                     }
