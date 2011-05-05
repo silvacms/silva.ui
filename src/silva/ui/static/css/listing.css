@@ -39,21 +39,21 @@
   border-collapse: collapse;
 }
 #workspace .content .listing-header th {
-  line-height:24px;
+  line-height: 24px;
 }
 #workspace .content .listing td,
 #workspace .content .listing-header th {
-  padding:0 5px 0 5px;
-  line-height:22px;
-  text-align:left;
-  white-space:nowrap;
+  padding: 0 5px 0 5px;
+  line-height: 22px;
+  text-align: left;
+  white-space: nowrap;
   vertical-align: middle;
-  overflow:hidden;
+  /*overflow:hidden;*/
 }
 #workspace .content .listing td ins.state {
-  background-image:url(../img/sprite.png);
-  display:block;
-  float:left;
+  background-image: url(../img/sprite.png);
+  display: block;
+  float: left;
 }
 #workspace .content .listing tr.item input {
   width: 100%;
@@ -103,10 +103,6 @@
 }
 #workspace .content .listing .static tr.selected.hover {
   background-color:#5fa2ea;
-}
-#workspace .content .listing .static tr.item:active {
-  background-color:#4d96e6!important;
-  color:#fff;
 }
 #workspace .content .listing td.moveable,
 #workspace .content .listing td.moveable ins {

@@ -49,14 +49,14 @@ div.actions ol li a:hover {
 }
 
 div.actions .dropdown {
-  -khtml-border-radius:0px 0px 3px 3px;
-  -moz-border-radius:0px 0px 3px 3px;
-  -ms-border-radius:0px 0px 3px 3px;
-  -o-border-radius:0px 0px 3px 3px;
-  -webkit-border-radius:0px 0px 3px 3px;
+  -khtml-border-radius: 0px 0px 3px 3px;
+  -moz-border-radius: 0px 0px 3px 3px;
+  -ms-border-radius: 0px 0px 3px 3px;
+  -o-border-radius: 0px 0px 3px 3px;
+  -webkit-border-radius: 0px 0px 3px 3px;
   position: absolute;
-  background:#fff;
-  border-radius:0px 0px 3px 3px;
+  background: #fff;
+  border-radius: 0px 0px 3px 3px;
   border: 1px #999 solid;
   display: none;
   z-index: 50;

@@ -32,16 +32,47 @@
     });
 
     listingcolumns.register({
-        name: 'nothing',
-        html: ''
+        name: 'goto',
+        jsont: '<div class="actions"><ol><li><a class="ui-state-default" rel="{column.index.screen|htmltag}" href="{data.path|htmltag}"><div class="dropdown-icon"><ins class="ui-icon ui-icon-triangle-1-s" /></div><span>{column.index.caption}</span></a><div class="dropdown"><ol></ol></div></li></ol></div>',
+        render: function($content, data) {
+            var $opener = $content.find('div.dropdown-icon');
+            var $dropdown = $content.find('div.dropdown');
+            var $entries = $dropdown.children('ol');
+            var smi = this.smi;
+
+            for (var i=0; i < this.column.menu.length; i++) {
+                var entry = this.column.menu[i];
+
+                if (entry.require_iface == undefined ||
+                    $.inArray(entry.require_iface, data.ifaces) > -1){
+                    $entries.append(
+                        '<li><a class="ui-state-default" href="' + data.path +
+                            '" rel="' + entry.screen + '"><span>' +
+                            entry.caption + '</span></a></li>');
+                };
+            };
+
+            $content.delegate('a', 'click', function(event) {
+                smi.open_screen_from_link($(event.target).parent('a'));
+                return false;
+            });
+            $opener.bind('click', function(event) {
+                $dropdown.fadeToggle();
+                return false;
+            });
+            $dropdown.bind('mouseleave', function() {
+                $dropdown.fadeOut('fast');
+            });
+
+        }
     });
 
     listingcolumns.register({
         name: 'action-icon',
         jsont: '<a href="{data.path|htmltag}" rel="{column.action|htmltag}" title="{data.title|htmltag}"><ins class="icon"></ins></a>',
-        render: function() {
-            var $icon = this.$content.find('ins');
-            var $link = this.$content.children('a');
+        render: function($content) {
+            var $icon = $content.find('ins');
+            var smi = this.smi;
 
             if (this.value.indexOf('.') < 0) {
                 $icon.addClass(this.value);
@@ -51,10 +82,10 @@
                     'background:url(' + this.value + ') no-repeat center center');
             };
 
-            $link.bind('click', function(event) {
-                this.smi.open_screen_from_link($link);
+            $content.delegate('a', 'click', function(event) {
+                smi.open_screen_from_link($(event.target).parent('a'));
                 return false;
-            }.scope(this));
+            });
         }
     });
 
@@ -310,14 +341,22 @@
 
                                 $.each(configuration.columns, function(e, column) {
                                     var $cell = $('<td></td>');
+
                                     $cell.bind('updatecell-smilisting', function(event, data) {
-                                        listingcolumns.render($(this), {
-                                            data: data,
-                                            name: column.view,
-                                            ifaces: ['object'],
-                                            extra: {smi: listing.smi,
-                                                    column: column,
-                                                    value: data[column.name]}});
+                                        if (column.view) {
+                                            var value = null;
+
+                                            if (column.name) {
+                                                value = data[column.name];
+                                            };
+                                            listingcolumns.render($(this), {
+                                                data: data,
+                                                name: column.view,
+                                                ifaces: ['object'],
+                                                extra: {smi: listing.smi,
+                                                        column: column,
+                                                        value: value}});
+                                        }
                                         event.stopPropagation();
                                         event.preventDefault();
                                     });
