@@ -31,6 +31,7 @@ div.actions ol li a {
   border-right: 1px #777 solid;
   line-height: 20px;
   padding: 0px;
+  white-space: nowrap;
 }
 div.actions ol li a span {
   padding: 0px 4px;
@@ -60,6 +61,13 @@ div.actions .dropdown {
   border: 1px #999 solid;
   display: none;
   z-index: 50;
+}
+
+div.actions .dropdown li {
+  float: none;
+}
+div.actions .dropdown li a:hover {
+   background: #eee;
 }
 
 div.actions div.dropdown-icon {
