@@ -225,6 +225,14 @@
                                         'actionrefresh-smilisting', {data: this.data});
                                 };
                                 break;
+                            case 'form':
+                                definition['action'] = function() {
+                                    var url = $('#content-url').attr('href');
+
+                                    return this.$content.SMIFormPopup(
+                                        url + '/++rest++' + action_definition.action.form.name);
+                                };
+                                break;
                             };
                         };
                     };

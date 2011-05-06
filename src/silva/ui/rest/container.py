@@ -284,14 +284,14 @@ class ColumnsContainerListing(UIREST):
                                  'icon': 'document',
                                  'order': 25,
                                  'action':
-                                     {'rest':
-                                          {'action': 'approve',
+                                     {'form':
+                                          {'name': 'silva.core.smi.approveforfuture',
                                            'send': 'selected_ids'}},
                                  'available':
                                      {'content_match':
                                           {'access': ['manage', 'publish', 'write']},
                                       'items_match':
-                                          {'status': ['published', 'closed']}},
+                                          {'status': ['draft', 'closed']}},
                                  'ifaces': ['versioned']},
                                 ],
                          'ifaces': ['object']},

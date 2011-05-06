@@ -92,7 +92,6 @@ class UIREST(rest.REST):
         return messages
 
 
-
 def get_resources(request):
     needed = fanstatic.get_needed()
     if not needed.has_resources():
@@ -109,7 +108,6 @@ def get_resources(request):
         resource_url =  '/'.join((library_url, resource.relpath))
         data[resource.ext[1:]].append(resource_url)
 
-    data['ifaces'] = ['resources']
     return data
 
 

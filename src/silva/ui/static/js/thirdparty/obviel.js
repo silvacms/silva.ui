@@ -199,24 +199,24 @@ var obviel = {};
         if (this.cleanup) {
             // Install new cleanup callback
             this.$content.one('cleanup-obviel', function(event) {
-                this.cleanup();
+                this.cleanup(this.$content);
             }.scope(this));
         };
 
         // Insert content and call render.
         if (this.iframe) {
-            var iframe = $('<iframe src="">');
+            var $iframe = $('<iframe src="">');
 
-            iframe.height(this.$content.height());
-            iframe.width(this.$content.width());
-            this.$content.html(iframe);
+            $iframe.height(this.$content.height());
+            $iframe.width(this.$content.width());
+            this.$content.html($iframe);
             if (template) {
                 if (template.indexOf('<html') < 0 &&
                     template.indexOf('<HTML') < 0) {
                     // no html tags, add missing html tag
                     template = '<html><body>' + template + '</body></html>';
                 };
-                var template_window = iframe.get(0).contentWindow;
+                var template_window = $iframe.get(0).contentWindow;
                 var template_document = template_window.document;
                 $(template_document).ready(render);
                 template_document.write(template);

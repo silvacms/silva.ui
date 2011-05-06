@@ -136,6 +136,9 @@
                 $content.disableTextSelect();
                 $content.find('.content-actions ol').render({data: actions});
             };
+        },
+        cleanup: function($content) {
+            $content.enableTextSelect();
         }
     });
 
