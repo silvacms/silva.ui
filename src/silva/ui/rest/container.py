@@ -14,7 +14,7 @@ from OFS.interfaces import IObjectWillBeRemovedEvent
 
 from silva.core.cache.memcacheutils import MemcacheSlice
 from silva.core.interfaces import IPublishable, INonPublishable
-from silva.core.interfaces import IRoot, IContainer, ISilvaObject
+from silva.core.interfaces import IContainer, ISilvaObject
 from silva.core.interfaces import IVersion, IVersionedContent
 from silva.core.messages.interfaces import IMessageService
 from silva.core.services.utils import walk_silva_tree
@@ -556,8 +556,6 @@ def register_version_update(target, event):
 def register_add(target, event):
     if event.object != target:
         return
-    if IRoot.providedBy(target):
-        return
     register_change(target, event, 'add')
 
 
@@ -568,7 +566,5 @@ def register_add(target, event):
 @grok.subscribe(ISilvaObject, IObjectWillBeRemovedEvent)
 def register_remove(target, event):
     if event.object != target:
-        return
-    if IRoot.providedBy(target):
         return
     register_change(target, event, 'remove')

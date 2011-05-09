@@ -14,9 +14,10 @@ from OFS.Image import Image as ZopeImage
 
 
 class UIService(SilvaService):
-    grok.implements(IUIService)
     meta_type = 'Silva UI Service'
-    default_service_identifier = 'service_ui'
+    grok.implements(IUIService)
+    grok.name('service_ui')
+    silvaconf.default_service()
     silvaconf.icon('service.png')
 
     manage_options = (

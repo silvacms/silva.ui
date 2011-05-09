@@ -238,8 +238,6 @@ def register_add(target, event):
         return
     if not IContainer.providedBy(target):
         return
-    if IRoot.providedBy(target):
-        return
 
     service = getUtility(IIntIds)
 
@@ -262,8 +260,6 @@ def register_remove(target, event):
     if event.object != target:
         return
     if not IContainer.providedBy(target):
-        return
-    if IRoot.providedBy(target):
         return
 
     service = getUtility(IIntIds)
