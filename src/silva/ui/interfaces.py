@@ -23,7 +23,9 @@ class ISilvaUIDependencies(IJsonTemplateResources):
     Every Silva UI plugin should depend on those resources.
     """
     silvaconf.resource(jqueryui.jqueryui)
-    silvaconf.resource('js/thirdparty/obviel.js')
+    silvaconf.resource('js/infrae.js')
+    silvaconf.resource('js/infrae.deferred.js')
+    silvaconf.resource('js/infrae.view.js')
     silvaconf.resource('js/utils.js')
 
 
@@ -39,6 +41,7 @@ class ISilvaUI(ISilvaUIDependencies):
     silvaconf.resource('js/navigation.js')
     silvaconf.resource('js/workspace.js')
     silvaconf.resource('js/form.js')
+    silvaconf.resource('js/listingselection.js')
     silvaconf.resource('js/listing.js')
     silvaconf.resource('js/listingtoolbar.js')
     silvaconf.resource('js/listingutils.js')

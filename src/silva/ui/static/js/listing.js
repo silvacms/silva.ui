@@ -99,7 +99,12 @@
         }
     });
 
-    var render_header = function(configuration, $content) {
+    /**
+     * Render/bind top listing header.
+     * @param $content: listing JQuery element.
+     * @param configuration: listing configuration.
+     */
+    var render_listing_header = function($content, configuration) {
         var first_configuration = configuration.listing[0];
         var $header = $content.find('div.listing-header tr');
 
@@ -111,6 +116,60 @@
                 $cell.text(column.caption);
             };
             $header.append($cell);
+        });
+    };
+
+    /**
+     * Render bind top container header (of publishables or assets for instance).
+     * @param $header: header JQuery element.
+     * @param $container: container JQuery element associated to the header.
+     * @param configuration: listing configuration.
+     */
+    var render_container_header = function($header, $container, configuration) {
+        var $marker = $header.children('ins.ui-icon');
+
+        var toggle_marker = function() {
+            // Update the jQueryUI class on the marker (would be
+            // too easy otherwise).
+            if ($marker.hasClass('ui-icon-triangle-1-e')) {
+                $marker.removeClass('ui-icon-triangle-1-e');
+                $marker.addClass('ui-icon-triangle-1-s');
+            } else {
+                $marker.removeClass('ui-icon-triangle-1-s');
+                $marker.addClass('ui-icon-triangle-1-e');
+            };
+        };
+        var toggle_collapsing = function () {
+            configuration.collapsed = !configuration.collapsed;
+            toggle_marker();
+            $header.toggleClass('collapsed');
+            $container.toggleClass('collapsed');
+            $header.trigger('collapsingchange-smilisting');
+        };
+
+        if (configuration.collapsed) {
+            toggle_marker();
+            $header.addClass('collapsed');
+            $container.addClass('collapsed');
+            $header.trigger('collapsingchange-smilisting');
+        };
+        $header.bind('click', function(event) {
+            var $target = $(event.target);
+            if ($target.is('input')) {
+                $target.focus();
+            } else {
+                toggle_collapsing();
+            }
+            event.preventDefault();
+            event.stopPropagation();
+        });
+        $container.bind('focus-smi', function(event) {
+            if ($header.hasClass('collapsed')) {
+                toggle_collapsing();
+            };
+            $container.parent().SMISmoothScroll(
+                'slow', 'absolute',
+                $container.position().top - $header.outerHeight());
         });
     };
 
@@ -141,7 +200,7 @@
                     $.each(configuration.columns, function(e, column) {
                         if (column.filterable) {
                             names.push(column.name);
-                        }
+                        };
                     });
                     configuration.filter_entry = function(pattern, data) {
                         for (var i=0; i < names.length ; i++) {
@@ -158,61 +217,11 @@
 
                 var create_container = function(name, configuration, data, listing) {
                     var $content = $('dd.' + name);
+                    var $header = $('dt.' + name);
                     var $container = $content.find('tbody');
 
                     // Collapse feature / table header.
-                    (function() {
-                        var $header = $('dt.' + name);;
-                        var $marker = $header.children('ins.ui-icon');
-
-                        var toggle_marker = function() {
-                            // Update the jQueryUI class on the marker (would be
-                            // too easy otherwise).
-                            if ($marker.hasClass('ui-icon-triangle-1-e')) {
-                                $marker.removeClass('ui-icon-triangle-1-e');
-                                $marker.addClass('ui-icon-triangle-1-s');
-                            } else {
-                                $marker.removeClass('ui-icon-triangle-1-s');
-                                $marker.addClass('ui-icon-triangle-1-e');
-                            };
-                        };
-                        var toggle_collapsing = function () {
-                            toggle_marker();
-                            $header.toggleClass('collapsed');
-                            $content.toggleClass('collapsed');
-                            configuration.collapsed = !configuration.collapsed;
-                            $header.trigger('collapsingchange-smilisting');
-                            trigger('selectionchange-smilisting');
-                        };
-
-                        if (configuration.collapsed) {
-                            toggle_marker();
-                            $header.addClass('collapsed');
-                            $content.addClass('collapsed');
-                            $header.trigger('collapsingchange-smilisting');
-                        };
-                        $header.bind('click', function(event) {
-                            var target = $(event.target);
-                            if (target.is('input')) {
-                                target.focus();
-                                return;
-                            };
-                            toggle_collapsing();
-                            return false;
-                        });
-                        $content.bind('focus-smi', function() {
-                            if ($header.hasClass('collapsed')) {
-                                toggle_collapsing();
-                            };
-                            $content.parent().SMISmoothScroll(
-                                'slow', 'absolute',
-                                $content.position().top - $header.outerHeight());
-                        });
-                    })();
-
-                    var trigger = function(event_name) {
-                        listing.trigger(event_name, $container);
-                    };
+                    render_container_header($header, $content, configuration);
 
                     (function() {
                         // Row selection
@@ -239,14 +248,13 @@
                                 hovered_row.addClass("hover");
                             };
                         };
-                        var select_row = function(row, multiple) {
+                        var select_row = function($row, multiple) {
                             if (last_selected_index === null || !multiple) {
-                                last_selected_index = row.index();
-                                row.toggleClass('selected');
-                                trigger('selectionchange-smilisting');
+                                last_selected_index = $row.index();
+                                listing.selection.toggle($row);
                             } else {
                                 // Multiple selection
-                                var current_index = row.index();
+                                var current_index = $row.index();
 
                                 if (current_index != last_selected_index) {
                                     var start = 0;
@@ -259,8 +267,8 @@
                                         start = current_index;
                                         end = last_selected_index;
                                     };
-                                    row.parent().children().slice(start, end).filter('.item').toggleClass('selected');
-                                    trigger('selectionchange-smilisting');
+                                    var $lines = $row.parent().children().slice(start, end).filter('.item:visible');
+                                    listing.selection.toggle($lines);
                                 };
                                 last_selected_index = current_index;
                             };
@@ -286,11 +294,11 @@
 
                         if (configuration.sortable) {
                             if (true) {
-                            //if (objects_match([listing.data.content], configuration.sortable.available)) {
-                                var table = $content.find('table');
+                                //if (objects_match([listing.data.content], configuration.sortable.available)) {
+                                var $table = $content.find('table');
 
                                 // Add the sorting if the table is sortable
-                                table.tableDnD({
+                                $table.tableDnD({
                                     dragHandle: "moveable",
                                     onDragClass: "dragging",
                                     onDragStart: function(table, row) {
@@ -322,7 +330,7 @@
                                 });
                                 // If content change, reinitialize the DND
                                 $content.bind('contentchange-smilisting', function() {
-                                    table.tableDnDUpdate();
+                                    $table.tableDnDUpdate();
                                 });
                             };
                         };
@@ -338,66 +346,81 @@
                             $.each(datas, function(i, data) {
                                 // Add a data line to the table
                                 var $line = $('<tr class="item"></tr>');
+                                var input_line = null;
+                                var input_data = {};
+
+                                $line.attr('id', 'list' + data['id'].toString());
+                                if (!initial) {
+                                    $line.addClass('selected');
+                                };
 
                                 $.each(configuration.columns, function(e, column) {
                                     var $cell = $('<td></td>');
 
-                                    $cell.bind('updatecell-smilisting', function(event, data) {
-                                        if (column.view) {
+                                    if (column.view) {
+                                        $cell.bind('refreshcell-smilisting', function(event, data) {
+                                            var $cell = $(this);
                                             var value = null;
 
                                             if (column.name) {
                                                 value = data[column.name];
                                             };
-                                            listingcolumns.render($(this), {
+                                            listingcolumns.render($cell, {
                                                 data: data,
                                                 name: column.view,
                                                 ifaces: ['object'],
                                                 extra: {smi: listing.smi,
                                                         column: column,
                                                         value: value}});
-                                        }
-                                        event.stopPropagation();
-                                        event.preventDefault();
-                                    });
+                                            event.stopPropagation();
+                                            event.preventDefault();
+                                        });
+                                        if (column.name) {
+                                            $cell.bind('inputcell-smilisting', function(event, data) {
+                                                var $cell = $(this);
+                                                var $field = $('<input type="text" />');
+
+                                                $field.val(data[column.name]);
+                                                $cell.empty();
+                                                $cell.append($field);
+                                                event.stopPropagation();
+                                                event.preventDefault();
+                                            });
+                                        };
+                                    };
                                     $line.append($cell);
                                 });
-                                if (!initial) {
-                                    $line.addClass('selected');
-                                };
-                                $line.attr('id', 'list' + data['id'].toString());
-                                $line.bind('updateline-smilisting', function(event, data) {
-                                    $line.children().trigger('updatecell-smilisting', data);
-                                    $line.removeClass('inputized');
-                                    $line.data('smilisting', data);
+
+                                $line.bind('refreshline-smilisting', function(event, data) {
+                                    if (data != undefined) {
+                                        $line.data('smilisting', data);
+                                    } else {
+                                        data = $line.data('smilisting');
+                                    };
+                                    $line.children().trigger('refreshcell-smilisting', data);
                                     event.stopPropagation();
                                     event.preventDefault();
                                 });
-                                $line.bind('inputline-smilisting', function(event, data) {
-                                    var tabindex = data.names.length * $line.index() + 1;
-                                    $.each(data.names, function(e, name) {
-                                        var index = configuration.column_index(name);
-                                        var data = $line.data('smilisting')[name];
-                                        var $cell = $line.children(':eq(' + index + ')');
-                                        var $input = $('<input type="text" />');
+                                $line.bind('inputline-smilisting', function(event, info) {
+                                    var data = $line.data('smilisting');
 
-                                        $input.attr('tabindex', tabindex);
-                                        tabindex += 1;
-                                        $input.val(data);
-                                        $cell.empty();
-                                        $cell.append($input);
+                                    $.each(info.names, function(e, name) {
+                                        var index = configuration.column_index(name);
+                                        var $cell = $line.children(':eq(' + index + ')');
+
+                                        $cell.trigger('inputcell-smilisting', data);
                                     });
                                     $line.addClass('inputized');
                                     event.stopPropagation();
                                     event.preventDefault();
                                 });
                                 $container.append($line);
-                                $line.trigger('updateline-smilisting', data);
+                                $line.trigger('refreshline-smilisting', data);
                             });
                             // Send events
-                            trigger('contentchange-smilisting');
+                            listing.trigger('contentchange-smilisting', $container);
                             if (!initial) {
-                                trigger('selectionchange-smilisting');
+                                listing.trigger('selectionchange-smilisting', $container);
                             };
                         } else if (initial) {
                             // Add a message no lines.
@@ -427,10 +450,23 @@
                     init: function() {
                         this.configuration = configuration;
                         this.$containers = $([]);
+                        this.selection = this.$content.SMISelection();
                         this.by_name = {};
                     },
                     get_line: function(id) {
-                        return this.$containers.children('#list' + id.toString());
+                        return $(document.getElementById('list' + id.toString()));
+                    },
+                    get_lines: function(ids) {
+                        if (ids.length) {
+                            var index = ids.length - 1;
+                            var $lines = $(document.getElementById('list' + ids[index].toString()));
+
+                            while(index--) {
+                                $lines.add(document.getElementById('list' + ids[index].toString()));
+                            };
+                            return $lines;
+                        };
+                        return $([]);
                     },
                     add_lines: function(data) {
                         for (var name in this.by_name) {
@@ -449,25 +485,12 @@
                         });
                     },
                     remove_lines: function(ids) {
-                        var is_selection_changed = false;
-                        var is_content_changed = false;
+                        var $lines = this.get_lines(ids);
 
-                        $.each(ids, function(i, id) {
-                            var line = this.get_line(id);
-
-                            if (line.length) {
-                                if (line.is('.selected')) {
-                                    is_selection_changed = true;
-                                };
-                                is_content_changed = true;
-                                line.remove();
-                            };
-                        }.scope(this));
-                        if (is_content_changed) {
+                        if ($lines.length) {
+                            this.selection.remove($lines);
+                            $lines.remove();
                             this.trigger('contentchange-smilisting');
-                        };
-                        if (is_selection_changed) {
-                            this.trigger('selectionchange-smilisting');
                         };
                     },
                     filter_lines: function(value) {
@@ -489,19 +512,13 @@
                         this.trigger('selectionchange-smilisting');
                     },
                     unselect: function($lines) {
-                        $lines.filter('.inputized').each(function(i, line) {
-                            var $line = $(line);
-                            this.update_line($line, $line.data('smilisting'));
-                        }.scope(this));
-                        $lines.removeClass('selected');
-                        this.trigger('selectionchange-smilisting');
+                        this.selection.unselect($lines);
                     },
                     unselect_all: function() {
-                        this.unselect(this.$containers.children('tr.item.selected:visible'));
+                        this.selection.unselect(this.$containers.children('tr.item.selected:visible'));
                     },
                     select_all: function() {
-                        this.$containers.children('tr.item:visible').addClass('selected');
-                        this.trigger('selectionchange-smilisting');
+                        this.selection.select(this.$containers.children('tr.item:visible'));
                     },
                     trigger: function(event_name, $content) {
                         var $items = this.$containers.children('tr.item');
@@ -518,9 +535,14 @@
                             items: $selected
                         });
                     },
-                    render: function() {
+                    render: function($content) {
                         // Render header
-                        render_header(this.configuration, this.$content);
+                        render_listing_header($content, this.configuration);
+
+                        // Configure selection
+                        this.selection.events.always(function() {
+                            this.trigger('selectionchange-smilisting');
+                        }.scope(this));
 
                         // Create containers
                         $.each(this.configuration.listing, function(i, configuration) {
@@ -553,6 +575,7 @@
 
                         $.each(this.configuration.listing, function(i, configuration) {
                             var $table = $containers[configuration.name].parent();
+
                             if ($table.is(':visible')) {
                                 if ($reference === null) {
                                     $reference = $table;
@@ -565,11 +588,11 @@
                         });
 
                         if ($reference !== null) {
-                            $reference.updateTableColumnsWidths(layout);
-                            $header.updateTableColumnsWidths({}, $reference);
+                            $reference.SMIUpdateTableColumnsWidths(layout);
+                            $header.SMIUpdateTableColumnsWidths({}, $reference);
 
                             for (var i=0; i < others.length; i++) {
-                                others[i].updateTableColumnsWidths(other_layouts[i], $reference);
+                                others[i].SMIUpdateTableColumnsWidths(other_layouts[i], $reference);
                             };
                         };
                     },

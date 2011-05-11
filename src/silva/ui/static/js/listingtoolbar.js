@@ -1,31 +1,7 @@
 
 
-(function($, obviel) {
+(function($, obviel, infrae) {
 
-    /**
-     * Helper that return true if one object in data match all conditions.
-     * @param data: list of object with properties
-     * @param conditions: object with properties that are list of
-     *        possible values that a data object must have in order to
-     *        match.
-     */
-    var objects_match = function(data, conditions) {
-        for (var i=0; i < data.length; i++) {
-            var item = data[i];
-            var missing = false;
-
-            for (var property in conditions) {
-                if ($.inArray(item[property], conditions[property]) < 0) {
-                    missing = true;
-                    break;
-                };
-            };
-            if (!missing) {
-                return true;
-            };
-        };
-        return false;
-    };
 
     /**
      * Return a function that evalute a list of JSON predicate.
@@ -38,7 +14,7 @@
             switch(predicate) {
             case 'content_match':
                 conditions.push(function() {
-                    return objects_match([this.data.content], predicates.content_match);
+                    return infrae.utils.match([this.data.content], predicates.content_match);
                 });
                 break;
             case 'items_provides':
@@ -53,7 +29,7 @@
                 break;
             case 'items_match':
                 conditions.push(function() {
-                    return objects_match(this.data.items(), predicates.items_match);
+                    return infrae.utils.match(this.data.items(), predicates.items_match);
                 });
                 break;
             case 'min_items':
@@ -316,8 +292,7 @@
         };
 
         // Update selector on selection change
-        listing.$content.bind(
-            'selectionchange-smilisting', function(event, changes) {
+        listing.$content.bind('selectionchange-smilisting', function(event, changes) {
                 if (changes.selected == 0) {
                     set_status('none');
                 } else if (changes.selected == changes.visible) {
@@ -457,7 +432,16 @@
     };
 
     SMISelection.prototype.inputs = function(names) {
-        this._raw_items.trigger('inputline-smilisting', {names: names});
+        var promise = this.listing.selection.events.promise();
+
+        if (promise != null) {
+            promise.template.until(function(element) {
+                $(element).trigger('inputline-smilisting', {names: names});
+            }, true);
+            promise.template.done(function(element) {
+                $(element).trigger('refreshline-smilisting');
+            }, true);
+        }
     };
 
     /**
@@ -466,13 +450,6 @@
      */
     SMISelection.prototype.remove = function(ids) {
         this.listing.remove_lines(ids);
-    };
-
-    /**
-     * Close the current selection (unselect it).
-     */
-    SMISelection.prototype.close = function() {
-        this.listing.unselect(this._raw_items);
     };
 
 
@@ -523,4 +500,4 @@
 
     });
 
-})(jQuery, obviel);
+})(jQuery, obviel, infrae);

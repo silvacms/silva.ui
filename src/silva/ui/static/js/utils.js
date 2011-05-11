@@ -1,16 +1,5 @@
 (function($) {
 
-    // First next elemeent that doesn't match the descriptor.
-    $.fn.nextOne = function(selector) {
-        var element = $(this);
-        var not_matching = element.nextUntil(selector);
-
-        if (not_matching.length) {
-            return not_matching.last().next();
-        };
-        return element.next();
-    };
-
     /**
      * Disable or enable text selection
      */
@@ -75,23 +64,6 @@
     };
 
     /**
-     * Set a class name to table rows based on a sequence.
-     *
-     * @param classes: List of class names in the sequence. Defaults to ['odd', 'even']
-     */
-    $.fn.setClassSequence = function(classes) {
-        return $(this).each(function() {
-            if (typeof(classes) != 'object') {
-                classes = ['odd', 'even'];
-            }
-            var length = classes.length;
-            $(this).find('tr').removeClass(classes.join(' ')).each(function(i) {
-                $(this).addClass(classes[i % length]);
-            });
-        });
-    };
-
-    /**
      * Calculate and set percentual widths on table columns based on the
      * automatically determined width of columns. In other words: let the
      * browser set the size of the columns based on contents, and then
@@ -102,7 +74,7 @@
      * @param options: Object which can contain a 'source' jQuery object or a
      * 'fixedColumns' object containing columnindex:pixelwidth values
      */
-    $.fn.updateTableColumnsWidths = function(options, reference) {
+    $.fn.SMIUpdateTableColumnsWidths = function(options, reference) {
         if (typeof(options.fixed) != 'object') {
             options.fixed = {};
         };
