@@ -138,12 +138,12 @@
 
                     if (actions && actions.entries.length) {
                         $content.html('<div class="actions content-actions"><ol></ol></div>');
-                        $content.disableTextSelect();
+                        infrae.ui.selection.disable($content);
                         $content.find('.content-actions ol').render({data: actions});
                     };
                 },
                 cleanup: function() {
-                    $content.enableTextSelect();
+                    infrae.ui.selection.enable($content);
                 }
             };
         }
@@ -174,7 +174,7 @@
         var $content = $workspace.children('.content');
 
         // Disable text selection in metadata
-        $header.children('.metadata').disableTextSelect();
+        infrae.ui.selection.disable($header.children('.metadata'));
 
         // New workspace is loaded
         $workspace.bind('content-smi', function (event, data) {

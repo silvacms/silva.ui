@@ -127,9 +127,8 @@
         factory: function($content, data, smi, listing) {
             return {
                 render: function() {
-
                     // Disable text selection in all footer
-                    $content.disableTextSelect();
+                    infrae.ui.selection.disable($content);
 
                     // Render clipboard info
                     smi.clipboard.content = data.content;

@@ -108,7 +108,7 @@
         });
 
         // Disable text selection on tree
-        $navigation.disableTextSelect();
+        infrae.ui.selection.disable($navigation);
 
         // Listen to smi.blur and focus to activate/disable shortcuts.
         $navigation.bind('blur-smi', function() {

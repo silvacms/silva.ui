@@ -313,7 +313,7 @@
         var smi = data.smi;
         var configuration = data.configuration;
 
-        var create_container = function(name, configuration, lines, selection, notify) {
+        var create_container = function(name, configuration, lines, selection) {
             var $content = $('dd.' + name);
             var $header = $('dt.' + name);
             var $container = $content.find('tbody');
@@ -394,24 +394,19 @@
             };
 
             var add_lines = function(lines, initial) {
-                var $added_lines = $([]);
-
                 if (lines.length) {
                     if (!initial) {
                         // Remove any eventual empty line
                         $container.children('.empty').remove();
                     };
                     // Fill in table
-                    $added_lines = infrae.utils.map(lines, render_line);
-
-                    // Send events
-                    notify('contentchange-smilisting');
+                    return infrae.utils.map(lines, render_line);
                 } else if (initial) {
                     // Add a message no lines.
                     $container.append(
                         '<tr class="empty"><td colpsan="' + configuration.columns.length + '">There is no items here.</td></tr>');
                 };
-                return $added_lines;
+                return [];
             };
 
             // Add default data
@@ -506,6 +501,7 @@
                         };
                         if (added.length) {
                             selection.select($(added));
+                            notify('contentchange-smilisting');
                         };
                     },
                     update_lines: function(lines) {
@@ -562,8 +558,7 @@
                                 configuration.name,
                                 configuration,
                                 data.items[configuration.name],
-                                selection,
-                                notify);
+                                selection);
                             $containers = $containers.add(container.$container);
                             by_name[configuration.name] = container;
                         });
@@ -603,12 +598,12 @@
                 $.each(configuration.listing, function(i, configuration) {
                     // Add column_index function
                     configuration.column_index = function(name) {
-                        for (var i=0; i < this.columns.length; i++) {
-                            if (name == this.columns[i].name)
+                        for (var i=0; i < configuration.columns.length; i++) {
+                            if (name == configuration.columns[i].name)
                                 return i;
                         };
                         return -1;
-                    }.scope(configuration);
+                    };
 
                     // Add filter_entry function
                     var names = [];

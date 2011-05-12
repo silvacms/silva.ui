@@ -48,6 +48,39 @@
             }
         },
         /**
+         * Smoothly scroll an element vertically, snapping to an interval size
+         *
+         * @param speed: Animation speed in ms, or one of the jQuery speed string values
+         * @param direction: 'up' or 'down'
+         * @param distance: Distance to scroll in pixels
+         * @param interval: Size in pixels to round the scrolling off to
+         */
+        scroll: function($content, speed, direction, distance, interval) {
+            var position = $content.scrollTop();
+            var target;
+
+            switch (direction) {
+            case 'up':
+                target = position - distance;
+                if (interval) {
+                    target -= target % interval;
+                };
+                break;
+            case 'down':
+                target = position + distance;
+                if (interval && position % interval != 0) {
+                    target += interval - (target % interval);
+                };
+                break;
+            case 'absolute':
+            default:
+                target = distance;
+            };
+
+            $content.stop(true, true);
+            $content.animate({scrollTop: target}, speed);
+        },
+        /**
          * Calculate and set percentual widths on table columns based on the
          * automatically determined width of columns. In other words: let the
          * browser set the size of the columns based on contents, and then
