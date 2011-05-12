@@ -25,7 +25,9 @@ class ISilvaUIDependencies(IJsonTemplateResources):
     silvaconf.resource(jqueryui.jqueryui)
     silvaconf.resource('js/infrae.js')
     silvaconf.resource('js/infrae.deferred.js')
-    silvaconf.resource('js/infrae.view.js')
+    silvaconf.resource('js/infrae.interfaces.js')
+    silvaconf.resource('js/infrae.views.js')
+    silvaconf.resource('js/infrae.ui.js')
     silvaconf.resource('js/utils.js')
 
 

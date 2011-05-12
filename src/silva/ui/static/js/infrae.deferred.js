@@ -99,6 +99,10 @@
             };
 
             $.extend(deferred, {
+                /**
+                 * Those are the default callbacks to use by default
+                 * on the list of Deferred we manage.
+                 */
                 template: {
                     always: function(callback, retro_active) {
                         template.done.push(callback);

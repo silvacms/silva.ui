@@ -1,38 +1,35 @@
 
-(function($, obviel) {
+(function($, infrae) {
 
     // Display a element in the clipboard
-    obviel.view({
+    infrae.views.view({
         iface: 'content',
         name: 'clipboarditem.smilisting',
-        render: function() {
-            var $item = $('<li class="clipboard-item '+ this.state + '"></li>');
+        factory: function($content, data, state) {
+            return {
+                render: function() {
+                    var $item = $('<li class="clipboard-item '+ state + '"></li>');
 
-            if (this.data.title) {
-                if (this.data.path) {
-                    var $link = $('<a class="open-screen"></a>');
+                    if (data.title) {
+                        if (data.path) {
+                            var $link = $('<a class="open-screen"></a>');
 
-                    $link.attr('href', this.data.path);
-                    $link.text(this.data.title);
-                    $item.append($link);
-                } else {
-                    $item.text(this.data.title);
-                };
+                            $link.attr('href', data.path);
+                            $link.text(data.title);
+                            $item.append($link);
+                        } else {
+                            $item.text(data.title);
+                        };
+                    };
+                    if (data.icon) {
+                        var $icon = $('<ins class="icon"></icon>');
+                        infrae.ui.icon($icon, data.icon);
+                        $item.prepend($icon);
+                    };
+
+                    $content.append($item);
+                }
             };
-            if (this.data.icon) {
-                var $icon = $('<ins class="icon"></icon>');
-
-                if (this.data.icon.indexOf('.') < 0) {
-                    $icon.addClass(this.data.icon);
-                } else {
-                    $icon.attr(
-                        'style',
-                        'background:url(' + this.data.icon + ') no-repeat center center;');
-                };
-                $item.prepend($icon);
-            };
-
-            this.$content.append($item);
         }
     });
 
@@ -52,13 +49,13 @@
                 $popup.render({
                     data: item,
                     name: 'clipboarditem.smilisting',
-                    extra: {state: 'cutted'}});
+                    args: ['cutted']});
             });
             $.each(smi.clipboard.copied, function(i, item) {
                 $popup.render({
                     data: item,
                     name: 'clipboarditem.smilisting',
-                    extra: {state: 'copied'}});
+                    args: ['copied']});
             });
             is_uptodate = true;
         };
@@ -124,26 +121,28 @@
         };
     };
 
-    obviel.view({
+    infrae.views.view({
         iface: 'listing',
         name: 'footer',
-        render: function($content, data) {
-            var listing = this.view;
+        factory: function($content, data, smi, listing) {
+            return {
+                render: function() {
 
-            // Disable text selection in all footer
-            $content.disableTextSelect();
+                    // Disable text selection in all footer
+                    $content.disableTextSelect();
 
-            // Render clipboard info
-            this.smi.clipboard.content = data.content;
-            render_clipboard($content.find('.clipboard-info'), this.smi);
+                    // Render clipboard info
+                    smi.clipboard.content = data.content;
+                    render_clipboard($content.find('.clipboard-info'), smi);
 
-            // Render counter information
-            render_counters($content.find('.counters'), listing);
-
-        },
-        cleanup: function() {
-            this.smi.clipboard.content = null;
+                    // Render counter information
+                    render_counters($content.find('.counters'), listing);
+                },
+                cleanup: function() {
+                    smi.clipboard.content = null;
+                }
+            };
         }
     });
 
-})(jQuery, obviel);
+})(jQuery, infrae);

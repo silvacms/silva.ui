@@ -2,8 +2,19 @@
 
 // Define level namespace.
 
-(function (window){
+(function (window) {
     var infrae = {};
+
+    // Add a rescope method
+    if (Function.prototype.scope === undefined) {
+        Function.prototype.scope = function(scope) {
+            var _function = this;
+
+            return function() {
+                return _function.apply(scope, arguments);
+            };
+        };
+    };
 
     window.infrae = infrae;
 })(window);

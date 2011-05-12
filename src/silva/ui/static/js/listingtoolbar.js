@@ -1,6 +1,5 @@
 
-
-(function($, obviel, infrae) {
+(function($, infrae) {
 
 
     /**
@@ -20,9 +19,9 @@
             case 'items_provides':
                 conditions.push(function() {
                     if (typeof(predicates.items_provides) === "string")
-                        return obviel.provides(this.data, predicates.items_provides);
+                        return infrae.views.provides(this.data, predicates.items_provides);
                     for (var i=0; i < predicates.items_provides.length; i++)
-                        if (obviel.provides(this.data, predicates.items_provides[i]))
+                        if (infrae.views.provides(this.data, predicates.items_provides[i]))
                             return true;
                     return false;
                 });
@@ -59,33 +58,37 @@
     };
 
 
-    obviel.view({
+    infrae.views.view({
         iface: ['actionresult'],
-        render: function() {
-            var need_refresh = false;
+        factory: function($content, data) {
+            return {
+                render: function() {
+                    var need_refresh = false;
 
-            for (var post_action in this.data.post_actions) {
-                switch(post_action) {
-                case 'remove':
-                    need_refresh |= this.selection.remove(this.data.post_actions.remove);
-                    break;
-                case 'update':
-                    need_refresh |= this.selection.update(this.data.post_actions.update);
-                    break;
-                case 'add':
-                    this.selection.add(this.data.post_actions.add);
-                    break;
-                case 'clear_clipboard':
-                    this.smi.clipboard.clear(true);
-                    break;
-                };
-            };
-            if (need_refresh) {
-                this.$content.trigger(
-                    'actionrefresh-smilisting', {data: this.selection});
-            };
-            if (this.data.notifications) {
-                this.smi.notifications.notifies(this.data.notifications);
+                    for (var post_action in this.data.post_actions) {
+                        switch(post_action) {
+                        case 'remove':
+                            need_refresh |= this.selection.remove(this.data.post_actions.remove);
+                            break;
+                        case 'update':
+                            need_refresh |= this.selection.update(this.data.post_actions.update);
+                            break;
+                        case 'add':
+                            this.selection.add(this.data.post_actions.add);
+                            break;
+                        case 'clear_clipboard':
+                            this.smi.clipboard.clear(true);
+                            break;
+                        };
+                    };
+                    if (need_refresh) {
+                        this.$content.trigger(
+                            'actionrefresh-smilisting', {data: this.selection});
+                    };
+                    if (this.data.notifications) {
+                        this.smi.notifications.notifies(this.data.notifications);
+                    };
+                }
             };
         }
     });
@@ -100,7 +103,7 @@
         var renderers = [];
 
         var build_group = function(group_definition) {
-            var group = new obviel.Registry();
+            var group = infrae.views.Registry();
 
             $.each(group_definition, function(i, action_definition) {
                 var definition = {
@@ -293,16 +296,16 @@
 
         // Update selector on selection change
         listing.$content.bind('selectionchange-smilisting', function(event, changes) {
-                if (changes.selected == 0) {
-                    set_status('none');
-                } else if (changes.selected == changes.visible) {
-                    set_status('all');
-                } else if (changes.selected == 1) {
-                    set_status('single');
-                } else {
-                    set_status('partial');
-                };
-            });
+            if (changes.selected == 0) {
+                set_status('none');
+            } else if (changes.selected == changes.visible) {
+                set_status('all');
+            } else if (changes.selected == 1) {
+                set_status('single');
+            } else {
+                set_status('partial');
+            };
+        });
 
         // Clicking on the selector change the selection.
         $selector.bind('click', function() {
@@ -459,45 +462,46 @@
         var url_template = jsontemplate.Template(smi.options.listing.action, {});
         var render_actions = build_actions_renderer(configuration.actions, url_template);
 
-        obviel.view({
+        infrae.views.view({
             iface: 'listing',
             name: 'toolbar',
-            html_url: smi.options.listing.templates.toolbar,
-            render: function($content, data) {
-                var listing = this.view;
-                var smi = this.smi;
+            factory: function($content, data, smi, listing) {
+                return {
+                    html_url: smi.options.listing.templates.toolbar,
+                    render: function() {
+                        // Render actions
+                        render_actions(
+                            $content,
+                            new SMISelection(listing, data.content, $([])),
+                            {smi: smi});
+                        $content.bind('actionrefresh-smilisting', function(event, data) {
+                            render_actions($content, data.data, {smi: smi});
+                            event.stopPropagation();
+                            event.preventDefault();
+                        });
+                        listing.$content.bind('selectionchange-smilisting', function(event, changes) {
+                            render_actions(
+                                $content,
+                                new SMISelection(listing, data.content, changes.items),
+                                {smi: smi});
+                        });
 
-                // Render actions
-                render_actions(
-                    $content,
-                    new SMISelection(listing, data.content, $([])),
-                    {smi: smi});
-                $content.bind('actionrefresh-smilisting', function(event, data) {
-                    render_actions($content, data.data, {smi: smi});
-                    event.stopPropagation();
-                    event.preventDefault();
-                });
-                listing.$content.bind('selectionchange-smilisting', function(event, changes) {
-                    render_actions(
-                        $content,
-                        new SMISelection(listing, data.content, changes.items),
-                        {smi: smi});
-                });
+                        // Render multi selector
+                        render_multi_selector($content.find('.selector ins'), listing);
 
-                // Render multi selector
-                render_multi_selector($content.find('.selector ins'), listing);
+                        // Render filter
+                        render_filter($content.find('.filter input'), listing);
 
-                // Render filter
-                render_filter($content.find('.filter input'), listing);
-
-            },
-            cleanup: function() {
-                this.$content.empty();
-                this.$content.unbind('actionrefresh-smilisting');
+                    },
+                    cleanup: function() {
+                        $content.empty();
+                        $content.unbind('actionrefresh-smilisting');
+                    }
+                };
             }
         });
 
 
     });
 
-})(jQuery, obviel, infrae);
+})(jQuery, infrae);

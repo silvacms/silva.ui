@@ -1,100 +1,119 @@
 
 
-(function($, obviel) {
+(function($, infrae) {
 
     // Define columns renderers
-    var listingcolumns = new obviel.Registry();
+    var listingcolumns = infrae.views.Registry();
 
     listingcolumns.register({
         name: 'action',
-        jsont: '<a rel="{column.action|htmltag}" href="{data.path|htmltag}">{value}</a>',
-        render: function() {
-            var $link = this.$content.children('a');
+        factory: function($content, data, smi, column, value) {
+            return {
+                column: column,
+                value: value,
+                jsont: '<a rel="{column.action|htmltag}" href="{data.path|htmltag}">{value}</a>',
+                render: function() {
+                    var $link = $content.children('a');
 
-            $link.bind('click', function(event) {
-                this.smi.open_screen_from_link($link);
-                return false;
-            }.scope(this));
+                    $link.bind('click', function(event) {
+                        smi.open_screen_from_link($link);
+                        return false;
+                    });
+                }
+            };
         }
     });
 
     listingcolumns.register({
         name: 'text',
-        jsont: '{value}'
+        factory: function($content, data, smi, column, value) {
+            return {
+                value: value,
+                jsont: '{value}'
+            };
+        }
     });
 
     listingcolumns.register({
         name: 'move',
-        html: '...',
-        render: function() {
-            this.$content.addClass('moveable');
+        factory: function($content, data, smi, column, value) {
+            return {
+                html: '...',
+                render: function() {
+                    $content.addClass('moveable');
+                }
+            };
         }
     });
 
     listingcolumns.register({
         name: 'goto',
-        jsont: '<div class="actions"><ol><li><a class="ui-state-default" rel="{column.index.screen|htmltag}" href="{data.path|htmltag}"><div class="dropdown-icon"><ins class="ui-icon ui-icon-triangle-1-s" /></div><span>{column.index.caption}</span></a><div class="dropdown"><ol></ol></div></li></ol></div>',
-        render: function($content, data) {
-            var $opener = $content.find('div.dropdown-icon');
-            var $dropdown = $content.find('div.dropdown');
-            var $entries = $dropdown.children('ol');
-            var smi = this.smi;
+        factory: function($content, data, smi, column, value) {
+            return {
+                column: column,
+                value: value,
+                jsont: '<div class="actions"><ol><li><a class="ui-state-default" rel="{column.index.screen|htmltag}" href="{data.path|htmltag}"><div class="dropdown-icon"><ins class="ui-icon ui-icon-triangle-1-s" /></div><span>{column.index.caption}</span></a><div class="dropdown"><ol></ol></div></li></ol></div>',
+                render: function() {
+                    var $opener = $content.find('div.dropdown-icon');
+                    var $dropdown = $content.find('div.dropdown');
+                    var $entries = $dropdown.children('ol');
 
-            for (var i=0; i < this.column.menu.length; i++) {
-                var entry = this.column.menu[i];
+                    for (var i=0; i < column.menu.length; i++) {
+                        var entry = column.menu[i];
 
-                if (entry.require_iface == undefined ||
-                    $.inArray(entry.require_iface, data.ifaces) > -1){
-                    $entries.append(
-                        '<li><a class="ui-state-default" href="' + data.path +
-                            '" rel="' + entry.screen + '"><span>' +
-                            entry.caption + '</span></a></li>');
-                };
+                        if (entry.require_iface == undefined ||
+                            infrae.interfaces.isProvidedBy(entry.required_iface, data)){
+                            $entries.append(
+                                '<li><a class="ui-state-default" href="' + data.path +
+                                    '" rel="' + entry.screen + '"><span>' +
+                                    entry.caption + '</span></a></li>');
+                        };
+                    };
+
+                    $content.delegate('a', 'click', function(event) {
+                        smi.open_screen_from_link($(event.target).parent('a'));
+                        return false;
+                    });
+                    $opener.bind('click', function(event) {
+                        $dropdown.fadeToggle();
+                        return false;
+                    });
+                    $dropdown.bind('mouseleave', function() {
+                        $dropdown.fadeOut('fast');
+                    });
+                }
             };
-
-            $content.delegate('a', 'click', function(event) {
-                smi.open_screen_from_link($(event.target).parent('a'));
-                return false;
-            });
-            $opener.bind('click', function(event) {
-                $dropdown.fadeToggle();
-                return false;
-            });
-            $dropdown.bind('mouseleave', function() {
-                $dropdown.fadeOut('fast');
-            });
-
         }
     });
 
     listingcolumns.register({
         name: 'action-icon',
-        jsont: '<a href="{data.path|htmltag}" rel="{column.action|htmltag}" title="{data.title|htmltag}"><ins class="icon"></ins></a>',
-        render: function($content) {
-            var $icon = $content.find('ins');
-            var smi = this.smi;
+        factory: function($content, data, smi, column, value) {
+            return {
+                column: column,
+                jsont: '<a href="{data.path|htmltag}" rel="{column.action|htmltag}" title="{data.title|htmltag}"><ins class="icon"></ins></a>',
+                render: function() {
+                    infrae.ui.icon($content.find('ins'), value);
 
-            if (this.value.indexOf('.') < 0) {
-                $icon.addClass(this.value);
-            } else {
-                $icon.attr(
-                    'style',
-                    'background:url(' + this.value + ') no-repeat center center');
+                    $content.delegate('a', 'click', function(event) {
+                        smi.open_screen_from_link($(event.target).parent('a'));
+                        return false;
+                    });
+                }
             };
-
-            $content.delegate('a', 'click', function(event) {
-                smi.open_screen_from_link($(event.target).parent('a'));
-                return false;
-            });
         }
     });
 
     listingcolumns.register({
         name: 'workflow',
-        html: '<ins class="state"></ins>',
-        render: function() {
-            if (this.value) {
-                this.$content.children('ins').addClass(this.value);
+        factory: function($content, data, smi, column, value) {
+            return {
+                html: '<ins class="state"></ins>',
+                render: function() {
+                    if (value) {
+                        $content.children('ins').addClass(value);
+                    };
+                }
             };
         }
     });
@@ -181,7 +200,7 @@
             dataType: 'json',
             success:function(configuration) {
                 for (var iface in configuration.ifaces) {
-                    obviel.iface(iface, configuration.ifaces[iface]);
+                    infrae.interfaces.register(iface, configuration.ifaces[iface]);
                 };
 
                 $.each(configuration.listing, function(i, configuration) {
@@ -443,167 +462,173 @@
                     return $container;
                 };
 
-                obviel.view({
+                infrae.views.view({
                     iface: 'listing',
                     name: 'content',
-                    html_url: smi.options.listing.templates.content,
-                    init: function() {
-                        this.configuration = configuration;
-                        this.$containers = $([]);
-                        this.selection = this.$content.SMISelection();
-                        this.by_name = {};
-                    },
-                    get_line: function(id) {
-                        return $(document.getElementById('list' + id.toString()));
-                    },
-                    get_lines: function(ids) {
-                        if (ids.length) {
-                            var index = ids.length - 1;
-                            var $lines = $(document.getElementById('list' + ids[index].toString()));
+                    factory: function($content, data, smi) {
+                        var $containers = $([]);
+                        var selection = $content.SMISelection();
+                        var by_name = {};
 
-                            while(index--) {
-                                $lines.add(document.getElementById('list' + ids[index].toString()));
-                            };
-                            return $lines;
+                        var get_dom_line = function(id) {
+                            return document.getElementById('list' + id.toString());
                         };
-                        return $([]);
-                    },
-                    add_lines: function(data) {
-                        for (var name in this.by_name) {
-                            var lines = data[name];
 
-                            if (lines && lines.length) {
-                                this.by_name[name].trigger('addline-smilisting', {lines: lines});
-                            };
-                        };
-                    },
-                    update_lines: function(datas) {
-                        var get_line = this.get_line.scope(this);
+                        return {
+                            html_url: smi.options.listing.templates.content,
+                            get_line: function(id) {
+                                return $(get_dom_line(id));
+                            },
+                            get_lines: function(ids) {
+                                if (ids.length) {
+                                    var index = ids.length - 1;
+                                    var $lines = $(get_dom_line(ids[index]));
 
-                        $.each(datas, function(i, data) {
-                            get_line(data['id']).trigger('updateline-smilisting', data);
-                        });
-                    },
-                    remove_lines: function(ids) {
-                        var $lines = this.get_lines(ids);
-
-                        if ($lines.length) {
-                            this.selection.remove($lines);
-                            $lines.remove();
-                            this.trigger('contentchange-smilisting');
-                        };
-                    },
-                    filter_lines: function(value) {
-                        var pattern = new RegExp(value, 'i');
-
-                        $.each(configuration.listing, function(i, configuration) {
-                            var $container = this.by_name[configuration.name];
-
-                            $container.children('.item').each(function (i) {
-                                var $line = $(this);
-
-                                if (configuration.filter_entry(pattern, $line.data('smilisting'))) {
-                                    $line.show();
-                                } else {
-                                    $line.hide();
+                                    while(index--) {
+                                        $lines.add(get_dom_line(ids[index]));
+                                    };
+                                    return $lines;
                                 };
-                            });
-                        }.scope(this));
-                        this.trigger('selectionchange-smilisting');
-                    },
-                    unselect: function($lines) {
-                        this.selection.unselect($lines);
-                    },
-                    unselect_all: function() {
-                        this.selection.unselect(this.$containers.children('tr.item.selected:visible'));
-                    },
-                    select_all: function() {
-                        this.selection.select(this.$containers.children('tr.item:visible'));
-                    },
-                    trigger: function(event_name, $content) {
-                        var $items = this.$containers.children('tr.item');
-                        var $visible = $items.filter(':visible');
-                        var $selected = $visible.filter('.selected');
+                                return $([]);
+                            },
+                            add_lines: function(data) {
+                                for (var name in by_name) {
+                                    var lines = data[name];
 
-                        if ($content === undefined) {
-                            $content = this.$content;
-                        }
-                        $content.trigger(event_name, {
-                            total: $items.length,
-                            visible: $visible.length,
-                            selected: $selected.length,
-                            items: $selected
-                        });
-                    },
-                    render: function($content) {
-                        // Render header
-                        render_listing_header($content, this.configuration);
-
-                        // Configure selection
-                        this.selection.events.always(function() {
-                            this.trigger('selectionchange-smilisting');
-                        }.scope(this));
-
-                        // Create containers
-                        $.each(this.configuration.listing, function(i, configuration) {
-                            var container = create_container(
-                                configuration.name,
-                                configuration,
-                                this.data.items[configuration.name],
-                                this);
-                            this.$containers = this.$containers.add(container);
-                            this.by_name[configuration.name] = container;
-                        }.scope(this));
-
-                        // Bind and update the listing column sizes
-                        this.update_widths();
-                        this.$content.bind('collapsingchange-smilisting', function() {
-                            this.update_widths();
-                        }.scope(this));
-
-                        // Render footer
-                        this.$content.find('.listing-footer').render(
-                            {data: this.data, name: 'footer', extra: {smi: this.smi, view: this}});
-                    },
-                    update_widths: function() {
-                        var $containers = this.by_name;
-                        var $header = this.$content.find('div.listing-header table');
-                        var $reference = null;
-                        var layout = null;
-                        var others = [];
-                        var other_layouts = [];
-
-                        $.each(this.configuration.listing, function(i, configuration) {
-                            var $table = $containers[configuration.name].parent();
-
-                            if ($table.is(':visible')) {
-                                if ($reference === null) {
-                                    $reference = $table;
-                                    layout = configuration.layout;
-                                } else {
-                                    others.push($table);
-                                    other_layouts.push(configuration.layout);
+                                    if (lines && lines.length) {
+                                        by_name[name].trigger('addline-smilisting', {lines: lines});
+                                    };
                                 };
-                            };
-                        });
+                            },
+                            update_lines: function(datas) {
+                                var get_line = this.get_line.scope(this);
 
-                        if ($reference !== null) {
-                            $reference.SMIUpdateTableColumnsWidths(layout);
-                            $header.SMIUpdateTableColumnsWidths({}, $reference);
+                                $.each(datas, function(i, data) {
+                                    get_line(data['id']).trigger('updateline-smilisting', data);
+                                });
+                            },
+                            remove_lines: function(ids) {
+                                var $lines = this.get_lines(ids);
 
-                            for (var i=0; i < others.length; i++) {
-                                others[i].SMIUpdateTableColumnsWidths(other_layouts[i], $reference);
-                            };
+                                if ($lines.length) {
+                                    this.selection.remove($lines);
+                                    $lines.remove();
+                                    this.trigger('contentchange-smilisting');
+                                };
+                            },
+                            filter_lines: function(value) {
+                                var pattern = new RegExp(value, 'i');
+
+                                $.each(configuration.listing, function(i, configuration) {
+                                    var $container = this.by_name[configuration.name];
+
+                                    $container.children('.item').each(function (i) {
+                                        var $line = $(this);
+
+                                        if (configuration.filter_entry(pattern, $line.data('smilisting'))) {
+                                            $line.show();
+                                        } else {
+                                            $line.hide();
+                                        };
+                                    });
+                                }.scope(this));
+                                this.trigger('selectionchange-smilisting');
+                            },
+                            unselect: function($lines) {
+                                this.selection.unselect($lines);
+                            },
+                            unselect_all: function() {
+                                this.selection.unselect(this.$containers.children('tr.item.selected:visible'));
+                            },
+                            select_all: function() {
+                                this.selection.select(this.$containers.children('tr.item:visible'));
+                            },
+                            trigger: function(event_name, $content) {
+                                var $items = this.$containers.children('tr.item');
+                                var $visible = $items.filter(':visible');
+                                var $selected = $visible.filter('.selected');
+
+                                if ($content === undefined) {
+                                    $content = this.$content;
+                                }
+                                $content.trigger(event_name, {
+                                    total: $items.length,
+                                    visible: $visible.length,
+                                    selected: $selected.length,
+                                    items: $selected
+                                });
+                            },
+                            render: function() {
+                                // Render header
+                                render_listing_header($content, configuration);
+
+                                // Configure selection
+                                selection.events.always(function() {
+                                    this.trigger('selectionchange-smilisting');
+                                }.scope(this));
+
+                                // Create containers
+                                $.each(configuration.listing, function(i, configuration) {
+                                    var container = create_container(
+                                        configuration.name,
+                                        configuration,
+                                        data.items[configuration.name],
+                                        this);
+                                    $containers = $containers.add(container);
+                                    by_name[configuration.name] = container;
+                                }.scope(this));
+
+                                // Bind and update the listing column sizes
+                                this.update_widths();
+                                $content.bind('collapsingchange-smilisting', function() {
+                                    this.update_widths();
+                                }.scope(this));
+
+                                // Render footer
+                                this.$content.find('.listing-footer').render(
+                                    {data: this.data, name: 'footer', extra: {smi: this.smi, view: this}});
+                            },
+                            update_widths: function() {
+                                var $containers = this.by_name;
+                                var $header = this.$content.find('div.listing-header table');
+                                var $reference = null;
+                                var layout = null;
+                                var others = [];
+                                var other_layouts = [];
+
+                                $.each(this.configuration.listing, function(i, configuration) {
+                                    var $table = $containers[configuration.name].parent();
+
+                                    if ($table.is(':visible')) {
+                                        if ($reference === null) {
+                                            $reference = $table;
+                                            layout = configuration.layout;
+                                        } else {
+                                            others.push($table);
+                                            other_layouts.push(configuration.layout);
+                                        };
+                                    };
+                                });
+
+                                if ($reference !== null) {
+                                    $reference.SMIUpdateTableColumnsWidths(layout);
+                                    $header.SMIUpdateTableColumnsWidths({}, $reference);
+
+                                    for (var i=0; i < others.length; i++) {
+                                        others[i].SMIUpdateTableColumnsWidths(other_layouts[i], $reference);
+                                    };
+                                };
+                            },
+                            cleanup: function() {
+                                $content.unbind('collapsingchange-smilisting');
+                                $content.unbind('selectionchange-smilisting');
+                                $content.empty();
+                            }
                         };
-                    },
-                    cleanup: function() {
-                        this.$content.empty();
-                        this.$content.unbind('collapsingchange-smilisting');
-                        this.$content.unbind('selectionchange-smilisting');
                     }
                 });
 
             }});
     });
 
-})(jQuery, obviel);
+})(jQuery, infrae);

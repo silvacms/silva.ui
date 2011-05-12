@@ -40,62 +40,79 @@
 })(jQuery);
 
 
-(function($, obviel) {
+(function($, infrae) {
     var HASH_REGEXP = /#([^!]*)!?(.*)/;
 
-    obviel.view({
+    infrae.views.view({
         iface: 'redirect',
-        render: function() {
-            this.smi.open_screen(this.data.path, this.data.tab);
-        }
-    });
-
-    obviel.view({
-        iface: 'view',
-        render: function() {
-            window.open(this.data.url);
-        }
-    });
-
-    obviel.view({
-        iface: 'message',
-        render: function() {
-            var message = $('<div></div>');
-
-            if (this.data.title) {
-                message.attr('title', this.data.title);
-            };
-            message.html(this.data.message);
-            message.dialog({
-                modal: true,
-                buttons: {
-                    Ok: function() {
-                        $(this).dialog('close');
-                    }
+        factory: function($content, data, smi) {
+            return {
+                render: function() {
+                    smi.open_screen(data.path, data.tab);
                 }
-            });
+            };
         }
     });
 
-    obviel.view({
+    infrae.views.view({
+        iface: 'view',
+        factory: function($content, data) {
+            return {
+                render: function() {
+                    window.open(data.url);
+                }
+            };
+        }
+    });
+
+    infrae.views.view({
+        iface: 'message',
+        factory: function($content, data) {
+            return {
+                render: function() {
+                    var message = $('<div></div>');
+
+                    if (data.title) {
+                        message.attr('title', data.title);
+                    };
+                    message.html(data.message);
+                    message.dialog({
+                        modal: true,
+                        buttons: {
+                            Ok: function() {
+                                $(this).dialog('close');
+                            }
+                        }
+                    });
+                }
+            };
+        }
+    });
+
+    infrae.views.view({
         iface: 'content',
-        render: function() {
-            this.smi.notifications.mark_as_seen();
-            this.smi._.workspace.trigger('content-smi', this.data);
-            this.smi._.navigation.trigger('content-smi', this.data);
-            if (this.data.notifications) {
-                this.smi.notifications.notifies(this.data.notifications);
-            }
+        factory: function($content, data, smi) {
+            return {
+                render: function() {
+                    smi.notifications.mark_as_seen();
+                    smi._.workspace.trigger('content-smi', data);
+                    smi._.navigation.trigger('content-smi', data);
+                    if (data.notifications) {
+                        smi.notifications.notifies(data.notifications);
+                    };
+                }
+            };
         }
     });
 
     // Error handler used by AJAX requests. Build a message and render it.
     var error_handler = function(request) {
+        // 'this' should be 'smi'.
         var data = this.options.errors[request.status];
         if (!data) {
             data = this.options.errors[500];
         };
-        $(document).render({data: data, extra: {smi: this}});
+        $(document).render({data: data, args: [this]});
     };
 
     /**
@@ -422,7 +439,7 @@
         query['dataType'] = 'json';
         query['success'] = function(data) {
             this.opened = this.opening;
-            $(document).render({data: data, extra: {smi: this}});
+            $(document).render({data: data, args: [this]});
         }.scope(this);
         query['error'] = error_handler.scope(this);
         if (data) {
@@ -448,7 +465,7 @@
         query['dataType'] = 'json';
         query['type'] = 'POST';
         query['success'] = function(data) {
-            $(document).render({data: data, extra: {smi: this}});
+            $(document).render({data: data, args: [this]});
         }.scope(this);
         query['error'] = error_handler.scope(this);
         $.ajax(query);
@@ -473,6 +490,6 @@
         return new SMI(options);
     };
 
-})(jQuery, obviel);
+})(jQuery, infrae);
 
 
