@@ -12,51 +12,51 @@
         for (var predicate in predicates) {
             switch(predicate) {
             case 'content_match':
-                conditions.push(function() {
-                    return infrae.utils.match([this.data.content], predicates.content_match);
+                conditions.push(function($content, data, smi) {
+                    return infrae.utils.match([data.content], predicates.content_match);
                 });
                 break;
-            case 'items_provides':
-                conditions.push(function() {
-                    if (typeof(predicates.items_provides) === "string")
-                        return infrae.views.provides(this.data, predicates.items_provides);
-                    for (var i=0; i < predicates.items_provides.length; i++)
-                        if (infrae.views.provides(this.data, predicates.items_provides[i]))
+            case 'items_implements':
+                conditions.push(function($content, data, smi) {
+                    if (typeof(predicates.items_implements) === "string")
+                        return infrae.interfaces.isImplementedBy(predicates.items_implements, data);
+                    for (var i=0; i < predicates.items_implements.length; i++)
+                        if (infrae.interfaces.isImplementedBy(predicates.items_implements[i], data))
                             return true;
                     return false;
                 });
                 break;
             case 'items_match':
-                conditions.push(function() {
-                    return infrae.utils.match(this.data.items(), predicates.items_match);
+                conditions.push(function($content, data, smi) {
+                    return infrae.utils.match(data.items(), predicates.items_match);
                 });
                 break;
             case 'min_items':
-                conditions.push(function() {
-                    return this.data.length() >= predicates.min_items;
+                conditions.push(function($content, data, smi) {
+                    return data.length() >= predicates.min_items;
                 });
                 break;
             case 'max_items':
-                conditions.push(function() {
-                    return this.data.length() <= predicates.max_items;
+                conditions.push(function($content, data, smi) {
+                    return data.length() <= predicates.max_items;
                 });
                 break;
             case 'clipboard_min_items':
-                conditions.push(function() {
-                    return this.smi.clipboard.length() >= predicates.clipboard_min_items;
+                conditions.push(function($content, data, smi) {
+                    return smi.clipboard.length() >= predicates.clipboard_min_items;
                 });
                 break;
             };
         };
+
         return function() {
             for (var i=0; i < conditions.length; i++) {
-                if (!conditions[i].apply(this))
+                if (!conditions[i].apply(this, arguments))
                     return false;
             };
             return true;
         };
     };
-
 
     infrae.views.view({
         iface: ['actionresult'],
@@ -102,179 +102,181 @@
     var build_actions_renderer = function(group_definitions, url_template) {
         var renderers = [];
 
-        var build_group = function(group_definition) {
+        var build_group = function(definitions) {
             var group = infrae.views.Registry();
 
-            $.each(group_definition, function(i, action_definition) {
-                var definition = {
-                    order: action_definition.order
+            var build_button = function(definition) {
+                var button = {
+                    order: definition.order,
+                    title: definition.title
                 };
-                if (action_definition.title != null) {
-                    definition['init'] = function() {
-                        this.collecting = false;
-                    };
-                    definition['render'] = function() {
-                        var $action = $('<li><a class="ui-state-default"><span>' +
-                                        action_definition.title + '</span></a></li>');
-                        var $trigger = $action.children('a');
+                if (definition.title != null) {
+                    button['factory'] = function($content, data, smi) {
+                        var collecting = false;
+                        var view = {
+                            render: function() {
+                                var $action = $('<li><a class="ui-state-default"><span>' +
+                                                definition.title + '</span></a></li>');
+                                var $trigger = $action.children('a');
 
-                        if (action_definition.icon) {
-                            $trigger.prepend(
-                                '<div class="action-icon"><ins class="ui-icon ui-icon-' +
-                                    action_definition.icon +
-                                    '"></ins></div>');
-                        };
-                        if (action_definition.accesskey) {
-                            $trigger.attr('accesskey', action_definition.accesskey);
-                        };
-                        this.$content.append($action);
-                        if (this.action != undefined) {
-                            $trigger.bind('click', function() {
-                                this.action();
-                            }.scope(this));
-                        };
-                    };
-                    if (action_definition.action != undefined) {
-                        for (var action_type in action_definition.action) {
-                            switch(action_type) {
-                            case 'rest':
-                                definition['action'] = function() {
-                                    var url = url_template.expand({
-                                        path: this.smi.opened.path,
-                                        action: action_definition.action.rest.action});
-                                    var payload = [];
-                                    switch(action_definition.action.rest.send) {
-                                    case 'selected_ids':
-                                        $.each(this.data.items(), function(i, item) {
-                                            payload.push({name: 'content', value: item.id});
-                                        });
-                                        break;
-                                    case 'clipboard_ids':
-                                        $.each(this.smi.clipboard.cutted, function(i, item) {
-                                            payload.push({name: 'cutted', value: item.id});
-                                        });
-                                        $.each(this.smi.clipboard.copied, function(i, item) {
-                                            payload.push({name: 'copied', value: item.id});
-                                        });
-                                        break;
-                                    case 'item_values':
-                                        var names = action_definition.action.rest.values;
-                                        var counter = 0;
-
-                                        if (!this.collecting) {
-                                            this.data.inputs(names);
-                                            this.collecting = true;
-                                            return;
-                                        };
-                                        this.data.values(names, function(data) {
-                                            var prefix = 'values.' + counter.toString() + '.';
-                                            for (var key in data) {
-                                                payload.push({name: prefix + key, value: data[key]});
-                                            };
-                                            counter += 1;
-                                        });
-                                        payload.push({name: 'values', value: counter.toString()});
-                                        this.collecting = false;
-                                        break;
-                                    }
-                                    $.ajax({
-                                        url: url,
-                                        type: 'POST',
-                                        dataType: 'json',
-                                        data: payload,
-                                        success: function(result) {
-                                            this.$content.render({data: result,
-                                                                  extra: {selection: this.data,
-                                                                          smi: this.smi}});
-                                        }.scope(this)
+                                if (definition.icon) {
+                                    $trigger.prepend(
+                                        '<div class="action-icon"><ins class="ui-icon ui-icon-' +
+                                            definition.icon + '"></ins></div>');
+                                };
+                                if (definition.accesskey) {
+                                    $trigger.attr('accesskey', definition.accesskey);
+                                };
+                                if (view.action != undefined) {
+                                    $trigger.bind('click', function() {
+                                        view.action();
                                     });
                                 };
-                                break;
-                            case 'cut':
-                                definition['action'] = function () {
-                                    this.smi.clipboard.cut(this.data.data);
-                                    this.$content.trigger(
-                                        'actionrefresh-smilisting', {data: this.data});
-                                };
-                                break;
-                            case 'copy':
-                                definition['action'] = function () {
-                                    this.smi.clipboard.copy(this.data.data);
-                                    this.$content.trigger(
-                                        'actionrefresh-smilisting', {data: this.data});
-                                };
-                                break;
-                            case 'form':
-                                definition['action'] = function() {
-                                    var url = $('#content-url').attr('href');
+                                $content.append($action);
+                            }
+                        };
+                        if (definition.action != undefined) {
+                            for (var action_type in definition.action) {
+                                switch(action_type) {
+                                case 'rest':
+                                    view['action'] = function() {
+                                        var url = url_template.expand({path: smi.opened.path,
+                                                                       action: definition.action.rest.action});
+                                        var payload = [];
+                                        switch(definition.action.rest.send) {
+                                        case 'selected_ids':
+                                            $.each(data.items(), function(i, item) {
+                                                payload.push({name: 'content', value: item.id});
+                                            });
+                                            break;
+                                        case 'clipboard_ids':
+                                            $.each(smi.clipboard.cutted, function(i, item) {
+                                                payload.push({name: 'cutted', value: item.id});
+                                            });
+                                            $.each(smi.clipboard.copied, function(i, item) {
+                                                payload.push({name: 'copied', value: item.id});
+                                            });
+                                            break;
+                                        case 'item_values':
+                                            var names = definition.action.rest.values;
+                                            var counter = 0;
 
-                                    return this.$content.SMIFormPopup(
-                                        url + '/++rest++' + action_definition.action.form.name);
+                                            if (!collecting) {
+                                                data.inputs(names);
+                                                collecting = true;
+                                                return;
+                                            };
+                                            data.values(names, function(data) {
+                                                var prefix = 'values.' + counter.toString() + '.';
+                                                for (var key in data) {
+                                                    payload.push({name: prefix + key, value: data[key]});
+                                                };
+                                                counter += 1;
+                                            });
+                                            payload.push({name: 'values', value: counter.toString()});
+                                            collecting = false;
+                                            break;
+                                        }
+                                        $.ajax({
+                                            url: url,
+                                            type: 'POST',
+                                            dataType: 'json',
+                                            data: payload,
+                                            success: function(result) {
+                                                $content.render({data: result, args: [data, smi]});
+                                            }
+                                        });
+                                    };
+                                    break;
+                                case 'cut':
+                                    view['action'] = function () {
+                                        smi.clipboard.cut(data.data);
+                                        $content.trigger(
+                                            'actionrefresh-smilisting', {data: data});
+                                    };
+                                    break;
+                                case 'copy':
+                                    view['action'] = function () {
+                                        smi.clipboard.copy(data.data);
+                                        $content.trigger(
+                                            'actionrefresh-smilisting', {data: data});
+                                    };
+                                    break;
+                                case 'form':
+                                    view['action'] = function() {
+                                        var url = $('#content-url').attr('href');
+
+                                        return $content.SMIFormPopup(url + '/++rest++' + definition.action.form.name);
+                                    };
+                                    break;
                                 };
-                                break;
                             };
                         };
+                        return view;
                     };
                 } else {
-                    var subgroup = build_group(action_definition.actions);
+                    var subgroup = build_group(definition.actions);
 
-                    definition['render'] = function() {
-                        var $dropdown = $('<div class="dropdown"><ol></ol></div');
+                    button['factory'] = function($content, data, smi) {
+                        return {
+                            render: function() {
+                                var $dropdown = $('<div class="dropdown"><ol></ol></div');
 
-                        subgroup.render(
-                            $dropdown.children('ol'),
-                            {every: this.data, extra: {smi: this.smi}});
+                                subgroup.render($dropdown.children('ol'), {every: data, args:[smi]});
 
-                        // Take the first action and use it as top-level action.
-                        var $first = $dropdown.find('li:first');
-                        if ($first.length) {
-                            var $action = $first.detach();
+                                // Take the first action and use it as top-level action.
+                                var $first = $dropdown.find('li:first');
+                                if ($first.length) {
+                                    var $action = $first.detach();
 
-                            if ($dropdown.find('li:first').length) {
-                                var $trigger = $action.children('a');
-                                var $opener = $(
-                                    '<div class="dropdown-icon"><ins class="ui-icon ui-icon-triangle-1-s"></ins></div>');
+                                    if ($dropdown.find('li:first').length) {
+                                        var $trigger = $action.children('a');
+                                        var $opener = $(
+                                            '<div class="dropdown-icon"><ins class="ui-icon ui-icon-triangle-1-s"></ins></div>');
 
-                                $opener.bind('click', function() {
-                                    $dropdown.fadeToggle();
-                                    return false;
-                                });
-                                $dropdown.bind('mouseleave', function() {
-                                    $dropdown.fadeOut('fast');
-                                });
-                                $trigger.prepend($opener);
-                                $action.append($dropdown);
-                            };
-                            this.$content.append($action);
+                                        $opener.bind('click', function() {
+                                            $dropdown.fadeToggle();
+                                            return false;
+                                        });
+                                        $dropdown.bind('mouseleave', function() {
+                                            $dropdown.fadeOut('fast');
+                                        });
+                                        $trigger.prepend($opener);
+                                        $action.append($dropdown);
+                                    };
+                                    $content.append($action);
+                                };
+                            }
                         };
                     };
                 };
-                if (action_definition.available) {
-                    definition['available'] = predicates_evaluator(action_definition.available);
+                if (definition.available) {
+                    button['available'] = predicates_evaluator(definition.available);
                 };
-                group.register(definition);
-            });
+                group.register(button);
+            };
+            infrae.utils.map(definitions, build_button);
             return group;
         };
 
         $.each(group_definitions, function(i, group_definition) {
             var group = build_group(group_definition);
 
-            renderers.push(function($content, data, extra) {
+            renderers.push(function($content, data, args) {
                 var $actions = $('<div class="actions"><ol></ol></div>');
-                $actions.disableTextSelect();
 
-                group.render($actions.children('ol'), {every: data, extra: extra});
+                infrae.ui.selection.disable($actions);
+                group.render($actions.children('ol'), {every: data, args: args});
                 if ($actions.find('li:first').length) {
                     $content.append($actions);
                 };
             });
         });
 
-        return function($content, data, extra) {
+        return function($content, data, args) {
             $content.children('div.actions').remove();
             $.each(renderers, function() {
-                this($content, data, extra);
+                this($content, data, args);
             });
         };
     };
@@ -473,9 +475,9 @@
                         render_actions(
                             $content,
                             new SMISelection(listing, data.content, $([])),
-                            {smi: smi});
+                            [smi]);
                         $content.bind('actionrefresh-smilisting', function(event, data) {
-                            render_actions($content, data.data, {smi: smi});
+                            render_actions($content, data.data, [smi]);
                             event.stopPropagation();
                             event.preventDefault();
                         });
@@ -483,7 +485,7 @@
                             render_actions(
                                 $content,
                                 new SMISelection(listing, data.content, changes.items),
-                                {smi: smi});
+                                [smi]);
                         });
 
                         // Render multi selector

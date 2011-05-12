@@ -53,14 +53,12 @@
             return false;
         },
         /**
-         * Helper that call a callaback on each element of an array.
+         * Helper that call a callback on each element of an array.
          * @param array: array containing elements.
          * @param callback: callback to call on each element of the array.
          */
         map: function(array, callback) {
-            var index = array.length;
-
-            while(index--) {
+            for (var index=0; index < array.length; index++) {
                 callback(array[index]);
             };
         }

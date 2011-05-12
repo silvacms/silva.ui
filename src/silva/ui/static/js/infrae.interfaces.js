@@ -52,7 +52,7 @@
         /**
          * Returns true of object implements base, false otherwise.
          */
-        isImplementedBy: function(object, base) {
+        isImplementedBy: function(base, object) {
             return $.inArray(base, module.implementedBy(object)) > -1;
         }
     });

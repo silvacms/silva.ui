@@ -276,13 +276,20 @@
                 if (named_views == undefined) {
                     return [];
                 };
-                $.each(ifaces, function (i, iface) {
+                infrae.utils.map(ifaces, function (iface) {
                     var definitions = named_views[iface];
                     if (definitions) {
-                        $.each(definitions, function(e, definition) {
+                        infrae.utils.map(definitions, function(definition) {
                             if ($.inArray(definition['__view_uid__'], seen_definitions) < 0) {
-                                var view = View($content, data, defintion.factory, options.args);
-                                to_render.push([definition.order, view]);
+                                seen_definitions.push(definition['__view_uid__']);
+                                if (definition['available'] != undefined) {
+                                    if (!definition['available'].apply(definition, [$content, data].concat(options.args))) {
+                                        return;
+                                    };
+                                };
+                                to_render.push([
+                                    definition.order,
+                                    View($content, data, definition.factory, options.args)]);
                             };
                         });
                     };

@@ -183,11 +183,11 @@
                 data: data.content,
                 name: 'content',
                 args: [smi]
-            }).done(function(view) {
+            }).done(function() {
                 $header.render({
                     data: data.content,
                     name: 'header',
-                    args: [smi, url, view]});
+                    args: [smi, url, this]});
             });
         });
     };
