@@ -388,8 +388,9 @@
                     event.stopPropagation();
                     event.preventDefault();
                 });
-                $container.append($line);
                 $line.trigger('refreshline-smilisting', data);
+                $container.append($line);
+                return $line;
             };
 
             var add_lines = function(lines, initial) {
@@ -419,12 +420,9 @@
 
             // Add default data
             add_lines(lines, true);
-            $container.bind('addline-smilisting', function(event, data) {
-                add_lines(data.lines, false);
-                event.stopPropagation();
-                event.preventDefault();
-            });
-            return $container;
+            return {
+                add: add_lines,
+                $container: $container};
         };
 
         infrae.views.view({
@@ -460,7 +458,7 @@
                     var other_layouts = [];
 
                     $.each(configuration.listing, function(i, configuration) {
-                        var $table = by_name[configuration.name].parent();
+                        var $table = by_name[configuration.name].$container.parent();
 
                         if ($table.is(':visible')) {
                             if ($reference === null) {
@@ -474,11 +472,11 @@
                     });
 
                     if ($reference !== null) {
-                        $reference.SMIUpdateTableColumnsWidths(layout);
-                        $header.SMIUpdateTableColumnsWidths({}, $reference);
+                        infrae.ui.updateTableColumnsWidths($reference, layout);
+                        infrae.ui.updateTableColumnsWidths($header, {}, $reference);
 
                         for (var i=0; i < others.length; i++) {
-                            others[i].SMIUpdateTableColumnsWidths(other_layouts[i], $reference);
+                            infrae.ui.updateTableColumnsWidths(others[i], other_layouts[i], $reference);
                         };
                     };
                 };
@@ -505,7 +503,7 @@
                             var lines = data[name];
 
                             if (lines && lines.length) {
-                                by_name[name].trigger('addline-smilisting', {lines: lines});
+                                by_name[name].add(lines);
                             };
                         };
                     },
@@ -569,7 +567,7 @@
                                 data.items[configuration.name],
                                 selection,
                                 notify);
-                            $containers = $containers.add(container);
+                            $containers = $containers.add(container.$container);
                             by_name[configuration.name] = container;
                         });
 

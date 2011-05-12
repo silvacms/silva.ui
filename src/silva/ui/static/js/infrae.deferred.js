@@ -151,7 +151,6 @@
                     $(element).data(masterkey, value);
                     data.push(element);
                     value.workWith(element);
-                    //console.log('Add ', element, data.length);
                     return true;
                 },
                 get: function($element) {
@@ -182,7 +181,6 @@
                         value.resolve(element);
                     else
                         value.reject(element);
-                    //console.log('Remove ', element, data.length, success);
                     if (!finishing && !data.length)
                         deferred.resolve();
                     return true;

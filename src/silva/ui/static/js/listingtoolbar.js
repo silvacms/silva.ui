@@ -60,33 +60,32 @@
 
     infrae.views.view({
         iface: ['actionresult'],
-        factory: function($content, data) {
+        factory: function($content, data, smi, selection) {
             return {
                 render: function() {
                     var need_refresh = false;
 
-                    for (var post_action in this.data.post_actions) {
+                    for (var post_action in data.post_actions) {
                         switch(post_action) {
                         case 'remove':
-                            need_refresh |= this.selection.remove(this.data.post_actions.remove);
+                            need_refresh |= selection.remove(data.post_actions.remove);
                             break;
                         case 'update':
-                            need_refresh |= this.selection.update(this.data.post_actions.update);
+                            need_refresh |= selection.update(data.post_actions.update);
                             break;
                         case 'add':
-                            this.selection.add(this.data.post_actions.add);
+                            selection.add(data.post_actions.add);
                             break;
                         case 'clear_clipboard':
-                            this.smi.clipboard.clear(true);
+                            smi.clipboard.clear(true);
                             break;
                         };
                     };
                     if (need_refresh) {
-                        this.$content.trigger(
-                            'actionrefresh-smilisting', {data: this.selection});
+                        $content.trigger('actionrefresh-smilisting', {data: selection});
                     };
-                    if (this.data.notifications) {
-                        this.smi.notifications.notifies(this.data.notifications);
+                    if (data.notifications) {
+                        smi.notifications.notifies(data.notifications);
                     };
                 }
             };
@@ -183,7 +182,7 @@
                                             dataType: 'json',
                                             data: payload,
                                             success: function(result) {
-                                                $content.render({data: result, args: [data, smi]});
+                                                $content.render({data: result, args: [smi, data]});
                                             }
                                         });
                                     };
