@@ -57,11 +57,25 @@
          * @param array: array containing elements.
          * @param callback: callback to call on each element of the array.
          */
-        map: function(array, callback) {
+        each: function(array, callback) {
             for (var index=0; index < array.length; index++) {
                 callback(array[index]);
             };
+        },
+        /**
+         * Helper that call a callback on each element of an array,
+         * and build a new one with the results of each call.
+         * @param array: array containing elements.
+         * @param callback: callback to call on each element of the array.
+         */
+        map: function(array, callback) {
+            var result = [];
+            for (var index=0; index < array.length; index++) {
+                result.push(callback(array[index]));
+            };
+            return result;
         }
+
     });
 
     infrae.utils = module;

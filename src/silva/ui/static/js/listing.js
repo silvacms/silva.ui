@@ -363,7 +363,7 @@
                     $line.append($cell);
                 };
 
-                infrae.utils.map(configuration.columns, render_cell);
+                infrae.utils.each(configuration.columns, render_cell);
 
                 $line.bind('refreshline-smilisting', function(event, data) {
                     if (data != undefined) {
@@ -390,32 +390,28 @@
                 });
                 $line.trigger('refreshline-smilisting', data);
                 $container.append($line);
-                return $line;
+                return $line.get(0);
             };
 
             var add_lines = function(lines, initial) {
+                var $added_lines = $([]);
+
                 if (lines.length) {
                     if (!initial) {
                         // Remove any eventual empty line
                         $container.children('.empty').remove();
                     };
                     // Fill in table
-                    infrae.utils.map(lines, render_line);
+                    $added_lines = infrae.utils.map(lines, render_line);
 
                     // Send events
                     notify('contentchange-smilisting');
-                    if (!initial) {
-                        // notify('selectionchange-smilisting', $container);
-                    };
                 } else if (initial) {
                     // Add a message no lines.
-                    var $empty_line = $('<tr class="empty"></tr>');
-                    var $empty_cell = $('<td>There is no items here.</td>');
-
-                    $empty_cell.attr('colspan', configuration.columns.length);
-                    $empty_line.append($empty_cell);
-                    $container.append($empty_line);
+                    $container.append(
+                        '<tr class="empty"><td colpsan="' + configuration.columns.length + '">There is no items here.</td></tr>');
                 };
+                return $added_lines;
             };
 
             // Add default data
@@ -492,19 +488,24 @@
                             var $lines = $(get_dom_line(ids[index]));
 
                             while(index--) {
-                                $lines.add(get_dom_line(ids[index]));
+                                $lines = $lines.add(get_dom_line(ids[index]));
                             };
                             return $lines;
                         };
                         return $([]);
                     },
                     add_lines: function(data) {
+                        var added = [];
+
                         for (var name in by_name) {
                             var lines = data[name];
 
                             if (lines && lines.length) {
-                                by_name[name].add(lines);
+                                $.merge(added, by_name[name].add(lines));
                             };
+                        };
+                        if (added.length) {
+                            selection.select($(added));
                         };
                     },
                     update_lines: function(lines) {
@@ -519,7 +520,6 @@
 
                         if ($lines.length) {
                             selection.remove($lines);
-                            $lines.remove();
                             notify('contentchange-smilisting');
                         };
                     },
@@ -540,9 +540,6 @@
                             });
                         });
                         notify('selectionchange-smilisting');
-                    },
-                    unselect: function($lines) {
-                        selection.unselect($lines);
                     },
                     unselect_all: function() {
                         selection.unselect($containers.children('tr.item.selected:visible'));

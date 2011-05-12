@@ -20,7 +20,7 @@
                 $(element).removeClass('selected');
             });
             deferred.template.fail(function(element) {
-                $(element).detach();
+                $(element).remove();
             });
         };
 

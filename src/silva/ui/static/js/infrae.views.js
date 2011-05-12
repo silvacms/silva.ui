@@ -164,10 +164,10 @@
             var resources = data.html_resources || view.html_resources;
             if (resources) {
                 if (resources.js) {
-                    infrae.utils.map(resources.js, resource_manager.load_js);
+                    infrae.utils.each(resources.js, resource_manager.load_js);
                 };
                 if (resources.css) {
-                    infrae.utils.map(resources.css, resource_manager.load_css);
+                    infrae.utils.each(resources.css, resource_manager.load_css);
                 };
             };
 
@@ -276,10 +276,10 @@
                 if (named_views == undefined) {
                     return [];
                 };
-                infrae.utils.map(ifaces, function (iface) {
+                infrae.utils.each(ifaces, function (iface) {
                     var definitions = named_views[iface];
                     if (definitions) {
-                        infrae.utils.map(definitions, function(definition) {
+                        infrae.utils.each(definitions, function(definition) {
                             if ($.inArray(definition['__view_uid__'], seen_definitions) < 0) {
                                 seen_definitions.push(definition['__view_uid__']);
                                 if (definition['available'] != undefined) {

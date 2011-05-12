@@ -63,15 +63,13 @@
         factory: function($content, data, smi, selection) {
             return {
                 render: function() {
-                    var need_refresh = false;
-
                     for (var post_action in data.post_actions) {
                         switch(post_action) {
                         case 'remove':
-                            need_refresh |= selection.remove(data.post_actions.remove);
+                            selection.remove(data.post_actions.remove);
                             break;
                         case 'update':
-                            need_refresh |= selection.update(data.post_actions.update);
+                            selection.update(data.post_actions.update);
                             break;
                         case 'add':
                             selection.add(data.post_actions.add);
@@ -80,9 +78,6 @@
                             smi.clipboard.clear(true);
                             break;
                         };
-                    };
-                    if (need_refresh) {
-                        $content.trigger('actionrefresh-smilisting', {data: selection});
                     };
                     if (data.notifications) {
                         smi.notifications.notifies(data.notifications);
@@ -254,7 +249,7 @@
                 };
                 group.register(button);
             };
-            infrae.utils.map(definitions, build_button);
+            infrae.utils.each(definitions, build_button);
             return group;
         };
 
@@ -495,8 +490,8 @@
 
                     },
                     cleanup: function() {
-                        $content.empty();
                         $content.unbind('actionrefresh-smilisting');
+                        $content.empty();
                     }
                 };
             }

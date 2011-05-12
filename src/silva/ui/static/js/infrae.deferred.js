@@ -144,9 +144,9 @@
                         return false;
 
                     var value = module.Deferred();
-                    infrae.utils.map(template.fail, value.fail);
-                    infrae.utils.map(template.done, value.done);
-                    infrae.utils.map(template.until, value.until);
+                    infrae.utils.each(template.fail, value.fail);
+                    infrae.utils.each(template.done, value.done);
+                    infrae.utils.each(template.until, value.until);
 
                     $(element).data(masterkey, value);
                     data.push(element);
