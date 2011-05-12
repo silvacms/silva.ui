@@ -9,6 +9,7 @@ from five import grok
 from silva.core.interfaces import ISilvaObject
 from silva.core.views.interfaces import IVirtualSite
 from silva.ui.interfaces import IUIService
+from silva.ui.rest.container import ListingSynchronizer
 from silva.fanstatic import need
 
 from zope.component import getUtility
@@ -27,6 +28,7 @@ class SMI(grok.View):
 
     def update(self):
         # Redirect to the root of the SMI if we are not already
+        ListingSynchronizer().initialize_client(self.request)
         root = IVirtualSite(self.request).get_root()
         root_url = absoluteURL(root, self.request)
         if root != self.context:

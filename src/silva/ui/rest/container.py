@@ -501,6 +501,11 @@ class ListingSynchronizer(object):
 
     namespace = 'silva.listing.invalidation'
 
+    def initialize_client(self, request):
+        storage = MemcacheSlice(self.namespace)
+        if self.get_client_version(request) is None:
+            self.set_client_version(request, storage.get_index())
+
     def get_path(self, request):
         return IVirtualSite(request).get_root().absolute_url_path()
 
@@ -508,7 +513,7 @@ class ListingSynchronizer(object):
         try:
             return int(request.cookies.get(self.namespace, None))
         except TypeError:
-            return 1
+            return None
 
     def set_client_version(self, request, version):
         request.response.setCookie(

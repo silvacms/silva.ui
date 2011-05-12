@@ -213,7 +213,7 @@ class NavigationSynchronizer(object):
             return int(
                 self.request.cookies.get(self.namespace, None))
         except TypeError:
-            return 1
+            return None
 
     def set_client_version(self, version):
         self.request.response.setCookie(
