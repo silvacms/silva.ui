@@ -94,7 +94,10 @@
                     return true;
                 },
                 each: function(callback) {
-                    infrae.utils.each(data, callback);
+                    return infrae.utils.apply_on_each(data, callback);
+                },
+                map: function(callback) {
+                    return infrae.utils.apply_on_map(data, callback);
                 },
                 remove: function(element, failed) {
                     var index = $.inArray(element, data);

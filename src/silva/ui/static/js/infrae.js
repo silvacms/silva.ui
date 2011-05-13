@@ -81,6 +81,15 @@
                 result.push(callback(array[index]));
             };
             return result;
+        },
+        apply_on_map: function(array, callback, result) {
+            if (result == undefined) {
+                result = [];
+            };
+            for (var index=0; index < array.length; index++) {
+                result.push(callback.apply(array[index]));
+            };
+            return result;
         }
 
     });

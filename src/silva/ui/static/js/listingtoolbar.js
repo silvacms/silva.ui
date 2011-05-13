@@ -153,11 +153,17 @@
                                                 data.selection.input.begin();
                                                 return;
                                             };
-                                            data.selection.input.finish();
+                                            var count = 0;
+                                            infrae.utils.each(data.selection.input.finish(), function(item) {
+                                                for (var name in item)
+                                                    payload.push({name: 'values.' + count + '.' + name, value: item[name]});
+                                                count += 1;
+                                            });
+                                            payload.push({name: 'values', value: count});
                                             break;
                                         }
                                         $.ajax({
-                                            url: data.action_url(definition.action.rest.action),
+                                            url: data.get_action_url(definition.action.rest.action),
                                             type: 'POST',
                                             dataType: 'json',
                                             data: payload,

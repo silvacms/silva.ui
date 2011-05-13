@@ -19,10 +19,10 @@
 
         // To collect values from lines.
         collection.events.incoming(function() {
-            $(this).trigger('inputline-smilisting', {names: ['identifier', 'title']});
+            $(this).data('smilisting-line').input(['identifier', 'title']);
         });
         collection.events.outgoing(function() {
-            $(this).trigger('refreshline-smilisting');
+            $(this).data('smilisting-line').update();
         });
 
 
@@ -78,8 +78,8 @@
                 var ifaces = [];
                 var data = [];
 
-                selection.each(function (item) {
-                    var $item = $(item);
+                selection.each(function () {
+                    var $item = $(this);
                     var local_data = $item.data('smilisting');
 
                     for (var e=0; e < local_data.ifaces.length; e++) {
@@ -98,9 +98,13 @@
                             return collecting;
                         },
                         finish: function() {
+                            var values = collection.map(function() {
+                                return $(this).data('smilisting-line').values(['identifier', 'title']);
+                            });
                             selection.events.pop();
                             collection.clear();
                             collecting = false;
+                            return values;
                         },
                         begin: function() {
                             if (!collecting) {
@@ -115,7 +119,7 @@
                                     })
                                 );
                                 selection.events.outgoing(function() {
-                                    $(this).trigger('refreshline-smilisting');
+                                    $(this).data('smilisting-line').update();
                                 });
                             }
                         }

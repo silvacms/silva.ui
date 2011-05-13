@@ -348,6 +348,7 @@
             var render_line = function(data) {
                 // Add a data line to the table
                 var $line = $('<tr class="item"></tr>');
+                var line = {};
 
                 $line.attr('id', 'list' + data['id'].toString());
 
@@ -388,30 +389,42 @@
 
                 infrae.utils.each(configuration.columns, render_cell);
 
-                $line.bind('refreshline-smilisting', function(event, data) {
-                    if (data != undefined) {
-                        $line.data('smilisting', data);
-                    } else {
-                        data = $line.data('smilisting');
-                    };
-                    $line.children().trigger('refreshcell-smilisting', data);
-                    event.stopPropagation();
-                    event.preventDefault();
-                });
-                $line.bind('inputline-smilisting', function(event, info) {
-                    var data = $line.data('smilisting');
+                $.extend(line, {
+                    update: function(data) {
+                        if (data != undefined) {
+                            $line.data('smilisting', data);
+                        } else {
+                            data = $line.data('smilisting');
+                        };
+                        $line.children().trigger('refreshcell-smilisting', data);
+                    },
+                    input: function(names) {
+                        var data = $line.data('smilisting');
 
-                    $.each(info.names, function(e, name) {
-                        var index = configuration.column_index(name);
-                        var $cell = $line.children(':eq(' + index + ')');
+                        infrae.utils.each(names, function(name) {
+                            var index = configuration.column_index(name);
+                            var $cell = $line.children(':eq(' + index + ')');
 
-                        $cell.triggerHandler('inputcell-smilisting', data);
-                    });
-                    $line.addClass('inputized');
-                    event.stopPropagation();
-                    event.preventDefault();
+                            $cell.triggerHandler('inputcell-smilisting', data);
+                        });
+                        $line.addClass('inputized');
+                    },
+                    values: function(names) {
+                        var data = $line.data('smilisting');
+                        var values = {id: data['id']};
+
+                        infrae.utils.each(names, function(name) {
+                            var index = configuration.column_index(name);
+                            var $cell = $line.children(':eq(' + index + ')');
+
+                            values[name] = $cell.find('input').val();
+                        });
+                        return values;
+                    }
                 });
-                $line.triggerHandler('refreshline-smilisting', data);
+
+                line.update(data);
+                $line.data('smilisting-line', line);
                 $container.append($line);
                 return $line.get(0);
             };
@@ -497,7 +510,7 @@
                             update: function(lines) {
                                 if (lines.length) {
                                     infrae.utils.each(lines, function(line) {
-                                        get_line(line['id']).trigger('refreshline-smilisting', line);
+                                        get_line(line['id']).data('smilisting-line').update(line);
                                     });
                                     transaction.require(events.status.invoke);
                                 };
@@ -556,7 +569,7 @@
                             copied: smi.clipboard.copied
                         },
                         get_transaction: new_listing_transaction,
-                        action_url: function(action) {
+                        get_action_url: function(action) {
                             return action_url_template.expand({path: smi.opened.path, action: action});
                         }
                     };
