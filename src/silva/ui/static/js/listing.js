@@ -497,9 +497,9 @@
                             update: function(lines) {
                                 if (lines.length) {
                                     infrae.utils.each(lines, function(line) {
-                                        get_line(line['id']).trigger('updateline-smilisting', line);
+                                        get_line(line['id']).trigger('refreshline-smilisting', line);
                                     });
-                                    transaction.require(events.content.invoke);
+                                    transaction.require(events.status.invoke);
                                 };
                             },
                             remove: function(ids) {
@@ -659,9 +659,6 @@
 
                         // Render footer
                         $content.find('.listing-footer').render({data: data, name: 'footer', args: [smi, this]});
-
-                        // Initial events to initialize the UI
-                        events.content.invoke();
                     },
                     cleanup: function() {
                         $content.unbind('collapsingchange-smilisting');
