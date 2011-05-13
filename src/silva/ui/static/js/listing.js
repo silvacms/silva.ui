@@ -555,7 +555,7 @@
                             cutted: smi.clipboard.cutted,
                             copied: smi.clipboard.copied
                         },
-                        transaction: new_listing_transaction(),
+                        get_transaction: new_listing_transaction,
                         action_url: function(action) {
                             return action_url_template.expand({path: smi.opened.path, action: action});
                         }

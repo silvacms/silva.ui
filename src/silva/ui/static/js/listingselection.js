@@ -2,26 +2,29 @@
 (function($, infrae) {
 
     $.fn.SMISelection = function() {
-        var deferred = null;
+        var selection = infrae.deferred.FluxCapacitor();
+        var collecting = false;
+        var collection = infrae.deferred.FluxCapacitor();
 
-        var new_deferred = function() {
-            deferred = infrae.deferred.MetaDeferred('selection');
+        // Default behavior of a SMI Selection.
+        selection.events.incoming(function() {
+            $(this).addClass('selected');
+        });
+        selection.events.outgoing(function() {
+            $(this).removeClass('selected');
+        });
+        selection.events.failing(function() {
+            $(this).remove();
+        });
 
-            deferred.always(function() {
-                deferred = null;
-            });
+        // To collect values from lines.
+        collection.events.incoming(function() {
+            $(this).trigger('inputline-smilisting', {names: ['identifier', 'title']});
+        });
+        collection.events.outgoing(function() {
+            $(this).trigger('refreshline-smilisting');
+        });
 
-            // Default behavior of a SMI Selection.
-            deferred.template.until(function(element) {
-                $(element).addClass('selected');
-            });
-            deferred.template.done(function(element) {
-                $(element).removeClass('selected');
-            });
-            deferred.template.fail(function(element) {
-                $(element).remove();
-            });
-        };
 
         return {
             /**
@@ -31,10 +34,7 @@
                 var changed = false;
 
                 if ($items.length) {
-                    if (!deferred) {
-                        new_deferred();
-                    };
-                    $items.each(function () {changed |= deferred.add(this);});
+                    $items.each(function () {changed |= selection.add(this);});
                 };
                 return changed;
             },
@@ -44,9 +44,7 @@
             unselect: function($items) {
                 var changed = false;
 
-                if (deferred) {
-                    $items.each(function () { changed |= deferred.remove(this, true);});
-                };
+                $items.each(function () { changed |= selection.remove(this);});
                 return changed;
             },
             /**
@@ -55,9 +53,7 @@
             remove: function($items) {
                 var changed = false;
 
-                if (deferred) {
-                    $items.each(function () { changed |= deferred.remove(this, false);});
-                };
+                $items.each(function () { changed |= selection.remove(this, true);});
                 return changed;
             },
             /**
@@ -68,12 +64,9 @@
 
                 $items.each(function () {
                     if ($(this).hasClass('selected')) {
-                        if (deferred)
-                            changed |= deferred.remove(this, true);
+                        changed |= selection.remove(this);
                     } else {
-                        if (!deferred)
-                            new_deferred();
-                        changed |= deferred.add(this);
+                        changed |= selection.add(this);
                     };
                 });
                 return changed;
@@ -82,13 +75,10 @@
              * Return data associated to selected items.
              */
             data: function() {
-                if (!deferred)
-                    return {ifaces: [], items: [], length: 0, promise: null};
-
                 var ifaces = [];
                 var data = [];
 
-                deferred.each(function (item) {
+                selection.each(function (item) {
                     var $item = $(item);
                     var local_data = $item.data('smilisting');
 
@@ -102,15 +92,35 @@
                 return {
                     ifaces: ifaces,
                     items: data,
-                    promise: this.promise(),
-                    length: data.length
+                    length: data.length,
+                    input: {
+                        is_running: function() {
+                            return collecting;
+                        },
+                        finish: function() {
+                            selection.events.pop();
+                            collection.clear();
+                            collecting = false;
+                        },
+                        begin: function() {
+                            if (!collecting) {
+                                collecting = true;
+                                selection.events.push();
+                                selection.events.incoming(function() {
+                                    collection.add(this);
+                                });
+                                selection.events.failing(
+                                    selection.events.outgoing(function(){
+                                        collection.remove(this, true);
+                                    })
+                                );
+                                selection.events.outgoing(function() {
+                                    $(this).trigger('refreshline-smilisting');
+                                });
+                            }
+                        }
+                    }
                 };
-            },
-            promise: function() {
-                if (deferred == null) {
-                    return null;
-                };
-                return deferred.promise();
             }
         };
     };

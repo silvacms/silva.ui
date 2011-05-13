@@ -62,6 +62,11 @@
                 callback(array[index]);
             };
         },
+        apply_on_each: function(array, callback) {
+            for (var index=0; index < array.length; index++) {
+                callback.apply(array[index]);
+            };
+        },
         /**
          * Helper that call a callback on each element of an array,
          * and build a new one with the results of each call.

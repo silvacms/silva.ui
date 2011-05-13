@@ -101,12 +101,11 @@
 
             var build_button = function(definition) {
                 var button = {
-                    order: definition.order,
-                    title: definition.title
+                    order: definition.order
+                    //ifaces: definition.ifaces
                 };
                 if (definition.title != null) {
                     button['factory'] = function($content, data) {
-                        var collecting = false;
                         var view = {
                             render: function() {
                                 var $action = $('<li><a class="ui-state-default"><span>' +
@@ -150,23 +149,11 @@
                                             }, payload);
                                             break;
                                         case 'item_values':
-                                            var names = definition.action.rest.values;
-                                            var counter = 0;
-
-                                            if (!collecting) {
-                                                data.inputs(names);
-                                                collecting = true;
+                                            if (!data.selection.input.is_running()) {
+                                                data.selection.input.begin();
                                                 return;
                                             };
-                                            data.values(names, function(data) {
-                                                var prefix = 'values.' + counter.toString() + '.';
-                                                for (var key in data) {
-                                                    payload.push({name: prefix + key, value: data[key]});
-                                                };
-                                                counter += 1;
-                                            });
-                                            payload.push({name: 'values', value: counter.toString()});
-                                            collecting = false;
+                                            data.selection.input.finish();
                                             break;
                                         }
                                         $.ajax({
@@ -175,21 +162,23 @@
                                             dataType: 'json',
                                             data: payload,
                                             success: function(result) {
-                                                $content.render({data: result, args: [data.transaction]});
+                                                $content.render({data: result, args: [data.get_transaction()]});
                                             }
                                         });
                                     };
                                     break;
                                 case 'cut':
                                     view['action'] = function () {
-                                        data.transaction.clipboard.cut(data.selection.items);
-                                        data.transaction.commit();
+                                        var transaction = data.get_transaction();
+                                        transaction.clipboard.cut(data.selection.items);
+                                        transaction.commit();
                                     };
                                     break;
                                 case 'copy':
                                     view['action'] = function () {
-                                        data.transaction.clipboard.copy(data.selection.items);
-                                        data.transaction.commit();
+                                        var transaction = data.get_transaction();
+                                        transaction.clipboard.copy(data.selection.items);
+                                        transaction.commit();
                                     };
                                     break;
                                 case 'form':
@@ -207,12 +196,12 @@
                 } else {
                     var subgroup = build_group(definition.actions);
 
-                    button['factory'] = function($content, data, smi) {
+                    button['factory'] = function($content, data) {
                         return {
                             render: function() {
                                 var $dropdown = $('<div class="dropdown"><ol></ol></div');
 
-                                subgroup.render($dropdown.children('ol'), {every: data, args:[smi]});
+                                subgroup.render($dropdown.children('ol'), {every: data});
 
                                 // Take the first action and use it as top-level action.
                                 var $first = $dropdown.find('li:first');
