@@ -68,8 +68,10 @@
          * @param array: array containing elements.
          * @param callback: callback to call on each element of the array.
          */
-        map: function(array, callback) {
-            var result = [];
+        map: function(array, callback, result) {
+            if (result == undefined) {
+                result = [];
+            };
             for (var index=0; index < array.length; index++) {
                 result.push(callback(array[index]));
             };

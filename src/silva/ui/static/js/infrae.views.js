@@ -2,10 +2,6 @@
 (function (infrae, $) {
     var module = {};
 
-    module.InvalidOptions = function(options) {
-        this.message = 'Missing required options';
-    };
-
     /**
      * HTMLResourceManager, load extra JS or CSS at run time.
      */
@@ -383,7 +379,7 @@
                     } else if(options.url) {
                         return render_url($content, options.url, options);
                     } else {
-                        throw((new module.InvalidOptions(options)));
+                        throw({message: 'Missing required options'});
                     };
                 }
             };

@@ -195,7 +195,7 @@
     /**
      * Render/bind the user selection process to the given listing container.
      */
-    var render_container_selection = function($container, selection) {
+    var render_container_selection = function($container, selector) {
         // Row selection
         var last_selected_index = null;
         var $hovered_row = null;
@@ -229,7 +229,7 @@
         var select_row = function($row, multiple) {
             if (last_selected_index === null || !multiple) {
                 last_selected_index = $row.index();
-                selection.toggle($row);
+                selector($row);
             } else {
                 // Multiple selection
                 var current_index = $row.index();
@@ -246,7 +246,7 @@
                         end = last_selected_index;
                     };
                     var $lines = $row.parent().children().slice(start, end).filter('.item:visible');
-                    selection.toggle($lines);
+                    selector($lines);
                 };
                 last_selected_index = current_index;
             };
@@ -301,7 +301,7 @@
                     }
                 });
                 // If content change, reinitialize the DND
-                $container.bind('contentchange-smilisting', function() {
+                $container.bind('containerchange-smilisting', function() {
                     $table.tableDnDUpdate();
                 });
             };
@@ -309,18 +309,41 @@
     };
 
 
+    var new_transaction = function() {
+        var finalizer = [];
+
+        return {
+            require: function(callback) {
+                if ($.inArray(callback, finalizer) < 0) {
+                    finalizer.push(callback);
+                };
+            },
+            commit: function() {
+                setTimeout(function () {
+                    var index = finalizer.length;
+
+                    while (index--) {
+                        finalizer[index]();
+                    };
+                }, 0);
+            }
+        };
+    };
+
+
     $(document).bind('load-smilisting', function(event, data) {
         var smi = data.smi;
         var configuration = data.configuration;
+        var action_url_template = new jsontemplate.Template(smi.options.listing.action, {});
 
-        var create_container = function(name, configuration, lines, selection) {
+        var create_container = function(name, configuration, lines, selector) {
             var $content = $('dd.' + name);
             var $header = $('dt.' + name);
             var $container = $content.find('tbody');
 
             // Collapse feature / table header.
             render_container_header($header, $content, configuration);
-            render_container_selection($content, selection);
+            render_container_selection($content, selector);
 
             var render_line = function(data) {
                 // Add a data line to the table
@@ -388,7 +411,7 @@
                     event.stopPropagation();
                     event.preventDefault();
                 });
-                $line.trigger('refreshline-smilisting', data);
+                $line.triggerHandler('refreshline-smilisting', data);
                 $container.append($line);
                 return $line.get(0);
             };
@@ -400,7 +423,9 @@
                         $container.children('.empty').remove();
                     };
                     // Fill in table
-                    return infrae.utils.map(lines, render_line);
+                    var new_lines = infrae.utils.map(lines, render_line);
+                    $container.trigger('containerchange-smilisting');
+                    return new_lines;
                 } else if (initial) {
                     // Add a message no lines.
                     $container.append(
@@ -420,26 +445,123 @@
             iface: 'listing',
             name: 'content',
             factory: function($content, data, smi) {
-                var $containers = $([]);
+                var listing = {};
                 var selection = $content.SMISelection();
+                var $containers = $([]);
                 var by_name = {};
+                var events = {
+                    status: infrae.deferred.Callbacks(),
+                    content: infrae.deferred.Callbacks()
+                };
 
                 var get_dom_line = function(id) {
                     return document.getElementById('list' + id.toString());
                 };
-
-                var notify = function(event_name) {
-                    var $items = $containers.children('tr.item');
-                    var $visible = $items.filter(':visible');
-                    var $selected = $visible.filter('.selected');
-
-                    $content.trigger(event_name, {
-                        total: $items.length,
-                        visible: $visible.length,
-                        selected: $selected.length,
-                        items: $selected
-                    });
+                var get_line = function(id) {
+                    return $(get_dom_line(id));
                 };
+                var get_lines = function(ids) {
+                    if (ids.length) {
+                        var index = ids.length - 1;
+                        var $lines = $(get_dom_line(ids[index]));
+
+                        while(index--) {
+                            $lines = $lines.add(get_dom_line(ids[index]));
+                        };
+                        return $lines;
+                    };
+                    return $([]);
+                };
+
+                var new_listing_transaction = function() {
+                    var transaction = new_transaction();
+
+                    $.extend(transaction, {
+                        listing: {
+                            add: function(data, select) {
+                                var added = [];
+
+                                for (var name in by_name) {
+                                    var lines = data[name];
+
+                                    if (lines && lines.length) {
+                                        $.merge(added, by_name[name].add(lines));
+                                    };
+                                };
+                                if (added.length) {
+                                    selection.select($(added));
+                                    transaction.require(events.content.invoke);
+                                    transaction.require(events.status.invoke);
+                                };
+                            },
+                            update: function(lines) {
+                                if (lines.length) {
+                                    infrae.utils.each(lines, function(line) {
+                                        get_line(line['id']).trigger('updateline-smilisting', line);
+                                    });
+                                    transaction.require(events.content.invoke);
+                                };
+                            },
+                            remove: function(ids) {
+                                var $lines = get_lines(ids);
+
+                                if ($lines.length) {
+                                    selection.remove($lines);
+                                    transaction.require(events.content.invoke);
+                                    transaction.require(events.status.invoke);
+                                };
+                            }
+                        },
+                        clipboard: {
+                            cut: function(data) {
+                                smi.clipboard.cut(data);
+                                transaction.require(events.status.invoke);
+                            },
+                            copy: function(data) {
+                                smi.clipboard.copy(data);
+                                transaction.require(events.status.invoke);
+                            },
+                            clear: function() {
+                                smi.clipboard.clear();
+                            }
+                        },
+                        notifies: function(messages) {
+                            smi.notifications.notifies(messages);
+                        }
+                    });
+                    return transaction;
+                };
+
+                // Then a content event is trigger, the context is the following object.
+                events.content.context(function() {
+                    var info = {};
+
+                    for (var name in by_name) {
+                        info[name] = by_name[name].$container.children('tr.item').length;
+                    };
+                    return info;
+                });
+                // Then a content event is trigger, the context is the following object.
+                events.status.context(function() {
+                    var $items = $containers.children('tr.item:visible');
+                    var $selected = $items.filter('.selected');
+
+                    var status = {
+                        content: data.content,
+                        length: $items.length,
+                        selection: selection.data(),
+                        clipboard: {
+                            length: smi.clipboard.length(),
+                            cutted: smi.clipboard.cutted,
+                            copied: smi.clipboard.copied
+                        },
+                        transaction: new_listing_transaction(),
+                        action_url: function(action) {
+                            return action_url_template.expand({path: smi.opened.path, action: action});
+                        }
+                    };
+                    return status;
+                });
 
                 var update_container_sizes = function() {
                     var $header = $content.find('div.listing-header table');
@@ -472,58 +594,21 @@
                     };
                 };
 
-                return {
+                $.extend(listing, {
                     html_url: smi.options.listing.templates.content,
-                    get_line: function(id) {
-                        return $(get_dom_line(id));
-                    },
-                    get_lines: function(ids) {
-                        if (ids.length) {
-                            var index = ids.length - 1;
-                            var $lines = $(get_dom_line(ids[index]));
-
-                            while(index--) {
-                                $lines = $lines.add(get_dom_line(ids[index]));
-                            };
-                            return $lines;
-                        };
-                        return $([]);
-                    },
-                    add_lines: function(data) {
-                        var added = [];
-
-                        for (var name in by_name) {
-                            var lines = data[name];
-
-                            if (lines && lines.length) {
-                                $.merge(added, by_name[name].add(lines));
-                            };
-                        };
-                        if (added.length) {
-                            selection.select($(added));
-                            notify('contentchange-smilisting');
-                        };
-                    },
-                    update_lines: function(lines) {
-                        var get_line = this.get_line;
-
-                        $.each(lines, function(i, data) {
-                            get_line(data['id']).trigger('updateline-smilisting', data);
-                        });
-                    },
-                    remove_lines: function(ids) {
-                        var $lines = this.get_lines(ids);
-
-                        if ($lines.length) {
-                            selection.remove($lines);
-                            notify('contentchange-smilisting');
-                        };
+                    events: {
+                        content: function(callback) {
+                            events.content.add(callback, true);
+                        },
+                        status: function(callback) {
+                            events.status.add(callback, true);
+                        }
                     },
                     filter_lines: function(value) {
                         var pattern = new RegExp(value, 'i');
 
                         $.each(configuration.listing, function(i, configuration) {
-                            var $container = by_name[configuration.name];
+                            var $container = by_name[configuration.name].$container;
 
                             $container.children('.item').each(function (i) {
                                 var $line = $(this);
@@ -535,22 +620,21 @@
                                 };
                             });
                         });
-                        notify('selectionchange-smilisting');
+                        events.status.invoke();
                     },
                     unselect_all: function() {
-                        selection.unselect($containers.children('tr.item.selected:visible'));
+                        if (selection.unselect($containers.children('tr.item.selected:visible'))) {
+                            events.status.invoke();
+                        }
                     },
                     select_all: function() {
-                        selection.select($containers.children('tr.item:visible'));
+                        if (selection.select($containers.children('tr.item:visible'))) {
+                            events.status.invoke();
+                        };
                     },
                     render: function() {
                         // Render header
                         render_listing_header($content, configuration);
-
-                        // Configure selection
-                        selection.events.always(function() {
-                            notify('selectionchange-smilisting');
-                        });
 
                         // Create containers
                         $.each(configuration.listing, function(i, configuration) {
@@ -558,7 +642,11 @@
                                 configuration.name,
                                 configuration,
                                 data.items[configuration.name],
-                                selection);
+                                function ($items) {
+                                    if (selection.toggle($items)) {
+                                        events.status.invoke();
+                                    };
+                                });
                             $containers = $containers.add(container.$container);
                             by_name[configuration.name] = container;
                         });
@@ -571,13 +659,16 @@
 
                         // Render footer
                         $content.find('.listing-footer').render({data: data, name: 'footer', args: [smi, this]});
+
+                        // Initial events to initialize the UI
+                        events.content.invoke();
                     },
                     cleanup: function() {
                         $content.unbind('collapsingchange-smilisting');
-                        $content.unbind('selectionchange-smilisting');
                         $content.empty();
                     }
-                };
+                });
+                return listing;
             }
         });
 

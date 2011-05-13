@@ -12,38 +12,38 @@
         for (var predicate in predicates) {
             switch(predicate) {
             case 'content_match':
-                conditions.push(function($content, data, smi) {
+                conditions.push(function($content, data) {
                     return infrae.utils.match([data.content], predicates.content_match);
                 });
                 break;
             case 'items_implements':
-                conditions.push(function($content, data, smi) {
+                conditions.push(function($content, data) {
                     if (typeof(predicates.items_implements) === "string")
-                        return infrae.interfaces.isImplementedBy(predicates.items_implements, data);
+                        return infrae.interfaces.isImplementedBy(predicates.items_implements, data.selection);
                     for (var i=0; i < predicates.items_implements.length; i++)
-                        if (infrae.interfaces.isImplementedBy(predicates.items_implements[i], data))
+                        if (infrae.interfaces.isImplementedBy(predicates.items_implements[i], data.selection))
                             return true;
                     return false;
                 });
                 break;
             case 'items_match':
-                conditions.push(function($content, data, smi) {
-                    return infrae.utils.match(data.items(), predicates.items_match);
+                conditions.push(function($content, data) {
+                    return infrae.utils.match(data.selection.items, predicates.items_match);
                 });
                 break;
             case 'min_items':
-                conditions.push(function($content, data, smi) {
-                    return data.length() >= predicates.min_items;
+                conditions.push(function($content, data) {
+                    return data.selection.length >= predicates.min_items;
                 });
                 break;
             case 'max_items':
-                conditions.push(function($content, data, smi) {
-                    return data.length() <= predicates.max_items;
+                conditions.push(function($content, data) {
+                    return data.selection.length <= predicates.max_items;
                 });
                 break;
             case 'clipboard_min_items':
-                conditions.push(function($content, data, smi) {
-                    return smi.clipboard.length() >= predicates.clipboard_min_items;
+                conditions.push(function($content, data) {
+                    return data.clipboard.length >= predicates.clipboard_min_items;
                 });
                 break;
             };
@@ -60,28 +60,29 @@
 
     infrae.views.view({
         iface: ['actionresult'],
-        factory: function($content, data, smi, selection) {
+        factory: function($content, data, transaction) {
             return {
                 render: function() {
                     for (var post_action in data.post_actions) {
                         switch(post_action) {
                         case 'remove':
-                            selection.remove(data.post_actions.remove);
+                            transaction.listing.remove(data.post_actions.remove);
                             break;
                         case 'update':
-                            selection.update(data.post_actions.update);
+                            transaction.listing.update(data.post_actions.update);
                             break;
                         case 'add':
-                            selection.add(data.post_actions.add);
+                            transaction.listing.add(data.post_actions.add);
                             break;
                         case 'clear_clipboard':
-                            smi.clipboard.clear(true);
+                            transaction.clipboard.clear(true);
                             break;
                         };
                     };
                     if (data.notifications) {
-                        smi.notifications.notifies(data.notifications);
+                        transaction.notifies(data.notifications);
                     };
+                    transaction.commit();
                 }
             };
         }
@@ -91,9 +92,8 @@
     /**
      * Create button kind-of-view that can be used to render actions.
      * @param group_definitions: list of action groups
-     * @param url_template: base URL to use for REST-type actions
      */
-    var build_actions_renderer = function(group_definitions, url_template) {
+    var build_actions_renderer = function(group_definitions) {
         var renderers = [];
 
         var build_group = function(definitions) {
@@ -105,7 +105,7 @@
                     title: definition.title
                 };
                 if (definition.title != null) {
-                    button['factory'] = function($content, data, smi) {
+                    button['factory'] = function($content, data) {
                         var collecting = false;
                         var view = {
                             render: function() {
@@ -134,22 +134,20 @@
                                 switch(action_type) {
                                 case 'rest':
                                     view['action'] = function() {
-                                        var url = url_template.expand({path: smi.opened.path,
-                                                                       action: definition.action.rest.action});
                                         var payload = [];
                                         switch(definition.action.rest.send) {
                                         case 'selected_ids':
-                                            $.each(data.items(), function(i, item) {
-                                                payload.push({name: 'content', value: item.id});
-                                            });
+                                            infrae.utils.map(data.selection.items, function(item) {
+                                                return {name: 'content', value: item.id};
+                                            }, payload);
                                             break;
                                         case 'clipboard_ids':
-                                            $.each(smi.clipboard.cutted, function(i, item) {
-                                                payload.push({name: 'cutted', value: item.id});
-                                            });
-                                            $.each(smi.clipboard.copied, function(i, item) {
-                                                payload.push({name: 'copied', value: item.id});
-                                            });
+                                            infrae.utils.map(data.clipboard.cutted, function(item) {
+                                                    return {name: 'cutted', value: item.id};
+                                            }, payload);
+                                            infrae.utils.map(data.clipboard.copied, function(item) {
+                                                    return {name: 'copied', value: item.id};
+                                            }, payload);
                                             break;
                                         case 'item_values':
                                             var names = definition.action.rest.values;
@@ -172,28 +170,26 @@
                                             break;
                                         }
                                         $.ajax({
-                                            url: url,
+                                            url: data.action_url(definition.action.rest.action),
                                             type: 'POST',
                                             dataType: 'json',
                                             data: payload,
                                             success: function(result) {
-                                                $content.render({data: result, args: [smi, data]});
+                                                $content.render({data: result, args: [data.transaction]});
                                             }
                                         });
                                     };
                                     break;
                                 case 'cut':
                                     view['action'] = function () {
-                                        smi.clipboard.cut(data.data);
-                                        $content.trigger(
-                                            'actionrefresh-smilisting', {data: data});
+                                        data.transaction.clipboard.cut(data.selection.items);
+                                        data.transaction.commit();
                                     };
                                     break;
                                 case 'copy':
                                     view['action'] = function () {
-                                        smi.clipboard.copy(data.data);
-                                        $content.trigger(
-                                            'actionrefresh-smilisting', {data: data});
+                                        data.transaction.clipboard.copy(data.selection.items);
+                                        data.transaction.commit();
                                     };
                                     break;
                                 case 'form':
@@ -256,21 +252,23 @@
         $.each(group_definitions, function(i, group_definition) {
             var group = build_group(group_definition);
 
-            renderers.push(function($content, data, args) {
+            renderers.push(function($content, data) {
                 var $actions = $('<div class="actions"><ol></ol></div>');
 
                 infrae.ui.selection.disable($actions);
-                group.render($actions.children('ol'), {every: data, args: args});
+                group.render($actions.children('ol'), {every: data});
                 if ($actions.find('li:first').length) {
                     $content.append($actions);
                 };
             });
         });
 
-        return function($content, data, args) {
-            $content.children('div.actions').remove();
-            $.each(renderers, function() {
-                this($content, data, args);
+        return function($content, listing) {
+            listing.events.status(function() {
+                $content.children('div.actions').remove();
+                for (var index=0; index < renderers.length; index++) {
+                    renderers[index]($content, this);
+                };
             });
         };
     };
@@ -291,12 +289,12 @@
         };
 
         // Update selector on selection change
-        listing.$content.bind('selectionchange-smilisting', function(event, changes) {
-            if (changes.selected == 0) {
+        listing.events.status(function() {
+            if (this.selection.length == 0) {
                 set_status('none');
-            } else if (changes.selected == changes.visible) {
+            } else if (this.selection.length == this.length) {
                 set_status('all');
-            } else if (changes.selected == 1) {
+            } else if (this.selection.length == 1) {
                 set_status('single');
             } else {
                 set_status('partial');
@@ -352,111 +350,23 @@
         });
     };
 
-    /**
-     * Represent a selection of multiple items in a listing.
-     * @param items: selected rows (must have the .item class).
-     */
-    var SMISelection = function(listing, content, items) {
-        this.listing = listing;
-        this.content = content;
+    // SMISelection.prototype.inputs = function(names) {
+    //     var promise = this.listing.selection.events.promise();
 
-        this._raw_items = items;
-        this._refresh_data();
-    };
-
-    // Compute selection data
-    SMISelection.prototype._refresh_data = function () {
-        this.ifaces = [];
-        this.data = [];
-
-        $.each(this._raw_items, function (i, item) {
-            var local_data = $(item).data('smilisting');
-
-            for (var e=0; e < local_data.ifaces.length; e++) {
-                if ($.inArray(local_data.ifaces[e], this.ifaces) < 0) {
-                    this.ifaces.push(local_data.ifaces[e]);
-                };
-            };
-            this.data.push(local_data);
-        }.scope(this));
-    };
-
-    /**
-     * Return the size of the selection.
-     */
-    SMISelection.prototype.length = function() {
-        return this._raw_items.length;
-    };
-
-    /**
-     * Add data to the listing (and selection).
-     */
-    SMISelection.prototype.add = function(data) {
-        this.listing.add_lines(data);
-    };
-
-    /**
-     * Return the items of the selection.
-     */
-    SMISelection.prototype.items = function() {
-        return this.data;
-    };
-
-    /**
-     * Update some selected items.
-     */
-    SMISelection.prototype.update = function(items) {
-        if (items.length) {
-            this.listing.update_lines(items);
-            this._refresh_data();
-            return true;
-        };
-        return false;
-    };
-
-    SMISelection.prototype.values = function(names, processor) {
-        var column_index = this.listing.configuration.column_index;
-
-        $.each(this._raw_items, function(i, line) {
-            var $line = $(line);
-            var collected = {};
-            collected['id'] = $line.data('smilisting')['id'];
-            $.each(names, function(e, name) {
-                var index = column_index(name);
-                var $input = $line.children(':eq(' + index + ')').children('input');
-                collected[name] = $input.val();
-            });
-            processor(collected);
-        });
-    };
-
-    SMISelection.prototype.inputs = function(names) {
-        var promise = this.listing.selection.events.promise();
-
-        if (promise != null) {
-            promise.template.until(function(element) {
-                $(element).trigger('inputline-smilisting', {names: names});
-            }, true);
-            promise.template.done(function(element) {
-                $(element).trigger('refreshline-smilisting');
-            }, true);
-        }
-    };
-
-    /**
-     * Remove some items associated to the selection.
-     * @param ids: content id of the line to remove.
-     */
-    SMISelection.prototype.remove = function(ids) {
-        this.listing.remove_lines(ids);
-    };
-
+    //     if (promise != null) {
+    //         promise.template.until(function(element) {
+    //             $(element).trigger('inputline-smilisting', {names: names});
+    //         }, true);
+    //         promise.template.done(function(element) {
+    //             $(element).trigger('refreshline-smilisting');
+    //         }, true);
+    //     }
+    // };
 
     $(document).bind('load-smilisting', function(event, data) {
         var configuration = data.configuration;
         var smi = data.smi;
-        var url_template = jsontemplate.Template(smi.options.listing.action, {});
-        var render_actions = build_actions_renderer(configuration.actions, url_template);
+        var render_actions = build_actions_renderer(configuration.actions);
 
         infrae.views.view({
             iface: 'listing',
@@ -466,21 +376,7 @@
                     html_url: smi.options.listing.templates.toolbar,
                     render: function() {
                         // Render actions
-                        render_actions(
-                            $content,
-                            new SMISelection(listing, data.content, $([])),
-                            [smi]);
-                        $content.bind('actionrefresh-smilisting', function(event, data) {
-                            render_actions($content, data.data, [smi]);
-                            event.stopPropagation();
-                            event.preventDefault();
-                        });
-                        listing.$content.bind('selectionchange-smilisting', function(event, changes) {
-                            render_actions(
-                                $content,
-                                new SMISelection(listing, data.content, changes.items),
-                                [smi]);
-                        });
+                        render_actions($content, listing);
 
                         // Render multi selector
                         render_multi_selector($content.find('.selector ins'), listing);

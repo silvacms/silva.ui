@@ -7,16 +7,13 @@
     var interfaces = {};
 
     $.extend(module, {
-        DuplicateInterfaces: function(name) {
-            this.message = 'duplicate registration of interface ' + name;
-        },
         /**
          * Register an interface
          * @param name: interface name (string)
          */
         register: function(name, bases) {
             if (interfaces[name]) {
-                throw(new module.DuplicateInterfaces(name));
+                throw({message: 'Duplicate registration of interface ' + name});
             };
             if (!bases) {
                 bases = ['object'];

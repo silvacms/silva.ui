@@ -107,18 +107,12 @@
      * Render counter information.
      */
     var render_counters = function($counters, listing) {
-        for (var name in listing.by_name) {
-            var $content = listing.by_name[name];
-            var $counter = $counters.find('.' + name + ' .count');
-
-            // Set default value.
-            $counter.text($content.children('tr.item').length.toString());
-
-            // Change in content change.
-            $content.bind('contentchange-smilisting', function(event, data) {
-                $counter.text(data.total.toString());
-            });
-        };
+        listing.events.content(function () {
+            for (var name in this) {
+                var $counter = $counters.find('.' + name + ' .count');
+                $counter.text(this[name].toString());
+            };
+        });
     };
 
     infrae.views.view({
@@ -131,14 +125,10 @@
                     infrae.ui.selection.disable($content);
 
                     // Render clipboard info
-                    smi.clipboard.content = data.content;
                     render_clipboard($content.find('.clipboard-info'), smi);
 
                     // Render counter information
                     render_counters($content.find('.counters'), listing);
-                },
-                cleanup: function() {
-                    smi.clipboard.content = null;
                 }
             };
         }

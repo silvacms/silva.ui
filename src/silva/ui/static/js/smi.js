@@ -209,9 +209,7 @@
      * @param messages: list of messages.
      */
     NotificationManager.prototype.notifies = function(messages) {
-        $.each(messages, function(i, message) {
-            this.notify(message);
-        }.scope(this));
+        infrae.utils.each(messages, this.notify.scope(this));
     };
 
     /**
@@ -226,11 +224,7 @@
      * @param notification: notification manage used to send notifications.
      */
     var ClipBoard = function(notifications) {
-        this.ifaces = ['clipboard'];
         this.notifications = notifications;
-        // content represent information about content that might be
-        // the target of a paste.
-        this.content = null;
         this._clear();
     };
 

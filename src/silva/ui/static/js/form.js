@@ -85,13 +85,6 @@
                         var $form = $(this);
                         var form_prefix = $form.attr('name');
 
-                        // If the form is focused
-                        // $form.bind('focus-smi', function() {
-                        //     // Scroll into view and select the first field
-                        //     this.$content.SMISmoothScroll('slow', 'absolute', $form.position().top);
-                        //     this.focus_first_form_field($form);
-                        // }.scope(this));
-
                         var submit = function(extra) {
                             var values = $form.serializeArray();
 
@@ -128,6 +121,13 @@
                         // Bind form focus
                         $form.delegate('.form-section', 'focusin', focus_form_field);
                         $form.delegate('.form-section', 'click', focus_form_field);
+
+                        // If the form is focused
+                        // $form.bind('focus-smi', function() {
+                        //     // Scroll into view and select the first field
+                        //     this.$content.SMISmoothScroll('slow', 'absolute', $form.position().top);
+                        //     this.focus_first_form_field($form);
+                        // }.scope(this));
 
                         // Set submit URL for helper
                         $form.attr('data-form-url', smi.get_screen_url());

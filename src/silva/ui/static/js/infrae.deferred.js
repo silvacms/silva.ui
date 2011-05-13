@@ -11,14 +11,29 @@
          */
         Callbacks: function() {
             var callbacks = [];
+            var context_provider = null;
 
             return {
-                add: function(callback) {
+                add: function(callback, invoke) {
+                    if (invoke && context_provider) {
+                        callback.apply(context_provider());
+                    };
                     callbacks.push(callback);
                     return this;
                 },
+                context: function(callback) {
+                    context_provider = callback;
+                },
                 invoke: function(context, args) {
                     var index = callbacks.length;
+                    if (!args && context_provider) {
+                        var value = context_provider();
+                        if (!context) {
+                            context = value;
+                        } else {
+                            args = [value];
+                        };
+                    };
 
                     while (index--) {
                         callbacks[index].apply(context, args);
