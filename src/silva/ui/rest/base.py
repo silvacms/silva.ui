@@ -14,8 +14,8 @@ from zope.i18n import translate
 from zope.i18n.interfaces import IUserPreferredLanguages
 from zope.intid.interfaces import IIntIds
 
-from zope.lifecycleevent.interfaces import IObjectAddedEvent
-from OFS.interfaces import IObjectWillBeRemovedEvent
+from zope.lifecycleevent.interfaces import IObjectMovedEvent
+from OFS.interfaces import IObjectWillBeMovedEvent
 
 from Acquisition import aq_parent
 
@@ -49,9 +49,9 @@ class RedirectToPage(PageException):
         self.tab = tab
 
     def payload(self, caller):
-        return {'ifaces': ['redirect'],
-                'path': caller.get_content_path(self.content),
-                'tab': self.tab}
+        return {'content': {'ifaces': ['redirect'],
+                            'path': caller.get_content_path(self.content),
+                            'tab': self.tab}}
 
 
 class UIREST(rest.REST):
@@ -111,7 +111,34 @@ def get_resources(request):
     return data
 
 
-class PageREST(UIREST):
+class ActionREST(UIREST):
+    grok.baseclass()
+    grok.require('silva.ReadSilvaContent')
+
+    def get_navigation(self):
+        return {'invalidation': NavigationSynchronizer(self.request).get_changes()}
+
+    def GET(self):
+        try:
+            payload = self.get_payload()
+        except PageException as error:
+            return self.json_response(error.payload(self))
+
+        data = {
+            'content': payload,
+            'navigation': self.get_navigation()}
+        notifications =  self.get_notifications()
+        if notifications is not None:
+            data['notifications'] = notifications
+        resources = get_resources(self.request)
+        if resources is not None:
+            data['html_resources'] = resources
+        return self.json_response(data)
+
+    POST = GET
+
+
+class PageREST(ActionREST):
     grok.baseclass()
     grok.implements(IUIScreen)
     grok.require('silva.ReadSilvaContent')
@@ -131,23 +158,18 @@ class PageREST(UIREST):
             content = aq_parent(content)
 
         parents.reverse()
-        return {'selected': identifier(self.context.get_container()),
-                'parents': parents,
-                'invalidation':
-                    NavigationSynchronizer(self.request).get_changes()}
+        navigation = {'current': parents}
+        navigation.update(super(PageREST, self).get_navigation())
+        return navigation
 
     def get_metadata_menu(self, menu):
         return {'ifaces': ['menu'],
                 'entries': menu.get_entries(self.context).describe(self)}
 
-    def GET(self):
-        try:
-            payload = self.payload()
-        except PageException as error:
-            return self.json_response(error.payload(self))
-
+    def get_payload(self):
+        screen = self.payload()
         metadata = {
-            'ifaces': ['metadata'],
+            'ifaces': screen.get('ifaces', []),
             'title': {
                 'ifaces': ['title'],
                 'title': self.context.get_title_or_id(),
@@ -160,23 +182,11 @@ class PageREST(UIREST):
                 },
             'path': self.get_content_path(self.context),
             }
-        payload['metadata'] = metadata
-
-        data = {
-            'ifaces': ['content'],
-            'content': payload,
-            'navigation': self.get_navigation()}
-        notifications =  self.get_notifications()
-        if notifications is not None:
-            data['notifications'] = notifications
-        resources = get_resources(self.request)
-        if resources is not None:
-            data['html_resources'] = resources
         if not IRoot.providedBy(self.context):
             metadata['up'] = self.get_content_path(aq_parent(self.context))
-        return self.json_response(data)
-
-    POST = GET
+        return {'ifaces': ['screen'],
+                'metadata': metadata,
+                'screen': screen}
 
 
 class PageWithTemplateREST(PageREST):
@@ -232,11 +242,15 @@ class NavigationSynchronizer(object):
         return []
 
 
-@grok.subscribe(ISilvaObject, IObjectAddedEvent)
+@grok.subscribe(ISilvaObject, IObjectMovedEvent)
 def register_add(target, event):
     if event.object != target:
         return
     if not IContainer.providedBy(target):
+        return
+    if event.newParent is None:
+        return
+    if event.oldParent is event.newParent:
         return
 
     service = getUtility(IIntIds)
@@ -251,15 +265,15 @@ def register_add(target, event):
                              'position': -1}})
 
 
-# TODO: add ContentPositionChangedEvent handler
-
-# don't use zope.lifecycleevent.IObjectRemovedEvent because the object
-# as no more int id
-@grok.subscribe(ISilvaObject, IObjectWillBeRemovedEvent)
+@grok.subscribe(ISilvaObject, IObjectWillBeMovedEvent)
 def register_remove(target, event):
     if event.object != target:
         return
     if not IContainer.providedBy(target):
+        return
+    if event.oldParent is None:
+        return
+    if event.newParent is event.oldParent:
         return
 
     service = getUtility(IIntIds)

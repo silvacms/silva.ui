@@ -8,9 +8,9 @@ from infrae import rest
 from megrok.chameleon.components import ChameleonPageTemplate
 from zope.component import getUtility
 from zope.intid.interfaces import IIntIds
-from zope.lifecycleevent.interfaces import IObjectAddedEvent
 from zope.lifecycleevent.interfaces import IObjectModifiedEvent
-from OFS.interfaces import IObjectWillBeRemovedEvent
+from zope.lifecycleevent.interfaces import IObjectMovedEvent
+from OFS.interfaces import IObjectWillBeMovedEvent
 
 from silva.core.cache.memcacheutils import MemcacheSlice
 from silva.core.interfaces import IPublishable, INonPublishable
@@ -22,6 +22,7 @@ from silva.core.views.interfaces import IVirtualSite
 from silva.translations import translate as _
 from silva.ui.icon import get_icon
 from silva.ui.rest.base import UIREST
+from silva.ui.rest.base import ActionREST
 
 from AccessControl import getSecurityManager
 from Acquisition import aq_parent
@@ -373,7 +374,7 @@ class ContentSerializer(object):
         return data
 
 
-class ActionREST(UIREST):
+class FolderActionREST(ActionREST):
     """Base class for REST-based listing actions.
     """
     grok.baseclass()
@@ -407,7 +408,7 @@ class ActionREST(UIREST):
     def payload(self):
         raise NotImplementedError
 
-    def POST(self):
+    def get_payload(self):
         data = self.payload()
 
         serializer = ContentSerializer(self, self.request)
@@ -442,10 +443,7 @@ class ActionREST(UIREST):
             else:
                 data['add']['assets'] = added_nonpublishables
         print data
-        return self.json_response({
-                'ifaces': ['actionresult'],
-                'post_actions': data,
-                'notifications': self.get_notifications()})
+        return {'ifaces': ['action'], 'actions': data}
 
 
 class ContentCounter(object):
@@ -539,6 +537,7 @@ class ListingSynchronizer(object):
 def register_change(target, event, action):
     service = getUtility(IIntIds)
     container = aq_parent(target)
+    print '%s: %s' % (action, '/'.join(target.getPhysicalPath()))
     data = {
         'action': action,
         'listing': 'publishables' if IPublishable.providedBy(target) else 'assets',
@@ -557,19 +556,25 @@ def register_version_update(target, event):
     register_change(target.get_content(), event, 'update')
 
 
-@grok.subscribe(ISilvaObject, IObjectAddedEvent)
-def register_add(target, event):
+@grok.subscribe(ISilvaObject, IObjectMovedEvent)
+def register_move(target, event):
     if event.object != target:
         return
-    register_change(target, event, 'add')
+    if event.newParent is not None:
+        # That was not a delete
+        if event.oldParent is event.newParent:
+            # This was a rename.
+            register_change(target, event, 'update')
+        else:
+            # This was an add.
+            register_change(target, event, 'add')
 
 
-# TODO: add ContentPositionChangedEvent handler
-
-# don't use zope.lifecycleevent.IObjectRemovedEvent because the object
-# as no more int id
-@grok.subscribe(ISilvaObject, IObjectWillBeRemovedEvent)
+@grok.subscribe(ISilvaObject, IObjectWillBeMovedEvent)
 def register_remove(target, event):
     if event.object != target:
         return
-    register_change(target, event, 'remove')
+    if event.oldParent is not None:
+        if event.newParent is not event.oldParent:
+            # That was a move or a delete, but not a rename
+            register_change(target, event, 'remove')

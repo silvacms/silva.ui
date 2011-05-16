@@ -1,6 +1,72 @@
 
 (function($, infrae) {
 
+    // Generic views.
+
+    infrae.views.view({
+        iface: 'preview',
+        name: 'content',
+        factory: function($content, data, smi) {
+            return {
+                data_template: true,
+                iframe: true,
+                nocache: true,
+                cleanup: function() {
+                    $content.empty();
+                }
+            };
+        }
+    });
+
+
+    infrae.views.view({
+        iface: 'redirect',
+        factory: function($content, data, smi) {
+            return {
+                render: function() {
+                    smi.open_screen(data.path, data.tab);
+                }
+            };
+        }
+    });
+
+    infrae.views.view({
+        iface: 'view',
+        factory: function($content, data, smi) {
+            return {
+                render: function() {
+                    window.open(data.url);
+                }
+            };
+        }
+    });
+
+    infrae.views.view({
+        iface: 'message',
+        factory: function($content, data, smi) {
+            return {
+                render: function() {
+                    var message = $('<div></div>');
+
+                    if (data.title) {
+                        message.attr('title', data.title);
+                    };
+                    message.html(data.message);
+                    message.dialog({
+                        modal: true,
+                        buttons: {
+                            Ok: function() {
+                                $(this).dialog('close');
+                            }
+                        }
+                    });
+                }
+            };
+        }
+    });
+
+    // Header views.
+
     infrae.views.view({
         iface: 'title',
         factory: function($content, data) {
@@ -97,25 +163,24 @@
         factory: function($content, data, smi, url, view) {
             return {
                 render: function() {
-                    var metadata = data.metadata;
                     var $metadata = $content.children('.metadata');
                     var $parent = $content.find('a.parent');
 
                     // Update header
-                    $metadata.children('h2').render({data: metadata.title});
+                    $metadata.children('h2').render({data: data.title});
                     $metadata.children('.content-tabs').render(
-                        {data: metadata.menu.content, args: [true]});
+                        {data: data.menu.content, args: [true]});
                     $metadata.find('.view-actions ol').render(
-                        {data: metadata.menu.view});
+                        {data: data.menu.view});
                     $content.children('.toolbar').render(
                         {data: data, name: 'toolbar', args: [smi, view]});
 
                     // Update content link hidden link
-                    $metadata.children('#content-url').attr('href', url.expand({path: metadata.path}));
+                    $metadata.children('#content-url').attr('href', url.expand({path: data.path}));
 
                     // Update parent link
-                    if (metadata.up != null) {
-                        $parent.attr('href', metadata.up ||'/');
+                    if (data.up != null) {
+                        $parent.attr('href', data.up ||'/');
                         $parent.attr('rel', smi.opened.tab);
                         $parent.removeClass('ui-state-disabled');
                         $parent.addClass('ui-state-default');
@@ -134,7 +199,7 @@
         factory: function($content, data) {
             return {
                 render: function() {
-                    var actions = data.metadata.menu.actions;
+                    var actions = data.menu.actions;
 
                     if (actions && actions.entries.length) {
                         $content.html('<div class="actions content-actions"><ol></ol></div>');
@@ -148,49 +213,6 @@
             };
         }
     });
-
-    infrae.views.view({
-        iface: 'preview',
-        name: 'content',
-        factory: function($content, data) {
-            return {
-                data_template: true,
-                iframe: true,
-                nocache: true,
-                cleanup: function() {
-                    $content.empty();
-                }
-            };
-        }
-    });
-
-    /**
-     * Folder navigation tree using JSTree plugin.
-     */
-    $.fn.SMIWorkspace = function(smi, options) {
-        var $workspace = $(this);
-        var url = jsontemplate.Template(options.url, {});
-        var $header = $workspace.children('.header');
-        var $content = $workspace.children('.content');
-
-        // Disable text selection in metadata
-        infrae.ui.selection.disable($header.children('.metadata'));
-
-        // New workspace is loaded
-        $workspace.bind('content-smi', function (event, data) {
-            // Update content area
-            $content.render({
-                data: data.content,
-                name: 'content',
-                args: [smi]
-            }).done(function() {
-                $header.render({
-                    data: data.content,
-                    name: 'header',
-                    args: [smi, url, this]});
-            });
-        });
-    };
 
 })(jQuery, infrae);
 

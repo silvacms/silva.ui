@@ -43,180 +43,101 @@
 (function($, infrae) {
     var HASH_REGEXP = /#([^!]*)!?(.*)/;
 
-    infrae.views.view({
-        iface: 'redirect',
-        factory: function($content, data, smi) {
-            return {
-                render: function() {
-                    smi.open_screen(data.path, data.tab);
-                }
-            };
-        }
-    });
-
-    infrae.views.view({
-        iface: 'view',
-        factory: function($content, data) {
-            return {
-                render: function() {
-                    window.open(data.url);
-                }
-            };
-        }
-    });
-
-    infrae.views.view({
-        iface: 'message',
-        factory: function($content, data) {
-            return {
-                render: function() {
-                    var message = $('<div></div>');
-
-                    if (data.title) {
-                        message.attr('title', data.title);
-                    };
-                    message.html(data.message);
-                    message.dialog({
-                        modal: true,
-                        buttons: {
-                            Ok: function() {
-                                $(this).dialog('close');
-                            }
-                        }
-                    });
-                }
-            };
-        }
-    });
-
-    infrae.views.view({
-        iface: 'content',
-        factory: function($content, data, smi) {
-            return {
-                render: function() {
-                    smi.notifications.mark_as_seen();
-                    smi._.workspace.trigger('content-smi', data);
-                    smi._.navigation.trigger('content-smi', data);
-                    if (data.notifications) {
-                        smi.notifications.notifies(data.notifications);
-                    };
-                }
-            };
-        }
-    });
-
-    // Error handler used by AJAX requests. Build a message and render it.
-    var error_handler = function(request) {
-        // 'this' should be 'smi'.
-        var data = this.options.errors[request.status];
-        if (!data) {
-            data = this.options.errors[500];
-        };
-        $(document).render({data: data, args: [this]});
-    };
-
-    /**
-     * Notification implement a notification.
-     * @param container: container to insert notification.
-     * @param messags: message used to render the notification.
-     */
-    var Notification = function(container, message) {
-        var notification = $('<div class="notification"></div>');
-        var timer = null;
-
-        if (typeof(message.title) == 'string') {
-            notification.prepend('<h3>' + message.title + '</h3>');
-        };
-        if (typeof(message.category) == 'string') {
-            notification.addClass(message.category);
-            switch (message.category) {
-            case 'error':
-                notification.append('<ins class="ui-icon ui-icon-alert" />');
-                break;
-            };
-        };
-        if (typeof(message.message) == 'string') {
-            notification.append('<p>' + message.message + '</p>');
-        };
-
-        // Bind the close event
-        notification.bind('close-sminotification', function() {
-            // Disable timeout if dialog is closed
-            if (timer !== null) {
-                clearTimeout(timer);
-                timer = null;
-            };
-            notification.animate({ height:0, opacity:0 }, 'slow', function() {
-                notification.remove();
-                if (!container.children().length) {
-                    container.hide();
-                }
-            });
-        });
-
-        // Close and autoclose
-        notification.bind('click', function() {
-            notification.trigger('close-sminotification');
-        });
-        if(typeof message.autoclose == 'number') {
-            timer = setTimeout(function() {
-                notification.trigger('close-sminotification');
-            }, message.autoclose);
-        };
-
-        container.append(notification);
-        if (!container.is(':visible')) {
-            container.show();
-        };
-    };
 
     /**
      * NotificationManager manage notifications
      * @param options: configuration options.
      */
     var NotificationManager = function(options) {
-        this.$container = $(options.selector);
+        var $container = $(options.selector);
+        var manager = {
+            /**
+             * Notify of a new notification
+             * @param message: message.
+             */
+            notify: function(message) {
+                var $notification = $('<div class="notification"></div>');
+                var timer = null;
+
+                if (typeof(message.title) == 'string') {
+                    $notification.prepend('<h3>' + message.title + '</h3>');
+                };
+                if (typeof(message.category) == 'string') {
+                    $notification.addClass(message.category);
+                    switch (message.category) {
+                    case 'error':
+                        $notification.append('<ins class="ui-icon ui-icon-alert" />');
+                        break;
+                    };
+                };
+                if (typeof(message.message) == 'string') {
+                    $notification.append('<p>' + message.message + '</p>');
+                };
+
+                // Bind the close event
+                $notification.bind('close-sminotification', function() {
+                    // Disable timeout if dialog is closed
+                    if (timer !== null) {
+                        clearTimeout(timer);
+                        timer = null;
+                    };
+                    $notification.animate({ height:0, opacity:0 }, 'slow', function() {
+                        $notification.remove();
+                        if (!$container.children().length) {
+                            $container.hide();
+                        };
+                    });
+                });
+
+                // Close and autoclose
+                $notification.bind('click', function() {
+                    $notification.trigger('close-sminotification');
+                });
+                if (typeof message.autoclose == 'number') {
+                    timer = setTimeout(function() {
+                        $notification.trigger('close-sminotification');
+                    }, message.autoclose);
+                };
+
+                $container.append($notification);
+                if (!$container.is(':visible')) {
+                    $container.show();
+                };
+
+            },
+            /**
+             * Notify a list of new notifications
+             * @param messages: list of messages.
+             */
+            notifies: function(messages) {
+                infrae.utils.each(messages, manager.notify);
+            },
+            /**
+             * Mark all notifications as seen.
+             */
+            mark_as_seen : function() {
+                $container.children().trigger('close-sminotification');
+            }
+        };
 
         // Listen to pull notification events.
         $(document).bind('refresh-feedback-smi', function() {
             $.getJSON(options.url, function(messages) {
                 if (messages) {
-                    this.notifies(messages);
+                    manager.notifies(messages);
                 };
-            }.scope(this));
-        }.scope(this));
+            });
+        });
         // Display a notification
         $(document).bind('notify-feedback-smi', function(event, data) {
-            this.mark_as_seen(); // Clear old notification first.
+            manager.mark_as_seen(); // Clear old notification first.
             if (typeof(data) == "array") {
-                this.notifies(data);
+                manager.notifies(data);
             } else {
-                this.notify(data);
+                manager.notify(data);
             };
-        }.scope(this));
-    };
-
-    /**
-     * Notify of a new notification
-     * @param message: message.
-     */
-    NotificationManager.prototype.notify = function(message) {
-        new Notification(this.$container, message);
-    };
-
-    /**
-     * Notify a list of new notifications
-     * @param messages: list of messages.
-     */
-    NotificationManager.prototype.notifies = function(messages) {
-        infrae.utils.each(messages, this.notify.scope(this));
-    };
-
-    /**
-     * Mark all notifications as seen.
-     */
-    NotificationManager.prototype.mark_as_seen = function() {
-        this.$container.children().trigger('close-sminotification');
+        });
+        return manager;
     };
 
     /**
@@ -270,7 +191,7 @@
                 message: 'Cutted ' + count.toString() + ' content(s) in the clipboard.',
                 autoclose: 4000};
             if (!count) {
-              message['category'] = 'error';
+                message['category'] = 'error';
             };
             this.notifications.notify(message);
         };
@@ -313,175 +234,207 @@
     /**
      * SMI object.
      */
-    var SMI = function(options) {
-        var navigation = $(options.navigation.selector);
-        var workspace = $(options.workspace.selector);
+    $.fn.SMI = function(options) {
+        var smi = {
+            options: options,
+            opened: {path: '', screen: ''}, // Currently opened screen
+            opening: {path: '', screen: ''} // Screen being currently opened
+        };
 
-        this._ = {};
-        this._.screen_url = jsontemplate.Template(options.screen, {});
-        this._.action_url = jsontemplate.Template(options.action, {});
-        this._.workspace = workspace;
-        this._.navigation = navigation;
+        var $workspace = $(options.workspace.selector);
+        var $workspace_header = $workspace.children('.header');
+        var $workspace_content = $workspace.children('.content');
 
+        infrae.ui.selection.disable($workspace_header.children('.metadata'));
         if (options.theme && options.theme.background) {
             $('html').css('background-color', options.theme.background);
         };
 
-        this.opened = {path: '', screen: ''}; // Currently opened screen
-        this.opening = {path: '', screen: ''}; // Screen being currently opened
-        this.options = options;
-        this.notifications = new NotificationManager(options.notifications);
-        this.clipboard = new ClipBoard(this.notifications);
+        var screen_url = new jsontemplate.Template(options.screen, {});
+        var action_url = new jsontemplate.Template(options.action, {});
+        var content_url = new jsontemplate.Template(options.workspace.url, {});
 
-        navigation.SMINavigation(this, options.navigation);
-        workspace.SMIWorkspace(this, options.workspace);
+        var navigation = $(options.navigation.selector).SMINavigation(smi, options.navigation);
+        var notifications = NotificationManager(options.notifications);
+        smi.clipboard = new ClipBoard(notifications);
 
-        // By default, navigation is blue and workspace is focus
-        navigation.trigger('blur-smi');
-        workspace.trigger('focus-smi');
+        // Register the default content view.
+        infrae.views.view({
+            iface: 'screen',
+            factory: function($content, data, smi) {
+                return {
+                    render: function() {
+                        // Update content area
+                        $workspace_content.render({
+                            data: data.screen,
+                            name: 'content',
+                            args: [smi]
+                        }).done(function() {
+                            $workspace_header.render({
+                                data: data.metadata,
+                                name: 'header',
+                                args: [smi, content_url, this]});
+                        });
+                    }
+                };
+            }
+        });
 
-        var process_hash = function(hash) {
+        // Add utilities and screen open functions
+        $.extend(smi, {
+            /**
+             * Retrieve the language used by the SMI.
+             */
+            get_language: function() {
+                var lang = $('html').attr('lang');
+
+                if (!lang) {
+                    lang = 'en';
+                };
+                return lang;
+            },
+            /**
+             * Return a given screen URL.
+             */
+            get_screen_url: function(screen) {
+                if (!screen) {
+                    screen = smi.opened;
+                };
+                return screen_url.expand(screen);
+            },
+            /**
+             * Open a content tab for the content located on the given
+             * path. If tab is not provided, open the content tab.
+             *
+             * @param path: path to the content to open.
+             * @param tab: tab name to open on the content.
+             */
+            open_screen: function(path, screen) {
+                if (screen == undefined) {
+                    screen = smi.opened.screen;
+                };
+                document.location.hash = screen + '!' + path;
+            },
+            /**
+             * Open a content tab by reading the given link information.
+             * @param link: link containing information to open the content tab.
+             */
+            open_screen_from_link: function(link) {
+                var path = link.attr('href');
+
+                if (!path || path == "#") {
+                    path = smi.opened.path;
+                };
+                smi.open_screen(path, link.attr('rel'));
+            }
+        });
+        $(document).delegate('a.open-screen', 'click', function(event) {
+            smi.open_screen_from_link($(this));
+            return false;
+        });
+
+        // Add AJAX feature queries.
+        $.extend(smi, {
+            ajax: {
+                query: function(url, data) {
+                    var query = {};
+
+                    query['url'] = url;
+                    query['dataType'] = 'json';
+                    if (data) {
+                        query['type'] = 'POST';
+                        query['data'] = data;
+                    };
+                    return $.ajax(query).promise().pipe(
+                        function (payload) {
+                            // Default success handler.
+                            if (payload.navigation != undefined) {
+                                // Manage navigation.
+                                if (payload.navigation.invalidation != undefined)
+                                    navigation.invalidate(payload.navigation.invalidation);
+                                if (payload.navigation.current != undefined)
+                                    navigation.open(payload.navigation.current);
+                            };
+                            if (payload.notifications != undefined) {
+                                // Display any notification.
+                                notifications.mark_as_seen();
+                                notifications.notifies(payload.notifications);
+                            };
+                            // Return content attribute. Next handler will work on it.
+                            return payload.content;
+                        },
+                        function (request) {
+                            // Default error handler.
+                            var message = options.errors[request.status];
+                            if (!message) {
+                                message = options.errors[500];
+                            };
+                            return $(document).render({data: message, args: [smi]});
+                        });
+                },
+                /**
+                 * Send data to the server corresponding to the currently opened
+                 * tab.
+                 * @param data: dictionnary to be posted to the server.
+                 */
+                send_to_opened: function(data) {
+                    return smi.ajax.query(
+                        smi.get_screen_url(smi.opening),
+                        data).pipe(
+                            function (payload) {
+                                smi.opened = smi.opening;
+                                return $(document).render({data: payload, args: [smi]});
+                            });
+                }
+            },
+            /**
+             * Send an action, and process the result.
+             */
+            open_action_from_link: function(link) {
+                var action = link.attr('rel');
+                var path = link.attr('href');
+
+                if (!path) {
+                    path = smi.opened.path;
+                };
+                return smi.ajax.query(
+                    action_url.expand({path: path, action: action}),
+                    smi.opened).pipe(
+                        function (payload) {
+                            return $(document).render({data: payload, args: [smi]});
+                        });
+            }
+        });
+        $(document).delegate('a.open-action', 'click', function(event) {
+            smi.open_action_from_link($(this));
+            return false;
+        });
+
+        // Plugins initialization
+        $(document).trigger('load-smiplugins', smi);
+
+        // Bind the hash change used by open (effectively enable open).
+        var read_hash = function(hash) {
             var parts = HASH_REGEXP.exec(hash);
 
             if (parts) {
-                this.opening = {screen: parts[1], path: parts[2]};
+                smi.opening = {screen: parts[1], path: parts[2]};
             } else {
-                this.opening = {screen: '', path: ''};
+                smi.opening = {screen: '', path: ''};
             };
 
-            if (!this.opening.screen.length) {
-                this.opening.screen = 'content';
+            if (!smi.opening.screen.length) {
+                smi.opening.screen = 'content';
             };
-            this.send_to_screen();
-        }.scope(this);
-
-        // Bind the hash change used by open
+            smi.ajax.send_to_opened();
+        };
         $(window).hashchange(function(event, data) {
-            process_hash(data.after);
+            read_hash(data.after);
         });
 
-        // Bind event to open new tab
-        {
-            var open_link = this.open_screen_from_link.scope(this);
-            $(document).delegate('a.open-screen', 'click', function(event) {
-                open_link($(this));
-                return false;
-            });
-        };
-        // Bind action to open
-        {
-            var open_action = this.open_action_from_link.scope(this);
-            $(document).delegate('a.open-action', 'click', function(event) {
-                open_action($(this));
-                return false;
-            });
-        };
-
-        // Plugins initialization
-        $(document).trigger('load-smiplugins', this);
-
         // Open the current location.
-        process_hash(document.location.hash);
-    };
-
-    /**
-     * Open a content tab for the content located on the given
-     * path. If tab is not provided, open the content tab.
-     *
-     * @param path: path to the content to open.
-     * @param tab: tab name to open on the content.
-     */
-    SMI.prototype.open_screen = function(path, screen) {
-        if (screen == undefined) {
-            screen = this.opened.screen;
-        };
-        document.location.hash = screen + '!' + path;
-    };
-
-    /**
-     * Open a content tab by reading the given link information.
-     * @param link: link containing information to open the content tab.
-     */
-    SMI.prototype.open_screen_from_link = function(link) {
-        var path = link.attr('href');
-
-        if (!path || path == "#") {
-            path = this.opened.path;
-        };
-        this.open_screen(path, link.attr('rel'));
-    };
-
-    /**
-     * Return a given screen URL.
-     */
-    SMI.prototype.get_screen_url = function(screen) {
-        if (!screen) {
-            screen = this.opened;
-        };
-        return this._.screen_url.expand(screen);
-    };
-
-    /**
-     * Send data to the server corresponding to the currently opened
-     * tab.
-     * @param data: dictionnary to be posted to the server.
-     */
-    SMI.prototype.send_to_screen = function(data) {
-        var query = {};
-
-        query['url'] = this.get_screen_url(this.opening);
-        query['dataType'] = 'json';
-        query['success'] = function(data) {
-            this.opened = this.opening;
-            $(document).render({data: data, args: [this]});
-        }.scope(this);
-        query['error'] = error_handler.scope(this);
-        if (data) {
-            query['type'] = 'POST';
-            query['data'] = data;
-        };
-        $.ajax(query);
-    };
-
-    /**
-     * Send an action, and process the result.
-     */
-    SMI.prototype.open_action_from_link = function(link) {
-        var query = {};
-        var action = link.attr('rel');
-        var path = link.attr('href');
-
-        if (!path) {
-            path = this.opened.path;
-        };
-        query['url'] = this._.action_url.expand({path: path, action: action});
-        query['data'] = this.opened;
-        query['dataType'] = 'json';
-        query['type'] = 'POST';
-        query['success'] = function(data) {
-            $(document).render({data: data, args: [this]});
-        }.scope(this);
-        query['error'] = error_handler.scope(this);
-        $.ajax(query);
-    };
-
-    /**
-     * Retrieve the language used by the SMI.
-     */
-    SMI.prototype.get_language = function() {
-        var lang = $('html').attr('lang');
-
-        if (!lang) {
-            lang = 'en';
-        };
-        return lang;
-    };
-
-    /**
-     * JQuery SMI loader
-     */
-    $.fn.SMI = function(options) {
-        return new SMI(options);
+        read_hash(document.location.hash);
+        return smi;
     };
 
 })(jQuery, infrae);

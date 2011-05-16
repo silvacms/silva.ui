@@ -1,4 +1,4 @@
-(function($) {
+(function($, infrae) {
     /**
      * Folder navigation tree using JSTree plugin.
      */
@@ -38,7 +38,7 @@
                             open_node(left);
                         }
                     } else {
-                        $tree.jstree('select_node', parent_node);
+                        $tree.jstree('select_node', parent_node, true);
                     };
                     return true;
                 };
@@ -52,18 +52,18 @@
         var remove = function(info) {
             if (info.target === undefined)
                 return;
-            var node = $('#' + info.target, $tree);
-            if (node.length > 0) {
-                $tree.jstree('delete_node', node);
+            var $node = $('#' + info.target, $tree);
+            if ($node.length > 0) {
+                $tree.jstree('delete_node', $node);
             }
         };
 
         var add = function(info) {
             if (info.parent === undefined)
                 return;
-            var parent = $('#' + info.parent, $tree);
-            if (parent.length > 0) {
-                $tree.jstree('refresh', parent);
+            var $parent = $('#' + info.parent, $tree);
+            if ($parent.length > 0) {
+                $tree.jstree('refresh', $parent);
             }
         };
 
@@ -111,26 +111,30 @@
         infrae.ui.selection.disable($navigation);
 
         // Listen to smi.blur and focus to activate/disable shortcuts.
-        $navigation.bind('blur-smi', function() {
-            $tree.jstree('disable_hotkeys');
-        });
-        $navigation.bind('focus-smi', function() {
-            $tree.jstree('enable_hotkeys');
-        });
+        $tree.jstree('disable_hotkeys');
+        // $navigation.bind('blur-smi', function() {
+        //     $tree.jstree('disable_hotkeys');
+        // });
+        // $navigation.bind('focus-smi', function() {
+        //     $tree.jstree('enable_hotkeys');
+        // });
 
-        // If a content is loaded, try to select its container
-        $navigation.bind('content-smi', function (event, data) {
-            if (data.navigation.invalidation.length > 0) {
-                $.each(data.navigation.invalidation, function(index, datum){
-                    switch(datum['action']) {
+        return {
+            invalidate: function(data) {
+                if (data.length > 0) {
+                    infrae.utils.each(data, function(datum) {
+                        switch(datum['action']) {
                         case 'remove':
                             remove(datum['info']);
                         case 'add':
                             add(datum['info']);
-                    }
-                });
+                        }
+                    });
+                };
+            },
+            open: function(data) {
+                uncollapse(data);
             }
-            uncollapse(data.navigation.parents);
-        });
+        };
     };
-})(jQuery);
+})(jQuery, infrae);

@@ -396,7 +396,9 @@
                         } else {
                             data = $line.data('smilisting');
                         };
-                        $line.children().trigger('refreshcell-smilisting', data);
+                        $line.children().each(function() {
+                            $(this).triggerHandler('refreshcell-smilisting', data);
+                        });
                     },
                     input: function(names) {
                         var data = $line.data('smilisting');
@@ -537,9 +539,6 @@
                             clear: function() {
                                 smi.clipboard.clear();
                             }
-                        },
-                        notifies: function(messages) {
-                            smi.notifications.notifies(messages);
                         }
                     });
                     return transaction;
@@ -568,9 +567,12 @@
                             cutted: smi.clipboard.cutted,
                             copied: smi.clipboard.copied
                         },
+                        // Those are actions not data
                         get_transaction: new_listing_transaction,
-                        get_action_url: function(action) {
-                            return action_url_template.expand({path: smi.opened.path, action: action});
+                        query_server: function(action, data) {
+                            return smi.ajax.query(
+                                action_url_template.expand({path: smi.opened.path, action: action}),
+                                data);
                         }
                     };
                     return status;

@@ -59,28 +59,25 @@
     };
 
     infrae.views.view({
-        iface: ['actionresult'],
+        iface: ['action'],
         factory: function($content, data, transaction) {
             return {
                 render: function() {
-                    for (var post_action in data.post_actions) {
-                        switch(post_action) {
+                    for (var action in data.actions) {
+                        switch(action) {
                         case 'remove':
-                            transaction.listing.remove(data.post_actions.remove);
+                            transaction.listing.remove(data.actions.remove);
                             break;
                         case 'update':
-                            transaction.listing.update(data.post_actions.update);
+                            transaction.listing.update(data.actions.update);
                             break;
                         case 'add':
-                            transaction.listing.add(data.post_actions.add);
+                            transaction.listing.add(data.actions.add);
                             break;
                         case 'clear_clipboard':
                             transaction.clipboard.clear(true);
                             break;
                         };
-                    };
-                    if (data.notifications) {
-                        transaction.notifies(data.notifications);
                     };
                     transaction.commit();
                 }
@@ -162,15 +159,10 @@
                                             payload.push({name: 'values', value: count});
                                             break;
                                         }
-                                        $.ajax({
-                                            url: data.get_action_url(definition.action.rest.action),
-                                            type: 'POST',
-                                            dataType: 'json',
-                                            data: payload,
-                                            success: function(result) {
-                                                $content.render({data: result, args: [data.get_transaction()]});
-                                            }
-                                        });
+                                        data.query_server(definition.action.rest.action, payload).pipe(
+                                            function (result) {
+                                                return $content.render({data: result, args: [data.get_transaction()]});
+                                            });
                                     };
                                     break;
                                 case 'cut':
@@ -378,7 +370,6 @@
 
                         // Render filter
                         render_filter($content.find('.filter input'), listing);
-
                     },
                     cleanup: function() {
                         $content.unbind('actionrefresh-smilisting');

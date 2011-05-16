@@ -91,7 +91,7 @@
                             if (extra) {
                                 values = values.concat(extra);
                             };
-                            smi.send_to_screen(values);
+                            smi.ajax.send_to_opened(values);
                             return false;
                         };
                         var default_submit = function() {
