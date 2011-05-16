@@ -80,6 +80,9 @@
 
                 selection.each(function () {
                     var $item = $(this);
+                    if (!$item.is(':visible'))
+                        return;
+
                     var local_data = $item.data('smilisting');
 
                     for (var e=0; e < local_data.ifaces.length; e++) {

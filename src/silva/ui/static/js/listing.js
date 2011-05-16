@@ -509,12 +509,8 @@
                 });
                 // Then a content event is trigger, the context is the following object.
                 events.status.context(function() {
-                    var $items = $containers.children('tr.item:visible');
-                    var $selected = $items.filter('.selected');
-
-                    var status = {
+                    return {
                         content: data.content,
-                        length: $items.length,
                         selection: selection.data(),
                         clipboard: {
                             length: smi.clipboard.length(),
@@ -583,7 +579,6 @@
                                 data);
                         }
                     };
-                    return status;
                 });
 
                 var update_container_sizes = function() {
@@ -681,8 +676,10 @@
 
                         // Bind and update the listing column sizes
                         update_container_sizes();
+                        // Then collpasing change, update column sizes, and trigger a new status.
                         $content.bind('collapsingchange-smilisting', function() {
                             update_container_sizes();
+                            events.status.invoke();
                         });
 
                         // Render footer
