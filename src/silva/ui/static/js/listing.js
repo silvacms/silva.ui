@@ -195,7 +195,7 @@
     /**
      * Render/bind the user selection process to the given listing container.
      */
-    var render_container_selection = function($container, selector) {
+    var render_container_selection = function($container, selector, mover) {
         // Row selection
         var last_selected_index = null;
         var $hovered_row = null;
@@ -262,50 +262,34 @@
             select_row($(this), event.shiftKey);
         });
 
-        if (false && configuration.sortable) {
-            if (true) {
-                //var action_url_template = new jsontemplate.Template(smi.options.listing.action, {});
+        var $table = $container.find('table');
 
-                //if (objects_match([listing.data.content], configuration.sortable.available)) {
-                var $table = $container.find('table');
+        // Add the sorting if the table is sortable
+        $table.tableDnD({
+            dragHandle: "moveable",
+            onDragClass: "dragging",
+            onAllowDrop: function(row, candidate){
+                // don't drop on the first row, it is default.
+                return $(candidate).index() != 0;
+            },
+            onDragStart: function(table, row) {
+                // Reset hover style and mouse last_selected_index
+                last_selected_index = null;
+                $(table).removeClass('static');
+            },
+            onDrop: function(table, row) {
+                var $line = $(row);
+                var data = $line.data('smilisting');
+                mover([{name: 'content', value: data['id']},
+                       {name: 'position', value: $line.index() - 1}]);
 
-                // Add the sorting if the table is sortable
-                $table.tableDnD({
-                    dragHandle: "moveable",
-                    onDragClass: "dragging",
-                    onDragStart: function(table, row) {
-                        // Reset hover style and mouse last_selected_index
-                        last_selected_index = null;
-                        $(table).removeClass('static');
-                    },
-                    onDrop: function(table, row) {
-                        var $line = $(row);
-                        var data = $line.data('smilisting');
-
-                        $.ajax({
-                            url: action_url_template.expand({
-                                path: listing.smi.opened.path,
-                                action: configuration.sortable.action}),
-                            type: 'POST',
-                            dataType: 'json',
-                            data: [{name: 'content', value: data['id']},
-                                   {name: 'position', value: $line.index() - 1}],
-                            success: function(data) {
-                                if (data.notifications) {
-                                    listing.smi.notifications.notifies(data.notifications);
-                                };
-                            }
-                        });
-
-                        $(table).addClass('static');
-                    }
-                });
-                // If content change, reinitialize the DND
-                $container.bind('containerchange-smilisting', function() {
-                    $table.tableDnDUpdate();
-                });
-            };
-        };
+                $(table).addClass('static');
+            }
+        });
+        // If content change, reinitialize the DND
+        $container.bind('containerchange-smilisting', function() {
+            $table.tableDnDUpdate();
+        });
     };
 
 
@@ -336,14 +320,14 @@
         var configuration = data.configuration;
         var action_url_template = new jsontemplate.Template(smi.options.listing.action, {});
 
-        var create_container = function(name, configuration, lines, selector) {
+        var create_container = function(name, configuration, lines, selector, mover) {
             var $content = $('dd.' + name);
             var $header = $('dt.' + name);
             var $container = $content.find('tbody');
 
             // Collapse feature / table header.
             render_container_header($header, $content, configuration);
-            render_container_selection($content, selector);
+            render_container_selection($content, selector, mover);
 
             var render_line = function(data) {
                 // Add a data line to the table
@@ -488,62 +472,6 @@
                     return $([]);
                 };
 
-                var new_listing_transaction = function() {
-                    var transaction = new_transaction();
-
-                    $.extend(transaction, {
-                        listing: {
-                            add: function(data, select) {
-                                var added = [];
-
-                                for (var name in by_name) {
-                                    var lines = data[name];
-
-                                    if (lines && lines.length) {
-                                        $.merge(added, by_name[name].add(lines));
-                                    };
-                                };
-                                if (added.length) {
-                                    selection.select($(added));
-                                    transaction.require(events.content.invoke);
-                                    transaction.require(events.status.invoke);
-                                };
-                            },
-                            update: function(lines) {
-                                if (lines.length) {
-                                    infrae.utils.each(lines, function(line) {
-                                        get_line(line['id']).data('smilisting-line').update(line);
-                                    });
-                                    transaction.require(events.status.invoke);
-                                };
-                            },
-                            remove: function(ids) {
-                                var $lines = get_lines(ids);
-
-                                if ($lines.length) {
-                                    selection.remove($lines);
-                                    transaction.require(events.content.invoke);
-                                    transaction.require(events.status.invoke);
-                                };
-                            }
-                        },
-                        clipboard: {
-                            cut: function(data) {
-                                smi.clipboard.cut(data);
-                                transaction.require(events.status.invoke);
-                            },
-                            copy: function(data) {
-                                smi.clipboard.copy(data);
-                                transaction.require(events.status.invoke);
-                            },
-                            clear: function() {
-                                smi.clipboard.clear();
-                            }
-                        }
-                    });
-                    return transaction;
-                };
-
                 // Then a content event is trigger, the context is the following object.
                 events.content.context(function() {
                     var info = {};
@@ -568,7 +496,61 @@
                             copied: smi.clipboard.copied
                         },
                         // Those are actions not data
-                        get_transaction: new_listing_transaction,
+                        get_transaction: function() {
+                            var transaction = new_transaction();
+
+                            $.extend(transaction, {
+                                listing: {
+                                    add: function(data, select) {
+                                        var added = [];
+
+                                        for (var name in by_name) {
+                                            var lines = data[name];
+
+                                            if (lines && lines.length) {
+                                                $.merge(added, by_name[name].add(lines));
+                                            };
+                                        };
+                                        if (added.length) {
+                                            selection.select($(added));
+                                            transaction.require(events.content.invoke);
+                                            transaction.require(events.status.invoke);
+                                        };
+                                    },
+                                    update: function(lines) {
+                                        if (lines.length) {
+                                            infrae.utils.each(lines, function(line) {
+                                                get_line(line['id']).data('smilisting-line').update(line);
+                                            });
+                                            transaction.require(events.status.invoke);
+                                        };
+                                    },
+                                    remove: function(ids) {
+                                        var $lines = get_lines(ids);
+
+                                        if ($lines.length) {
+                                            selection.remove($lines);
+                                            transaction.require(events.content.invoke);
+                                            transaction.require(events.status.invoke);
+                                        };
+                                    }
+                                },
+                                clipboard: {
+                                    cut: function(data) {
+                                        smi.clipboard.cut(data);
+                                        transaction.require(events.status.invoke);
+                                    },
+                                    copy: function(data) {
+                                        smi.clipboard.copy(data);
+                                        transaction.require(events.status.invoke);
+                                    },
+                                    clear: function() {
+                                        smi.clipboard.clear();
+                                    }
+                                }
+                            });
+                            return transaction;
+                        },
                         query_server: function(action, data) {
                             return smi.ajax.query(
                                 action_url_template.expand({path: smi.opened.path, action: action}),
@@ -661,6 +643,11 @@
                                     if (selection.toggle($items)) {
                                         events.status.invoke();
                                     };
+                                },
+                                function (data) {
+                                    return smi.ajax.query(
+                                        action_url_template.expand({path: smi.opened.path, action: configuration.sortable.action}),
+                                        data);
                                 });
                             $containers = $containers.add(container.$container);
                             by_name[configuration.name] = container;

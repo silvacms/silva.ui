@@ -256,6 +256,7 @@
 
         var navigation = $(options.navigation.selector).SMINavigation(smi, options.navigation);
         var notifications = NotificationManager(options.notifications);
+        var resources = infrae.views.HTMLResourceManager();
         smi.clipboard = new ClipBoard(notifications);
 
         // Register the default content view.
@@ -347,6 +348,15 @@
                     };
                     return $.ajax(query).promise().pipe(
                         function (payload) {
+                            // Resources
+                            if (payload.resources != undefined) {
+                                if (payload.resources.js) {
+                                    infrae.utils.each(payload.resources.js, resources.load_js);
+                                };
+                                if (payload.resources.css) {
+                                    infrae.utils.each(payload.resources.css, resources.load_css);
+                                };
+                            };
                             // Default success handler.
                             if (payload.navigation != undefined) {
                                 // Manage navigation.
@@ -361,7 +371,7 @@
                                 notifications.notifies(payload.notifications);
                             };
                             // Return content attribute. Next handler will work on it.
-                            return payload.content;
+                            return payload.content || {};
                         },
                         function (request) {
                             // Default error handler.

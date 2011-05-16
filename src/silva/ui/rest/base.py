@@ -132,7 +132,7 @@ class ActionREST(UIREST):
             data['notifications'] = notifications
         resources = get_resources(self.request)
         if resources is not None:
-            data['html_resources'] = resources
+            data['resources'] = resources
         return self.json_response(data)
 
     POST = GET

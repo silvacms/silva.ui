@@ -13,16 +13,16 @@ from zope.lifecycleevent.interfaces import IObjectMovedEvent
 from OFS.interfaces import IObjectWillBeMovedEvent
 
 from silva.core.cache.memcacheutils import MemcacheSlice
-from silva.core.interfaces import IPublishable, INonPublishable
 from silva.core.interfaces import IContainer, ISilvaObject
+from silva.core.interfaces import IPublishable, INonPublishable
 from silva.core.interfaces import IVersion, IVersionedContent
 from silva.core.messages.interfaces import IMessageService
 from silva.core.services.utils import walk_silva_tree
 from silva.core.views.interfaces import IVirtualSite
 from silva.translations import translate as _
 from silva.ui.icon import get_icon
-from silva.ui.rest.base import UIREST
 from silva.ui.rest.base import ActionREST
+from silva.ui.rest.base import UIREST
 
 from AccessControl import getSecurityManager
 from Acquisition import aq_parent

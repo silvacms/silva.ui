@@ -1,91 +1,89 @@
 
 (function (infrae, $) {
-    var module = {};
+    var module = {
+        /**
+         * HTMLResourceManager, load extra JS or CSS at run time.
+         */
+        HTMLResourceManager: function() {
+            var data = {
+                css: [],
+                js: []
+            };
+            var resources = {
+                /**
+                 * Return true if the given Javascript is already loaded.
+                 * @param script: url of the Javascript file.
+                 */
+                is_js_loaded: function(script) {
+                    return $.inArray(script, data.js) > -1;
+                },
+                /**
+                 * Return true if the given CSS is already loaded.
+                 * @param css: url of the CSS file.
+                 */
+                is_css_loaded: function(css) {
+                    return $.inArray(css, data.css) > -1;
+                },
+                /**
+                 * Load a given JS file.
+                 * @param script: url of the JS file.
+                 */
+                load_js: function(script) {
+                    console.log('load ', script);
+                    if (!resources.is_js_loaded(script)) {
+                        // We don't use jQuery here, as does strange things with scripts.
+                        var head = document.getElementsByTagName('head')[0];
+                        var script_tag = document.createElement('script');
 
-    /**
-     * HTMLResourceManager, load extra JS or CSS at run time.
-     */
-    var HTMLResourceManager = function() {
-        var data = {
-            css: [],
-            js: []
-        };
-        var resources = {
-            /**
-             * Return true if the given Javascript is already loaded.
-             * @param script: url of the Javascript file.
-             */
-            is_js_loaded: function(script) {
-                return $.inArray(script, data.js) > -1;
-            },
-            /**
-             * Return true if the given CSS is already loaded.
-             * @param css: url of the CSS file.
-             */
-            is_css_loaded: function(css) {
-                return $.inArray(css, data.css) > -1;
-            },
-            /**
-             * Load a given JS file.
-             * @param script: url of the JS file.
-             */
-            load_js: function(script) {
-                if (!resources.is_js_loaded(script)) {
-                    // We don't use jQuery here, as does strange things with scripts.
-                    var head = document.getElementsByTagName('head')[0];
-                    var script_tag = document.createElement('script');
+                        script_tag.type = 'text/javascript';
+                        script_tag.src = script;
+                        head.appendChild(script_tag);
 
-                    script_tag.type = 'text/javascript';
-                    script_tag.src = script;
-                    head.appendChild(script_tag);
-
-                    data.js.push(script);
-                };
-            },
-            /**
-             * Load a given CSS file.
-             * @param css: url of the CSS file.
-             */
-            load_css: function(css) {
-                if (!resources.is_css_loaded(css)) {
-                    // We don't use jQuery here, as does strange things with links.
-                    var head = document.getElementsByTagName('head')[0];
-                    var link_tag = document.createElement('link');
-
-                    link_tag.rel = 'stylesheet';
-                    link_tag.type = 'text/css';
-                    link_tag.href = css;
-                    head.appendChild(link_tag);
-
-                    data.css.push(css);
-                };
-            }
-        };
-
-        $(document).ready(function() {
-            $('script').each(function () {
-                var src = $(this).attr('src');
-
-                if (src != undefined && ! resources.is_js_loaded(src)) {
-                    data.js.push(src);
-                };
-            });
-            $('link').each(function () {
-                var $link = $(this);
-
-                if ($link.attr('rel') == 'stylesheet' && $link.attr('type') == 'text/css') {
-                    var src = $link.attr('href');
-                    if (src != undefined && !resources.is_css_loaded(src)) {
-                        data.css.push(src);
+                        data.js.push(script);
                     };
-                };
-            });
-        });
-        return resources;
-    };
+                },
+                /**
+                 * Load a given CSS file.
+                 * @param css: url of the CSS file.
+                 */
+                load_css: function(css) {
+                    if (!resources.is_css_loaded(css)) {
+                        // We don't use jQuery here, as does strange things with links.
+                        var head = document.getElementsByTagName('head')[0];
+                        var link_tag = document.createElement('link');
 
-    // Manage resources used by views.
-    var resource_manager = HTMLResourceManager();
+                        link_tag.rel = 'stylesheet';
+                        link_tag.type = 'text/css';
+                        link_tag.href = css;
+                        head.appendChild(link_tag);
+
+                        data.css.push(css);
+                    };
+                }
+            };
+
+            $(document).ready(function() {
+                $('script').each(function () {
+                    var src = $(this).attr('src');
+
+                    if (src != undefined && ! resources.is_js_loaded(src)) {
+                        data.js.push(src);
+                    };
+                });
+                $('link').each(function () {
+                    var $link = $(this);
+
+                    if ($link.attr('rel') == 'stylesheet' && $link.attr('type') == 'text/css') {
+                        var src = $link.attr('href');
+                        if (src != undefined && !resources.is_css_loaded(src)) {
+                            data.css.push(src);
+                        };
+                    };
+                });
+            });
+            return resources;
+        }
+    };
 
     // Template cache: mapping url or html to template instance or html
     var template_cache = {};
@@ -156,17 +154,6 @@
 
         // render the view: retrieve a template to render it and render it
         return function() {
-            // Resources
-            var resources = data.html_resources || view.html_resources;
-            if (resources) {
-                if (resources.js) {
-                    infrae.utils.each(resources.js, resource_manager.load_js);
-                };
-                if (resources.css) {
-                    infrae.utils.each(resources.css, resource_manager.load_css);
-                };
-            };
-
             // Remote JSON
             var jsont_url = view.data_template && data.jsont_url || view.jsont_url;
             if (jsont_url) {

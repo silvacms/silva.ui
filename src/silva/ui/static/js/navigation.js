@@ -126,8 +126,10 @@
                         switch(datum['action']) {
                         case 'remove':
                             remove(datum['info']);
+                            break;
                         case 'add':
                             add(datum['info']);
+                            break;
                         }
                     });
                 };
