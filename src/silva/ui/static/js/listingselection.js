@@ -92,6 +92,7 @@
                     };
                     data.push(local_data);
                 });
+
                 return {
                     ifaces: ifaces,
                     items: data,

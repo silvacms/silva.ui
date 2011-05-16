@@ -98,8 +98,8 @@
 
             var build_button = function(definition) {
                 var button = {
-                    order: definition.order
-                    //ifaces: definition.ifaces
+                    order: definition.order,
+                    ifaces: definition.ifaces
                 };
                 if (definition.title != null) {
                     button['factory'] = function($content, data) {

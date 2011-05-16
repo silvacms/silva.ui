@@ -509,7 +509,7 @@
                 });
                 // Then a content event is trigger, the context is the following object.
                 events.status.context(function() {
-                    return {
+                    var status = {
                         content: data.content,
                         selection: selection.data(),
                         clipboard: {
@@ -579,6 +579,9 @@
                                 data);
                         }
                     };
+                    // Interfaces of this content are the same as the clipboard.
+                    status['ifaces'] = status['selection']['ifaces'];
+                    return status;
                 });
 
                 var update_container_sizes = function() {

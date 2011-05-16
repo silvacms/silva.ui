@@ -29,7 +29,6 @@
                  * @param script: url of the JS file.
                  */
                 load_js: function(script) {
-                    console.log('load ', script);
                     if (!resources.is_js_loaded(script)) {
                         // We don't use jQuery here, as does strange things with scripts.
                         var head = document.getElementsByTagName('head')[0];
@@ -315,28 +314,24 @@
                     definition['__view_uid__'] = count.toString();
                     count += 1;
 
-                    var add = function(definition) {
+                    var add = function(definition, iface) {
                         if (!views[definition.name]) {
                             views[definition.name] = {};
                         };
-                        if (!views[definition.name][definition.iface]) {
-                            views[definition.name][definition.iface] = [];
+                        if (!views[definition.name][iface]) {
+                            views[definition.name][iface] = [];
                         };
-                        views[definition.name][definition.iface].unshift(definition);
+                        views[definition.name][iface].unshift(definition);
                     };
 
                     // Registration multiple or simple
                     if (definition.ifaces) {
-                        $.each(definition.ifaces, function(i, iface) {
-                            definition.iface = iface;
-                            add(definition);
+                        infrae.utils.each(definition.ifaces, function(iface) {
+                            add(definition, iface);
                         });
                     } else {
                         // Default
-                        if (definition.iface == undefined) {
-                            definition.iface = 'object';
-                        };
-                        add(definition);
+                        add(definition, definition.iface || 'object');
                     };
                 },
                 /**
