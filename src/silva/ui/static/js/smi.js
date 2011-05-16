@@ -348,8 +348,9 @@
                     };
                     return $.ajax(query).promise().pipe(
                         function (payload) {
-                            // Resources
+                            // Default success handler.
                             if (payload.resources != undefined) {
+                                // Resources
                                 if (payload.resources.js) {
                                     infrae.utils.each(payload.resources.js, resources.load_js);
                                 };
@@ -357,7 +358,6 @@
                                     infrae.utils.each(payload.resources.css, resources.load_css);
                                 };
                             };
-                            // Default success handler.
                             if (payload.navigation != undefined) {
                                 // Manage navigation.
                                 if (payload.navigation.invalidation != undefined)
@@ -370,8 +370,8 @@
                                 notifications.mark_as_seen();
                                 notifications.notifies(payload.notifications);
                             };
-                            // Return content attribute. Next handler will work on it.
-                            return payload.content || {};
+                            // Return content attribute if any. Next handler will work on it.
+                            return payload.content;
                         },
                         function (request) {
                             // Default error handler.

@@ -123,7 +123,8 @@ class ColumnsContainerListing(UIREST):
                                        'caption': self.translate(_(u"Access")),
                                        'require_iface': 'container'},
                                       ]},
-                            {'view': 'move'}],
+                            {'view': 'move',
+                             'name': 'moveable'}],
                      'sortable':
                          {'available': {'access': ['manage', 'publish', 'write']},
                           'action': 'order'},
@@ -371,6 +372,7 @@ class ContentSerializer(object):
             'access': self.get_access(content)}
         if IPublishable.providedBy(content):
             data['status'] = get_content_status(content)
+            data['moveable'] = not content.is_default()
         return data
 
 

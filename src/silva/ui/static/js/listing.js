@@ -38,9 +38,11 @@
         name: 'move',
         factory: function($content, data, smi, column, value) {
             return {
-                html: '...',
                 render: function() {
-                    $content.addClass('moveable');
+                    if (value) {
+                        $content.addClass('moveable');
+                        $content.html('...');
+                    };
                 }
             };
         }
@@ -263,6 +265,7 @@
         });
 
         var $table = $container.find('table');
+        var row_original_index = null;
 
         // Add the sorting if the table is sortable
         $table.tableDnD({
@@ -270,20 +273,43 @@
             onDragClass: "dragging",
             onAllowDrop: function(row, candidate){
                 // don't drop on the first row, it is default.
-                return $(candidate).index() != 0;
+                return $(candidate).data('smilisting').moveable != 0;
             },
-            onDragStart: function(table, row) {
-                // Reset hover style and mouse last_selected_index
+            onDragStart: function(table, cell) {
+                // Reset hover style and mouse last_selected_index. Save row index.
                 last_selected_index = null;
+                row_original_index = $(cell).parent('tr').index();
                 $(table).removeClass('static');
             },
             onDrop: function(table, row) {
                 var $line = $(row);
+                var $table = $(table);
+                var position = $line.index();
                 var data = $line.data('smilisting');
-                mover([{name: 'content', value: data['id']},
-                       {name: 'position', value: $line.index() - 1}]);
 
-                $(table).addClass('static');
+                if (position != row_original_index) {
+                    // The row moved.
+                    if (position > row_original_index)
+                        row_original_index -= 1; // Fix original index in case of failure.
+
+                    // If the first line is not moveable, reduce the index of 1.
+                    if (!$table.find('tbody tr.item:first').data('smilisting').moveable) {
+                        position -= 1;
+                    };
+                    mover([{name: 'content', value: data['id']},
+                           {name: 'position', value: position}]).pipe(function (success) {
+                               if (!success) {
+                                   // The moving failed. Restore the row position.
+                                   $line.detach();
+                                   $line.insertAfter(
+                                       $table.find('tbody tr.item:eq(' + row_original_index + ')'));
+                               };
+                               $table.addClass('static');
+                               return success;
+                           });
+                } else {
+                    $table.addClass('static');
+                };
             }
         });
         // If content change, reinitialize the DND
