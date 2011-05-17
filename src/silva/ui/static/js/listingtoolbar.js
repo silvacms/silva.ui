@@ -46,6 +46,11 @@
                     return data.clipboard.length >= predicates.clipboard_min_items;
                 });
                 break;
+            case 'input_mode':
+                conditions.push(function($content, data) {
+                    return data.input.status == predicates.input_mode;
+                });
+                break;
             };
         };
 
@@ -145,19 +150,6 @@
                                                     return {name: 'copied', value: item.id};
                                             }, payload);
                                             break;
-                                        case 'item_values':
-                                            if (!data.selection.input.is_running()) {
-                                                data.selection.input.begin();
-                                                return;
-                                            };
-                                            var count = 0;
-                                            infrae.utils.each(data.selection.input.finish(), function(item) {
-                                                for (var name in item)
-                                                    payload.push({name: 'values.' + count + '.' + name, value: item[name]});
-                                                count += 1;
-                                            });
-                                            payload.push({name: 'values', value: count});
-                                            break;
                                         }
                                         data.query_server(definition.action.rest.action, payload).pipe(
                                             function (result) {
@@ -176,6 +168,38 @@
                                     view['action'] = function () {
                                         var transaction = data.get_transaction();
                                         transaction.clipboard.copy(data.selection.items);
+                                        transaction.commit();
+                                    };
+                                    break;
+                                case 'input':
+                                    view['action'] = function() {
+                                        var save = $.Deferred();
+                                        var transaction = data.get_transaction();
+
+                                        save.done(function(values) {
+                                            var count = 0;
+                                            var payload = [];
+                                            infrae.utils.each(values, function(value) {
+                                                for (var name in value)
+                                                    payload.push({name: 'values.' + count + '.' + name, value: value[name]});
+                                                count += 1;
+                                            });
+                                            payload.push({name: 'values', value: count});
+                                            return data.query_server(
+                                                definition.action.input.action,
+                                                payload).pipe(
+                                                    function (result) {
+                                                        return $content.render({data: result, args: [transaction]});
+                                                    });
+                                        });
+                                        transaction.input.input(save);
+                                        transaction.commit();
+                                    };
+                                    break;
+                                case 'input_mode':
+                                    view['action'] = function() {
+                                        var transaction = data.get_transaction();
+                                        transaction.input.collect(definition.action.input_mode);
                                         transaction.commit();
                                     };
                                     break;
@@ -236,10 +260,14 @@
             return group;
         };
 
-        $.each(group_definitions, function(i, group_definition) {
-            var group = build_group(group_definition);
+        $.each(group_definitions, function(i, definition) {
+            var group = build_group(definition.actions);
+            var available = predicates_evaluator(definition.available);
 
             renderers.push(function($content, data) {
+                if (!available($content, data))
+                    return;
+
                 var $actions = $('<div class="actions"><ol></ol></div>');
 
                 infrae.ui.selection.disable($actions);

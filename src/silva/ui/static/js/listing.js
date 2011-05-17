@@ -509,9 +509,10 @@
                 });
                 // Then a content event is trigger, the context is the following object.
                 events.status.context(function() {
-                    var status = {
+                    var status = selection.status();
+
+                    $.extend(status, {
                         content: data.content,
-                        selection: selection.data(),
                         clipboard: {
                             length: smi.clipboard.length(),
                             cutted: smi.clipboard.cutted,
@@ -522,6 +523,16 @@
                             var transaction = new_transaction();
 
                             $.extend(transaction, {
+                                input: {
+                                    input: function(deferred) {
+                                        if (selection.input(deferred))
+                                            transaction.require(events.status.invoke);
+                                    },
+                                    collect: function(success) {
+                                        selection.collect(success);
+                                        transaction.require(events.status.invoke);
+                                    }
+                                },
                                 listing: {
                                     add: function(data, select) {
                                         var added = [];
@@ -578,9 +589,7 @@
                                 action_url_template.expand({path: smi.opened.path, action: action}),
                                 data);
                         }
-                    };
-                    // Interfaces of this content are the same as the clipboard.
-                    status['ifaces'] = status['selection']['ifaces'];
+                    });
                     return status;
                 });
 

@@ -3,7 +3,7 @@
 
     $.fn.SMISelection = function() {
         var selection = infrae.deferred.FluxCapacitor();
-        var collecting = false;
+        var collecting = null;
         var collection = infrae.deferred.FluxCapacitor();
 
         // Default behavior of a SMI Selection.
@@ -71,10 +71,49 @@
                 });
                 return changed;
             },
+            input: function(deferred) {
+                if (!collecting) {
+                    collecting = deferred;
+                    selection.events.push();
+                    selection.events.incoming(function() {
+                        collection.add(this);
+                    });
+                    selection.events.failing(
+                        selection.events.outgoing(function(){
+                            collection.remove(this, true);
+                        })
+                    );
+                    selection.events.outgoing(function() {
+                        $(this).data('smilisting-line').update();
+                    });
+                    return true;
+                };
+                return false;
+            },
+            collect: function(success) {
+                if (collecting) {
+                    var promise = collecting.promise();
+                    if (success) {
+                        var values = collection.map(function() {
+                            return $(this).data('smilisting-line').values(['identifier', 'title']);
+                        });
+                        selection.events.pop();
+                        collection.clear();
+                        collecting.resolve(values);
+                    } else {
+                        selection.events.pop();
+                        collection.clear(false);
+                        collecting.reject();
+                    };
+                    collecting = null;
+                    return promise;
+                };
+                return null;
+            },
             /**
              * Return data associated to selected items.
              */
-            data: function() {
+            status: function() {
                 var ifaces = [];
                 var data = [];
 
@@ -95,38 +134,12 @@
 
                 return {
                     ifaces: ifaces,
-                    items: data,
-                    length: data.length,
+                    selection: {
+                        length: data.length,
+                        items: data
+                    },
                     input: {
-                        is_running: function() {
-                            return collecting;
-                        },
-                        finish: function() {
-                            var values = collection.map(function() {
-                                return $(this).data('smilisting-line').values(['identifier', 'title']);
-                            });
-                            selection.events.pop();
-                            collection.clear();
-                            collecting = false;
-                            return values;
-                        },
-                        begin: function() {
-                            if (!collecting) {
-                                collecting = true;
-                                selection.events.push();
-                                selection.events.incoming(function() {
-                                    collection.add(this);
-                                });
-                                selection.events.failing(
-                                    selection.events.outgoing(function(){
-                                        collection.remove(this, true);
-                                    })
-                                );
-                                selection.events.outgoing(function() {
-                                    $(this).data('smilisting-line').update();
-                                });
-                            }
-                        }
+                        status: collecting != null
                     }
                 };
             }
