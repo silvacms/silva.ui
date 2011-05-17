@@ -460,7 +460,6 @@ class FolderActionREST(ActionREST):
                 data['add']['publishables'] = added_publishables
             else:
                 data['add']['assets'] = added_nonpublishables
-        print data
         return {'ifaces': ['action'], 'actions': data}
 
 
@@ -556,7 +555,6 @@ class ListingSynchronizer(object):
 def register_change(target, event, action):
     service = getUtility(IIntIds)
     container = aq_parent(target)
-    print '%s: %s' % (action, '/'.join(target.getPhysicalPath()))
     data = {
         'action': action,
         'listing': 'publishables' if IPublishable.providedBy(target) else 'assets',
