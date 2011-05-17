@@ -392,8 +392,11 @@
                         smi.get_screen_url(smi.opening),
                         data).pipe(
                             function (payload) {
-                                smi.opened = smi.opening;
-                                return $(document).render({data: payload, args: [smi]});
+                                if (payload != undefined) {
+                                    smi.opened = smi.opening;
+                                    return $(document).render({data: payload, args: [smi]});
+                                };
+                                return {};
                             });
                 }
             },
@@ -411,7 +414,10 @@
                     action_url.expand({path: path, action: action}),
                     smi.opened).pipe(
                         function (payload) {
-                            return $(document).render({data: payload, args: [smi]});
+                            if (payload != undefined) {
+                                return $(document).render({data: payload, args: [smi]});
+                            };
+                            return {};
                         });
             }
         });
