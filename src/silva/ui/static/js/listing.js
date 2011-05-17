@@ -64,7 +64,7 @@
                         var entry = column.menu[i];
 
                         if (entry.require_iface == undefined ||
-                            infrae.interfaces.isImplementedBy(entry.required_iface, data)){
+                            infrae.interfaces.isImplementedBy(entry.require_iface, data)){
                             $entries.append(
                                 '<li><a class="ui-state-default" href="' + data.path +
                                     '" rel="' + entry.screen + '"><span>' +
