@@ -518,9 +518,10 @@ class ListingSynchronizer(object):
     namespace = 'silva.listing.invalidation'
 
     def initialize_client(self, request):
+        # Set version inconditionally. (We are not interested about
+        # what happened before).
         storage = MemcacheSlice(self.namespace)
-        if self.get_client_version(request) is None:
-            self.set_client_version(request, storage.get_index())
+        self.set_client_version(request, storage.get_index())
 
     def get_path(self, request):
         return IVirtualSite(request).get_root().absolute_url_path()
