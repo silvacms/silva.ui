@@ -7,7 +7,9 @@
     $.extend(module, {
         /**
          * This is a simple list of callbacks callable multiple times.
-         * (unlike a deferred).
+         * (unlike a deferred). You can provide a default context
+         * factory to create the this object that will be used as this
+         * while calling the callbacks.
          */
         Callbacks: function(callbacks, context_provider) {
             if (!callbacks) {
@@ -42,6 +44,40 @@
                     while (index--) {
                         callbacks[index].apply(context, args);
                     };
+                }
+            };
+        },
+        /**
+         * This implement a list of callbacks, that is called one
+         * time, then a counter reach zero. You can increment and
+         * decrement that counter.
+         */
+        StackCallbacks: function() {
+            var value = 0;
+            var callbacks = [];
+
+            return {
+                use: function() {
+                    value += 1;
+                },
+                release: function() {
+                    if (value) {
+                        value -= 1;
+                        if (value)
+                            return;
+                    };
+                    // We reached Zero, invoke the callbacks.
+                    while (callbacks.length) {
+                        callbacks.pop()();
+                    };
+                },
+                call: function(callback) {
+                    // If we have a value, delay the
+                    // execution. Otherwise run it right away.
+                    if (value)
+                        callbacks.push(callback);
+                    else
+                        callback();
                 }
             };
         }

@@ -236,6 +236,7 @@
      */
     $.fn.SMI = function(options) {
         var smi = {
+            ready: infrae.deferred.StackCallbacks(),// Flag indicating if something is loading
             options: options,
             opened: {path: '', screen: ''}, // Currently opened screen
             opening: {path: '', screen: ''} // Screen being currently opened
@@ -388,6 +389,7 @@
                  * @param data: dictionnary to be posted to the server.
                  */
                 send_to_opened: function(data) {
+                    smi.ready.use();
                     return smi.ajax.query(
                         smi.get_screen_url(smi.opening),
                         data).pipe(
@@ -396,6 +398,10 @@
                                     smi.opened = smi.opening;
                                     return $(document).render({data: payload, args: [smi]});
                                 };
+                                return {};
+                            }).pipe(
+                            function () {
+                                smi.ready.release();
                                 return {};
                             });
                 }
@@ -410,6 +416,7 @@
                 if (!path) {
                     path = smi.opened.path;
                 };
+                smi.ready.use();
                 return smi.ajax.query(
                     action_url.expand({path: path, action: action}),
                     smi.opened).pipe(
@@ -418,7 +425,10 @@
                                 return $(document).render({data: payload, args: [smi]});
                             };
                             return {};
-                        });
+                        }).pipe(
+                            function () {
+                                smi.ready.release();
+                            });;
             }
         });
         $(document).delegate('a.open-action', 'click', function(event) {
