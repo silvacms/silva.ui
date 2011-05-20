@@ -115,16 +115,19 @@ class ExpendableMenuItem(MenuItem):
         return get_menu_items(self, self.content)
 
     def available(self):
-        return len(self.submenu) != 0
+        # We are available if we have sublevel menu or a screen.
+        return (len(self.submenu) != 0) or (IUIScreen.implementedBy(self.screen))
 
     def describe(self, page, path, actives):
         data = super(ExpendableMenuItem, self).describe(page, path, actives)
-        data['entries'] = entries = []
-        entry_path = self.identifier()
-        if path:
-            entry_path = '/'.join((path, entry_path))
-        for item in self.submenu:
-            if IMenuItem.providedBy(item):
-                item = item.describe(page, entry_path, actives)
-            entries.append(item)
+        if self.submenu:
+            # If we have a submenu, add it.
+            data['entries'] = entries = []
+            entry_path = self.identifier()
+            if path:
+                entry_path = '/'.join((path, entry_path))
+            for item in self.submenu:
+                if IMenuItem.providedBy(item):
+                    item = item.describe(page, entry_path, actives)
+                entries.append(item)
         return data
