@@ -347,7 +347,7 @@
                         query['type'] = 'POST';
                         query['data'] = data;
                     };
-                    return $.ajax(query).promise().pipe(
+                    return $.ajax(query).pipe(
                         function (payload) {
                             // Default success handler.
                             if (payload.resources != undefined) {
@@ -366,9 +366,9 @@
                                 if (payload.navigation.current != undefined)
                                     navigation.open(payload.navigation.current);
                             };
+                            notifications.mark_as_seen(); // Always clean old status
                             if (payload.notifications != undefined) {
                                 // Display any notification.
-                                notifications.mark_as_seen();
                                 notifications.notifies(payload.notifications);
                             };
                             // Return content attribute if any. Next handler will work on it.
@@ -460,6 +460,7 @@
 
         // Open the current location.
         read_hash(document.location.hash);
+
         return smi;
     };
 
