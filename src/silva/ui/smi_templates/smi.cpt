@@ -84,7 +84,7 @@
     </div>
     <script type="text/javascript">
       $(document).ready(function() {
-      smi = $('body').SMI({
+      window.smi = $('body').SMI({
           theme: {
             background: "${view.background}"
           },
