@@ -63,8 +63,10 @@
                     for (var i=0; i < column.menu.length; i++) {
                         var entry = column.menu[i];
 
-                        if (entry.require_iface == undefined ||
-                            infrae.interfaces.isImplementedBy(entry.require_iface, data)){
+                        if ((entry.item_implements == undefined ||
+                             infrae.interfaces.isImplementedBy(entry.item_implements, data)) &&
+                            (entry.item_match == undefined ||
+                             infrae.utils.match(entry.item_match, [data]))){
                             $entries.append(
                                 '<li><a class="ui-state-default" href="' + data.path +
                                     '" rel="' + entry.screen + '"><span>' +

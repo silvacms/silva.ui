@@ -33,7 +33,7 @@
          *        possible values that a data object must have in order to
          *        match.
          */
-        match: function(array, conditions) {
+        match: function(conditions, array) {
             var index = array.length;
 
             while (index--) {

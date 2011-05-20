@@ -13,7 +13,7 @@
             switch(predicate) {
             case 'content_match':
                 conditions.push(function($content, data) {
-                    return infrae.utils.match([data.content], predicates.content_match);
+                    return infrae.utils.match(predicates.content_match, [data.content]);
                 });
                 break;
             case 'items_implements':
@@ -28,7 +28,7 @@
                 break;
             case 'items_match':
                 conditions.push(function($content, data) {
-                    return infrae.utils.match(data.selection.items, predicates.items_match);
+                    return infrae.utils.match(predicates.items_match, data.selection.items);
                 });
                 break;
             case 'min_items':
