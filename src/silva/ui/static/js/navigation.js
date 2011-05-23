@@ -22,29 +22,25 @@
         };
 
         var uncollapse = function(parents) {
-            var last = parents.length - 1;
-
-            function open_node(remaining) {
+            function open_node_chain(remaining) {
                 var parent_node = $("#" + remaining[0]);
                 var left = remaining.slice(1);
                 if (parent_node.length > 0) {
                     if (left.length > 0) {
-                        if ($tree.jstree('is_closed', parent_node)) {
-                            $tree.jstree(
-                                'open_node',
-                                parent_node,
-                                function(){ open_node(left); });
-                        } else {
-                            open_node(left);
-                        }
+                        $tree.jstree('open_node',
+                            parent_node, function(){ open_node_chain(left); });
                     } else {
-                        $tree.jstree('select_node', parent_node, true);
+                        $tree.jstree('open_node',
+                            parent_node,
+                            function(){
+                                $tree.jstree('select_node', parent_node, true);
+                            });
                     };
                     return true;
                 };
                 return false;
             };
-            if (!open_node(parents)) {
+            if (!open_node_chain(parents)) {
                 $tree.jstree('deselect_all');
             };
         };
@@ -68,12 +64,7 @@
         };
 
         // Load the tree.
-        $tree.bind('loaded.jstree', function(){
-            var root = $('ul li', this).first();
-            if (root !== undefined){
-                $tree.jstree('open_node', root);
-            }
-        }).jstree({
+        $tree.jstree({
             ui: {
                 select_limit: 1
             },
