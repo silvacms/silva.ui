@@ -106,10 +106,13 @@
             // Clean content if needed (call cleanup callback)
             $content.triggerHandler('cleanup-infrae-views');
 
-            if (view.cleanup) {
+            if (view.cleanup || view.iframe) {
                 // Install new cleanup callback
                 $content.one('cleanup-infrae-views', function() {
-                    view.cleanup();
+                    if (view.cleanup)
+                        view.cleanup();
+                    if (view.iframe)
+                        $(window).unbind('resize.infrae-views-iframe');
                 });
             };
 
@@ -128,8 +131,13 @@
             if (view.iframe) {
                 var $iframe = $('<iframe src="">');
 
-                $iframe.height($content.height());
-                $iframe.width($content.width());
+                var resize = function() {
+                    $iframe.height($content.height());
+                    $iframe.width($content.width());
+                };
+                resize();
+                $(window).bind('resize.infrae-views-iframe', resize);
+
                 $content.html($iframe);
                 if (template) {
                     if (template.indexOf('<html') < 0 &&
