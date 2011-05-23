@@ -40,6 +40,8 @@
                         else
                             args = [value];
                     };
+                    if (!args)  // For IE 8
+                        args = [];
 
                     while (index--) {
                         callbacks[index].apply(context, args);
