@@ -55,12 +55,14 @@
         StackCallbacks: function() {
             var value = 0;
             var callbacks = [];
+            var last_args = undefined;
 
             return {
                 use: function() {
                     value += 1;
+                    last_args = undefined;
                 },
-                release: function() {
+                release: function(args) {
                     if (value) {
                         value -= 1;
                         if (value)
@@ -68,8 +70,9 @@
                     };
                     // We reached Zero, invoke the callbacks.
                     while (callbacks.length) {
-                        callbacks.pop()();
+                        callbacks.pop()(args);
                     };
+                    last_args = args;
                 },
                 call: function(callback) {
                     // If we have a value, delay the
@@ -77,7 +80,7 @@
                     if (value)
                         callbacks.push(callback);
                     else
-                        callback();
+                        callback(last_args);
                 }
             };
         }

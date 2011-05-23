@@ -93,13 +93,13 @@
      * @param element: DOM element on which the view will be rendered
      * @param data: data object used by the view to be rendered.
      */
-    var View = function($content, data, factory, args) {
+    var View = function($content, data, factory, args, reject) {
         var view = {
             $content: $content,
             data: data
         };
 
-        $.extend(view, factory.apply($content, [$content, data].concat(args)));
+        $.extend(view, factory.apply($content, args));
 
         // finish to render the view using the given template
         var render = function(template) {
@@ -118,7 +118,10 @@
             var finalizer = function() {
                 if (view.render != undefined)
                     view.render();
-                deferred.resolveWith(view);
+                if (reject != undefined)
+                    deferred.rejectWith(view, reject);
+                else
+                    deferred.resolveWith(view);
             };
 
             // Insert content and call render.
@@ -230,11 +233,14 @@
                 var named_views = views[options.name];
                 var to_render = null;
 
+                var args = [$content, data].concat(options.args);
+                var reject = options.reject;
+
                 if (named_views) {
                     for (var i=0; i < ifaces.length; i++) {
                         var definitions = named_views[ifaces[i]];
                         if (definitions && definitions.length) {
-                            to_render = View($content, data, definitions[0].factory, options.args);
+                            to_render = View($content, data, definitions[0].factory, args, reject);
                             break;
                         };
                     };
@@ -250,14 +256,19 @@
 
             // Render all possible views for a given JSON object (viewlet like)
             var render_all_views = function($content, data, options) {
-                var ifaces = options.ifaces || infrae.interfaces.implementedBy(data);
                 var named_views = views[options.name];
-                var seen_definitions = [];
-                var to_render = [];
 
                 if (named_views == undefined) {
                     return [];
                 };
+
+                var ifaces = options.ifaces || infrae.interfaces.implementedBy(data);
+                var seen_definitions = [];
+                var to_render = [];
+
+                var args = [$content, data].concat(options.args);
+                var reject = options.reject;
+
                 infrae.utils.each(ifaces, function (iface) {
                     var definitions = named_views[iface];
                     if (definitions) {
@@ -265,13 +276,13 @@
                             if ($.inArray(definition['__view_uid__'], seen_definitions) < 0) {
                                 seen_definitions.push(definition['__view_uid__']);
                                 if (definition['available'] != undefined) {
-                                    if (!definition['available'].apply(definition, [$content, data].concat(options.args))) {
+                                    if (!definition['available'].apply(definition, args)) {
                                         return;
                                     };
                                 };
                                 to_render.push([
                                     definition.order,
-                                    View($content, data, definition.factory, options.args)]);
+                                    View($content, data, definition.factory, args, reject)]);
                             };
                         });
                     };

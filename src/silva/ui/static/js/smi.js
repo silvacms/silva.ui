@@ -380,7 +380,7 @@
                             if (!message) {
                                 message = options.errors[500];
                             };
-                            return $(document).render({data: message, args: [smi]});
+                            return $(document).render({data: message, args: [smi], reject: [request]});
                         });
                 },
                 /**
@@ -394,16 +394,17 @@
                         smi.get_screen_url(smi.opening),
                         data).pipe(
                             function (payload) {
-                                if (payload != undefined) {
-                                    smi.opened = smi.opening;
-                                    return $(document).render({data: payload, args: [smi]});
-                                };
-                                return {};
+                                smi.opened = smi.opening;
+                                return $(document).render({data: payload, args: [smi]});
                             }).pipe(
-                            function () {
-                                smi.ready.release();
-                                return {};
-                            });
+                                function () {
+                                    smi.ready.release(200);
+                                    return {};
+                                },
+                                function (request) {
+                                    smi.ready.release(request.status);
+                                    return {};
+                                });
                 }
             },
             /**
@@ -421,14 +422,16 @@
                     action_url.expand({path: path, action: action}),
                     smi.opened).pipe(
                         function (payload) {
-                            if (payload != undefined) {
-                                return $(document).render({data: payload, args: [smi]});
-                            };
-                            return {};
+                            return $(document).render({data: payload, args: [smi]});
                         }).pipe(
                             function () {
-                                smi.ready.release();
-                            });;
+                                smi.ready.release(200);
+                                return {};
+                            },
+                            function (request) {
+                                smi.ready.release(request.status);
+                                return {};
+                            });
             }
         });
         $(document).delegate('a.open-action', 'click', function(event) {
