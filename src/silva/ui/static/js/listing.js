@@ -334,10 +334,8 @@
             },
             commit: function() {
                 setTimeout(function () {
-                    var index = finalizer.length;
-
-                    while (index--) {
-                        finalizer[index]();
+                    while (finalizer.length) {
+                        finalizer.pop()();
                     };
                 }, 0);
             }

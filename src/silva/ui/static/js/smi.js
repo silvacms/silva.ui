@@ -338,6 +338,9 @@
         // Add AJAX feature queries.
         $.extend(smi, {
             ajax: {
+                /**
+                 * Send a query to the given URL, POST data as JSON if given.
+                 */
                 query: function(url, data) {
                     var query = {};
 
@@ -384,54 +387,55 @@
                         });
                 },
                 /**
+                 * Run the callback inside of the SMI delay system.
+                 */
+                lock: function(callback) {
+                    smi.ready.use();
+                    return callback().pipe(
+                        function () {
+                            smi.ready.release(200);
+                            return {};
+                        },
+                        function (request) {
+                            smi.ready.release(request.status);
+                            return {};
+                        });
+                },
+                /**
                  * Send data to the server corresponding to the currently opened
                  * tab.
                  * @param data: dictionnary to be posted to the server.
                  */
                 send_to_opened: function(data) {
-                    smi.ready.use();
-                    return smi.ajax.query(
-                        smi.get_screen_url(smi.opening),
-                        data).pipe(
-                            function (payload) {
-                                smi.opened = smi.opening;
-                                return $(document).render({data: payload, args: [smi]});
-                            }).pipe(
-                                function () {
-                                    smi.ready.release(200);
-                                    return {};
-                                },
-                                function (request) {
-                                    smi.ready.release(request.status);
-                                    return {};
+                    return smi.ajax.lock(function () {
+                        return smi.ajax.query(
+                            smi.get_screen_url(smi.opening),
+                            data).pipe(
+                                function (payload) {
+                                    smi.opened = smi.opening;
+                                    return $(document).render({data: payload, args: [smi]});
                                 });
+                    });
                 }
             },
             /**
              * Send an action, and process the result.
              */
             open_action_from_link: function(link) {
-                var action = link.attr('rel');
-                var path = link.attr('href');
+                return smi.ajax.lock(function() {
+                    var action = link.attr('rel');
+                    var path = link.attr('href');
 
-                if (!path) {
-                    path = smi.opened.path;
-                };
-                smi.ready.use();
-                return smi.ajax.query(
-                    action_url.expand({path: path, action: action}),
-                    smi.opened).pipe(
-                        function (payload) {
-                            return $(document).render({data: payload, args: [smi]});
-                        }).pipe(
-                            function () {
-                                smi.ready.release(200);
-                                return {};
-                            },
-                            function (request) {
-                                smi.ready.release(request.status);
-                                return {};
+                    if (!path) {
+                        path = smi.opened.path;
+                    };
+                    return smi.ajax.query(
+                        action_url.expand({path: path, action: action}),
+                        smi.opened).pipe(
+                            function (payload) {
+                                return $(document).render({data: payload, args: [smi]});
                             });
+                });
             }
         });
         $(document).delegate('a.open-action', 'click', function(event) {

@@ -17,6 +17,7 @@ from zope.interface import Interface
 from zope.publisher.browser import applySkin
 from zope.traversing.browser import absoluteURL
 
+from AccessControl import getSecurityManager
 from zExceptions import Redirect
 
 
@@ -58,3 +59,5 @@ class SMI(grok.View):
 
         self.lang = languages[0] if languages else 'en'
         self.root_url = root_url
+        self.can_manage = getSecurityManager().checkPermission(
+            'View Management Screens', self.context)
