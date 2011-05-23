@@ -112,10 +112,12 @@
         name: 'workflow',
         factory: function($content, data, smi, column, value) {
             return {
-                html: '<ins class="state"></ins>',
+                html: '<ins class="state first"></ins><ins class="state"></ins>',
                 render: function() {
                     if (value) {
-                        $content.children('ins').addClass(value);
+                        var states = $content.children('ins');
+                        states.first().addClass(value[0]);
+                        states.last().addClass(value[1]);
                     };
                 }
             };

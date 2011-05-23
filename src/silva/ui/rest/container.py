@@ -72,7 +72,7 @@ class TemplateToolbarContainerListing(rest.REST):
 
 
 icon_width = 20
-pubstate_width = 16
+pubstate_width = 30
 
 
 class ColumnsContainerListing(UIREST):
@@ -329,22 +329,31 @@ def format_date(date):
     return ''
 
 def get_content_status(content):
-    if IVersionedContent.providedBy(content):
-        next_status = content.get_next_version_status()
+    public_version_status = None
+    next_version_status = None
 
+    if IVersionedContent.providedBy(content):
+        public = content.get_public_version_status()
+        if public == 'published':
+            public_version_status = 'published'
+        elif public == 'closed':
+            public_version_status = 'closed'
+
+        next_status = content.get_next_version_status()
         if next_status == 'not_approved':
-            return 'draft'
+            next_version_status = 'draft'
         elif next_status == 'request_pending':
-            return 'pending'
+            next_version_status = 'pending'
         elif next_status == 'approved':
-            return 'approved'
-        else:
-            public = content.get_public_version_status()
-            if public == 'published':
-                return 'published'
-            elif public == 'closed':
-                return 'closed'
-    return None
+            next_version_status = 'approved'
+
+    # XXX: define behavior for Folders
+    # elif IFolder.providedBy(content):
+    #     if content.is_published():
+    #         status[0] = 'published'
+    #     if content.is_approved():
+    #         status[1] = 'approved'
+    return (public_version_status, next_version_status)
 
 def content_ifaces(content):
     for interface, iface in CONTENT_IFACES:
