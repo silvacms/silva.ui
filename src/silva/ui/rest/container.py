@@ -72,7 +72,7 @@ class TemplateToolbarContainerListing(rest.REST):
 
 
 icon_width = 20
-pubstate_width = 30
+pubstate_width = 32
 
 
 class ColumnsContainerListing(UIREST):
