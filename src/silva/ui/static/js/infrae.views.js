@@ -1,5 +1,11 @@
 
 (function (infrae, $) {
+
+    // Disable all ajax caching, for IE 8.
+    $.ajaxSetup({
+        cache:false
+    });
+
     var module = {
         /**
          * HTMLResourceManager, load extra JS or CSS at run time.
