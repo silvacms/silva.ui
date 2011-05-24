@@ -507,7 +507,7 @@
                         };
                         return smi.ajax.query(
                             action_url.expand({path: path, action: action}),
-                            smi.opened).pipe(
+                            {path: smi.opened.path, screen: smi.opened.screen}).pipe(
                                 function (payload) {
                                     return $(document).render({data: payload, args: [smi]});
                                 });
