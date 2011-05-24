@@ -231,6 +231,44 @@
         return this.cutted.length + this.copied.length;
     };
 
+
+    var Screen = function(default_screen) {
+        var screen = {path: '', screen: ''};
+
+        $.extend(screen, {
+            copy: function(other) {
+                screen.path = other.path;
+                screen.screen = other.screen;
+            },
+            equal: function(other) {
+                return screen.path == other.path && screen.screen == other.screen;
+            },
+            open: function(new_path, new_screen) {
+                if (!new_path)
+                    new_path = screen.path;
+                if (!new_screen)
+                    new_screen = screen.screen;
+                document.location.hash = new_screen + '!' + new_path;
+            },
+            read: function(hash) {
+                var parts = HASH_REGEXP.exec(hash);
+
+                if (parts) {
+                    screen.screen = parts[1];
+                    screen.path = parts[2];
+                } else {
+                    screen.screen = '';
+                    screen.path = '';
+                };
+
+                if (!screen.screen.length) {
+                    screen.screen = default_screen;
+                };
+            }
+        });
+        return screen;
+    };
+
     /**
      * SMI object.
      */
@@ -238,8 +276,8 @@
         var smi = {
             ready: infrae.deferred.StackCallbacks(),// Flag indicating if something is loading
             options: options,
-            opened: {path: '', screen: ''}, // Currently opened screen
-            opening: {path: '', screen: ''} // Screen being currently opened
+            opened: Screen('content'), // Currently opened screen
+            opening: Screen('content') // Screen being currently opened
         };
 
         var $workspace = $(options.workspace.selector);
@@ -312,10 +350,7 @@
              * @param tab: tab name to open on the content.
              */
             open_screen: function(path, screen) {
-                if (screen == undefined) {
-                    screen = smi.opened.screen;
-                };
-                document.location.hash = screen + '!' + path;
+                smi.opened.open(path, screen);
             },
             /**
              * Open a content tab by reading the given link information.
@@ -412,8 +447,16 @@
                             smi.get_screen_url(smi.opening),
                             data).pipe(
                                 function (payload) {
-                                    smi.opened = smi.opening;
+                                    smi.opened.copy(smi.opening);
                                     return $(document).render({data: payload, args: [smi]});
+                                },
+                                function (request) {
+                                    // In case of error, revert the screen if needed.
+                                    if (!smi.opening.equal(smi.opened)){
+                                        smi.opening.copy(smi.opened);
+                                        smi.opening.open();
+                                    };
+                                    return request;
                                 });
                     });
                 }
@@ -448,18 +491,9 @@
 
         // Bind the hash change used by open (effectively enable open).
         var read_hash = function(hash) {
-            var parts = HASH_REGEXP.exec(hash);
-
-            if (parts) {
-                smi.opening = {screen: parts[1], path: parts[2]};
-            } else {
-                smi.opening = {screen: '', path: ''};
-            };
-
-            if (!smi.opening.screen.length) {
-                smi.opening.screen = 'content';
-            };
-            smi.ajax.send_to_opened();
+            smi.opening.read(hash);
+            if (!smi.opening.equal(smi.opened))
+                smi.ajax.send_to_opened();
         };
         $(window).hashchange(function(event, data) {
             read_hash(data.after);
