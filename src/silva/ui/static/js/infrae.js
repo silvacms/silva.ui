@@ -25,6 +25,19 @@
 (function (infrae, $) {
     var module = {};
 
+    var last_non_null = function(values) {
+        var value = null;
+        var index = values.length;
+
+        while (index--) {
+            if (values[index]) {
+                value = values[index];
+                break;
+            };
+        };
+        return value;
+    };
+
     $.extend(module, {
         /**
          * Helper that return true if one object in array match all conditions.
@@ -41,7 +54,13 @@
                 var missing = false;
 
                 for (var property in conditions) {
-                    if ($.inArray(object[property], conditions[property]) < 0) {
+                    var condition = conditions[property];
+                    var value = object[property];
+
+                    if ($.isArray(value)) {
+                        value = last_non_null(value);
+                    };
+                    if ($.inArray(value, condition) < 0) {
                         missing = true;
                         break;
                     };
