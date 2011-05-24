@@ -274,6 +274,7 @@
      */
     $.fn.SMI = function(options) {
         var smi = {
+            objection: null,// Objection when to open a screen or execute an action
             ready: infrae.deferred.StackCallbacks(),// Flag indicating if something is loading
             options: options,
             opened: Screen('content'), // Currently opened screen
@@ -422,6 +423,34 @@
                         });
                 },
                 /**
+                 * Vote for an action (or not). Execute the objections
+                 * callbacks. If they doesn't reject the deferred, the
+                 * objections callbacks are cleared, and the callback
+                 * is executed.
+                 */
+                vote: function(callback) {
+                    // No objection, do nothing.
+                    if (!smi.objection)
+                        return callback();
+
+                    var deferred = smi.objection();
+                    if (!deferred) {
+                        deferred =  $.Deferred();
+                        deferred.resolve();
+                    };
+                    deferred.done(function () {
+                        smi.objection = null;
+                    });
+                    return deferred.pipe(
+                        callback,
+                        function() {
+                            // request.status == 417 means Expectation failed.
+                            return $.Deferred(function(deferred) {
+                                deferred.reject({status: 417});
+                            });
+                        });
+                },
+                /**
                  * Run the callback inside of the SMI delay system.
                  */
                 lock: function(callback) {
@@ -443,21 +472,24 @@
                  */
                 send_to_opened: function(data) {
                     return smi.ajax.lock(function () {
-                        return smi.ajax.query(
-                            smi.get_screen_url(smi.opening),
-                            data).pipe(
-                                function (payload) {
-                                    smi.opened.copy(smi.opening);
-                                    return $(document).render({data: payload, args: [smi]});
-                                },
-                                function (request) {
-                                    // In case of error, revert the screen if needed.
-                                    if (!smi.opening.equal(smi.opened)){
-                                        smi.opening.copy(smi.opened);
-                                        smi.opening.open();
-                                    };
-                                    return request;
-                                });
+                        return smi.ajax.vote(function () {
+                            return smi.ajax.query(
+                                smi.get_screen_url(smi.opening),
+                                data).pipe(
+                                    function (payload) {
+                                        smi.opened.copy(smi.opening);
+                                        return $(document).render({data: payload, args: [smi]});
+                                    });
+                        }).pipe(
+                            null,
+                            function (request) {
+                                // In case of error, revert the screen if needed.
+                                if (!smi.opening.equal(smi.opened)){
+                                    smi.opening.copy(smi.opened);
+                                    smi.opening.open();
+                                };
+                                return request;
+                            });
                     });
                 }
             },
@@ -466,18 +498,20 @@
              */
             open_action_from_link: function(link) {
                 return smi.ajax.lock(function() {
-                    var action = link.attr('rel');
-                    var path = link.attr('href');
+                    return smi.ajax.vote(function() {
+                        var action = link.attr('rel');
+                        var path = link.attr('href');
 
-                    if (!path) {
-                        path = smi.opened.path;
-                    };
-                    return smi.ajax.query(
-                        action_url.expand({path: path, action: action}),
-                        smi.opened).pipe(
-                            function (payload) {
-                                return $(document).render({data: payload, args: [smi]});
-                            });
+                        if (!path) {
+                            path = smi.opened.path;
+                        };
+                        return smi.ajax.query(
+                            action_url.expand({path: path, action: action}),
+                            smi.opened).pipe(
+                                function (payload) {
+                                    return $(document).render({data: payload, args: [smi]});
+                                });
+                    });
                 });
             }
         });

@@ -48,6 +48,35 @@
             }
         },
         /**
+         * Create a confirmation dialog that returns a promise.
+         *
+         * @param data: object defining the confirmation message.
+         */
+        ConfirmationDialog: function(data) {
+            var deferred = $.Deferred();
+            var message = $('<div></div>');
+
+            if (data.title) {
+                message.attr('title', data.title);
+            };
+            message.html(data.message);
+            message.dialog({
+                modal: true,
+                buttons: {
+                    Ok: function() {
+                        deferred.resolveWith(this);
+                    },
+                    Cancel: function() {
+                        deferred.rejectWith(this);
+                    }
+                }
+            });
+            deferred.always(function () {
+                $(this).dialog('close');
+            });
+            return deferred.promise();
+        },
+        /**
          * Smoothly scroll an element vertically, snapping to an interval size
          *
          * @param speed: Animation speed in ms, or one of the jQuery speed string values

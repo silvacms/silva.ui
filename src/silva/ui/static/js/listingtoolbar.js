@@ -90,31 +90,6 @@
         }
     });
 
-    var build_confirmation_dialog = function(data) {
-        var deferred = $.Deferred();
-        var message = $('<div></div>');
-
-        if (data.title) {
-            message.attr('title', data.title);
-        };
-        message.html(data.message);
-        message.dialog({
-            modal: true,
-            buttons: {
-                Ok: function() {
-                    deferred.resolveWith(this);
-                },
-                Cancel: function() {
-                    deferred.rejectWith(this);
-                }
-            }
-        });
-        deferred.always(function () {
-            $(this).dialog('close');
-        });
-        return deferred.promise();
-    };
-
 
     /**
      * Create button kind-of-view that can be used to render actions.
@@ -150,7 +125,7 @@
                                 if (view.action != undefined) {
                                     $trigger.bind('click', function() {
                                         if (definition.confirmation)
-                                            build_confirmation_dialog(definition.confirmation).done(view.action);
+                                            infrae.ui.ConfirmationDialog(definition.confirmation).done(view.action);
                                         else
                                             view.action();
                                     });
