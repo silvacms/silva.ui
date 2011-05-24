@@ -36,7 +36,7 @@ class ISilvaUI(ISilvaUIDependencies):
     silvaconf.resource('js/thirdparty/jquery.hotkeys.js')
     silvaconf.resource('js/thirdparty/jquery.observehashchange.js')
     silvaconf.resource('js/thirdparty/jquery.jstree.js')
-    silvaconf.resource('js/thirdparty/jquery.tablednd-0.5.min.js')
+    silvaconf.resource('js/thirdparty/jquery.tablednd-0.5.js')
 
     silvaconf.resource('js/smi.js')
     silvaconf.resource('js/navigation.js')
