@@ -130,7 +130,6 @@
   left:0;
   line-height:25px;
   position:absolute;
-  overflow: hidden; /* fix overflow bug in webkit */
   right:0;
 }
 
