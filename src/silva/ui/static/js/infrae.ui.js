@@ -55,22 +55,28 @@
         ConfirmationDialog: function(data) {
             var deferred = $.Deferred();
             var message = $('<div></div>');
+            var dialog = {modal: true, buttons: {}};
 
             if (data.title) {
                 message.attr('title', data.title);
             };
             message.html(data.message);
-            message.dialog({
-                modal: true,
-                buttons: {
+            if (!data.buttons) {
+                data.buttons = {
                     Ok: function() {
                         deferred.resolveWith(this);
                     },
                     Cancel: function() {
                         deferred.rejectWith(this);
                     }
-                }
+                };
+            };
+            $.each(data.buttons, function(name, callback) {
+                dialog.buttons[name] = function() {
+                    callback() ? deferred.resolveWith(this) : deferred.rejectWith(this);
+                };
             });
+            message.dialog(dialog);
             deferred.always(function () {
                 $(this).dialog('close');
             });
