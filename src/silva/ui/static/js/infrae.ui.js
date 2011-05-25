@@ -64,10 +64,10 @@
             if (!data.buttons) {
                 data.buttons = {
                     Ok: function() {
-                        deferred.resolveWith(this);
+                        return true;
                     },
                     Cancel: function() {
-                        deferred.rejectWith(this);
+                        return false;
                     }
                 };
             };
