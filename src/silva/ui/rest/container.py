@@ -13,7 +13,7 @@ from zope.lifecycleevent.interfaces import IObjectMovedEvent
 from OFS.interfaces import IObjectWillBeMovedEvent
 
 from silva.core.cache.memcacheutils import MemcacheSlice
-from silva.core.interfaces import IContainer, ISilvaObject
+from silva.core.interfaces import IRoot, IContainer, ISilvaObject
 from silva.core.interfaces import IPublishable, INonPublishable
 from silva.core.interfaces import IVersion, IVersionedContent
 from silva.core.messages.interfaces import IMessageService
@@ -606,6 +606,8 @@ def register_move(target, event):
 @grok.subscribe(ISilvaObject, IObjectWillBeMovedEvent)
 def register_remove(target, event):
     if event.object != target:
+        return
+    if IRoot.providedBy(target):
         return
     if event.oldParent is not None:
         if event.newParent is not event.oldParent:

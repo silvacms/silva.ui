@@ -271,6 +271,8 @@ def register_remove(target, event):
         return
     if not IContainer.providedBy(target):
         return
+    if IRoot.providedBy(target):
+        return
     if event.oldParent is None:
         return
     if event.newParent is event.oldParent:
