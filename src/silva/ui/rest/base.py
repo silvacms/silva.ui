@@ -54,6 +54,16 @@ class RedirectToPage(PageException):
                             'tab': self.tab}}
 
 
+class RedirectToUrl(PageException):
+
+    def __init__(self, url):
+        self.url = url
+
+    def payload(self, caller):
+        return {'content': {'ifaces': ['view'],
+                            'url': self.url}}
+
+
 class UIREST(rest.REST):
     grok.require('silva.ReadSilvaContent')
     grok.baseclass()

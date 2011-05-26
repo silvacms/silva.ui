@@ -6,6 +6,7 @@
 from infrae.rest import REST
 
 from silva.ui.rest.base import Screen, UIREST, PageREST, PageWithTemplateREST
-from silva.ui.rest.base import RedirectToPage
+from silva.ui.rest.base import RedirectToPage, RedirectToUrl
 
-__all__ = ['Screen', 'REST', 'UIREST', 'PageREST', 'PageWithTemplateREST', 'RedirectToPage']
+__all__ = ['Screen', 'REST', 'UIREST', 'PageREST', 'PageWithTemplateREST',
+           'RedirectToPage', 'RedirectToUrl']
