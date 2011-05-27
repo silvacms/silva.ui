@@ -48,7 +48,10 @@
   text-align: left;
   white-space: nowrap;
   vertical-align: middle;
-  overflow:hidden;
+  overflow :hidden;
+}
+#workspace .content .listing td.hasdropdown {
+  overflow: visible;
 }
 #workspace .content .listing td ins.state {
   background-image: url(../img/sprite.png);

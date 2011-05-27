@@ -74,6 +74,7 @@
                         };
                     };
 
+                    $content.addClass('hasdropdown');
                     $content.delegate('a', 'click', function(event) {
                         smi.open_screen_from_link($(event.target).parent('a'));
                         return false;
