@@ -278,7 +278,8 @@
             ready: infrae.deferred.StackCallbacks(),// Flag indicating if something is loading
             options: options,
             opened: Screen('content'), // Currently opened screen
-            opening: Screen('content') // Screen being currently opened
+            opening: Screen('content'), // Screen being currently opened
+            shortcuts: infrae.keyboard.ShortcutManager()
         };
 
         var $workspace = $(options.workspace.selector);

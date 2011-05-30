@@ -1284,27 +1284,37 @@
 			"left" : function () {
 				var o = this.data.ui.hovered || this.data.ui.last_selected;
 				if(o) {
-					if(o.hasClass("jstree-open")) { this.close_node(o); }
-					else { this.hover_node(this._get_prev(o)); }
-				}
-				return false;
+					if(o.hasClass("jstree-open")) {
+                        this.close_node(o);
+                    } else {
+                        this.hover_node(this._get_prev(o));
+                    };
+                    return false;
+				};
 			},
 			"right" : function () {
 				var o = this.data.ui.hovered || this.data.ui.last_selected;
 				if(o && o.length) {
-					if(o.hasClass("jstree-closed")) { this.open_node(o); }
-					else { this.hover_node(this._get_next(o)); }
-				}
-				return false;
+					if(o.hasClass("jstree-closed")) {
+                        this.open_node(o);
+                    } else {
+                        this.hover_node(this._get_next(o));
+                    };
+                    return false;
+				};
 			},
 			"space" : function () {
-				if(this.data.ui.hovered) { this.data.ui.hovered.children("a:eq(0)").click(); }
-				return false;
+				if(this.data.ui.hovered) {
+                    this.data.ui.hovered.children("a:eq(0)").click();
+                    return false;
+                };
 			},
 			"ctrl+space" : function (event) {
 				event.type = "click";
-				if(this.data.ui.hovered) { this.data.ui.hovered.children("a:eq(0)").trigger(event); }
-				return false;
+				if(this.data.ui.hovered) {
+                    this.data.ui.hovered.children("a:eq(0)").trigger(event);
+                    return false;
+                };
 			},
 			"f2" : function () { this.rename(this.data.ui.hovered || this.data.ui.last_selected); },
 			"del" : function () { this.remove(this.data.ui.hovered || this._get_node(null)); }

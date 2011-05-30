@@ -44,16 +44,17 @@
             keys = handleObj.data.toLowerCase().split(" ");
 
         var newHandler = function(event) {
-            // Don't fire in text-accepting inputs that we didn't directly bind to
-            // if (this !== event.target && (/textarea|select/i.test(event.target.nodeName) ||
-            //                               event.target.type === "text")) {
-            //   return;
-            // };
-
             // Keypress represents characters, not special keys
             var special = event.type !== "keypress" && jQuery.hotkeys.specialKeys[ event.which ],
                 character = String.fromCharCode( event.which ).toLowerCase(),
                 key, modif = "", possible = {};
+
+            // Don't fire in text-accepting inputs that we didn't directly bind to
+            if (!special)
+                if (this !== event.target && (/textarea|select/i.test(event.target.nodeName) ||
+                                              event.target.type === "text")) {
+                  return;
+                };
 
             // check combinations (alt|ctrl|shift+anything)
             if (event.altKey && special !== "alt") {

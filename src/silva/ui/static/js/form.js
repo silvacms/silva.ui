@@ -31,7 +31,6 @@
                 $section.addClass('form-focus');
                 $section.find('.field:first').focus();
             };
-
             var focus_first_form_field = function($form) {
                 var $field = $form.find('.field-error:first').find('.field:first');
                 if ($field.length) {
@@ -43,22 +42,22 @@
                     focus_form_field.apply($field);
                 };
             };
-                // focus_next_form_field: function($form) {
-                //     var $focused = $form.find('.form-focus');
-                //     var $field = $focused.next();
-                //     if (!$field.length) {
-                //         $field = $form.find('.form-section:first');
-                //     };
-                //     this.focus_form_field($field);
-                // },
-                // focus_prev_form_field: function($form) {
-                //     var $focused = $form.find('.form-focus');
-                //     var $field = $focused.prev();
-                //     if (!$field.length) {
-                //         $field = $form.find('.form-section:last');
-                //     };
-                //     this.focus_form_field($field);
-                // },
+            var focus_next_form_field = function($form) {
+                var $focused = $form.find('.form-focus');
+                var $field = $focused.next();
+                if (!$field.length) {
+                    $field = $form.find('.form-section:first');
+                };
+                focus_form_field.apply($field);
+            };
+            var focus_previous_form_field = function($form) {
+                var $focused = $form.find('.form-focus');
+                var $field = $focused.prev();
+                if (!$field.length) {
+                    $field = $form.find('.form-section:last');
+                };
+                focus_form_field.apply($field);
+            };
 
             return {
                 data_template: true,
@@ -81,6 +80,7 @@
                     $forms = $content_form.find('form');
 
                     // Initialize each form.
+                    var is_first_form = true;
                     $forms.each(function() {
                         var $form = $(this);
                         var form_prefix = $form.attr('name');
@@ -123,23 +123,42 @@
                         $form.delegate('.form-section', 'click', focus_form_field);
 
                         // If the form is focused
-                        // $form.bind('focus-smi', function() {
-                        //     // Scroll into view and select the first field
-                        //     this.$content.SMISmoothScroll('slow', 'absolute', $form.position().top);
-                        //     this.focus_first_form_field($form);
-                        // }.scope(this));
+                        $form.bind('focus-smi', function() {
+                            // Scroll into view and select the first field
+                            infrae.ui.scroll($content, 'slow', 'absolute', $form.position().top);
+                            focus_first_form_field($form);
+                        });
+
+                        // Shortcuts
+                        smi.shortcuts.create(form_prefix, $form, is_first_form);
+                        smi.shortcuts.bind(form_prefix, ['ctrl+down', 'ctrl+shift+down'], function() {
+                            focus_next_form_field($form);
+                            return false;
+                        });
+                        smi.shortcuts.bind(form_prefix, ['ctrl+up', 'ctrl+shift+up'], function() {
+                            focus_previous_form_field($form);
+                            return false;
+                        });
 
                         // Set submit URL for helper
                         $form.attr('data-form-url', smi.get_screen_url());
 
                         // Send an event form loaded to init specific JS field
                         $form.trigger('load-smiform', data);
+                        is_first_form = false;
                     });
 
                     // Focus the first field of the first form.
                     focus_first_form_field($forms.first());
                 },
                 cleanup: function() {
+                    $forms.each(function() {
+                        var $form = $(this);
+                        var form_prefix = $form.attr('name');
+
+                        smi.shortcuts.remove(form_prefix);
+                    });
+
                     $content.undelegate('.form-section', 'focusin');
                     $content.undelegate('.form-section', 'click');
                     $content.removeClass('form-content');

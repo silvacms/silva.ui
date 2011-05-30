@@ -54,7 +54,7 @@
             return {
                 column: column,
                 value: value,
-                jsont: '<div class="actions"><ol><li><a class="ui-state-default" rel="{column.index.screen|htmltag}" href="{data.path|htmltag}"><div class="dropdown-icon"><ins class="ui-icon ui-icon-triangle-1-s" /></div><span>{column.index.caption}</span></a><div class="dropdown"><ol></ol></div></li></ol></div>',
+                jsont: '<div class="actions"><ol><li class="last-action"><a class="ui-state-default" rel="{column.index.screen|htmltag}" href="{data.path|htmltag}"><div class="dropdown-icon"><ins class="ui-icon ui-icon-triangle-1-s" /></div><span>{column.index.caption}</span></a><div class="dropdown"><ol></ol></div></li></ol></div>',
                 render: function() {
                     var $opener = $content.find('div.dropdown-icon');
                     var $dropdown = $content.find('div.dropdown');
@@ -199,6 +199,7 @@
         });
     };
 
+
     /**
      * Render/bind the user selection process to the given listing container.
      */
@@ -323,7 +324,6 @@
         });
     };
 
-
     var new_transaction = function() {
         var finalizer = [];
 
@@ -349,10 +349,12 @@
         var configuration = data.configuration;
         var action_url_template = new jsontemplate.Template(smi.options.listing.action, {});
 
-        var create_container = function(name, configuration, lines, selector, mover) {
+        var render_container = function(name, configuration, lines, selector, mover) {
             var $content = $('dd.' + name);
             var $header = $('dt.' + name);
             var $container = $content.find('tbody');
+
+            smi.shortcuts.create(name, $container);
 
             // Collapse feature / table header.
             render_container_header($header, $content, configuration);
@@ -671,7 +673,7 @@
 
                         // Create containers
                         $.each(configuration.listing, function(i, configuration) {
-                            var container = create_container(
+                            var container = render_container(
                                 configuration.name,
                                 configuration,
                                 data.items[configuration.name],
@@ -701,6 +703,9 @@
                         $content.find('.listing-footer').render({data: data, name: 'footer', args: [smi, this]});
                     },
                     cleanup: function() {
+                        for (var name in by_name)
+                            smi.shortcuts.remove(name);
+
                         $content.unbind('collapsingchange-smilisting');
                         $content.empty();
                     }

@@ -36,7 +36,7 @@ div.actions ol li a {
 div.actions ol li a span {
   padding: 0px 4px;
 }
-div.actions ol li:last-child a {
+div.actions ol li.last-action a {
   border-right: 0px;
 }
 div.actions ol li a.inactive {

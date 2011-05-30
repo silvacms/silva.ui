@@ -28,6 +28,7 @@ class ISilvaUIDependencies(IJsonTemplateResources):
     silvaconf.resource('js/infrae.interfaces.js')
     silvaconf.resource('js/infrae.views.js')
     silvaconf.resource('js/infrae.ui.js')
+    silvaconf.resource('js/infrae.keyboard.js')
 
 
 class ISilvaUI(ISilvaUIDependencies):

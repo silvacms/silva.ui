@@ -149,6 +149,10 @@
                         };
                         $content.append($tab);
                     });
+                    if (!tabsmode) {
+                        // Add a class for style under IE 8
+                        $content.children('li:last').addClass('last-action');
+                    };
                 },
                 cleanup: function() {
                     $content.empty();

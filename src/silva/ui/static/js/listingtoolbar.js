@@ -272,10 +272,14 @@
                     return;
 
                 var $actions = $('<div class="actions"><ol></ol></div>');
+                var $container = $actions.children('ol');
 
                 infrae.ui.selection.disable($actions);
-                group.render($actions.children('ol'), {every: data});
-                if ($actions.find('li:first').length) {
+                group.render($container, {every: data});
+                var $last = $container.children('li:last');
+                if ($last.length) {
+                    // Add a class to style fix IE 8
+                    $last.addClass('last-action');
                     $content.append($actions);
                 };
             });
