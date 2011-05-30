@@ -84,6 +84,8 @@ class MenuItem(grok.MultiSubscription):
     def identifier(self):
         if IRESTComponent.implementedBy(self.screen):
             return grok.name.bind().get(self.screen)
+        if isinstance(self.screen, basestring):
+            return self.screen
         return None
 
     def describe(self, page, path, actives):
@@ -94,12 +96,14 @@ class MenuItem(grok.MultiSubscription):
                     if isinstance(active, self.screen):
                         data['active'] = True
                         break
+                is_screen = IUIScreen.implementedBy(self.screen)
             elif self.interface is not None:
                 for active in actives:
                     if self.interface.providedBy(active):
                         data['active'] = True
                         break
-            if IUIScreen.implementedBy(self.screen):
+                is_screen = self.interface.extends(IUIScreen)
+            if is_screen:
                 screen = self.identifier()
                 data['screen'] = '/'.join((path, screen)) if path else screen
         if self.action is not None:
