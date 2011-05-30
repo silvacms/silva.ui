@@ -70,6 +70,7 @@ class MenuItem(grok.MultiSubscription):
     screen = None
     action = None
     accesskey = None
+    interface = None
 
     def __init__(self, menu, content):
         self.content = content
@@ -92,6 +93,12 @@ class MenuItem(grok.MultiSubscription):
                 for active in actives:
                     if isinstance(active, self.screen):
                         data['active'] = True
+                        break
+            elif self.interface is not None:
+                for active in actives:
+                    if self.interface.providedBy(active):
+                        data['active'] = True
+                        break
             if IUIScreen.implementedBy(self.screen):
                 screen = self.identifier()
                 data['screen'] = '/'.join((path, screen)) if path else screen
