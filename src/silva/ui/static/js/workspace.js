@@ -105,6 +105,28 @@
                 return $tab;
             };
 
+            var bind = function($container, $trigger) {
+                var opened = false;
+
+                var close_menu = function() {
+                    if (opened) {
+                        $container.fadeOut('fast');
+                        opened = false;
+                    };
+                };
+
+                // When a menu is opened or the mouse leave our, we close the menu.
+                $content.bind('open-menu', close_menu);
+                $container.bind('mouseleave', close_menu);
+
+                $trigger.bind('click', function () {
+                    $container.trigger('open-menu');
+                    $container.toggle();
+                    opened = true;
+                    return false;
+                });
+            };
+
             return {
                 render: function() {
                     $.each(data.entries, function(i, info) {
@@ -129,20 +151,7 @@
                                 $container.append(create(entry));
                             });
 
-                            $container.bind('mouseleave', function() {
-                                $container.fadeOut('fast');
-                            });
-                            if (info.screen) {
-                                $opener.bind('click', function () {
-                                    $container.toggle();
-                                    return false;
-                                });
-                            } else {
-                                $link.bind('click', function () {
-                                    $container.toggle();
-                                    return false;
-                                });
-                            };
+                            bind($container, info.screen ? $opener : $link);
 
                             $link.prepend($opener);
                             $tab.append($container);
@@ -155,6 +164,7 @@
                     };
                 },
                 cleanup: function() {
+                    $content.unbind('open-menu');
                     $content.empty();
                 }
             };
