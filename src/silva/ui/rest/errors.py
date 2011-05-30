@@ -4,8 +4,9 @@
 # $Id$
 
 from five import grok
-from zope.i18n import translate
+from silva.core.views.interfaces import IVirtualSite
 from zope.cachedescriptors.property import CachedProperty
+from zope.i18n import translate
 from zope.i18n.interfaces import IUserPreferredLanguages
 import simplejson
 
@@ -13,6 +14,12 @@ import simplejson
 class ErrorREST(grok.View):
     grok.baseclass()
     grok.name('error.html')
+
+
+    @CachedProperty
+    def root_path(self):
+        root = IVirtualSite(self.request).get_root()
+        return root.absolute_url_path()
 
     @CachedProperty
     def language(self):
@@ -26,13 +33,16 @@ class ErrorREST(grok.View):
         return translate(
             message, target_language=self.language, context=self.request)
 
+    def get_content_path(self, content):
+        return content.absolute_url_path()[len(self.root_path):] or '/'
+
     def render(self):
         data = {'ifaces': ['message'],
                 'message': self._render_template()}
         if hasattr(self, 'title'):
             data['title'] = self.translate(self.title)
         self.response.setHeader('Content-Type', 'application/json')
-        return simplejson.dumps(data)
+        return simplejson.dumps({'content': data})
 
     render.base_method = True
 
