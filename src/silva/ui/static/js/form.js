@@ -60,8 +60,10 @@
 
                 if (!$field.length)
                     $field = $base.find('.field-required:first');
-                focus_form_field($field);
-                scroll_field_into_view($base, $field);
+                if ($field.length) {
+                    focus_form_field($field);
+                    scroll_field_into_view($base, $field);
+                };
             };
             var focus_next_form_field = function($base) {
                 var $focused = $base.find('.form-focus');
