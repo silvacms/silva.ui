@@ -108,6 +108,7 @@
         });
         $navigation.bind('focus-keyboard', function() {
             $tree.jstree('enable_hotkeys');
+            $tree.focus();
         });
         smi.shortcuts.create('navigation', $tree);
 
