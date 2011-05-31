@@ -95,7 +95,7 @@
      * Create button kind-of-view that can be used to render actions.
      * @param group_definitions: list of action groups
      */
-    var build_actions_renderer = function(group_definitions) {
+    var build_actions_renderer = function(group_definitions, shortcuts) {
         var renderers = [];
 
         var build_group = function(definitions) {
@@ -119,16 +119,18 @@
                                         '<div class="action-icon"><ins class="ui-icon ui-icon-' +
                                             definition.icon + '"></ins></div>');
                                 };
-                                if (definition.accesskey) {
-                                    $trigger.attr('accesskey', definition.accesskey);
-                                };
                                 if (view.action != undefined) {
-                                    $trigger.bind('click', function() {
+                                    var action = function() {
                                         if (definition.confirmation)
                                             infrae.ui.ConfirmationDialog(definition.confirmation).done(view.action);
                                         else
                                             view.action();
-                                    });
+                                        return false;
+                                    };
+
+                                    $trigger.bind('click', action);
+                                    if (definition.accesskey)
+                                        shortcuts.bind('listing', 'actions', [definition.accesskey], action);
                                 };
                                 $content.append($action);
                             }
@@ -287,6 +289,7 @@
 
         return function($content, listing) {
             listing.events.status(function() {
+                shortcuts.remove('listing', 'actions');
                 $content.children('div.actions').remove();
                 for (var index=0; index < renderers.length; index++) {
                     renderers[index]($content, this);
@@ -301,7 +304,7 @@
      * @param $selector: JQuery object representing the selector
      * @param listing: managed listing
      */
-    var render_multi_selector = function($selector, listing) {
+    var render_multi_selector = function($selector, shortcuts, listing) {
         var status = 'none';
 
         var set_status = function(new_status) {
@@ -323,15 +326,18 @@
             };
         });
 
-        // Clicking on the selector change the selection.
-        $selector.bind('click', function() {
+        var change_status = function() {
             if (status == 'none') {
                 listing.select_all();
             } else {
                 listing.unselect_all();
             };
             return false;
-        });
+        };
+
+        // Clicking on the selector change the selection.
+        $selector.bind('click', change_status);
+        shortcuts.bind('listing', null, ['ctrl+a'], change_status);
     };
 
     /**
@@ -339,10 +345,14 @@
      * @param $filter: JQuery object representing the filter field
      * @param listing: Listing to operate on
      */
-    var render_filter = function($filter, listing) {
+    var render_filter = function($filter, shortcuts, listing) {
         // We use a timeout of 100ms for fast typing people on poor computers.
         var timeout = null;
 
+        shortcuts.bind('listing', null, ['ctrl+f'], function() {
+            $filter.focus();
+            return false;
+        });
         $filter.bind('keyup', function(event) {
             var clear = false;
 
@@ -372,23 +382,10 @@
         });
     };
 
-    // SMISelection.prototype.inputs = function(names) {
-    //     var promise = this.listing.selection.events.promise();
-
-    //     if (promise != null) {
-    //         promise.template.until(function(element) {
-    //             $(element).trigger('inputline-smilisting', {names: names});
-    //         }, true);
-    //         promise.template.done(function(element) {
-    //             $(element).trigger('refreshline-smilisting');
-    //         }, true);
-    //     }
-    // };
-
     $(document).bind('load-smilisting', function(event, data) {
         var configuration = data.configuration;
         var smi = data.smi;
-        var render_actions = build_actions_renderer(configuration.actions);
+        var render_actions = build_actions_renderer(configuration.actions, smi.shortcuts);
 
         infrae.views.view({
             iface: 'listing',
@@ -397,14 +394,16 @@
                 return {
                     html_url: smi.options.listing.templates.toolbar,
                     render: function() {
+                        var shortcuts = smi.shortcuts;
+
                         // Render actions
                         render_actions($content, listing);
 
                         // Render multi selector
-                        render_multi_selector($content.find('.selector ins'), listing);
+                        render_multi_selector($content.find('.selector ins'), shortcuts, listing);
 
                         // Render filter
-                        render_filter($content.find('.filter input'), listing);
+                        render_filter($content.find('.filter input'), shortcuts, listing);
                     },
                     cleanup: function() {
                         $content.unbind('actionrefresh-smilisting');

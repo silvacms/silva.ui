@@ -58,10 +58,11 @@
             var focus_first_form_field = function($base) {
                 var $field = $base.find('.form-error:first').find('.field:first');
 
-                if (!$field.length)
+                if (!$field.length){
                     $field = $base.find('.field-required:first');
-                if (!$field.length)
-                    $field = $base.find('.field:first');
+                    if (!$field.length)
+                        $field = $base.find('.field:first');
+                };
                 if ($field.length) {
                     focus_form_field($field);
                     scroll_field_into_view($base, $field);
@@ -161,7 +162,7 @@
                                 return submit($control);
                             });
                             if (shortcut) {
-                                smi.shortcuts.bind('form', [shortcut], function() {
+                                smi.shortcuts.bind('form', null, [shortcut], function() {
                                     return submit($control);
                                 });
                             };
@@ -171,7 +172,7 @@
                             var shortcut = $control.attr('data-form-shortcut');
 
                             if (shortcut) {
-                                smi.shortcuts.bind('form', [shortcut], function() {
+                                smi.shortcuts.bind('form', null, [shortcut], function() {
                                     $control.click();
                                 });
                             };
@@ -193,11 +194,11 @@
                     focus_first_form_field($content);
 
                     // Shortcuts field navigation
-                    smi.shortcuts.bind('form', ['ctrl+down', 'ctrl+shift+down'], function() {
+                    smi.shortcuts.bind('form', null, ['ctrl+down', 'ctrl+shift+down'], function() {
                         focus_next_form_field($content);
                         return false;
                     });
-                    smi.shortcuts.bind('form', ['ctrl+up', 'ctrl+shift+up'], function() {
+                    smi.shortcuts.bind('form', null, ['ctrl+up', 'ctrl+shift+up'], function() {
                         focus_previous_form_field($content);
                         return false;
                     });

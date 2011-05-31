@@ -171,18 +171,20 @@ class ColumnsContainerListing(UIREST):
                              'icon': 'close',
                              'order': 5,
                              'action': {'input_mode': False},
+                             'accesskey': 'ctrl+z',
                              'iface': ['content']},
                             {'title': self.translate(_(u'Save')),
                              'icon': 'check',
                              'order': 10,
                              'action': {'input_mode': True},
+                             'accesskey': 'ctrl+s',
                              'iface': ['content']},
                             ]},
                     {'available': {'input_mode': False},
                      'actions': [
                             {'title': self.translate(_(u'Cut')),
                              'icon': 'scissors',
-                             'accesskey': 'x',
+                             'accesskey': 'ctrl+x',
                              'order': 5,
                              'action':
                                  {'cut': True},
@@ -193,7 +195,7 @@ class ColumnsContainerListing(UIREST):
                              'ifaces': ['content']},
                             {'title': self.translate(_(u'Copy')),
                              'icon': 'copy',
-                             'accesskey': 'c',
+                             'accesskey': 'ctrl+c',
                              'order': 6,
                              'action':
                                  {'copy': True},
@@ -209,7 +211,7 @@ class ColumnsContainerListing(UIREST):
                              'actions': [
                                     {'title': self.translate(_(u'Paste')),
                                      'icon': 'clipboard',
-                                     'accesskey': 'v',
+                                     'accesskey': 'ctrl+v',
                                      'order': 10,
                                      'action':
                                          {'rest':
@@ -218,7 +220,7 @@ class ColumnsContainerListing(UIREST):
                                      'ifaces': ['object']},
                                     {'title': self.translate(_(u'Paste as Ghost')),
                                      'icon': 'link',
-                                     'accesskey': 'g',
+                                     'accesskey': 'ctrl+g',
                                      'order': 20,
                                      'action':
                                          {'rest':
@@ -229,7 +231,7 @@ class ColumnsContainerListing(UIREST):
                              'ifaces': ['object']},
                             {'title': self.translate(_(u'Delete')),
                              'icon': 'trash',
-                             'accesskey': 'd',
+                             'accesskey': 'ctrl+d',
                              'order': 9,
                              'action':
                                  {'rest':
@@ -245,7 +247,7 @@ class ColumnsContainerListing(UIREST):
                              'ifaces': ['content']},
                             {'title': self.translate(_(u'Rename')),
                              'icon': 'pencil',
-                             'accesskey': 'r',
+                             'accesskey': 'ctrl+r',
                              'order': 10,
                              'action':
                                  {'input':
@@ -265,7 +267,7 @@ class ColumnsContainerListing(UIREST):
                              'actions': [
                                     {'title': self.translate(_(u'Publish')),
                                      'icon': 'check',
-                                     'accesskey': 'p',
+                                     'accesskey': 'ctrl+p',
                                      'order': 10,
                                      'action':
                                          {'rest':
@@ -279,7 +281,7 @@ class ColumnsContainerListing(UIREST):
                                      'ifaces': ['container', 'versioned']},
                                     {'title': self.translate(_(u'Close')),
                                      'icon': 'close',
-                                     'accesskey': 'l',
+                                     'accesskey': 'ctrl+l',
                                      'order': 15,
                                      'action':
                                          {'rest':
@@ -293,6 +295,7 @@ class ColumnsContainerListing(UIREST):
                                      'ifaces': ['container', 'versioned']},
                                     {'title': self.translate(_(u'New version')),
                                      'icon': 'document',
+                                     'accesskey': 'ctrl+n',
                                      'order': 20,
                                      'action':
                                          {'rest':

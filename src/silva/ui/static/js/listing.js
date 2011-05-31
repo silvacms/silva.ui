@@ -354,8 +354,6 @@
             var $header = $('dt.' + name);
             var $container = $content.find('tbody');
 
-            smi.shortcuts.create(name, $container);
-
             // Collapse feature / table header.
             render_container_header($header, $content, configuration);
             render_container_selection($content, selector, mover);
@@ -668,6 +666,9 @@
                         };
                     },
                     render: function() {
+                        // Shortcuts
+                        smi.shortcuts.create('listing', $content, true);
+
                         // Render header
                         render_listing_header($content, configuration);
 
@@ -703,9 +704,7 @@
                         $content.find('.listing-footer').render({data: data, name: 'footer', args: [smi, this]});
                     },
                     cleanup: function() {
-                        for (var name in by_name)
-                            smi.shortcuts.remove(name);
-
+                        smi.shortcuts.remove('listing');
                         $content.unbind('collapsingchange-smilisting');
                         $content.empty();
                     }

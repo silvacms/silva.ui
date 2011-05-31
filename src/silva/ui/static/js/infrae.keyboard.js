@@ -51,15 +51,24 @@
                         };
                     };
                 },
-                remove: function(name) {
+                remove: function(name, group) {
                     if (zones[name] != undefined) {
-                        if (current_name() == name) {
-                            manager.disable();
-                            selected = 0;
-                        }
-                        order.splice($.inArray(name, order), 1);
-                        delete zones[name];
-                        delete handlers[name];
+                        if (group == undefined) {
+                            if (current_name() == name) {
+                                manager.disable();
+                                selected = 0;
+                            };
+                            order.splice($.inArray(name, order), 1);
+                            delete zones[name];
+                            delete handlers[name];
+                        } else {
+                            if (handlers[name][group] != undefined && current_name() == name) {
+                                for (var key in handlers[name][group])
+                                    if (key)
+                                        $(document).unbind('keydown', handlers[name][group][key]);
+                                delete handlers[name][group];
+                            };
+                        };
                     };
                 },
                 /**
@@ -68,25 +77,18 @@
                  * @param key: shortcut key
                  * @param callback: callback to execute
                  */
-                bind: function(name, keys, callback) {
+                bind: function(name, group, keys, callback) {
                     var is_current = (current_name() == name);
 
+                    if (group == undefined)
+                        group = 'default';
                     for (var i=0; i < keys.length; i++) {
                         var key = keys[i];
-                        handlers[name][key] = callback;
+                        if (handlers[name][group] == undefined)
+                            handlers[name][group] = {};
+                        handlers[name][group][key] = callback;
                         if (is_current)
                             $(document).bind('keydown', key, callback);
-                    };
-                },
-                /**
-                 * Unbind a shortcut.
-                 * @param key: shortcut key
-                 */
-                unbind: function(name, key) {
-                    if (handlers[name][key]) {
-                        if (current_name() == name)
-                            $(document).unbind('keydown', handlers[name][key]);
-                        delete handlers[name][key];
                     };
                 },
                 /**
@@ -102,9 +104,11 @@
                             zone.addClass('focus');
                             zone.trigger('focus-keyboard');
                         };
-                        for (var key in handlers)
-                            if (key)
-                                $(document).bind('keydown', key, handlers[key]);
+                        for (var group in handlers)
+                            if (group)
+                                for (var key in handlers[group])
+                                    if (key)
+                                        $(document).bind('keydown', key, handlers[group][key]);
                         active = true;
                     };
                 },
@@ -116,9 +120,11 @@
                         var handlers = current_handlers();
                         var zone = current_zone();
 
-                        for (var key in handlers)
-                            if (key)
-                                $(document).unbind('keydown', handlers[key]);
+                        for (var group in handlers)
+                            if (group)
+                                for (var key in handlers[group])
+                                    if (key)
+                                        $(document).unbind('keydown', handlers[group][key]);
                         if (event) {
                             zone.trigger('blur-keyboard');
                             zone.removeClass('focus');
