@@ -103,12 +103,13 @@
 
         // Listen to smi.blur and focus to activate/disable shortcuts.
         $tree.jstree('disable_hotkeys');
-        // $navigation.bind('blur-smi', function() {
-        //     $tree.jstree('disable_hotkeys');
-        // });
-        // $navigation.bind('focus-smi', function() {
-        //     $tree.jstree('enable_hotkeys');
-        // });
+        $navigation.bind('blur-keyboard', function() {
+            $tree.jstree('disable_hotkeys');
+        });
+        $navigation.bind('focus-keyboard', function() {
+            $tree.jstree('enable_hotkeys');
+        });
+        smi.shortcuts.create('navigation', $tree);
 
         return {
             invalidate: function(data) {

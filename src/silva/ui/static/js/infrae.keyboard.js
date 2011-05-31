@@ -12,6 +12,7 @@
             var zones = {};
             var order = [];
             var selected = 0;
+            var active = false;
 
             var current_name = function () {
                 if (order.length) {
@@ -44,7 +45,7 @@
                         order.push(name);
                         handlers[name] = {};
                         if (select) {
-                            manager.disable();
+                            manager.disable(true);
                             selected = order.length - 1;
                             manager.activate();
                         };
@@ -92,32 +93,38 @@
                  * Activate the current shortcut collection.
                  */
                 activate: function(event) {
-                    var handlers = current_handlers();
-                    var zone = current_zone();
+                    if (!active) {
+                        var handlers = current_handlers();
+                        var zone = current_zone();
 
-                    if (event) {
-                        $(document).focus();
-                        zone.addClass('focus');
-                        zone.trigger('focus-smi');
+                        if (event) {
+                            $(document).focus();
+                            zone.addClass('focus');
+                            zone.trigger('focus-keyboard');
+                        };
+                        for (var key in handlers)
+                            if (key)
+                                $(document).bind('keydown', key, handlers[key]);
+                        active = true;
                     };
-                    for (var key in handlers)
-                        if (key)
-                            $(document).bind('keydown', key, handlers[key]);
                 },
                 /**
                  * Disable the current shortcut collection.
                  */
                 disable: function(event) {
-                    var handlers = current_handlers();
-                    var zone = current_zone();
+                    if (active) {
+                        var handlers = current_handlers();
+                        var zone = current_zone();
 
-                    for (var key in handlers)
-                        if (key)
-                            $(document).unbind('keydown', handlers[key]);
-                    if (event) {
-                        zone.trigger('blur-smi');
-                        zone.removeClass('focus');
-                    };
+                        for (var key in handlers)
+                            if (key)
+                                $(document).unbind('keydown', handlers[key]);
+                        if (event) {
+                            zone.trigger('blur-keyboard');
+                            zone.removeClass('focus');
+                        };
+                        active = false;
+                    }
                 }
             };
 

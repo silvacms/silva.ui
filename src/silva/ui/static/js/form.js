@@ -18,6 +18,31 @@
                 });
             };
 
+            var max = function (n1, n2) {
+                return n1 > n2 ? n1 : n2;
+            };
+
+            /**
+             * Scroll the field into view if it is not.
+             */
+            var scroll_field_into_view = function($base, $field) {
+                var position = $field.position();
+                var top = $base.scrollTop();
+                var target = max(position.top - 25, 0);
+
+                if (target < top) {
+                    infrae.ui.scroll($base, 'slow', 'absolute', target);
+                } else {
+                    var size = $base.innerHeight();
+                    var bottom = top + size;
+                    target = position.top + $field.outerHeight() + 25;
+
+                    if (target > bottom) {
+                        infrae.ui.scroll($base, 'slow', 'absolute', target - size);
+                    };
+                };
+            };
+
             /**
              * Focus the form field on which it is applied.
              */
@@ -32,7 +57,7 @@
                 $section.find('.field:first').focus();
             };
             var focus_first_form_field = function($form) {
-                var $field = $form.find('.field-error:first').find('.field:first');
+                var $field = $form.find('.form-error:first').find('.field:first');
                 if ($field.length) {
                     // First error field
                     focus_form_field.apply($field);
@@ -42,21 +67,43 @@
                     focus_form_field.apply($field);
                 };
             };
-            var focus_next_form_field = function($form) {
-                var $focused = $form.find('.form-focus');
+            var focus_next_form_field = function($base) {
+                var $focused = $base.find('.form-focus');
                 var $field = $focused.next();
+
                 if (!$field.length) {
-                    $field = $form.find('.form-section:first');
+                    var $next_body = $focused.closest('.form-body').nextAll('.form-body');
+                    if ($next_body.length)
+                        $field = $next_body.find('.form-section:first');
+                    else {
+                        var $next_form = $focused.closest('form').nextAll('form');
+                        if ($next_form.length)
+                            $field = $next_form.find('.form-section:first');
+                        else
+                            $field = $base.find('.form-section:first');
+                    };
                 };
                 focus_form_field.apply($field);
+                scroll_field_into_view($base, $field);
             };
-            var focus_previous_form_field = function($form) {
-                var $focused = $form.find('.form-focus');
+            var focus_previous_form_field = function($base) {
+                var $focused = $base.find('.form-focus');
                 var $field = $focused.prev();
+
                 if (!$field.length) {
-                    $field = $form.find('.form-section:last');
+                    var $prev_body = $focused.closest('.form-body').prevAll('.form-body');
+                    if ($prev_body.length)
+                        $field = $prev_body.find('.form-section:last');
+                    else {
+                        var $prev_form = $focused.closest('form').prevAll('form');
+                        if ($prev_form.length)
+                            $field = $prev_form.find('.form-section:last');
+                        else
+                            $field = $base.find('.form-section:last');
+                    };
                 };
                 focus_form_field.apply($field);
+                scroll_field_into_view($base, $field);
             };
 
             return {
@@ -130,17 +177,6 @@
                             focus_first_form_field($form);
                         });
 
-                        // Shortcuts
-                        smi.shortcuts.create(form_prefix, $form, is_first_form);
-                        smi.shortcuts.bind(form_prefix, ['ctrl+down', 'ctrl+shift+down'], function() {
-                            focus_next_form_field($form);
-                            return false;
-                        });
-                        smi.shortcuts.bind(form_prefix, ['ctrl+up', 'ctrl+shift+up'], function() {
-                            focus_previous_form_field($form);
-                            return false;
-                        });
-
                         // Set submit URL for helper
                         $form.attr('data-form-url', smi.get_screen_url());
 
@@ -151,15 +187,20 @@
 
                     // Focus the first field of the first form.
                     focus_first_form_field($forms.first());
+
+                    // Shortcuts
+                    smi.shortcuts.create('form', $content, true);
+                    smi.shortcuts.bind('form', ['ctrl+down', 'ctrl+shift+down'], function() {
+                        focus_next_form_field($content);
+                        return false;
+                    });
+                    smi.shortcuts.bind('form', ['ctrl+up', 'ctrl+shift+up'], function() {
+                        focus_previous_form_field($content);
+                        return false;
+                    });
                 },
                 cleanup: function() {
-                    $forms.each(function() {
-                        var $form = $(this);
-                        var form_prefix = $form.attr('name');
-
-                        smi.shortcuts.remove(form_prefix);
-                    });
-
+                    smi.shortcuts.remove('form');
                     $content.undelegate('.form-section', 'focusin');
                     $content.undelegate('.form-section', 'click');
                     $content.removeClass('form-content');
