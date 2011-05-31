@@ -96,9 +96,10 @@
                         };
                         var default_submit = function() {
                             var extra = [];
+                            var $default = $form.find('.form-controls a.default-form-control');
 
-                            if (data['default']) {
-                                extra.push({name: data['default'], value:'Default'});
+                            if ($default.length) {
+                                extra.push({name: $default.attr('name'), value:'Default'});
                             };
                             return submit(extra);
                         };
