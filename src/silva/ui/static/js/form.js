@@ -60,6 +60,8 @@
 
                 if (!$field.length)
                     $field = $base.find('.field-required:first');
+                if (!$field.length)
+                    $field = $base.find('.field:first');
                 if ($field.length) {
                     focus_form_field($field);
                     scroll_field_into_view($base, $field);
