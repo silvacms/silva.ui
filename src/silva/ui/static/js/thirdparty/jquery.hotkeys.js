@@ -32,8 +32,6 @@
         }
     };
 
-    var changedHandlers = {};
-
     var createHandler = function (handleObj) {
         // Only care when a possible input has been specified
         if (typeof handleObj.data !== "string") {
@@ -93,19 +91,11 @@
             }
         };
         handleObj.handler = newHandler;
-        changedHandlers[origHandler] = newHandler;
-    };
-
-    var removeHandler = function(handleObj) {
-        var origHandler = handleObj.handler;
-
-        if (changedHandlers[origHandler] != undefined) {
-            handleObj.handler = changedHandlers[origHandler];
-        };
     };
 
     jQuery.each(["keydown", "keyup", "keypress"], function() {
-        jQuery.event.special[this] = {add: createHandler, remove: removeHandler};
+        // We don't need anything special to remove them
+        jQuery.event.special[this] = {add: createHandler};
     });
 
 })( jQuery );

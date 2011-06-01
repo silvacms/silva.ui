@@ -130,7 +130,7 @@
 
                                     $trigger.bind('click', action);
                                     if (definition.accesskey)
-                                        shortcuts.bind('listing', 'actions', [definition.accesskey], action);
+                                        shortcuts.bind('listing', 'actions', definition.accesskey, action);
                                 };
                                 $content.append($action);
                             }

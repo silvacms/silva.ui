@@ -114,6 +114,7 @@
 
             $content.stop(true, true);
             $content.animate({scrollTop: target}, speed);
+            return $content.promise();
         },
         /**
          * Calculate and set percentual widths on table columns based on the

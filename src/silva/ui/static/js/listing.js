@@ -180,37 +180,23 @@
             $header.trigger('collapsingchange-smilisting');
         };
         $header.bind('click', function(event) {
-            var $target = $(event.target);
-            if ($target.is('input')) {
-                $target.focus();
-            } else {
-                toggle_collapsing();
-            }
-            event.preventDefault();
-            event.stopPropagation();
-        });
-        $container.bind('focus-smi', function(event) {
-            if ($header.hasClass('collapsed')) {
-                toggle_collapsing();
-            };
-            $container.parent().SMISmoothScroll(
-                'slow', 'absolute',
-                $container.position().top - $header.outerHeight());
+            toggle_collapsing();
+            return false;
         });
     };
 
-
     /**
-     * Render/bind the user selection process to the given listing container.
+     * Render/bind the user selection process.
      */
-    var render_container_selection = function($container, selector, mover) {
+    var render_selection = function($containers, selector, shortcuts) {
         // Row selection
+        var $tables = $containers.find('table');
         var last_selected_index = null;
         var $hovered_row = null;
 
         var get_hovered_row = function() {
             if ($hovered_row === null) {
-                $hovered_row = $container.children('tr.item:first');
+                $hovered_row = $tables.find('tr.item:first');
                 $hovered_row.addClass("hover");
             };
             return $hovered_row;
@@ -221,8 +207,7 @@
             };
             $hovered_row = null;
         };
-        var set_hovered_row = function() {
-            var $row = $(this);
+        var set_hovered_row = function($row) {
             if ($row.length) {
                 clear_hovered_row();
                 $hovered_row = $row;
@@ -231,8 +216,12 @@
         };
 
         // Set the hover column on hovering
-        $container.delegate('tr.item', 'mouseenter', set_hovered_row);
-        $container.delegate('tr.item', 'mouseleave', clear_hovered_row);
+        $containers.delegate('tr.item', 'mouseenter', function() {set_hovered_row($(this));});
+        $containers.delegate('tr.item', 'mouseleave', clear_hovered_row);
+        $containers.bind('resetselection-smilisting', function() {
+            clear_hovered_row();
+            last_selected_index = null;
+        });
 
         var select_row = function($row, multiple) {
             if (last_selected_index === null || !multiple) {
@@ -261,7 +250,7 @@
         };
 
         // Row selection with mouse
-        $container.delegate('tr.item', 'click', function(event) {
+        $containers.delegate('tr.item', 'click', function(event) {
             var target = $(event.target);
             if (target.is('input[type="text"]')) {
                 target.focus();
@@ -269,60 +258,232 @@
             };
             select_row($(this), event.shiftKey);
         });
-
-        var $table = $container.find('table');
-        var row_original_index = null;
-
-        // Add the sorting if the table is sortable
-        $table.tableDnD({
-            dragHandle: "moveable",
-            onDragClass: "dragging",
-            onAllowDrop: function(row, candidate){
-                // don't drop on the first row, it is default.
-                return $(candidate).data('smilisting').moveable != 0;
-            },
-            onDragStart: function(table, cell) {
-                // Reset hover style and mouse last_selected_index. Save row index.
-                last_selected_index = null;
-                row_original_index = $(cell).parent('tr').index();
-                $(table).removeClass('static');
-            },
-            onDrop: function(table, row) {
-                var $line = $(row);
-                var $table = $(table);
-                var position = $line.index();
-                var data = $line.data('smilisting');
-
-                if (position != row_original_index) {
-                    // The row moved.
-                    if (position > row_original_index)
-                        row_original_index -= 1; // Fix original index in case of failure.
-
-                    // If the first line is not moveable, reduce the index of 1.
-                    if (!$table.find('tbody tr.item:first').data('smilisting').moveable) {
-                        position -= 1;
-                    };
-                    mover([{name: 'content', value: data['id']},
-                           {name: 'position', value: position}]).pipe(function (success) {
-                               if (!success) {
-                                   // The moving failed. Restore the row position.
-                                   $line.detach();
-                                   $line.insertAfter(
-                                       $table.find('tbody tr.item:eq(' + row_original_index + ')'));
-                               };
-                               $table.addClass('static');
-                               return success;
-                           });
-                } else {
-                    $table.addClass('static');
-                };
-            }
+        // Row selection with keyboard
+        shortcuts.bind('listing', null, ['space', 'shift+space'], function(event) {
+            select_row(get_hovered_row(), event.shiftKey);
+            return false;
         });
-        // If content change, reinitialize the DND
-        $container.bind('containerchange-smilisting', function() {
-            $table.tableDnDUpdate();
+
+        // Row movement with keyboard
+        shortcuts.bind('listing', null, ['up', 'shift+up'], function(event) {
+            var $row = get_hovered_row();
+            var $candidate = $row.prev();
+
+            while ($candidate.length && !$candidate.is(':visible'))
+                $candidate = $candidate.prev();
+            set_hovered_row($candidate);
+            if (event.shiftKey)
+                select_row($candidate);
+            return false;
+        });
+        shortcuts.bind('listing', null, ['down', 'shift+down'], function(event) {
+            var $row = get_hovered_row();
+            var $candidate = $row.next();
+
+            while ($candidate.length && !$candidate.is(':visible'))
+                $candidate = $candidate.next();
+            set_hovered_row($candidate);
+            if (event.shiftKey)
+                select_row($candidate);
+            return false;
         });
     };
+
+    var render_container = function(name, configuration, lines, mover, smi) {
+        var $content = $('dd.' + name);
+        var $header = $('dt.' + name);
+        var $container = $content.find('tbody');
+
+        // Collapse feature / table header.
+        render_container_header($header, $content, configuration);
+
+        var render_line = function(data) {
+            // Add a data line to the table
+            var $line = $('<tr class="item"></tr>');
+            var line = {};
+
+            $line.attr('id', 'list' + data['id'].toString());
+
+            var render_cell = function(column) {
+                var $cell = $('<td></td>');
+
+                if (column.view) {
+                    $cell.bind('refreshcell-smilisting', function(event, data) {
+                        var $cell = $(this);
+                        var value = null;
+
+                        if (column.name) {
+                            value = data[column.name];
+                        };
+                        listingcolumns.render($cell, {
+                            data: data,
+                            name: column.view,
+                            ifaces: ['object'],
+                            args: [smi, column, value]});
+                        event.stopPropagation();
+                        event.preventDefault();
+                    });
+                    if (column.name) {
+                        $cell.bind('inputcell-smilisting', function(event, data) {
+                            var $cell = $(this);
+                            var $field = $('<input type="text" />');
+
+                            $field.val(data[column.name]);
+                            $cell.empty();
+                            $cell.append($field);
+                            event.stopPropagation();
+                            event.preventDefault();
+                        });
+                    };
+                };
+                $line.append($cell);
+            };
+
+            infrae.utils.each(configuration.columns, render_cell);
+
+            $.extend(line, {
+                update: function(data) {
+                    if (data != undefined) {
+                        $line.data('smilisting', data);
+                    } else {
+                        data = $line.data('smilisting');
+                    };
+                    $line.children().each(function() {
+                        $(this).triggerHandler('refreshcell-smilisting', data);
+                    });
+                },
+                input: function(names) {
+                    var data = $line.data('smilisting');
+
+                    infrae.utils.each(names, function(name) {
+                        var index = configuration.column_index(name);
+                        var $cell = $line.children(':eq(' + index + ')');
+
+                        $cell.triggerHandler('inputcell-smilisting', data);
+                    });
+                    $line.addClass('inputized');
+                },
+                values: function(names) {
+                    var data = $line.data('smilisting');
+                    var values = {id: data['id']};
+
+                    infrae.utils.each(names, function(name) {
+                        var index = configuration.column_index(name);
+                        var $cell = $line.children(':eq(' + index + ')');
+
+                        values[name] = $cell.find('input').val();
+                    });
+                    return values;
+                }
+            });
+
+            line.update(data);
+            $line.data('smilisting-line', line);
+            $container.append($line);
+            return $line.get(0);
+        };
+
+        var add_lines = function(lines, initial) {
+            if (lines.length) {
+                if (!initial) {
+                    // Remove any eventual empty line
+                    $container.children('.empty').remove();
+                };
+                // Fill in table
+                var new_lines = infrae.utils.map(lines, render_line);
+                $container.trigger('containerchange-smilisting');
+                return new_lines;
+            } else if (initial) {
+                // Add a message no lines.
+                $container.append(
+                    '<tr class="empty"><td colpsan="' + configuration.columns.length + '">There is no items here.</td></tr>');
+            };
+            return [];
+        };
+
+        // Add default data
+        add_lines(lines, true);
+
+        // Bind table sort if needed
+        if (configuration.sortable) {
+            var $table = $content.find('table');
+            var row_original_index = null;
+
+            $table.tableDnD({
+                dragHandle: "moveable",
+                onDragClass: "dragging",
+                onAllowDrop: function(row, candidate){
+                    // don't drop on the first row, it is default.
+                    return $(candidate).data('smilisting').moveable != 0;
+                },
+                onDragStart: function(table, cell) {
+                    var $table = $(table);
+                    // Reset hover style and mouse last_selected_index. Save row index.
+                    row_original_index = $(cell).parent('tr').index();
+                    $table.trigger('resetselection-smilisting');
+                    $table.removeClass('static');
+                },
+                onDrop: function(table, row) {
+                    var $line = $(row);
+                    var $table = $(table);
+                    var position = $line.index();
+                    var data = $line.data('smilisting');
+
+                    if (position != row_original_index) {
+                        // The row moved.
+                        if (position > row_original_index)
+                            row_original_index -= 1; // Fix original index in case of failure.
+
+                        // If the first line is not moveable, reduce the index of 1.
+                        if (!$table.find('tbody tr.item:first').data('smilisting').moveable) {
+                            position -= 1;
+                        };
+                        mover([{name: 'content', value: data['id']},
+                               {name: 'position', value: position}]).pipe(function (success) {
+                                   if (!success) {
+                                       // The moving failed. Restore the row position.
+                                       $line.detach();
+                                       $line.insertAfter(
+                                           $table.find('tbody tr.item:eq(' + row_original_index + ')'));
+                                   };
+                                   $table.addClass('static');
+                                   return success;
+                               });
+                    } else {
+                        $table.addClass('static');
+                    };
+                }
+            });
+            // If content change, reinitialize the DND
+            $container.bind('containerchange-smilisting', function() {
+                $table.tableDnDUpdate();
+            });
+        };
+
+        return {
+            add: add_lines,
+            $container: $container};
+    };
+
+    var get_dom_line = function(id) {
+        return document.getElementById('list' + id.toString());
+    };
+    var get_line = function(id) {
+        return $(get_dom_line(id));
+    };
+    var get_lines = function(ids) {
+        if (ids.length) {
+            var index = ids.length - 1;
+            var $lines = $(get_dom_line(ids[index]));
+
+            while(index--) {
+                $lines = $lines.add(get_dom_line(ids[index]));
+            };
+            return $lines;
+        };
+        return $([]);
+    };
+
 
     var new_transaction = function() {
         var finalizer = [];
@@ -349,126 +510,6 @@
         var configuration = data.configuration;
         var action_url_template = new jsontemplate.Template(smi.options.listing.action, {});
 
-        var render_container = function(name, configuration, lines, selector, mover) {
-            var $content = $('dd.' + name);
-            var $header = $('dt.' + name);
-            var $container = $content.find('tbody');
-
-            // Collapse feature / table header.
-            render_container_header($header, $content, configuration);
-            render_container_selection($content, selector, mover);
-
-            var render_line = function(data) {
-                // Add a data line to the table
-                var $line = $('<tr class="item"></tr>');
-                var line = {};
-
-                $line.attr('id', 'list' + data['id'].toString());
-
-                var render_cell = function(column) {
-                    var $cell = $('<td></td>');
-
-                    if (column.view) {
-                        $cell.bind('refreshcell-smilisting', function(event, data) {
-                            var $cell = $(this);
-                            var value = null;
-
-                            if (column.name) {
-                                value = data[column.name];
-                            };
-                            listingcolumns.render($cell, {
-                                data: data,
-                                name: column.view,
-                                ifaces: ['object'],
-                                args: [smi, column, value]});
-                            event.stopPropagation();
-                            event.preventDefault();
-                        });
-                        if (column.name) {
-                            $cell.bind('inputcell-smilisting', function(event, data) {
-                                var $cell = $(this);
-                                var $field = $('<input type="text" />');
-
-                                $field.val(data[column.name]);
-                                $cell.empty();
-                                $cell.append($field);
-                                event.stopPropagation();
-                                event.preventDefault();
-                            });
-                        };
-                    };
-                    $line.append($cell);
-                };
-
-                infrae.utils.each(configuration.columns, render_cell);
-
-                $.extend(line, {
-                    update: function(data) {
-                        if (data != undefined) {
-                            $line.data('smilisting', data);
-                        } else {
-                            data = $line.data('smilisting');
-                        };
-                        $line.children().each(function() {
-                            $(this).triggerHandler('refreshcell-smilisting', data);
-                        });
-                    },
-                    input: function(names) {
-                        var data = $line.data('smilisting');
-
-                        infrae.utils.each(names, function(name) {
-                            var index = configuration.column_index(name);
-                            var $cell = $line.children(':eq(' + index + ')');
-
-                            $cell.triggerHandler('inputcell-smilisting', data);
-                        });
-                        $line.addClass('inputized');
-                    },
-                    values: function(names) {
-                        var data = $line.data('smilisting');
-                        var values = {id: data['id']};
-
-                        infrae.utils.each(names, function(name) {
-                            var index = configuration.column_index(name);
-                            var $cell = $line.children(':eq(' + index + ')');
-
-                            values[name] = $cell.find('input').val();
-                        });
-                        return values;
-                    }
-                });
-
-                line.update(data);
-                $line.data('smilisting-line', line);
-                $container.append($line);
-                return $line.get(0);
-            };
-
-            var add_lines = function(lines, initial) {
-                if (lines.length) {
-                    if (!initial) {
-                        // Remove any eventual empty line
-                        $container.children('.empty').remove();
-                    };
-                    // Fill in table
-                    var new_lines = infrae.utils.map(lines, render_line);
-                    $container.trigger('containerchange-smilisting');
-                    return new_lines;
-                } else if (initial) {
-                    // Add a message no lines.
-                    $container.append(
-                        '<tr class="empty"><td colpsan="' + configuration.columns.length + '">There is no items here.</td></tr>');
-                };
-                return [];
-            };
-
-            // Add default data
-            add_lines(lines, true);
-            return {
-                add: add_lines,
-                $container: $container};
-        };
-
         infrae.views.view({
             iface: 'listing',
             name: 'content',
@@ -480,25 +521,6 @@
                 var events = {
                     status: infrae.deferred.Callbacks(),
                     content: infrae.deferred.Callbacks()
-                };
-
-                var get_dom_line = function(id) {
-                    return document.getElementById('list' + id.toString());
-                };
-                var get_line = function(id) {
-                    return $(get_dom_line(id));
-                };
-                var get_lines = function(ids) {
-                    if (ids.length) {
-                        var index = ids.length - 1;
-                        var $lines = $(get_dom_line(ids[index]));
-
-                        while(index--) {
-                            $lines = $lines.add(get_dom_line(ids[index]));
-                        };
-                        return $lines;
-                    };
-                    return $([]);
                 };
 
                 // Then a content event is trigger, the context is the following object.
@@ -678,19 +700,25 @@
                                 configuration.name,
                                 configuration,
                                 data.items[configuration.name],
-                                function ($items) {
-                                    if (selection.toggle($items)) {
-                                        events.status.invoke();
-                                    };
-                                },
                                 function (data) {
                                     return smi.ajax.query(
                                         action_url_template.expand({path: smi.opened.path, action: configuration.sortable.action}),
                                         data);
-                                });
+                                },
+                                smi);
                             $containers = $containers.add(container.$container);
                             by_name[configuration.name] = container;
                         });
+
+                        // Selection
+                        render_selection(
+                            $containers,
+                            function ($items) {
+                                if (selection.toggle($items)) {
+                                    events.status.invoke();
+                                };
+                            },
+                            smi.shortcuts);
 
                         // Bind and update the listing column sizes
                         update_container_sizes();

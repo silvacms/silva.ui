@@ -78,7 +78,7 @@
                  * @param callback: callback to execute
                  */
                 bind: function(name, group, keys, callback) {
-                    var is_current = (current_name() == name);
+                    var is_current = (current_name() === name);
 
                     if (group == undefined)
                         group = 'default';
@@ -87,8 +87,9 @@
                         if (handlers[name][group] == undefined)
                             handlers[name][group] = {};
                         handlers[name][group][key] = callback;
-                        if (is_current)
+                        if (is_current) {
                             $(document).bind('keydown', key, callback);
+                        }
                     };
                 },
                 /**
