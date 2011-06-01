@@ -174,6 +174,7 @@
                             if (shortcut) {
                                 smi.shortcuts.bind('form', null, [shortcut], function() {
                                     $control.click();
+                                    return false;
                                 });
                             };
                         });
