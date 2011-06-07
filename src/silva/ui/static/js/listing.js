@@ -183,7 +183,7 @@
 
         var get_hovered_row = function() {
             if ($hovered_row === null) {
-                $hovered_row = $containers.find('tr.item:first');
+                $hovered_row = $containers.first().find('tr.item:first');
                 $hovered_row.addClass("hover");
             };
             return $hovered_row;
