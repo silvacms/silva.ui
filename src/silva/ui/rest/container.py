@@ -71,7 +71,7 @@ class TemplateToolbarContainerListing(rest.REST):
         return self.template.render(self)
 
 
-icon_width = 20
+icon_width = 26
 pubstate_width = 32
 
 

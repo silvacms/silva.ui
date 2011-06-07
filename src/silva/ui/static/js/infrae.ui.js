@@ -127,7 +127,7 @@
          * @param options: Object which can contain a 'source' jQuery object or a
          * 'fixedColumns' object containing columnindex:pixelwidth values
          */
-        updateTableColumnsWidths: function($table, options, reference) {
+        updateTableColumnsWidths: function($table, options, $reference) {
             if (typeof(options.fixed) != 'object') {
                 options.fixed = {};
             };
@@ -136,23 +136,22 @@
                 var colComputedWidths = {};
                 var fixedWidths = {};
                 var totalWidth = 0;
-                var newColWidth;
 
-                $table.css("table-layout", "auto");
-                if (reference !== undefined) {
-                    var regex = /width: ([0-9]+)([pxem%]*)/;
+                if ($reference !== undefined) {
+                    var regex = /([0-9]+)([em%]*)/;
 
-                    reference.find('tr:visible:first').find('td, th').each(function(i) {
-                        var match = $(this).attr('style').toLowerCase().match(regex);
+                    $reference.find("colgroup col").each(function(i) {
+                        var match = $(this).attr('width').match(regex);
 
-                        colComputedWidths[i] = parseInt(match[1]);
+                        colComputedWidths[i] = match[1];
                         fixedWidths[i] = match[2];
                     });
                 } else {
-                    $table.find('tr:visible:first').find('td').each(function(i) {
+                    $table.css("table-layout", "auto");
+                    $table.find("tr:visible:first td").each(function(i) {
                         if (options.fixed[i]) {
                             colComputedWidths[i] = options.fixed[i];
-                            fixedWidths[i] = 'px';
+                            fixedWidths[i] = null;
                         } else {
                             colComputedWidths[i] = $(this).outerWidth();
                         };
@@ -161,16 +160,18 @@
                 };
 
                 $table.css("table-layout", "fixed");
-                for (var i in colComputedWidths) {
-                    if (fixedWidths[i]) {
-                        newColWidth = colComputedWidths[i].toString() + fixedWidths[i];
+                $table.find('colgroup col').each(function (i) {
+                    var newColWidth;
+
+                    if (fixedWidths[i] !== undefined) {
+                        newColWidth = colComputedWidths[i];
+                        if (fixedWidths[i])
+                            newColWidth += fixedWidths[i];
                     } else {
                         newColWidth = Math.round(colComputedWidths[i] / totalWidth * 100) + '%';
                     };
-                    $table.find("tr").each(function() {
-                        $(this).children().eq(i).css("width", newColWidth);
-                    });
-                };
+                    $(this).attr("width", newColWidth);
+                });
             });
         }
     });

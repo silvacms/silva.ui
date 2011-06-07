@@ -11,15 +11,7 @@
             return {
                 column: column,
                 value: value,
-                jsont: '<a rel="{column.action|htmltag}" href="{data.path|htmltag}">{value}</a>',
-                render: function() {
-                    var $link = $content.children('a');
-
-                    $link.bind('click', function(event) {
-                        smi.open_screen_from_link($link);
-                        return false;
-                    });
-                }
+                jsont: '<a class="open-screen" rel="{column.action|htmltag}" href="{data.path|htmltag}">{value}</a>'
             };
         }
     });
@@ -54,7 +46,7 @@
             return {
                 column: column,
                 value: value,
-                jsont: '<div class="actions"><ol><li class="last-action"><a class="ui-state-default" rel="{column.index.screen|htmltag}" href="{data.path|htmltag}"><div class="dropdown-icon"><ins class="ui-icon ui-icon-triangle-1-s" /></div><span>{column.index.caption}</span></a><div class="dropdown"><ol></ol></div></li></ol></div>',
+                jsont: '<div class="actions"><ol><li class="last-action"><a class="ui-state-default open-screen" rel="{column.index.screen|htmltag}" href="{data.path|htmltag}"><div class="dropdown-icon"><ins class="ui-icon ui-icon-triangle-1-s" /></div><span>{column.index.caption}</span></a><div class="dropdown"><ol></ol></div></li></ol></div>',
                 render: function() {
                     var $opener = $content.find('div.dropdown-icon');
                     var $dropdown = $content.find('div.dropdown');
@@ -68,17 +60,12 @@
                             (entry.item_match == undefined ||
                              infrae.utils.match(entry.item_match, [data]))){
                             $entries.append(
-                                '<li><a class="ui-state-default" href="' + data.path +
+                                '<li><a class="ui-state-default open-screen" href="' + data.path +
                                     '" rel="' + entry.screen + '"><span>' +
                                     entry.caption + '</span></a></li>');
                         };
                     };
-
                     $content.addClass('hasdropdown');
-                    $content.delegate('a', 'click', function(event) {
-                        smi.open_screen_from_link($(event.target).parent('a'));
-                        return false;
-                    });
                     $opener.bind('click', function(event) {
                         $dropdown.fadeToggle();
                         return false;
@@ -96,14 +83,9 @@
         factory: function($content, data, smi, column, value) {
             return {
                 column: column,
-                jsont: '<a href="{data.path|htmltag}" rel="{column.action|htmltag}" title="{data.title|htmltag}"><ins class="icon"></ins></a>',
+                jsont: '<a class="open-screen" href="{data.path|htmltag}" rel="{column.action|htmltag}" title="{data.title|htmltag}"><ins class="icon"></ins></a>',
                 render: function() {
                     infrae.ui.icon($content.find('ins'), value);
-
-                    $content.delegate('a', 'click', function(event) {
-                        smi.open_screen_from_link($(event.target).parent('a'));
-                        return false;
-                    });
                 }
             };
         }
@@ -132,9 +114,13 @@
      */
     var render_listing_header = function($content, configuration) {
         var first_configuration = configuration.listing[0];
-        var $header = $content.find('div.listing-header tr');
+        var $table = $content.find('div.listing-header table');
+        var $header = $table.find('tr');
 
-        infrae.ui.selection.disable($header);
+        $table.prepend("<colgroup>" +
+                       Array(first_configuration.columns.length + 1).join("<col></col>") +
+                       "</colgroup>");
+
         $.each(first_configuration.columns, function(i, column) {
             var $cell = $('<th></th>');
 
@@ -143,6 +129,8 @@
             };
             $header.append($cell);
         });
+
+        infrae.ui.selection.disable($header);
     };
 
     /**
@@ -190,13 +178,12 @@
      */
     var render_selection = function($containers, selector, shortcuts) {
         // Row selection
-        var $tables = $containers.find('table');
         var last_selected_index = null;
         var $hovered_row = null;
 
         var get_hovered_row = function() {
             if ($hovered_row === null) {
-                $hovered_row = $tables.find('tr.item:first');
+                $hovered_row = $containers.find('tr.item:first');
                 $hovered_row.addClass("hover");
             };
             return $hovered_row;
@@ -249,6 +236,12 @@
             };
         };
 
+        // Actions with mouse, to be bound before row selection
+        $containers.delegate('tr.item a.open-screen', 'click', function(event) {
+            smi.open_screen_from_link($(event.target).parents('a.open-screen'));
+            return false;
+        });
+
         // Row selection with mouse
         $containers.delegate('tr.item', 'click', function(event) {
             var target = $(event.target);
@@ -292,7 +285,13 @@
     var render_container = function(name, configuration, lines, mover, smi) {
         var $content = $('dd.' + name);
         var $header = $('dt.' + name);
-        var $container = $content.find('tbody');
+        var $table = $content.find('table');
+        var $container = $table.find('tbody');
+
+        // For setting column widths, set column groups.
+        $table.prepend("<colgroup>" +
+                       Array(configuration.columns.length + 1).join("<col></col>") +
+                       "</colgroup>");
 
         // Collapse feature / table header.
         render_container_header($header, $content, configuration);
@@ -406,7 +405,6 @@
 
         // Bind table sort if needed
         if (configuration.sortable) {
-            var $table = $content.find('table');
             var row_original_index = null;
 
             $table.tableDnD({
@@ -462,7 +460,8 @@
 
         return {
             add: add_lines,
-            $container: $container};
+            $container: $container,
+            $table: $table};
     };
 
     var get_dom_line = function(id) {
@@ -626,7 +625,7 @@
                     var other_layouts = [];
 
                     $.each(configuration.listing, function(i, configuration) {
-                        var $table = by_name[configuration.name].$container.parent();
+                        var $table = by_name[configuration.name].$table;
 
                         if ($table.is(':visible')) {
                             if ($reference === null) {
@@ -640,11 +639,12 @@
                     });
 
                     if ($reference !== null) {
-                        infrae.ui.updateTableColumnsWidths($reference, layout);
-                        infrae.ui.updateTableColumnsWidths($header, {}, $reference);
+                        var update = infrae.ui.updateTableColumnsWidths;
+                        update($reference, layout);
+                        update($header, {}, $reference);
 
                         for (var i=0; i < others.length; i++) {
-                            infrae.ui.updateTableColumnsWidths(others[i], other_layouts[i], $reference);
+                            update(others[i], other_layouts[i], $reference);
                         };
                     };
                 };
