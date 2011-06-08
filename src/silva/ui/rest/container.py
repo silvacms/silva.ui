@@ -129,7 +129,7 @@ class ColumnsContainerListing(UIREST):
                             {'view': 'move',
                              'name': 'moveable'}],
                      'sortable':
-                         {'available': {'access': ['manage', 'publish', 'write']},
+                         {'content_match': {'access': ['manage', 'publish', 'write']},
                           'action': 'order'},
                      'collapsed': False},
                     {'name': 'assets',

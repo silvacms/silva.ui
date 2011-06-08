@@ -7,7 +7,7 @@
 
     listingcolumns.register({
         name: 'action',
-        factory: function($content, data, smi, column, value) {
+        factory: function($content, data, column, value) {
             return {
                 column: column,
                 value: value,
@@ -18,7 +18,7 @@
 
     listingcolumns.register({
         name: 'text',
-        factory: function($content, data, smi, column, value) {
+        factory: function($content, data, column, value) {
             return {
                 value: value,
                 jsont: '{value}'
@@ -28,7 +28,7 @@
 
     listingcolumns.register({
         name: 'move',
-        factory: function($content, data, smi, column, value) {
+        factory: function($content, data, column, value) {
             return {
                 render: function() {
                     if (value) {
@@ -42,7 +42,7 @@
 
     listingcolumns.register({
         name: 'goto',
-        factory: function($content, data, smi, column, value) {
+        factory: function($content, data, column, value) {
             return {
                 column: column,
                 value: value,
@@ -80,7 +80,7 @@
 
     listingcolumns.register({
         name: 'action-icon',
-        factory: function($content, data, smi, column, value) {
+        factory: function($content, data, column, value) {
             return {
                 column: column,
                 jsont: '<a class="open-screen" href="{data.path|htmltag}" rel="{column.action|htmltag}" title="{data.title|htmltag}"><ins class="icon"></ins></a>',
@@ -93,7 +93,7 @@
 
     listingcolumns.register({
         name: 'workflow',
-        factory: function($content, data, smi, column, value) {
+        factory: function($content, data, column, value) {
             return {
                 html: '<ins class="state first"></ins><ins class="state"></ins>',
                 render: function() {
@@ -282,7 +282,7 @@
         });
     };
 
-    var render_container = function(name, configuration, lines, mover, smi) {
+    var render_container = function(name, configuration, lines, mover) {
         var $content = $('dd.' + name);
         var $header = $('dt.' + name);
         var $table = $content.find('table');
@@ -318,7 +318,7 @@
                             data: data,
                             name: column.view,
                             ifaces: ['object'],
-                            args: [smi, column, value]});
+                            args: [column, value]});
                         event.stopPropagation();
                         event.preventDefault();
                     });
@@ -404,7 +404,7 @@
         add_lines(lines, true);
 
         // Bind table sort if needed
-        if (configuration.sortable) {
+        if (mover) {
             var row_original_index = null;
 
             $table.tableDnD({
@@ -696,16 +696,24 @@
 
                         // Create containers
                         $.each(configuration.listing, function(i, configuration) {
+                            var mover = null;
+
+                            if (configuration.sortable &&
+                                infrae.utils.match(configuration.sortable.content_match, [data.content])) {
+                                mover = function (data) {
+                                    return smi.ajax.query(
+                                        action_url_template.expand(
+                                            {path: smi.opened.path,
+                                             action: configuration.sortable.action}),
+                                        data);
+                                };
+                            };
+
                             var container = render_container(
                                 configuration.name,
                                 configuration,
                                 data.items[configuration.name],
-                                function (data) {
-                                    return smi.ajax.query(
-                                        action_url_template.expand({path: smi.opened.path, action: configuration.sortable.action}),
-                                        data);
-                                },
-                                smi);
+                                mover);
                             $containers = $containers.add(container.$container);
                             by_name[configuration.name] = container;
                         });
