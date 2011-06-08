@@ -288,11 +288,6 @@
         var $table = $content.find('table');
         var $container = $table.find('tbody');
 
-        // For setting column widths, set column groups.
-        $table.prepend("<colgroup>" +
-                       Array(configuration.columns.length + 1).join("<col></col>") +
-                       "</colgroup>");
-
         // Collapse feature / table header.
         render_container_header($header, $content, configuration);
 
@@ -382,26 +377,35 @@
             return $line.get(0);
         };
 
-        var add_lines = function(lines, initial) {
-            if (lines.length) {
-                if (!initial) {
-                    // Remove any eventual empty line
-                    $container.children('.empty').remove();
+        var container = {
+            add: function(lines, initial) {
+                if (lines.length) {
+                    if (!initial) {
+                        $container.children('.empty').remove();
+                    };
+                    // For setting column widths, set column groups.
+                    $table.prepend("<colgroup>" +
+                                   Array(configuration.columns.length + 1).join("<col></col>") +
+                                   "</colgroup>");
+
+                    container.add = function(lines) {
+                        var new_lines = infrae.utils.map(lines, render_line);
+                        $container.trigger('containerchange-smilisting');
+                        return new_lines;
+                    };
+                    return container.add(lines);
+                } else if (initial) {
+                    // Add a message no lines.
+                    $container.append(
+                        '<tr class="empty"><td colpsan="' + configuration.columns.length + '">There is no items here.</td></tr>');
                 };
-                // Fill in table
-                var new_lines = infrae.utils.map(lines, render_line);
-                $container.trigger('containerchange-smilisting');
-                return new_lines;
-            } else if (initial) {
-                // Add a message no lines.
-                $container.append(
-                    '<tr class="empty"><td colpsan="' + configuration.columns.length + '">There is no items here.</td></tr>');
-            };
-            return [];
-        };
+                return [];
+            },
+            $container: $container,
+            $table: $table};
 
         // Add default data
-        add_lines(lines, true);
+        container.add(lines, true);
 
         // Bind table sort if needed
         if (mover) {
@@ -458,10 +462,7 @@
             });
         };
 
-        return {
-            add: add_lines,
-            $container: $container,
-            $table: $table};
+        return container;
     };
 
     var get_dom_line = function(id) {
@@ -648,6 +649,7 @@
                         };
                     };
                 };
+                events.content.add(update_container_sizes);
 
                 $.extend(listing, {
                     html_url: smi.options.listing.templates.content,
