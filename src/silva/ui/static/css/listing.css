@@ -141,6 +141,10 @@
   display: inline;
 }
 
+#workspace .listing-footer-content {
+  display: none;
+}
+
 #workspace .listing-footer .clipboard-info {
   padding: 0px 15px;
   float: right;

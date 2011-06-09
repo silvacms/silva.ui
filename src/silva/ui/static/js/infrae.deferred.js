@@ -18,8 +18,9 @@
 
             return {
                 add: function(callback, invoke) {
-                    if (invoke && context_provider)
+                    if (invoke && context_provider) {
                         callback.apply(context_provider());
+                    };
                     callbacks.push(callback);
                     return callback;
                 },
@@ -67,8 +68,9 @@
                 release: function(args) {
                     if (value) {
                         value -= 1;
-                        if (value)
+                        if (value) {
                             return;
+                        };
                     };
                     // We reached Zero, invoke the callbacks.
                     while (callbacks.length) {
@@ -79,17 +81,76 @@
                 call: function(callback) {
                     // If we have a value, delay the
                     // execution. Otherwise run it right away.
-                    if (value)
+                    if (value) {
                         callbacks.push(callback);
-                    else
+                    } else {
                         callback(last_args);
+                    };
                 }
             };
-        }
-    });
+        },
+        /**
+         * This call a list of callbacks on an array, when it have
+         * time. You can use reset to cancel the call.
+         */
+        LazyCallbacks: function() {
+            var timeout = null;
+            var jobs = [];
 
+            var Job = function (array, callback) {
+                var deferred = $.Deferred();
+                var results = [];
+                var index = 0;
+                var len = array.length;
+                var job = {
+                    run: function() {
+                        var start = +new Date();
 
-    $.extend(module, {
+                        for (;index < len; index++) {
+                            results.push(callback(array[index]));
+                            if (+new Date() - start > 50) {
+                                timeout = setTimeout(job.run, 25);
+                                return;
+                            };
+                        };
+                        timeout = null;
+                        jobs.shift();
+                        if (jobs.length) {
+                            jobs[0].run();
+                        };
+                        deferred.resolve(results);
+                    },
+                    deferred: deferred
+                };
+                return job;
+            };
+
+            return {
+                reset: function() {
+                    var index = jobs.length;
+
+                    if (timeout) {
+                        clearTimeout(timeout);
+                        timeout = null;
+                    };
+                    while (index--) {
+                        jobs[index].deferred.reject();
+                    };
+                    jobs = [];
+                },
+                add: function(array, callback) {
+                    var idle = jobs.length === 0;
+                    var job = Job(array, callback);
+
+                    jobs.push(job);
+                    if (idle) {
+                        job.run();
+                    };
+
+                    return job.deferred.promise();
+                }
+            };
+        },
         FluxCapacitor: function() {
             var handlers = [{
                 incoming: module.Callbacks(),

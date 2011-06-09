@@ -129,6 +129,10 @@
 
                     // Render counter information
                     render_counters($content.find('.counters'), listing);
+
+                    // Remove loading message, display tools
+                    $content.children('.listing-footer-loading').hide();
+                    $content.children('.listing-footer-content').show();
                 }
             };
         }

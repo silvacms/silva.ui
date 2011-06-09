@@ -92,24 +92,31 @@
 
         /** Actually build the structure */
         build: function(options) {
-            // Set up the defaults if any
-
+            // Set up configuration and event handler
             this.each(function() {
-                // This is bound to each matching table, set up the defaults and override with user options
-                this.tableDnDConfig = jQuery.extend({
+                var table = this;
+                var config = jQuery.extend({
                     onDragStyle: null,
                     onDropStyle: null,
-                    // Add in the default class for whileDragging
                     onDragClass: "tDnD_whileDrag",
                     onDrop: null,
                     onDragStart: null,
                     scrollAmount: 5,
-                    serializeRegexp: /[^\-]*$/, // The regular expression to use to trim row IDs
-                    serializeParamName: null, // If you want to specify another parameter name instead of the table ID
-                    dragHandle: null // If you give the name of a class here, then only Cells with this class will be draggable
+                    dragHandle: null
                 }, options || {});
-                // Now make the rows draggable
-                module.makeDraggable(this);
+
+                jQuery(table).delegate("td." + config.dragHandle, "mousedown", function(ev) {
+                    var cell = ev.target;
+                    module.dragObject = cell.parentNode;
+                    module.currentTable = table;
+                    module.mouseOffset = module.getMouseOffset(cell, ev);
+                    if (config.onDragStart) {
+                        config.onDragStart(cell);
+                    }
+                    return false;
+                });
+
+                table.tableDnDConfig = config;
             });
 
             // Now we need to capture the mouse up and mouse move event
@@ -122,67 +129,12 @@
             return this;
         },
 
-        /** This function makes all the rows on the table draggable apart from those marked as "NoDrag" */
-        makeDraggable: function(table) {
-            var config = table.tableDnDConfig;
-            if (table.tableDnDConfig.dragHandle) {
-                // We only need to add the event to the specified cells
-                var cells = jQuery("td."+table.tableDnDConfig.dragHandle, table);
-                cells.each(function() {
-                    // The cell is bound to "this"
-                    jQuery(this).mousedown(function(ev) {
-                        module.dragObject = this.parentNode;
-                        module.currentTable = table;
-                        module.mouseOffset = module.getMouseOffset(this, ev);
-                        if (config.onDragStart) {
-                            // Call the onDrop method if there is one
-                            config.onDragStart(table, this);
-                        }
-                        return false;
-                    });
-                });
-            } else {
-                // For backwards compatibility, we add the event to the whole row
-                var rows = jQuery("tr", table); // get all the rows as a wrapped set
-                rows.each(function() {
-                    // Iterate through each row, the row is bound to "this"
-                    var row = jQuery(this);
-                    if (! row.hasClass("nodrag")) {
-                        row.mousedown(function(ev) {
-                            if (ev.target.tagName == "TD") {
-                                module.dragObject = this;
-                                module.currentTable = table;
-                                module.mouseOffset = module.getMouseOffset(this, ev);
-                                if (config.onDragStart) {
-                                    // Call the onDrop method if there is one
-                                    config.onDragStart(table, this);
-                                }
-                                return false;
-                            }
-                        }).css("cursor", "move"); // Store the tableDnD object
-                    }
-                });
-            }
-        },
-
-        updateTables: function() {
-            this.each(function() {
-                // this is now bound to each matching table
-                if (this.tableDnDConfig) {
-                    module.makeDraggable(this);
-                }
-            });
-        },
-
         /** Get the mouse coordinates from the event (allowing for browser differences) */
-        mouseCoords: function(ev){
-            if(ev.pageX || ev.pageY){
-                return {x:ev.pageX, y:ev.pageY};
+        mousePosition: function(ev){
+            if(ev.pageY){
+                return ev.pageY;
             }
-            return {
-                x:ev.clientX + document.body.scrollLeft - document.body.clientLeft,
-                y:ev.clientY + document.body.scrollTop  - document.body.clientTop
-            };
+            return ev.clientY + document.body.scrollTop  - document.body.clientTop;
         },
 
         /** Given a target element and a mouse event, get the mouse offset from that element.
@@ -190,36 +142,27 @@
         getMouseOffset: function(target, ev) {
             ev = ev || window.event;
 
-            var docPos    = this.getPosition(target);
-            var mousePos  = this.mouseCoords(ev);
-            return {x:mousePos.x - docPos.x, y:mousePos.y - docPos.y};
+            return this.mousePosition(ev) - this.documentPosition(target);
         },
 
         /** Get the position of an element by going up the DOM tree and adding up all the offsets */
-        getPosition: function(e){
-            var left = 0;
+        documentPosition: function(e){
             var top  = 0;
-            /** Safari fix -- thanks to Luis Chato for this! */
+
+            /**
+             * Safari fix
+             * http://jacob.peargrove.com/blog/2006/technical/table-row-offsettop-bug-in-safari/
+             */
             if (e.offsetHeight == 0) {
-                /** Safari 2 doesn't correctly grab the offsetTop of a table row
-                    this is detailed here:
-                    http://jacob.peargrove.com/blog/2006/technical/table-row-offsettop-bug-in-safari/
-                    the solution is likewise noted there, grab the offset of a table cell in the row - the firstChild.
-                    note that firefox will return a text node as a first child, so designing a more thorough
-                    solution may need to take that into account, for now this seems to work in firefox, safari, ie */
-                e = e.firstChild; // a table cell
-            }
+                e = e.firstChild;
+            };
 
             while (e.offsetParent){
-                left += e.offsetLeft;
-                top  += e.offsetTop;
-                e     = e.offsetParent;
-            }
-
-            left += e.offsetLeft;
+                top += e.offsetTop;
+                e = e.offsetParent;
+            };
             top  += e.offsetTop;
-
-            return {x:left, y:top};
+            return top;
         },
 
         mousemove: function(ev) {
@@ -229,8 +172,8 @@
 
             var dragObj = jQuery(module.dragObject);
             var config = module.currentTable.tableDnDConfig;
-            var mousePos = module.mouseCoords(ev);
-            var y = mousePos.y - module.mouseOffset.y;
+            var mousePos = module.mousePosition(ev);
+            var y = mousePos - module.mouseOffset;
             //auto scroll the window
             var yOffset = window.pageYOffset;
             if (document.all) {
@@ -246,12 +189,12 @@
 
             }
 
-            if (mousePos.y-yOffset < config.scrollAmount) {
+            if (mousePos-yOffset < config.scrollAmount) {
                 window.scrollBy(0, -config.scrollAmount);
             } else {
                 var windowHeight = window.innerHeight ? window.innerHeight
                     : document.documentElement.clientHeight ? document.documentElement.clientHeight : document.body.clientHeight;
-                if (windowHeight-(mousePos.y-yOffset) < config.scrollAmount) {
+                if (windowHeight-(mousePos-yOffset) < config.scrollAmount) {
                     window.scrollBy(0, config.scrollAmount);
                 }
             }
@@ -286,12 +229,12 @@
         /** We're only worried about the y position really, because we can only move rows up and down */
         findDropTargetRow: function(draggedRow, y) {
             var rows = module.currentTable.rows;
-            for (var i=0; i<rows.length; i++) {
+            for (var i=0, len=rows.length; i<len; i++) {
                 var row = rows[i];
-                var rowY    = this.getPosition(row).y;
+                var rowY = this.documentPosition(row);
                 var rowHeight = parseInt(row.offsetHeight)/2;
                 if (row.offsetHeight == 0) {
-                    rowY = this.getPosition(row.firstChild).y;
+                    rowY = this.documentPosition(row.firstChild);
                     rowHeight = parseInt(row.firstChild.offsetHeight)/2;
                 }
                 // Because we always have to insert before, we need to offset the height a bit
@@ -325,10 +268,10 @@
                 } else {
                     jQuery(droppedRow).css(config.onDropStyle);
                 }
-                module.dragObject   = null;
+                module.dragObject = null;
                 if (config.onDrop) {
                     // Call the onDrop method if there is one
-                    config.onDrop(module.currentTable, droppedRow);
+                    config.onDrop(droppedRow);
                 }
                 module.currentTable = null; // let go of the table too
             }
@@ -336,7 +279,6 @@
     };
 
     jQuery.fn.extend({
-        tableDnD : module.build,
-        tableDnDUpdate : module.updateTables
+        tableDnD : module.build
     });
 })(jQuery);

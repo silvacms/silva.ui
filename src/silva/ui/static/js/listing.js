@@ -282,6 +282,8 @@
         });
     };
 
+    var container_worker = infrae.deferred.LazyCallbacks();
+
     var render_container = function(name, configuration, lines, mover) {
         var $content = $('dd.' + name);
         var $header = $('dt.' + name);
@@ -388,10 +390,8 @@
                                    Array(configuration.columns.length + 1).join("<col></col>") +
                                    "</colgroup>");
 
-                    container.add = function(lines) {
-                        var new_lines = infrae.utils.map(lines, render_line);
-                        $container.trigger('containerchange-smilisting');
-                        return new_lines;
+                    this.add = function(lines) {
+                        return container_worker.add(lines, render_line);
                     };
                     return container.add(lines);
                 } else if (initial) {
@@ -399,13 +399,16 @@
                     $container.append(
                         '<tr class="empty"><td colpsan="' + configuration.columns.length + '">There is no items here.</td></tr>');
                 };
-                return [];
+                var deferred = $.Deferred();
+                deferred.resolve([]);
+                return deferred.promise();
             },
             $container: $container,
-            $table: $table};
+            $table: $table
+        };
 
         // Add default data
-        container.add(lines, true);
+        container.promise = container.add(lines, true);
 
         // Bind table sort if needed
         if (mover) {
@@ -418,16 +421,14 @@
                     // don't drop on the first row, it is default.
                     return $(candidate).data('smilisting').moveable != 0;
                 },
-                onDragStart: function(table, cell) {
-                    var $table = $(table);
+                onDragStart: function(row) {
                     // Reset hover style and mouse last_selected_index. Save row index.
-                    row_original_index = $(cell).parent('tr').index();
+                    row_original_index = $(row).parent('tr').index();
                     $table.trigger('resetselection-smilisting');
                     $table.removeClass('static');
                 },
-                onDrop: function(table, row) {
+                onDrop: function(row) {
                     var $line = $(row);
-                    var $table = $(table);
                     var position = $line.index();
                     var data = $line.data('smilisting');
 
@@ -437,7 +438,7 @@
                             row_original_index -= 1; // Fix original index in case of failure.
 
                         // If the first line is not moveable, reduce the index of 1.
-                        if (!$table.find('tbody tr.item:first').data('smilisting').moveable) {
+                        if (!$container.children('tr.item:first').data('smilisting').moveable) {
                             position -= 1;
                         };
                         mover([{name: 'content', value: data['id']},
@@ -446,7 +447,7 @@
                                        // The moving failed. Restore the row position.
                                        $line.detach();
                                        $line.insertAfter(
-                                           $table.find('tbody tr.item:eq(' + row_original_index + ')'));
+                                           $container.children('tr.item:eq(' + row_original_index + ')'));
                                    };
                                    $table.addClass('static');
                                    return success;
@@ -455,10 +456,6 @@
                         $table.addClass('static');
                     };
                 }
-            });
-            // If content change, reinitialize the DND
-            $container.bind('containerchange-smilisting', function() {
-                $table.tableDnDUpdate();
             });
         };
 
@@ -697,6 +694,7 @@
                         render_listing_header($content, configuration);
 
                         // Create containers
+                        var promises = [];
                         $.each(configuration.listing, function(i, configuration) {
                             var mover = null;
 
@@ -716,6 +714,7 @@
                                 configuration,
                                 data.items[configuration.name],
                                 mover);
+                            promises.push(container.promise);
                             $containers = $containers.add(container.$container);
                             by_name[configuration.name] = container;
                         });
@@ -730,18 +729,23 @@
                             },
                             smi.shortcuts);
 
-                        // Bind and update the listing column sizes
-                        update_container_sizes();
                         // Then collpasing change, update column sizes, and trigger a new status.
+                        update_container_sizes();
                         $content.bind('collapsingchange-smilisting', function() {
                             update_container_sizes();
                             events.status.invoke();
                         });
 
-                        // Render footer
-                        $content.find('.listing-footer').render({data: data, name: 'footer', args: [smi, this]});
+                        $.when.apply(null, promises).done(function () {
+                            // Update the listing column sizes
+                            update_container_sizes();
+                            // Render footer
+                            $content.find('.listing-footer').render(
+                                {data: data, name: 'footer', args: [smi, listing]});
+                        });
                     },
                     cleanup: function() {
+                        container_worker.reset();
                         smi.shortcuts.remove('listing');
                         $content.unbind('collapsingchange-smilisting');
                         $content.empty();

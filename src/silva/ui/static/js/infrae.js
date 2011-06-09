@@ -77,12 +77,16 @@
          * @param callback: callback to call on each element of the array.
          */
         each: function(array, callback) {
-            for (var index=0; index < array.length; index++) {
+            var index, len;
+
+            for (index=0, len=array.length; index < len; index++) {
                 callback(array[index]);
             };
         },
         apply_on_each: function(array, callback) {
-            for (var index=0; index < array.length; index++) {
+            var index, len;
+
+            for (index=0, len=array.length; index < len; index++) {
                 callback.apply(array[index]);
             };
         },
@@ -93,19 +97,47 @@
          * @param callback: callback to call on each element of the array.
          */
         map: function(array, callback, result) {
-            if (result == undefined) {
+            var index, len;
+
+            if (result === undefined) {
                 result = [];
             };
-            for (var index=0; index < array.length; index++) {
+            for (index=0, len=array.length; index < len; index++) {
                 result.push(callback(array[index]));
             };
             return result;
         },
-        apply_on_map: function(array, callback, result) {
-            if (result == undefined) {
+        lazy_map: function(array, callback, result) {
+            var index = 0;
+            var len = array.length;
+            var deferred = $.Deferred();
+
+            if (result === undefined) {
                 result = [];
             };
-            for (var index=0; index < array.length; index++) {
+
+            var work = function() {
+                var start = +new Date();
+
+                for (;index < len; index++) {
+                    result.push(callback(array[index]));
+                    if (+new Date() - start > 50) {
+                        setTimeout(work, 50);
+                        return;
+                    };
+                };
+                deferred.resolve(result);
+            };
+            work();
+            return deferred.promise();
+        },
+        apply_on_map: function(array, callback, result) {
+            var index, len;
+
+            if (result === undefined) {
+                result = [];
+            };
+            for (index=0, len=array.length; index < len; index++) {
                 result.push(callback.apply(array[index]));
             };
             return result;

@@ -65,15 +65,16 @@
                 modif += "shift+";
             };
 
+            // Don't fire in text-accepting inputs that we didn't
+            // directly bind to (unless it have some modifier.)
+            if (!modif &&
+                this !== event.target &&
+                (/textarea|select/i.test(event.target.nodeName) || event.target.type === "text"))
+                return;
+
             if (special) {
                 possible[modif + special] = true;
             } else {
-                // Don't fire in text-accepting inputs that we didn't
-                // directly bind to (unless it have some modifier.)
-                if (!modif &&
-                    this !== event.target &&
-                    (/textarea|select/i.test(event.target.nodeName) || event.target.type === "text"))
-                    return;
 
                 possible[modif + character] = true;
                 possible[modif + jQuery.hotkeys.shiftNums[character]] = true;
