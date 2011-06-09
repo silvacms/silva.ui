@@ -2339,7 +2339,7 @@
 			hide_checkboxes : function () { this.get_container().children("ul").addClass("jstree-no-checkboxes"); },
 
 			_repair_state : function (obj) {
-				obj = this._get_node(obj);
+				obj = this._get_node(obj).first();
 				if(!obj.length) { return; }
 				var a = obj.find("> ul > .jstree-checked").length,
 					b = obj.find("> ul > .jstree-undetermined").length,
