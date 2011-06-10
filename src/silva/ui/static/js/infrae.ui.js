@@ -54,13 +54,13 @@
          */
         ConfirmationDialog: function(data) {
             var deferred = $.Deferred();
-            var message = $('<div></div>');
-            var dialog = {modal: true, buttons: {}};
+            var $message = $('<div></div>');
+            var configuration = {modal: true, buttons: {}};
 
             if (data.title) {
-                message.attr('title', data.title);
+                $message.attr('title', data.title);
             };
-            message.html(data.message);
+            $message.html(data.message);
             if (!data.buttons) {
                 data.buttons = {
                     Ok: function() {
@@ -72,13 +72,14 @@
                 };
             };
             $.each(data.buttons, function(name, callback) {
-                dialog.buttons[name] = function() {
+                configuration.buttons[name] = function() {
                     callback() ? deferred.resolveWith(this) : deferred.rejectWith(this);
                 };
             });
-            message.dialog(dialog);
+            $message.dialog(configuration);
             deferred.always(function () {
-                $(this).dialog('close');
+                $message.dialog('close');
+                $message.remove();
             });
             return deferred.promise();
         },
