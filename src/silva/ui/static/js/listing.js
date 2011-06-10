@@ -282,7 +282,7 @@
         });
     };
 
-    var container_worker = infrae.deferred.LazyCallbacks();
+    var worker = infrae.deferred.LazyCallbacks();
 
     var render_container = function(name, configuration, lines, mover) {
         var $content = $('dd.' + name);
@@ -391,7 +391,7 @@
                                    "</colgroup>");
 
                     this.add = function(lines) {
-                        return container_worker.add(lines, render_line);
+                        return worker.add(lines, render_line);
                     };
                     return container.add(lines);
                 } else if (initial) {
@@ -464,9 +464,6 @@
 
     var get_dom_line = function(id) {
         return document.getElementById('list' + id.toString());
-    };
-    var get_line = function(id) {
-        return $(get_dom_line(id));
     };
     var get_lines = function(ids) {
         if (ids.length) {
@@ -557,28 +554,41 @@
                                 },
                                 listing: {
                                     add: function(data, select) {
-                                        var added = [];
+                                        var promises = [];
 
                                         for (var name in by_name) {
                                             var lines = data[name];
 
                                             if (lines && lines.length) {
-                                                $.merge(added, by_name[name].add(lines));
+                                                promises.push(by_name[name].add(lines));
                                             };
                                         };
-                                        if (added.length) {
-                                            selection.select($(added));
-                                            transaction.require(events.content.invoke);
-                                            transaction.require(events.status.invoke);
+                                        if (promises.length) {
+                                            return $.when.apply(null, promises).pipe(function (lines) {
+                                                var $added = $(lines);
+
+                                                if ($added.length) {
+                                                    selection.select($added);
+                                                    transaction.require(events.content.invoke);
+                                                    transaction.require(events.status.invoke);
+                                                };
+                                                return $added;
+                                            });
                                         };
+                                        return null;
                                     },
                                     update: function(lines) {
                                         if (lines.length) {
-                                            infrae.utils.each(lines, function(line) {
-                                                get_line(line['id']).data('smilisting-line').update(line);
+                                            return worker.add(lines, function(data) {
+                                                var line = get_dom_line(data['id']);
+                                                $(line).data('smilisting-line').update(data);
+                                                return line;
+                                            }).pipe(function(lines) {
+                                                transaction.require(events.status.invoke);
+                                                return $(lines);
                                             });
-                                            transaction.require(events.status.invoke);
                                         };
+                                        return null;
                                     },
                                     remove: function(ids) {
                                         var $lines = get_lines(ids);
@@ -588,19 +598,23 @@
                                             transaction.require(events.content.invoke);
                                             transaction.require(events.status.invoke);
                                         };
+                                        return null;
                                     }
                                 },
                                 clipboard: {
                                     cut: function(data) {
                                         smi.clipboard.cut(data);
                                         transaction.require(events.status.invoke);
+                                        return null;
                                     },
                                     copy: function(data) {
                                         smi.clipboard.copy(data);
                                         transaction.require(events.status.invoke);
+                                        return null;
                                     },
                                     clear: function() {
                                         smi.clipboard.clear();
+                                        return null;
                                     }
                                 }
                             });
@@ -745,7 +759,7 @@
                         });
                     },
                     cleanup: function() {
-                        container_worker.reset();
+                        worker.reset();
                         smi.shortcuts.remove('listing');
                         $content.unbind('collapsingchange-smilisting');
                         $content.empty();

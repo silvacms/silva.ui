@@ -18,11 +18,16 @@
                 break;
             case 'items_implements':
                 conditions.push(function($content, data) {
-                    if (typeof(predicates.items_implements) === "string")
-                        return infrae.interfaces.isImplementedBy(predicates.items_implements, data.selection);
-                    for (var i=0; i < predicates.items_implements.length; i++)
-                        if (infrae.interfaces.isImplementedBy(predicates.items_implements[i], data.selection))
+                    if (typeof(predicates.items_implements) === "string") {
+                        return infrae.interfaces.isImplementedBy(
+                            predicates.items_implements, data.selection);
+                    };
+                    for (var i=0; i < predicates.items_implements.length; i++) {
+                        if (infrae.interfaces.isImplementedBy(
+                            predicates.items_implements[i], data.selection)) {
                             return true;
+                        };
+                    };
                     return false;
                 });
                 break;
@@ -68,23 +73,33 @@
         factory: function($content, data, transaction) {
             return {
                 render: function() {
+                    var promises = [];
+                    var promise = null;
+
                     for (var action in data.actions) {
                         switch(action) {
                         case 'remove':
-                            transaction.listing.remove(data.actions.remove);
+                            promise = transaction.listing.remove(data.actions.remove);
                             break;
                         case 'update':
-                            transaction.listing.update(data.actions.update);
+                            promise = transaction.listing.update(data.actions.update);
                             break;
                         case 'add':
-                            transaction.listing.add(data.actions.add);
+                            promise = transaction.listing.add(data.actions.add);
                             break;
                         case 'clear_clipboard':
-                            transaction.clipboard.clear(true);
+                            promise = transaction.clipboard.clear(true);
                             break;
                         };
+                        if (promise !== null) {
+                            promises.push(promise);
+                        };
                     };
-                    transaction.commit();
+                    if (promises.length) {
+                        $.when.apply(this, promises).done(transaction.commit);
+                    } else {
+                        transaction.commit();
+                    };
                 }
             };
         }

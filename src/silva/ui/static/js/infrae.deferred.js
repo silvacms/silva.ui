@@ -109,7 +109,7 @@
                         while (index < len) {
                             results.push(callback(array[index]));
                             index += 1;
-                            if (+new Date() - start > 75) {
+                            if (+new Date() - start > 50) {
                                 timeout = setTimeout(job.run, 25);
                                 return;
                             };
