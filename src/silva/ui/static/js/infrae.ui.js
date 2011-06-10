@@ -144,8 +144,10 @@
                     $reference.find("colgroup col").each(function(i) {
                         var match = $(this).attr('width').match(regex);
 
-                        colComputedWidths[i] = match[1];
-                        fixedWidths[i] = match[2];
+                        if (match) {
+                            colComputedWidths[i] = match[1];
+                            fixedWidths[i] = match[2];
+                        };
                     });
                 } else {
                     $table.css("table-layout", "auto");
