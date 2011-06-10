@@ -73,6 +73,8 @@ class TemplateToolbarContainerListing(rest.REST):
 
 icon_width = 26
 pubstate_width = 32
+goto_width = 88
+move_width = 26
 
 
 class ColumnsContainerListing(UIREST):
@@ -88,7 +90,7 @@ class ColumnsContainerListing(UIREST):
                            'versioned': ['content', 'object']},
                 'listing': [
                     {'name': 'publishables',
-                     'layout': {'fixed': {0:icon_width, 1:pubstate_width}},
+                     'layout': {'fixed': {0:icon_width, 1:pubstate_width, 6:goto_width, 7:move_width}},
                      'columns': [
                             {'name': 'icon',
                              'view': 'action-icon',
@@ -133,7 +135,7 @@ class ColumnsContainerListing(UIREST):
                           'action': 'order'},
                      'collapsed': False},
                     {'name': 'assets',
-                     'layout': {'fixed': {0:icon_width, 1:pubstate_width}},
+                     'layout': {'fixed': {0:icon_width, 1:pubstate_width, 6:goto_width, 7:move_width}},
                      'columns': [
                             {'name': 'icon',
                              'view': 'action-icon',
