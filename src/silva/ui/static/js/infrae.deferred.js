@@ -106,9 +106,10 @@
                     run: function() {
                         var start = +new Date();
 
-                        for (;index < len; index++) {
+                        while (index < len) {
                             results.push(callback(array[index]));
-                            if (+new Date() - start > 50) {
+                            index += 1;
+                            if (+new Date() - start > 75) {
                                 timeout = setTimeout(job.run, 25);
                                 return;
                             };
