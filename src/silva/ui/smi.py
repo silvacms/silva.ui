@@ -39,6 +39,8 @@ class SMI(grok.View):
 
         # Set the proper SMI skin
         smi_skin_name = self.context.get_root()._smi_skin
+        if not smi_skin_name:
+            smi_skin_name = 'silva.ui.interfaces.ISilvaUITheme'
         smi_skin = getUtility(Interface, smi_skin_name)
         applySkin(self.request, smi_skin)
 
