@@ -106,8 +106,8 @@ def get_resources(request):
     needed = fanstatic.get_needed()
     if not needed.has_resources():
         return None
-    if not needed.base_url:
-        needed.base_url = IVirtualSite(request).get_root_url()
+    if not needed.has_base_url():
+        needed.set_base_url(IVirtualSite(request).get_root_url())
     data = defaultdict(list)
     url_cache = {}
     for resource in needed.resources():

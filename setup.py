@@ -23,7 +23,7 @@ setup(name='silva.ui',
       include_package_data=True,
       zip_safe=True,
       install_requires=[
-          'fanstatic',
+          'fanstatic > 0.11',
           'five.grok',
           'infrae.rest',
           'megrok.chameleon',
