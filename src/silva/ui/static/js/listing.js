@@ -47,32 +47,23 @@
                 value: value,
                 jsont: '<div class="actions"><ol><li class="last-action"><a class="ui-state-default open-screen" rel="{column.index.screen|htmltag}" href="{data.path|htmltag}"><div class="dropdown-icon"><ins class="ui-icon ui-icon-triangle-1-s" /></div><span>{column.index.caption}</span></a><div class="dropdown"><ol></ol></div></li></ol></div>',
                 render: function() {
-                    var $opener = $content.find('div.dropdown-icon');
-                    var $dropdown = $content.find('div.dropdown');
-                    var $entries = $dropdown.children('ol');
+                    var entries = [];
 
-                    for (var i=0; i < column.menu.length; i++) {
+                    for (var i=0, len=column.menu.length; i < len; i++) {
                         var entry = column.menu[i];
 
-                        if ((entry.item_implements == undefined ||
+                        if ((entry.item_implements === undefined ||
                              infrae.interfaces.isImplementedBy(entry.item_implements, data)) &&
-                            (entry.item_match == undefined ||
+                            (entry.item_match === undefined ||
                              infrae.utils.match(entry.item_match, [data]))){
-                            $entries.append(
+                            entries.push(
                                 '<li><a class="ui-state-default open-screen" href="' + data.path +
                                     '" rel="' + entry.screen + '"><span>' +
                                     entry.caption + '</span></a></li>');
                         };
                     };
-                    $content.addClass('hasdropdown');
-                    $content.addClass('active');
-                    $opener.bind('click', function(event) {
-                        $dropdown.fadeToggle();
-                        return false;
-                    });
-                    $dropdown.bind('mouseleave', function() {
-                        $dropdown.fadeOut('fast');
-                    });
+                    $content.find('div.dropdown ol').html(entries.join(''));
+                    $content.addClass('hasdropdown active');
                 }
             };
         }
@@ -237,9 +228,26 @@
             };
         };
 
-        // Actions with mouse, to be bound before row selection
+        // Actions
         $containers.delegate('tr.item a.open-screen', 'click', function(event) {
             smi.open_screen_from_link($(event.target).parents('a.open-screen'));
+            return false;
+        });
+
+        // Drop-downs
+        var opened_dropdown = undefined;
+        $containers.delegate('tr.item div.dropdown', 'mouseleave', function(event) {
+            if (opened_dropdown !== undefined) {
+                opened_dropdown.fadeOut('fast');
+                opened_dropdown = undefined;
+            };
+        });
+        $containers.delegate('tr.item div.dropdown-icon', 'click', function(event) {
+            if (opened_dropdown !== undefined) {
+                opened_dropdown.fadeOut('fast');
+            };
+            opened_dropdown = $(event.target).parents('a').next();
+            opened_dropdown.fadeToggle();
             return false;
         });
 
