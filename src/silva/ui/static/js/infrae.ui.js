@@ -74,8 +74,8 @@
             $.each(data.buttons, function(name, callback) {
                 configuration.buttons[name] = function() {
                     var result = callback();
-                    if (result.when != undefined) {
-                        result.when(deferred);
+                    if (result.pipe != undefined) {
+                        result.pipe(deferred.resolve, deferred.reject);
                     } else {
                         result ? deferred.resolve() : deferred.reject();
                     }
