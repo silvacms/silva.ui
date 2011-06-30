@@ -94,7 +94,7 @@
         build: function(options) {
             // Set up configuration and event handler
             this.each(function() {
-                var table = this;
+                var tbody = this;
                 var config = jQuery.extend({
                     onDragStyle: null,
                     onDropStyle: null,
@@ -105,18 +105,25 @@
                     dragHandle: null
                 }, options || {});
 
-                jQuery(table).delegate("td." + config.dragHandle, "mousedown", function(ev) {
-                    var cell = ev.target;
-                    module.dragObject = cell.parentNode;
-                    module.currentTable = table;
-                    module.mouseOffset = module.getMouseOffset(cell, ev);
+                jQuery(tbody).delegate("td." + config.dragHandle, "mousedown", function(event) {
+                    var cell = event.target;
+                    var drag = true;
+
                     if (config.onDragStart) {
-                        config.onDragStart(cell);
-                    }
-                    return false;
+                        // onDragStart can be used to disable drag and drop by returning false
+                        drag = config.onDragStart(cell);
+                    };
+                    if (drag !== false) {
+                        module.dragObject = cell.parentNode;
+                        module.currentTable = tbody;
+                        module.mouseOffset = module.getMouseOffset(cell, event);
+                        event.stopPropagation();
+                        event.preventDefault();
+                        return false;
+                    };
                 });
 
-                table.tableDnDConfig = config;
+                tbody.tableDnDConfig = config;
             });
 
             // Now we need to capture the mouse up and mouse move event
@@ -228,7 +235,7 @@
 
         /** We're only worried about the y position really, because we can only move rows up and down */
         findDropTargetRow: function(draggedRow, y) {
-            var rows = module.currentTable.rows;
+            var rows = $(module.currentTable).children('tr');
             for (var i=0, len=rows.length; i<len; i++) {
                 var row = rows[i];
                 var rowY = this.documentPosition(row);
@@ -257,7 +264,7 @@
             return null;
         },
 
-        mouseup: function(e) {
+        mouseup: function(event) {
             if (module.currentTable && module.dragObject) {
                 var droppedRow = module.dragObject;
                 var config = module.currentTable.tableDnDConfig;
@@ -274,6 +281,9 @@
                     config.onDrop(droppedRow);
                 }
                 module.currentTable = null; // let go of the table too
+                event.stopPropagation();
+                event.preventDefault();
+                return false;
             }
         }
     };

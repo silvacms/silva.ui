@@ -100,9 +100,6 @@
 #workspace .content .listing .static tr.hover {
   background-color:#d2e5f9;
 }
-#workspace .content .listing .static tr.hidden {
-  display: none;
-}
 #workspace .content .listing .static tr.selected {
   background-color:#4d96e6;
   color:#fff;
@@ -110,11 +107,18 @@
 #workspace .content .listing .static tr.selected.hover {
   background-color:#5fa2ea;
 }
-#workspace .content .listing td.moveable,
-#workspace .content .listing td.moveable ins {
-  cursor:move;
+#workspace .content .listing tr.hidden {
+  display: none;
 }
-#workspace .content .listing .dragging {
+#workspace .content .listing td.moveable {
+  cursor: move;
+  margin: 4px 5px;
+}
+#workspace .content .listing .filtering td.moveable {
+  cursor: inherit;
+  background: none;
+}
+#workspace .content .listing tr.moving {
   background-color:#4d96e6!important;
   color:#fff;
 }

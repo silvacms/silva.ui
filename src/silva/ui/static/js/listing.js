@@ -32,8 +32,7 @@
             return {
                 render: function() {
                     if (value) {
-                        $content.addClass('moveable');
-                        $content.html('...');
+                        $content.addClass('moveable ui-icon ui-icon-grip-dotted-horizontal');
                     };
                 }
             };
@@ -243,13 +242,16 @@
         });
 
         // Row selection with mouse
-        $containers.delegate('tr.item', 'click', function(event) {
+        // INFO: Binding mousedown integrate it well with column drag
+        // and drop and prevent browser text-selection on some browsers.
+        $containers.delegate('tr.item', 'mousedown', function(event) {
             var target = $(event.target);
             if (target.is('input[type="text"]')) {
                 target.focus();
                 return;
             };
             select_row($(this), event.shiftKey);
+            return false;
         });
         // Row selection with keyboard
         shortcuts.bind('listing', null, ['space', 'shift+space'], function(event) {
@@ -414,14 +416,17 @@
         if (mover) {
             var row_original_index = null;
 
-            $table.tableDnD({
+            $container.tableDnD({
                 dragHandle: "moveable",
-                onDragClass: "dragging",
+                onDragClass: "moving",
                 onAllowDrop: function(row, candidate){
                     // don't drop on the first row, it is default.
                     return $(candidate).data('smilisting').moveable != 0;
                 },
                 onDragStart: function(row) {
+                    if ($table.hasClass('filtering')) {
+                        return false;
+                    };
                     // Reset hover style and mouse last_selected_index. Save row index.
                     row_original_index = $(row).parent('tr').index();
                     $table.trigger('resetselection-smilisting');
@@ -673,21 +678,34 @@
                         }
                     },
                     filter_lines: function(value) {
-                        var pattern = new RegExp(value, 'i');
+                        if (value) {
+                            var pattern = new RegExp(value, 'i');
 
-                        $.each(configuration.listing, function(i, configuration) {
-                            var $container = by_name[configuration.name].$container;
+                            $.each(configuration.listing, function(i, configuration) {
+                                var $container = by_name[configuration.name].$container;
+                                var $table = by_name[configuration.name].$table;
 
-                            $container.children('.item').each(function (i) {
-                                var $line = $(this);
+                                $table.addClass('filtering');
+                                $container.children('.item').each(function (i) {
+                                    var $line = $(this);
 
-                                if (configuration.filter_entry(pattern, $line.data('smilisting'))) {
-                                    $line.show();
-                                } else {
-                                    $line.hide();
-                                };
+                                    if (configuration.filter_entry(pattern, $line.data('smilisting'))) {
+                                        $line.show();
+                                    } else {
+                                        $line.hide();
+                                    };
+                                });
                             });
-                        });
+                        } else {
+                            // Filtering is over, show all lines
+                            $.each(configuration.listing, function(i, configuration) {
+                                var $container = by_name[configuration.name].$container;
+                                var $table = by_name[configuration.name].$table;
+
+                                $table.removeClass('filtering');
+                                $container.children('.item').show();
+                            });
+                        };
                         events.status.invoke();
                     },
                     unselect_all: function() {
