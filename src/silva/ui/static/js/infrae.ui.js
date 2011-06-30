@@ -73,7 +73,12 @@
             };
             $.each(data.buttons, function(name, callback) {
                 configuration.buttons[name] = function() {
-                    callback() ? deferred.resolveWith(this) : deferred.rejectWith(this);
+                    var result = callback();
+                    if (result.when != undefined) {
+                        result.when(deferred);
+                    } else {
+                        result ? deferred.resolve() : deferred.reject();
+                    }
                 };
             });
             $message.dialog(configuration);
