@@ -65,6 +65,7 @@
                         };
                     };
                     $content.addClass('hasdropdown');
+                    $content.addClass('active');
                     $opener.bind('click', function(event) {
                         $dropdown.fadeToggle();
                         return false;
@@ -85,6 +86,7 @@
                 jsont: '<a class="open-screen" href="{data.path|htmltag}" rel="{column.action|htmltag}" title="{data.title|htmltag}"><ins class="icon"></ins></a>',
                 render: function() {
                     infrae.ui.icon($content.find('ins'), value);
+                    $content.addClass('active');
                 }
             };
         }
@@ -250,7 +252,13 @@
                 target.focus();
                 return;
             };
+            if (target.parents('td.active').length) {
+                // Active column respond to click event. We ignore if you click in one of those.
+                return;
+            };
             select_row($(this), event.shiftKey);
+            event.preventDefault();
+            event.stopPropagation();
             return false;
         });
         // Row selection with keyboard
