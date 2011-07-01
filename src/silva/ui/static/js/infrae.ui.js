@@ -81,10 +81,18 @@
                     }
                 };
             });
+            // This event is triggered when the dialog is closed,
+            // either by an action or the top level close button.
+            $message.bind('dialogclose', function() {
+                $message.remove();
+                // In case where the dialog was not triggered by a
+                // button we reject the deferred. It will only reject
+                // it if it was not previously rejected or resolved.
+                deferred.reject();
+            });
             $message.dialog(configuration);
             deferred.always(function () {
                 $message.dialog('close');
-                $message.remove();
             });
             return deferred.promise();
         },
