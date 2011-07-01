@@ -46,13 +46,16 @@
         factory: function($content, data, smi) {
             return {
                 render: function() {
-                    var message = $('<div></div>');
+                    var $message = $('<div></div>');
 
                     if (data.title) {
-                        message.attr('title', data.title);
+                        $message.attr('title', data.title);
                     };
-                    message.html(data.message);
-                    message.dialog({
+                    $message.html(data.message);
+                    $message.bind('dialogclose', function() {
+                        $message.remove();
+                    });
+                    $message.dialog({
                         modal: true,
                         buttons: {
                             Ok: function() {
