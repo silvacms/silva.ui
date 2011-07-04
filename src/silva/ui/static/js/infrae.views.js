@@ -265,7 +265,7 @@
                 if (window.console && console.log) {
                     console.log('failed view lookup for options', options, 'and', data);
                 };
-                return null;
+                return $.Deferred().reject({status: 604});
             };
 
             // Render all possible views for a given JSON object (viewlet like)

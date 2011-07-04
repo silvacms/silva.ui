@@ -416,11 +416,12 @@
                         },
                         function (request) {
                             // Default error handler.
-                            var message = options.errors[request.status];
-                            if (!message) {
-                                message = options.errors[500];
+                            var handler = options.errors[request.status];
+                            if (handler === undefined) {
+                                handler = options.errors[500];
                             };
-                            return $(document).render({data: message, args: [smi], reject: [request]});
+                            return $(document).render(
+                                {data: handler(request), args: [smi], reject: [request]});
                         });
                 },
                 /**

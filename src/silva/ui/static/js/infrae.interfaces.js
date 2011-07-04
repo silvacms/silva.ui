@@ -25,7 +25,10 @@
          * @param object: object to interspect.
          */
         implementedBy: function(object) {
-            if (!object.ifaces) {
+            if (object === undefined) {
+                return [];
+            }
+            if (object.ifaces === undefined) {
                 return [typeof object];
             };
             var result = [];

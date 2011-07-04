@@ -97,25 +97,29 @@
           screen: "${view.root_url}/{path}/++rest++silva.ui/{screen}",
           action:"${view.root_url}/{path}/++rest++silva.ui.actions.{action}",
           errors: {
-              401: {
-                ifaces: ['message'],
-                title: '<tal:msg i18n:translate="">Unauthorized</tal:msg>',
-                message: '<p i18n:translate="">You need to login with higher credentials in order to access this content or screen.</p>'
+              401: function (request) {
+                  return $.parseJSON(request.responseText).content;
               },
-              403: {
-                ifaces: ['message'],
-                title: '<tal:msg i18n:translate="">Forbidden</tal:msg>',
-                message: '<p i18n:translate="">You don\'t have access to this content or screen.</p>'
+              403: function () {
+                  return {
+                    ifaces: ['message'],
+                    title: '<tal:msg i18n:translate="">Forbidden</tal:msg>',
+                    message: '<p i18n:translate="">You don\'t have access to this content or screen.</p>'
+                  };
               },
-              404: {
-                ifaces: ['message'],
-                title: '<tal:msg i18n:translate="">Not found</tal:msg>',
-                message: '<p i18n:translate="">The request content or screen was not found.</p>'
+              404: function () {
+                  return {
+                    ifaces: ['message'],
+                    title: '<tal:msg i18n:translate="">Not found</tal:msg>',
+                    message: '<p i18n:translate="">The request content or screen was not found.</p>'
+                  };
               },
-              500: {
-                ifaces: ['message'],
-                title: '<tal:msg i18n:translate="">An error happened</tal:msg>',
-                message: '<p i18n:translate="">An error happened on the server. Please consult your system administrator for more information.</p>'
+              500: function () {
+                  return {
+                    ifaces: ['message'],
+                    title: '<tal:msg i18n:translate="">An error happened</tal:msg>',
+                    message: '<p i18n:translate="">An error happened on the server. Please consult your system administrator for more information.</p>'
+                  };
               }
           },
           navigation: {

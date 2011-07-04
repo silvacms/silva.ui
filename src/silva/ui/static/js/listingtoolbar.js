@@ -227,7 +227,8 @@
                                     view['action'] = function() {
                                         var url = $('#content-url').attr('href');
 
-                                        return $content.SMIFormPopup(url + '/++rest++' + definition.action.form.name);
+                                        return $content.SMIFormPopup({
+                                            url: url + '/++rest++' + definition.action.form.name});
                                     };
                                     break;
                                 };

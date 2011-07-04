@@ -72,11 +72,6 @@ class UIREST(rest.REST):
         super(UIREST, self).__init__(context, request)
 
     @CachedProperty
-    def root_path(self):
-        root = IVirtualSite(self.request).get_root()
-        return root.absolute_url_path()
-
-    @CachedProperty
     def language(self):
         adapter = IUserPreferredLanguages(self.request)
         languages = adapter.getPreferredLanguages()
@@ -87,9 +82,6 @@ class UIREST(rest.REST):
     def translate(self, message):
         return translate(
             message, target_language=self.language, context=self.request)
-
-    def get_content_path(self, content):
-        return content.absolute_url_path()[len(self.root_path):] or '/'
 
     def get_notifications(self):
         messages = []
@@ -103,6 +95,14 @@ class UIREST(rest.REST):
         if not messages:
             return None
         return messages
+
+    @CachedProperty
+    def root_path(self):
+        root = IVirtualSite(self.request).get_root()
+        return root.absolute_url_path()
+
+    def get_content_path(self, content):
+        return content.absolute_url_path()[len(self.root_path):] or '/'
 
 
 def get_resources(request):

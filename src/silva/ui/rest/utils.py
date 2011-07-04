@@ -14,6 +14,8 @@ from silva.core.interfaces import IContainer, IRoot
 from Products.Silva.ExtensionRegistry import meta_types_for_interface
 
 
+
+
 class NotificationPoll(UIREST):
     grok.name('silva.ui.poll.notifications')
     grok.context(IContainer)
