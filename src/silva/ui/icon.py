@@ -5,6 +5,8 @@
 
 
 from Products.Silva import icon
+from five import grok
+from silva.ui.interfaces import ISilvaUITheme
 
 ICON_SPRITE = {
     'Silva Folder': 'silvafolder',
@@ -20,7 +22,16 @@ ICON_SPRITE = {
     'Silva Indexer': 'silvaindexer'
     }
 
-def get_icon(content, request):
-    if content.meta_type in ICON_SPRITE:
-        return ICON_SPRITE[content.meta_type]
-    return icon.get_icon_url(content, request)
+
+class SMIIconResolver(icon.IconResolver):
+    grok.context(ISilvaUITheme)
+
+    def get_tag(self, content):
+        if content.meta_type in ICON_SPRITE:
+            return """<ins class="icon %s"></ins>""" % ICON_SPRITE[content.meta_type]
+        return super(SMIIconResolver, self).get_tag(content)
+
+    def get_content_url(self, content):
+        if content.meta_type in ICON_SPRITE:
+            return ICON_SPRITE[content.meta_type]
+        return super(SMIIconResolver, self).get_content_url(content)

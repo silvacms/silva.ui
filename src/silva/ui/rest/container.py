@@ -16,11 +16,11 @@ from silva.core.cache.memcacheutils import MemcacheSlice
 from silva.core.interfaces import IRoot, IContainer, ISilvaObject
 from silva.core.interfaces import IPublishable, INonPublishable
 from silva.core.interfaces import IVersion, IVersionedContent
+from silva.core.interfaces.adapters import IIconResolver
 from silva.core.messages.interfaces import IMessageService
 from silva.core.services.utils import walk_silva_tree
 from silva.core.views.interfaces import IVirtualSite
 from silva.translations import translate as _
-from silva.ui.icon import get_icon
 from silva.ui.rest.base import ActionREST
 from silva.ui.rest.base import UIREST
 
@@ -378,6 +378,7 @@ class ContentSerializer(object):
         self.get_id = service.register
         self.get_content = service.getObject
         self.get_metadata = getUtility(IMetadataService).getMetadataValue
+        self.get_icon = IIconResolver(self.request).get_content_url
         self.check_permission = getSecurityManager().checkPermission
 
     def get_access(self, content):
@@ -400,7 +401,7 @@ class ContentSerializer(object):
             'id': id,
             'identifier': content.getId(),
             'path': self.rest.get_content_path(content),
-            'icon': get_icon(content, self.request),
+            'icon': self.get_icon(content),
             'title': previewable.get_title_or_id(),
             'author': self.get_metadata(
                 previewable, 'silva-extra', 'lastauthor'),

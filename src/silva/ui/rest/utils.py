@@ -7,7 +7,7 @@ from five import grok
 from zope.component import getUtility
 from zope.intid.interfaces import IIntIds
 
-from silva.ui.icon import get_icon
+from silva.core.interfaces.adapters import IIconResolver
 from silva.ui.rest.base import UIREST
 from silva.core.interfaces import IContainer, IRoot
 
@@ -26,16 +26,20 @@ class NavigationListing(UIREST):
     grok.context(IContainer)
     grok.name('silva.ui.navigation')
 
-    def get_node_info(self, node, interfaces, service=None):
-        if service is None:
-            service = getUtility(IIntIds)
+    def __init__(self, context, request):
+        super(NavigationListing, self).__init__(context, request)
+        self.get_icon = IIconResolver(self.request).get_content_url
+        self.get_id = getUtility(IIntIds).register
+
+    def get_node_info(self, node, interfaces):
         is_not_empty = len(node.objectValues(interfaces))
         info = {
             'data': {
                 'title': node.get_title_or_id(),
-                'icon': get_icon(node, self.request)},
+                'icon': self.get_icon(node)
+                },
             'attr': {
-                'id': 'nav' + str(service.register(node)),
+                'id': 'nav' + str(self.get_id(node)),
                 },
             'metadata': {'path': self.get_content_path(node)}}
         if is_not_empty:
@@ -43,11 +47,10 @@ class NavigationListing(UIREST):
         return info
 
     def GET(self):
-        service = getUtility(IIntIds)
         interfaces = meta_types_for_interface(IContainer)
         children = []
         for child in self.context.objectValues(interfaces):
-            children.append(self.get_node_info(child, interfaces, service))
+            children.append(self.get_node_info(child, interfaces))
 
         return self.json_response(children)
 
@@ -57,9 +60,8 @@ class RootNavigationListing(NavigationListing):
     grok.name('silva.ui.navigation.root')
 
     def GET(self):
-        service = getUtility(IIntIds)
         interfaces = meta_types_for_interface(IContainer)
-        root_info = self.get_node_info(self.context, interfaces, service)
+        root_info = self.get_node_info(self.context, interfaces)
         return self.json_response(root_info)
 
 

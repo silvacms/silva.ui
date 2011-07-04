@@ -3,7 +3,6 @@
 # See also LICENSE.txt
 # $Id$
 
-
 from collections import defaultdict
 
 from five import grok
@@ -21,12 +20,12 @@ from Acquisition import aq_parent
 
 from silva.core.cache.memcacheutils import MemcacheSlice
 from silva.core.interfaces import IRoot, IContainer, ISilvaObject
+from silva.core.interfaces.adapters import IIconResolver
 from silva.core.messages.interfaces import IMessageService
 from silva.core.views.interfaces import IVirtualSite
+from silva.ui.smi import set_smi_skin
 from silva.ui.interfaces import IUIScreen
-from silva.ui.icon import get_icon
 from silva.ui.menu import ContentMenu, ViewMenu, ActionMenu
-
 
 import fanstatic
 
@@ -67,6 +66,10 @@ class RedirectToUrl(PageException):
 class UIREST(rest.REST):
     grok.require('silva.ReadSilvaContent')
     grok.baseclass()
+
+    def __init__(self, context, request):
+        set_smi_skin(context, request)
+        super(UIREST, self).__init__(context, request)
 
     @CachedProperty
     def root_path(self):
@@ -183,7 +186,7 @@ class PageREST(ActionREST):
             'title': {
                 'ifaces': ['title'],
                 'title': self.context.get_title_or_id(),
-                'icon': get_icon(self.context, self.request),
+                'icon': IIconResolver(self.request).get_content_url(self.context),
                 },
             'menu': {
                 'content': self.get_metadata_menu(ContentMenu),

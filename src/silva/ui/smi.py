@@ -21,6 +21,16 @@ from AccessControl import getSecurityManager
 from zExceptions import Redirect
 
 
+def set_smi_skin(context, request, default='silva.ui.interfaces.ISilvaUITheme'):
+    """Set the SMI skin.
+    """
+    if ISilvaObject.providedBy(context):
+        skin_name = context.get_root()._smi_skin
+        if not skin_name:
+            skin_name = default
+        applySkin(request, getUtility(Interface, skin_name))
+
+
 class SMI(grok.View):
     grok.name('edit')
     grok.context(ISilvaObject)
@@ -38,12 +48,9 @@ class SMI(grok.View):
             raise Redirect('/'.join((root_url, 'edit')) + '#!' + path)
 
         # Set the proper SMI skin
-        smi_skin_name = self.context.get_root()._smi_skin
-        if not smi_skin_name:
-            smi_skin_name = 'silva.ui.interfaces.ISilvaUITheme'
-        smi_skin = getUtility(Interface, smi_skin_name)
-        applySkin(self.request, smi_skin)
+        set_smi_skin(self.context, self.request)
 
+        # Load the extensions
         for load_entry in iter_entry_points('silva.ui.resources'):
             resource = load_entry.load()
             need(resource)
