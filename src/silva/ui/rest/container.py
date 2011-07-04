@@ -241,7 +241,7 @@ class ColumnsContainerListing(UIREST):
                                        'send': 'selected_ids',}},
                              'confirmation': {
                                     'title': self.translate(_(u"Confirm deletion")),
-                                    'message': self.translate(_(u'Do you want to continue this madness ?'))},
+                                    'message': self.translate(_(u'Do you want to delete the selected content(s) ?'))},
                              'available':
                                  {'content_match':
                                       {'access': ['manage', 'publish', 'write']},

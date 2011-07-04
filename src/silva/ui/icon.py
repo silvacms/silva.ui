@@ -27,11 +27,13 @@ class SMIIconResolver(icon.IconResolver):
     grok.context(ISilvaUITheme)
 
     def get_tag(self, content):
-        if content.meta_type in ICON_SPRITE:
-            return """<ins class="icon %s"></ins>""" % ICON_SPRITE[content.meta_type]
+        meta_type = getattr(content, 'meta_type', None)
+        if meta_type in ICON_SPRITE:
+            return """<ins class="icon %s"></ins>""" % ICON_SPRITE[meta_type]
         return super(SMIIconResolver, self).get_tag(content)
 
     def get_content_url(self, content):
-        if content.meta_type in ICON_SPRITE:
-            return ICON_SPRITE[content.meta_type]
+        meta_type = getattr(content, 'meta_type', None)
+        if meta_type in ICON_SPRITE:
+            return ICON_SPRITE[meta_type]
         return super(SMIIconResolver, self).get_content_url(content)
