@@ -98,7 +98,15 @@
           action:"${view.root_url}/{path}/++rest++silva.ui.actions.{action}",
           errors: {
               401: function (request) {
-                  return $.parseJSON(request.responseText).content;
+                  try {
+                     return $.parseJSON(request.responseText).content;
+                  } catch (e) {
+                     return {
+                       ifaces: ['message'],
+                       title: '<tal:msg i18n:translate="">Forbidden</tal:msg>',
+                       message: '<p i18n:translate="">You don\'t have access to this content or screen.</p>'
+                     };
+                  };
               },
               403: function () {
                   return {
