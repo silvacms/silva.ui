@@ -48,6 +48,27 @@
             }
         },
         /**
+         * Manage the size of jQuery UI dialog.
+         *
+         * @param $dialog: object representing the dialog.
+         */
+        ShowDialog: function($dialog) {
+            var $window = $(window);
+            var $widget = $dialog.dialog('widget');
+            var max_width = Math.ceil($window.width() * 0.8);
+            var max_height = Math.ceil($window.height() * 0.8);
+
+            if ($widget.height() > max_height) {
+                $dialog.dialog('option', 'height', max_height);
+            };
+            if ($widget.width() > max_width) {
+                $dialog.dialog('option', 'width', max_width);
+            };
+            $dialog.dialog('option', 'maxHeight', max_height);
+            $dialog.dialog('option', 'maxWidth', max_width);
+            $dialog.dialog('open');
+        },
+        /**
          * Create a confirmation dialog that returns a promise.
          *
          * @param data: object defining the confirmation message.
@@ -55,7 +76,7 @@
         ConfirmationDialog: function(data) {
             var deferred = $.Deferred();
             var $message = $('<div></div>');
-            var configuration = {modal: true, buttons: {}};
+            var configuration = {autoOpen: false, modal: true, buttons: {}};
 
             if (data.title) {
                 $message.attr('title', data.title);
@@ -93,10 +114,11 @@
                 // it if it was not previously rejected or resolved.
                 deferred.reject();
             });
-            $message.dialog(configuration);
             deferred.always(function () {
                 $message.dialog('close');
             });
+            $message.dialog(configuration);
+            infrae.ui.ShowDialog($message);
             return deferred.promise();
         },
         /**
