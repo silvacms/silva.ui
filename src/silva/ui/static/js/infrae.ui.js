@@ -63,12 +63,15 @@
             $message.html(data.message);
             if (!data.buttons) {
                 data.buttons = {
-                    Ok: function() {
-                        return true;
-                    },
                     Cancel: function() {
                         return false;
+                    },
+                    Continue: function() {
+                        return true;
                     }
+                };
+                if (data.not_cancellable) {
+                    delete data.buttons['Cancel'];
                 };
             };
             $.each(data.buttons, function(name, callback) {

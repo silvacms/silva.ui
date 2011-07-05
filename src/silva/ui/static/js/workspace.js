@@ -46,23 +46,10 @@
         factory: function($content, data, smi) {
             return {
                 render: function() {
-                    var $message = $('<div></div>');
-
-                    if (data.title) {
-                        $message.attr('title', data.title);
-                    };
-                    $message.html(data.message);
-                    $message.bind('dialogclose', function() {
-                        $message.remove();
-                    });
-                    $message.dialog({
-                        modal: true,
-                        buttons: {
-                            Ok: function() {
-                                $(this).dialog('close');
-                            }
-                        }
-                    });
+                    return infrae.ui.ConfirmationDialog({
+                        title: data.title,
+                        message: data.message,
+                        not_cancellable: true});
                 }
             };
         }
