@@ -4,36 +4,13 @@
 # $Id$
 
 from five import grok
-from silva.core.views.interfaces import IVirtualSite
-from zope.cachedescriptors.property import CachedProperty
-from zope.i18n import translate
-from zope.i18n.interfaces import IUserPreferredLanguages
+from silva.ui.rest.base import UIHelper
 import simplejson
 
 
-class ErrorREST(grok.View):
+class ErrorREST(grok.View, UIHelper):
     grok.baseclass()
     grok.name('error.html')
-
-    @CachedProperty
-    def root_path(self):
-        root = IVirtualSite(self.request).get_root()
-        return root.absolute_url_path()
-
-    @CachedProperty
-    def language(self):
-        adapter = IUserPreferredLanguages(self.request)
-        languages = adapter.getPreferredLanguages()
-        if languages:
-            return languages[0]
-        return 'en'
-
-    def translate(self, message):
-        return translate(
-            message, target_language=self.language, context=self.request)
-
-    def get_content_path(self, content):
-        return content.absolute_url_path()[len(self.root_path):] or '/'
 
     def render(self):
         data = {'ifaces': ['message'],

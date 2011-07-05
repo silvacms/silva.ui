@@ -63,13 +63,13 @@ class RedirectToUrl(PageException):
                             'url': self.url}}
 
 
-class UIREST(rest.REST):
-    grok.require('silva.ReadSilvaContent')
-    grok.baseclass()
+
+class UIHelper(object):
 
     def __init__(self, context, request):
-        set_smi_skin(context, request)
-        super(UIREST, self).__init__(context, request)
+        super(UIHelper, self).__init__(context, request)
+        self.context = context
+        self.request = request
 
     @CachedProperty
     def language(self):
@@ -103,6 +103,15 @@ class UIREST(rest.REST):
 
     def get_content_path(self, content):
         return content.absolute_url_path()[len(self.root_path):] or '/'
+
+
+class UIREST(rest.REST, UIHelper):
+    grok.require('silva.ReadSilvaContent')
+    grok.baseclass()
+
+    def __init__(self, context, request):
+        set_smi_skin(context, request)
+        super(UIREST, self).__init__(context, request)
 
 
 def get_resources(request):
