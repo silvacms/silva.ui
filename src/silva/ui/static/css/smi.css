@@ -261,6 +261,18 @@ input, textarea {
 }
 
 /*
+ * Dialog disclaimer
+ */
+
+.ui-dialog .disclaimer p {
+  margin: 0.8em;
+}
+
+.ui-dialog .disclaimer li {
+  margin: 0.2em;
+}
+
+/*
  * Portait mode for iPad removes tree
  */
 @media screen and (orientation: portrait) {
