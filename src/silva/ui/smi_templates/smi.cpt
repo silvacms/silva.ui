@@ -97,6 +97,17 @@
           screen: "${view.root_url}/{path}/++rest++silva.ui/{screen}",
           action:"${view.root_url}/{path}/++rest++silva.ui.actions.{action}",
           errors: {
+              400: function (request) {
+                  try {
+                     return $.parseJSON(request.responseText).content;
+                  } catch (e) {
+                     return {
+                       ifaces: ['message'],
+                       title: '<tal:msg i18n:translate="">An application error happened</tal:msg>',
+                       message: '<tal:msg i18n:translate="">An error happened. Please consult your webmaster for more information.</tal:msg>'
+                     };
+                  };
+              },
               401: function (request) {
                   try {
                      return $.parseJSON(request.responseText).content;
@@ -125,8 +136,8 @@
               500: function () {
                   return {
                     ifaces: ['message'],
-                    title: '<tal:msg i18n:translate="">An error happened</tal:msg>',
-                    message: '<p i18n:translate="">An error happened on the server. Please consult your system administrator for more information.</p>'
+                    title: '<tal:msg i18n:translate="">An internal error happened</tal:msg>',
+                    message: '<p i18n:translate="">An error internal happened on the server. Please consult your system administrator for more information.</p>'
                   };
               }
           },

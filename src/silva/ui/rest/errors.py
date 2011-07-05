@@ -15,7 +15,6 @@ class ErrorREST(grok.View):
     grok.baseclass()
     grok.name('error.html')
 
-
     @CachedProperty
     def root_path(self):
         root = IVirtualSite(self.request).get_root()
@@ -41,6 +40,7 @@ class ErrorREST(grok.View):
                 'message': self._render_template()}
         if hasattr(self, 'title'):
             data['title'] = self.translate(self.title)
+        self.response.setStatus(400)
         self.response.setHeader('Content-Type', 'application/json')
         return simplejson.dumps({'content': data})
 
