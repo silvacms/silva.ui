@@ -130,6 +130,7 @@
                                 var $trigger = $action.children('a');
 
                                 if (definition.icon) {
+                                    $trigger.children('span').addClass('have-icon');
                                     $trigger.prepend(
                                         '<div class="action-icon"><ins class="ui-icon ui-icon-' +
                                             definition.icon + '"></ins></div>');
