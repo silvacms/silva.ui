@@ -24,8 +24,6 @@
       <img src="${imgs_url}/loader.gif" alt="Loading data from server"
            i18n:attributes="alt" />
     </div>
-    <div id="notifications">
-    </div>
     <div id="main">
       <div id="navigation">
         <div class="header">

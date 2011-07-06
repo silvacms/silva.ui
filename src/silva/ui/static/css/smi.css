@@ -35,40 +35,8 @@ input, textarea {
   display: none;
 }
 
-#notifications {
-  position: absolute;
-  top: 50px;
-  right: 40px;
-  width: 250px;
-  background: transparent;
-  z-index: 15000;
-}
-#notifications .notification {
-  -khtml-box-shadow:#1c2e3d 0 3px 10px;
-  -moz-box-shadow:#1c2e3d 0 3px 10px;
-  -ms-box-shadow:#1c2e3d 0 3px 10px;
-  -o-box-shadow:#1c2e3d 0 3px 10px;
-  -webkit-box-shadow:#1c2e3d 0 3px 10px;
-  background-image: url("../img/workspace_bg.png");
-  background-repeat: repeat;
-  color: black;
-  border: 1px #777 solid;
-  box-shadow:#1c2e3d 0 3px 10px;
-  margin:10px;
-  padding:5px;
-}
-#notifications .error {
-  color: #b22222;
-  border: 2px solid #b22222;
-}
-#notifications .notification h3 {
-  margin-bottom:3px;
-}
-#notifications .notification a {
-  font-size:85%;
-}
-#notifications .notification ins {
-  float: left;
+div.jGrowl div.error {
+  background-color: #cc0000;
 }
 
 #main {

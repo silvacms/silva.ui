@@ -8,6 +8,7 @@ from zope.publisher.interfaces.browser import IDefaultBrowserLayer
 from zope import schema
 
 from js import jqueryui
+from js import jquery_jgrowl
 from infrae.rest.interfaces import IRESTComponent
 
 from silva.core import conf as silvaconf
@@ -23,6 +24,7 @@ class ISilvaUIDependencies(IJsonTemplateResources):
     Every Silva UI plugin should depend on those resources.
     """
     silvaconf.resource(jqueryui.jqueryui)
+    silvaconf.resource(jquery_jgrowl.jquery_jgrowl)
     silvaconf.resource('js/infrae.js')
     silvaconf.resource('js/infrae.deferred.js')
     silvaconf.resource('js/infrae.interfaces.js')

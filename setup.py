@@ -24,6 +24,7 @@ setup(name='silva.ui',
       zip_safe=True,
       install_requires=[
           'fanstatic > 0.11',
+          'js.jquery_jgrowl',
           'five.grok',
           'infrae.rest',
           'megrok.chameleon',

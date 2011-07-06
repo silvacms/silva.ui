@@ -56,54 +56,11 @@
              * @param message: message.
              */
             notify: function(message) {
-                var $notification = $('<div class="notification"></div>');
-                var timer = null;
-
-                if (typeof(message.title) == 'string') {
-                    $notification.prepend('<h3>' + message.title + '</h3>');
+                var options = {};
+                if (message.category == 'error') {
+                    options['theme'] = 'error';
                 };
-                if (typeof(message.category) == 'string') {
-                    $notification.addClass(message.category);
-                    switch (message.category) {
-                    case 'error':
-                        $notification.append('<ins class="ui-icon ui-icon-alert" />');
-                        break;
-                    };
-                };
-                if (typeof(message.message) == 'string') {
-                    $notification.append('<p>' + message.message + '</p>');
-                };
-
-                // Bind the close event
-                $notification.bind('close-sminotification', function() {
-                    // Disable timeout if dialog is closed
-                    if (timer !== null) {
-                        clearTimeout(timer);
-                        timer = null;
-                    };
-                    $notification.animate({ height:0, opacity:0 }, 'slow', function() {
-                        $notification.remove();
-                        if (!$container.children().length) {
-                            $container.hide();
-                        };
-                    });
-                });
-
-                // Close and autoclose
-                $notification.bind('click', function() {
-                    $notification.trigger('close-sminotification');
-                });
-                if (typeof message.autoclose == 'number') {
-                    timer = setTimeout(function() {
-                        $notification.trigger('close-sminotification');
-                    }, message.autoclose);
-                };
-
-                $container.append($notification);
-                if (!$container.is(':visible')) {
-                    $container.show();
-                };
-
+                $.jGrowl(message.message, options);
             },
             /**
              * Notify a list of new notifications
@@ -111,12 +68,6 @@
              */
             notifies: function(messages) {
                 infrae.utils.each(messages, manager.notify);
-            },
-            /**
-             * Mark all notifications as seen.
-             */
-            mark_as_seen : function() {
-                $container.children().trigger('close-sminotification');
             }
         };
 
@@ -406,7 +357,6 @@
                                 if (payload.navigation.current != undefined)
                                     navigation.open(payload.navigation.current);
                             };
-                            notifications.mark_as_seen(); // Always clean old status
                             if (payload.notifications != undefined) {
                                 // Display any notification.
                                 notifications.notifies(payload.notifications);
