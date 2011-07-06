@@ -59,7 +59,6 @@ form {
   border-bottom: 1px dotted #ccc;
 }
 
-
 .form-content .form-section p {
   font-style: italic;
 }
@@ -136,8 +135,8 @@ form {
   padding: 10px 20px 10px 10px;
 }
 
-#workspace .form-content a.form-control,
-#workspace .form-content a.form-button {
+.form-content a.form-control,
+.form-content a.form-button {
   -khtml-border-radius:3px;
   -moz-border-radius:3px;
   -ms-border-radius:3px;
@@ -154,13 +153,13 @@ form {
   float: left;
 }
 
-#workspace .form-content a.form-control ins,
-#workspace .form-content a.form-button ins {
+.form-content a.form-control ins,
+.form-content a.form-button ins {
   float: left;
 }
 
-#workspace .form-content a.form-control:hover,
-#workspace .form-content a.form-button:hover {
+.form-content a.form-control:hover,
+.form-content a.form-button:hover {
   background:#fff;
   border-color:#888;
   color:#222;

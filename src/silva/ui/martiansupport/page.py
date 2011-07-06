@@ -3,12 +3,12 @@
 # See also LICENSE.txt
 # $Id$
 
-
 import martian
 from grokcore.view.meta.views import TemplateGrokker
 from silva.ui.rest.base import PageWithTemplateREST
 
-class ViewletManagerTemplateGrokker(TemplateGrokker):
+
+class PageTemplateGrokker(TemplateGrokker):
     martian.component(PageWithTemplateREST)
 
     def has_render(self, factory):
