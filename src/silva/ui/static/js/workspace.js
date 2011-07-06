@@ -95,24 +95,19 @@
                 return $tab;
             };
 
+            var $opened_container = null;
             var bind = function($container, $trigger) {
-                var opened = false;
-
-                var close_menu = function() {
-                    if (opened) {
-                        $container.fadeOut('fast');
-                        opened = false;
-                    };
-                };
-
-                // When a menu is opened or the mouse leave our, we close the menu.
-                $content.bind('open-menu', close_menu);
-                $container.bind('mouseleave', close_menu);
+                $container.bind('mouseleave', function () {
+                    $opened_container.fadeOut('fast');
+                    $opened_container = null;
+                });
 
                 $trigger.bind('click', function () {
-                    $container.trigger('open-menu');
-                    $container.toggle();
-                    opened = true;
+                    if ($opened_container !== null) {
+                        $opened_container.fadeOut('fast');
+                    };
+                    $opened_container = $container;
+                    $opened_container.toggle();
                     return false;
                 });
             };

@@ -235,15 +235,15 @@
         });
 
         // Drop-downs
-        var opened_dropdown = undefined;
+        var opened_dropdown = null;
         $containers.delegate('tr.item div.dropdown', 'mouseleave', function(event) {
-            if (opened_dropdown !== undefined) {
+            if (opened_dropdown !== null) {
                 opened_dropdown.fadeOut('fast');
-                opened_dropdown = undefined;
+                opened_dropdown = null;
             };
         });
         $containers.delegate('tr.item div.dropdown-icon', 'click', function(event) {
-            if (opened_dropdown !== undefined) {
+            if (opened_dropdown !== null) {
                 opened_dropdown.fadeOut('fast');
             };
             opened_dropdown = $(event.target).parents('a').next();
