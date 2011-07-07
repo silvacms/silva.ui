@@ -199,3 +199,24 @@ form {
   width: 4em;
   height: 4em;
 }
+
+.portlets .references .item {
+  clear: both;
+  width: 100%;
+}
+
+.portlets .references .item a.open-screen {
+  float: right;
+  margin-right: 5px;
+  cursor: pointer;
+}
+
+.portlets .references .item p {
+  margin-left: 20px;
+}
+
+.portlets .references .item img {
+  float: left;
+  margin: 5px;
+  cursor: inherit;
+}
