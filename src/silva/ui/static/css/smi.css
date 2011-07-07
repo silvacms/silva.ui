@@ -35,6 +35,10 @@ input, textarea {
   display: none;
 }
 
+div.jGrowl {
+  z-index: 13000;
+}
+
 div.jGrowl div.error {
   background-color: #cc0000;
 }
