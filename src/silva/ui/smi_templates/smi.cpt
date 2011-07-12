@@ -94,27 +94,19 @@
           },
           screen: "${view.root_url}/{path}/++rest++silva.ui/{screen}",
           action:"${view.root_url}/{path}/++rest++silva.ui.actions.{action}",
-          errors: {
+          error_messages: {
               400: function (request) {
-                  try {
-                     return $.parseJSON(request.responseText).content;
-                  } catch (e) {
-                     return {
-                       ifaces: ['message'],
-                       title: '<tal:msg i18n:translate="">An application error happened</tal:msg>',
-                       message: '<tal:msg i18n:translate="">An error happened. Please consult your webmaster for more information.</tal:msg>'
-                     };
+                  return {
+                    ifaces: ['message'],
+                    title: '<tal:msg i18n:translate="">An application error happened</tal:msg>',
+                    message: '<tal:msg i18n:translate="">An error happened. Please consult your webmaster for more information.</tal:msg>'
                   };
               },
               401: function (request) {
-                  try {
-                     return $.parseJSON(request.responseText).content;
-                  } catch (e) {
-                     return {
-                       ifaces: ['message'],
-                       title: '<tal:msg i18n:translate="">Forbidden</tal:msg>',
-                       message: '<p i18n:translate="">You don\'t have access to this content or screen.</p>'
-                     };
+                  return {
+                    ifaces: ['message'],
+                    title: '<tal:msg i18n:translate="">Forbidden</tal:msg>',
+                    message: '<p i18n:translate="">You don\'t have access to this content or screen.</p>'
                   };
               },
               403: function () {

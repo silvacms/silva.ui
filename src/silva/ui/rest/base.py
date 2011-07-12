@@ -50,7 +50,7 @@ class RedirectToPage(PageException):
     def payload(self, caller):
         return {'content': {'ifaces': ['redirect'],
                             'path': caller.get_content_path(self.content),
-                            'tab': self.tab}}
+                            'screen': self.tab}}
 
 
 class RedirectToUrl(PageException):
@@ -218,7 +218,9 @@ class PageWithTemplateREST(PageREST):
         return {}
 
     def namespace(self):
-        return {'rest': self}
+        return {'rest': self,
+                'context': self.context,
+                'request': self.request}
 
     def update(self):
         pass

@@ -24,7 +24,7 @@
         factory: function($content, data, smi) {
             return {
                 render: function() {
-                    smi.open_screen(data.path, data.tab);
+                    smi.open_screen(data.path, data.screen);
                 }
             };
         }

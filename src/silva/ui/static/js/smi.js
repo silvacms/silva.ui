@@ -184,9 +184,18 @@
 
 
     var Screen = function(default_screen) {
-        var screen = {path: '', screen: ''};
+        var screen = {ifaces: ['redirect'], path: '', screen: ''};
 
         $.extend(screen, {
+            default_screen: function() {
+                var current_default = Screen(default_screen);
+                current_default.path = screen.path;
+                current_default.screen = default_screen;
+                return current_default;
+            },
+            is_default_screen: function() {
+                return screen.screen === default_screen;
+            },
             copy: function(other) {
                 screen.path = other.path;
                 screen.screen = other.screen;
@@ -249,7 +258,7 @@
         var navigation = $(options.navigation.selector).SMINavigation(smi, options.navigation);
         var notifications = NotificationManager(options.notifications);
         var resources = infrae.views.HTMLResourceManager();
-        smi.clipboard = new ClipBoard(notifications);
+        var default_error_handlers = {};
 
         // Register the default content view.
         infrae.views.view({
@@ -275,6 +284,7 @@
 
         // Add utilities and screen open functions
         $.extend(smi, {
+            clipboard: new ClipBoard(notifications),
             /**
              * Retrieve the language used by the SMI.
              */
@@ -329,7 +339,7 @@
                 /**
                  * Send a query to the given URL, POST data as JSON if given.
                  */
-                query: function(url, data) {
+                query: function(url, data, error_handlers) {
                     var query = {};
 
                     query['url'] = url;
@@ -365,13 +375,25 @@
                             return payload.content;
                         },
                         function (request) {
-                            // Default error handler.
-                            var handler = options.errors[request.status];
+                            if (error_handlers === undefined) {
+                                // If not specified, fallback on the default error handlers.
+                                error_handlers = default_error_handlers;
+                            }
+                            // Fetch the error handler and execute it
+                            var handler = error_handlers[request.status];
                             if (handler === undefined) {
-                                handler = options.errors[500];
+                                handler = error_handlers[500];
                             };
-                            return $(document).render(
-                                {data: handler(request), args: [smi], reject: [request]});
+                            var result_handler = handler(request);
+                            // No result, direct fail. Promise, return it, otherwise render it.
+                            if (result_handler) {
+                                if (result_handler.promise !== undefined) {
+                                    return result_handler;
+                                };
+                                return $(document).render(
+                                    {data: result_handler, args: [smi], reject: [request]});
+                            };
+                            return $.Deferred().reject(request);
                         });
                 },
                 /**
@@ -418,16 +440,41 @@
                         });
                 },
                 /**
+                 * Create a set of error handlers to use with query,
+                 * with the default error handlers as default.
+                 */
+                create_error_handlers: function(custom_handlers, parent_handlers) {
+                    var handlers = {};
+                    var default_handler;
+                    var code;
+
+                    if (parent_handlers === undefined) {
+                        parent_handlers = default_error_handlers;
+                    };
+                    for (code in parent_handlers) {
+                        handlers[code] = parent_handlers[code];
+                    };
+                    for (code in custom_handlers) {
+                        default_handler = parent_handlers[code];
+                        if (default_handler === undefined) {
+                            default_handler = parent_handlers[500];
+                        };
+                        handlers[code] = custom_handlers[code](default_handler);
+                    };
+                    return handlers;
+                },
+                /**
                  * Send data to the server corresponding to the currently opened
                  * tab.
                  * @param data: dictionnary to be posted to the server.
                  */
-                send_to_opened: function(data) {
+                send_to_opened: function(data, error_handlers) {
                     return smi.ajax.lock(function () {
                         return smi.ajax.vote(function () {
                             return smi.ajax.query(
                                 smi.get_screen_url(smi.opening),
-                                data).pipe(
+                                data,
+                                error_handlers).pipe(
                                     function (payload) {
                                         smi.opened.copy(smi.opening);
                                         return $(document).render({data: payload, args: [smi]});
@@ -467,6 +514,24 @@
                 });
             }
         });
+        // Initialize default_error_handlers
+        default_error_handlers = (function() {
+            var ajax_handler = function(default_handler) {
+                return function (request) {
+                    try {
+                      return $.parseJSON(request.responseText).content;
+                    } catch (e) {
+                        return default_handler(request);
+                    };
+                };
+            };
+
+            return smi.ajax.create_error_handlers({
+                400: ajax_handler,
+                401: ajax_handler
+            }, options.error_messages);
+        })();
+
         $(document).delegate('a.open-action', 'click', function(event) {
             smi.open_action_from_link($(this));
             return false;
@@ -477,9 +542,26 @@
 
         // Bind the hash change used by open (effectively enable open).
         var read_hash = function(hash) {
-            smi.opening.read(hash);
-            if (!smi.opening.equal(smi.opened))
-                smi.ajax.send_to_opened();
+            // Create the error handlers for opening new screens when hash change
+            var error_handlers = smi.ajax.create_error_handlers({
+                404: function(default_handler) {
+                    return function(request) {
+                        if (!smi.opening.is_default_screen()) {
+                            // On a 404, by default we redirect to the default screen
+                            return $.Deferred().resolve(smi.opening.default_screen());
+                        };
+                        return default_handler(request);
+                    };
+                }
+            });
+
+            // Redefine read_hash just to open now
+            read_hash = function(hash) {
+                smi.opening.read(hash);
+                if (!smi.opening.equal(smi.opened))
+                    smi.ajax.send_to_opened(undefined, error_handlers);
+            };
+            return read_hash(hash);
         };
         $(window).hashchange(function(event, data) {
             read_hash(data.after);
