@@ -547,7 +547,7 @@
                 404: function(default_handler) {
                     return function(request) {
                         if (!smi.opening.is_default_screen()) {
-                            // On a 404, by default we redirect to the default screen
+                            // On a 404, by default we redirect to the default screen (success)
                             return $.Deferred().resolve(smi.opening.default_screen());
                         };
                         return default_handler(request);

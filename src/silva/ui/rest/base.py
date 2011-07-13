@@ -41,29 +41,6 @@ class PageException(Exception):
         raise NotImplementedError
 
 
-class RedirectToPage(PageException):
-
-    def __init__(self, content, tab='content'):
-        self.content = content
-        self.tab = tab
-
-    def payload(self, caller):
-        return {'content': {'ifaces': ['redirect'],
-                            'path': caller.get_content_path(self.content),
-                            'screen': self.tab}}
-
-
-class RedirectToUrl(PageException):
-
-    def __init__(self, url):
-        self.url = url
-
-    def payload(self, caller):
-        return {'content': {'ifaces': ['view'],
-                            'url': self.url}}
-
-
-
 class UIHelper(object):
 
     def __init__(self, context, request):
@@ -105,6 +82,28 @@ class UIHelper(object):
         return content.absolute_url_path()[len(self.root_path):] or '/'
 
 
+class RedirectToPage(PageException):
+
+    def __init__(self, content, tab='content'):
+        self.content = content
+        self.tab = tab
+
+    def payload(self, caller):
+        return {'ifaces': ['redirect'],
+                'path': caller.get_content_path(self.content),
+                'screen': self.tab}
+
+
+class RedirectToUrl(PageException):
+
+    def __init__(self, url):
+        self.url = url
+
+    def payload(self, caller):
+        return {'ifaces': ['view'],
+                'url': self.url}
+
+
 class UIREST(rest.REST, UIHelper):
     grok.require('silva.ReadSilvaContent')
     grok.baseclass()
@@ -141,20 +140,20 @@ class ActionREST(UIREST):
         return {'invalidation': NavigationSynchronizer(self.request).get_changes()}
 
     def GET(self):
+        data = {}
         try:
-            payload = self.get_payload()
+            data['content'] = self.get_payload()
         except PageException as error:
-            return self.json_response(error.payload(self))
+            data['content'] = error.payload(self)
+        else:
+            data['navigation'] = self.get_navigation()
+            resources = get_resources(self.request)
+            if resources is not None:
+                data['resources'] = resources
 
-        data = {
-            'content': payload,
-            'navigation': self.get_navigation()}
         notifications =  self.get_notifications()
         if notifications is not None:
             data['notifications'] = notifications
-        resources = get_resources(self.request)
-        if resources is not None:
-            data['resources'] = resources
         return self.json_response(data)
 
     POST = GET
