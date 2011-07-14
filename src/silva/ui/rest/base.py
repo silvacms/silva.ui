@@ -184,8 +184,10 @@ class PageREST(ActionREST):
         return navigation
 
     def get_metadata_menu(self, menu):
-        return {'ifaces': ['menu'],
-                'entries': menu.get_entries(self.context).describe(self)}
+        entries = menu.get_entries(self.context).describe(self)
+        if not entries:
+            return None
+        return {'ifaces': ['menu'], 'entries': entries}
 
     def get_payload(self):
         screen = self.payload()

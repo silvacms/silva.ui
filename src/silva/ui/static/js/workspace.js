@@ -164,13 +164,18 @@
                 render: function() {
                     var $metadata = $content.children('.metadata');
                     var $parent = $content.find('a.parent');
+                    var $view_actions = $metadata.find('.view-actions');
 
                     // Update header
                     $metadata.children('h2').render({data: data.title});
                     $metadata.children('.content-tabs').render(
                         {data: data.menu.content, args: [true]});
-                    $metadata.find('.view-actions ol').render(
-                        {data: data.menu.view});
+                    if (data.menu.view) {
+                        $view_actions.children('ol').render({data: data.menu.view});
+                        $view_actions.show();
+                    } else {
+                        $view_actions.hide();
+                    };
                     $content.children('.toolbar').render(
                         {data: data, name: 'toolbar', args: [smi, view]});
 
