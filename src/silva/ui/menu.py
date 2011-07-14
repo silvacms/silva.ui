@@ -7,6 +7,7 @@ from AccessControl import getSecurityManager
 from zExceptions import Unauthorized
 
 from five import grok
+from zope.interface.interfaces import IInterface
 
 from silva.ui.interfaces import IUIScreen
 from silva.ui.interfaces import IMenuItem, IMenu
@@ -127,7 +128,9 @@ class ExpendableMenuItem(MenuItem):
 
     def available(self):
         # We are available if we have sublevel menu or a screen.
-        return (len(self.submenu) != 0) or (IUIScreen.implementedBy(self.screen))
+        return ((len(self.submenu) != 0) or
+                IUIScreen.implementedBy(self.screen) or
+                (IInterface.providedBy(self.interface) and self.interface.extends(IUIScreen)))
 
     def describe(self, page, path, actives):
         data = super(ExpendableMenuItem, self).describe(page, path, actives)
