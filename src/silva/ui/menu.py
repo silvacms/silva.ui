@@ -92,6 +92,7 @@ class MenuItem(grok.MultiSubscription):
     def describe(self, page, path, actives):
         data = {'name': page.translate(self.name)}
         if self.screen is not None:
+            is_screen = False
             if IRESTComponent.implementedBy(self.screen):
                 for active in actives:
                     if isinstance(active, self.screen):
