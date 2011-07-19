@@ -270,29 +270,31 @@ ins.loading {
 
 
 /* Silva Content Types - uses !important to override default jstree-icon */
-ins.agenda_filter { background-position:-60px -80px!important; }
-ins.agenda_viewer { background-position:-80px -80px!important; }
-ins.autotoc { background-position:-100px -80px!important; }
-ins.category_filter { background-position:-160px -80px!important; }
-ins.csvsource { background-position:-40px -120px!important; }
-ins.link { background-position:-120px -80px!important; }
-ins.news_filter { background-position:-60px -100px!important; }
-ins.news_source { background-position:-160px -100px!important; }
-ins.news_viewer { background-position:-80px -100px!important; }
-ins.rss_aggregator { background-position:-100px -120px!important; }
-ins.silvadocument { background-position:-0px -100px!important; }
-ins.silvafile { background-position:-80px -120px!important; }
-ins.silvafind { background-position:-140px -80px!important; }
-ins.silvafolder { background-position:-20px -100px!important; }
-ins.silvaghost { background-position:-0px -120px!important; }
-ins.silvaghostfolder { background-position:-20px -120px!important; }
-ins.silvaimage { background-position:-40px -100px!important; }
-ins.silvaindexer { background-position:-120px -120px!important; }
-ins.silvalogo { background-position:-160px -60px!important; }
-ins.silvapublication { background-position:-20px -80px!important; }
-ins.software_group { background-position:-140px -120px!important; }
-ins.software_package { background-position:-120px -100px!important; }
-ins.software_release { background-position:-140px -100px!important; }
+ins.silva_autotoc { background-position:-100px -80px!important; }
+ins.silva_csvsource { background-position:-40px -120px!important; }
+ins.silva_link { background-position:-120px -80px!important; }
+ins.silva_document { background-position:-0px -100px!important; }
+ins.silva_file { background-position:-80px -120px!important; }
+ins.silva_find { background-position:-140px -80px!important; }
+ins.silva_folder { background-position:-20px -100px!important; }
+ins.silva_ghost { background-position:-0px -120px!important; }
+ins.silva_ghostfolder { background-position:-20px -120px!important; }
+ins.silva_image { background-position:-40px -100px!important; }
+ins.silva_indexer { background-position:-120px -120px!important; }
+ins.silva_root { background-position:-160px -60px!important; }
+ins.silva_publication { background-position:-20px -80px!important; }
+
+ins.agendafilter { background-position:-60px -80px!important; }
+ins.agendaviewer { background-position:-80px -80px!important; }
+ins.categoryfilter { background-position:-160px -80px!important; }
+ins.newsfilter { background-position:-60px -100px!important; }
+ins.newssource { background-position:-160px -100px!important; }
+ins.newsviewer { background-position:-80px -100px!important; }
+ins.rssaggregator { background-position:-100px -120px!important; }
+
+ins.softwaregroup { background-position:-140px -120px!important; }
+ins.softwarepackage { background-position:-120px -100px!important; }
+ins.softwarerelease { background-position:-140px -100px!important; }
 
 /* Silva publication states */
 ins.state { width:10px!important; height:10px!important; }

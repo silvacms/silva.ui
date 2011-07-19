@@ -9,17 +9,19 @@ from five import grok
 from silva.ui.interfaces import ISilvaUITheme
 
 ICON_SPRITE = {
-    'Silva Folder': 'silvafolder',
-    'Silva Root': 'silvalogo',
-    'Silva Publication': 'silvapublication',
-    'Silva Image': 'silvaimage',
-    'Silva Ghost': 'silvaghost',
-    'Silva Ghost Folder': 'silvaghostfolder',
-    'Silva File': 'silvafile',
-    'Silva Find': 'silvafind',
-    'Silva Document': 'silvadocument',
-    'Silva Link': 'link',
-    'Silva Indexer': 'silvaindexer'
+    'Silva AutoTOC': 'silva_autotoc',
+    'Silva CSV Source': 'silva_csvsource',
+    'Silva Document': 'silva_document',
+    'Silva File': 'silva_file',
+    'Silva Find': 'silva_find',
+    'Silva Folder': 'silva_folder',
+    'Silva Ghost Folder': 'silva_ghostfolder',
+    'Silva Ghost': 'silva_ghost',
+    'Silva Image': 'silva_image',
+    'Silva Indexer': 'silva_indexer',
+    'Silva Link': 'silva_link',
+    'Silva Publication': 'silva_publication',
+    'Silva Root': 'silva_root',
     }
 
 
