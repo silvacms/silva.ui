@@ -26,19 +26,18 @@
              * Scroll the field into view if it is not.
              */
             var scroll_field_into_view = function($base, $field) {
-                var position = $field.position();
-                var top = $base.scrollTop();
-                var target = max(position.top - 25, 0);
+                var top = $field.position().top;
+                var height = $field.outerHeight();
+                var target, limit;
 
-                if (target < top) {
-                    infrae.ui.scroll($base, 'slow', 'absolute', target);
+                if (top < 25) {
+                    target = $base.scrollTop() - 25 + top;
+                    infrae.ui.scroll($base, 'fast', 'absolute', target);
                 } else {
-                    var size = $base.innerHeight();
-                    var bottom = top + size;
-                    target = position.top + $field.outerHeight() + 25;
-
-                    if (target > bottom) {
-                        infrae.ui.scroll($base, 'slow', 'absolute', target - size);
+                    limit = $base.innerHeight() - height - 25;
+                    if (top > limit) {
+                        target = $base.scrollTop() + (top - limit);
+                        infrae.ui.scroll($base, 'fast', 'absolute', target);
                     };
                 };
             };
@@ -65,7 +64,7 @@
                 };
                 if ($field.length) {
                     focus_form_field($field);
-                    scroll_field_into_view($base, $field);
+                    scroll_field_into_view($base, $field.closest('.form-section'));
                 };
             };
             var focus_next_form_field = function($base) {

@@ -168,7 +168,7 @@
     /**
      * Render/bind the user selection process.
      */
-    var render_selection = function($containers, selector, shortcuts) {
+    var render_selection = function($viewport, $containers, selector, shortcuts) {
         // Row selection
         var last_selected_index = null;
         var $hovered_row = null;
@@ -193,10 +193,22 @@
                 $hovered_row.addClass("hover");
             };
         };
+        var mouved_mouse = true;
 
-        // Set the hover column on hovering
-        $containers.delegate('tr.item', 'mouseenter', function() {set_hovered_row($(this));});
-        $containers.delegate('tr.item', 'mouseleave', clear_hovered_row);
+        // Set the hover column on hovering if we mouved the mouse
+        $containers.bind('mousemove', function () {
+            mouved_mouse = true;
+        });
+        $containers.delegate('tr.item', 'mouseenter', function() {
+            if (mouved_mouse) {
+                set_hovered_row($(this));
+            };
+        });
+        $containers.delegate('tr.item', 'mouseleave', function() {
+            if (mouved_mouse) {
+                clear_hovered_row();
+            };
+        });
         $containers.bind('resetselection-smilisting', function() {
             clear_hovered_row();
             last_selected_index = null;
@@ -275,6 +287,24 @@
             return false;
         });
 
+        // Scroll a line into view. This is used with the keyboard
+        var scroll_line_into_view = function($line) {
+            var top = $line.position().top;
+            var height = $line.outerHeight();
+            var target, limit;
+
+            if (top < 25) {
+                target = $viewport.scrollTop() - 25 + top;
+                infrae.ui.scroll($viewport, 'fast', 'absolute', target);
+            } else {
+                limit = $viewport.innerHeight() - height - 25;
+                if (top > limit) {
+                    target = $viewport.scrollTop() + (top - limit);
+                    infrae.ui.scroll($viewport, 'fast', 'absolute', target);
+                };
+            };
+        };
+
         // Row movement with keyboard
         shortcuts.bind('listing', null, ['up', 'shift+up'], function(event) {
             var $row = get_hovered_row();
@@ -282,9 +312,14 @@
 
             while ($candidate.length && !$candidate.is(':visible'))
                 $candidate = $candidate.prev();
-            set_hovered_row($candidate);
-            if (event.shiftKey)
-                select_row($candidate);
+            if ($candidate.length) {
+                mouved_mouse = false;
+                set_hovered_row($candidate);
+                if (event.shiftKey)
+                    select_row($candidate);
+
+                scroll_line_into_view($candidate);
+            };
             return false;
         });
         shortcuts.bind('listing', null, ['down', 'shift+down'], function(event) {
@@ -293,9 +328,14 @@
 
             while ($candidate.length && !$candidate.is(':visible'))
                 $candidate = $candidate.next();
-            set_hovered_row($candidate);
-            if (event.shiftKey)
-                select_row($candidate);
+            if ($candidate.length) {
+                mouved_mouse = false;
+                set_hovered_row($candidate);
+                if (event.shiftKey)
+                    select_row($candidate);
+
+                scroll_line_into_view($candidate);
+            };
             return false;
         });
     };
@@ -660,7 +700,7 @@
                     $.each(configuration.listing, function(i, configuration) {
                         var $table = by_name[configuration.name].$table;
 
-                        if ($table.is(':visible')) {
+                        if ($table.is(':visible') && $table.find('tr.item').length) {
                             if ($reference === null) {
                                 $reference = $table;
                                 layout = configuration.layout;
@@ -769,6 +809,7 @@
 
                         // Selection
                         render_selection(
+                            $content.find('dl.listing'),
                             $containers,
                             function ($items) {
                                 if (selection.toggle($items)) {
