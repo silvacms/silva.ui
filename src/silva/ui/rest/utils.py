@@ -33,8 +33,8 @@ class NavigationListing(UIREST):
         self.get_icon = IIconResolver(self.request).get_content_url
         self.get_id = getUtility(IIntIds).register
 
-    def get_node_info(self, node, interfaces):
-        is_not_empty = len(node.objectValues(interfaces))
+    def get_node_info(self, node, meta_types):
+        is_not_empty = len(node.objectValues(meta_types))
         info = {
             'data': {
                 'title': node.get_title_or_id(),
@@ -49,10 +49,10 @@ class NavigationListing(UIREST):
         return info
 
     def GET(self):
-        interfaces = meta_types_for_interface(IContainer)
+        meta_types = meta_types_for_interface(IContainer)
         children = []
-        for child in self.context.objectValues(interfaces):
-            children.append(self.get_node_info(child, interfaces))
+        for child in self.context.get_ordered_publishables(IContainer):
+            children.append(self.get_node_info(child, meta_types))
 
         return self.json_response(children)
 

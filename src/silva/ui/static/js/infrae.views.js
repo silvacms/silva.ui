@@ -125,12 +125,14 @@
             // Make a finalizer that call render and finish.
             var deferred = $.Deferred();
             var finalizer = function() {
-                if (view.render != undefined)
+                if (view.render != undefined) {
                     view.render();
-                if (reject != undefined)
+                }
+                if (reject != undefined) {
                     deferred.rejectWith(view, reject);
-                else
+                } else {
                     deferred.resolveWith(view);
+                };
             };
 
             // Insert content and call render.
