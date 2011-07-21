@@ -10,21 +10,22 @@ from zope import schema
 from js import jqueryui
 from js import jquery_jgrowl
 from infrae.rest.interfaces import IRESTComponent
+from zeam import jsontemplate
 
 from silva.core import conf as silvaconf
 from silva.core.interfaces import ISilvaLocalService
 from silva.core.conf import schema as silvaschema
-from silva.core.layout.jsontemplate import IJsonTemplateResources
 from silva.translations import translate as _
 
 
-class ISilvaUIDependencies(IJsonTemplateResources):
+class ISilvaUIDependencies(IDefaultBrowserLayer):
     """Dependencies required by Silva UI and Silva UI plugins.
 
     Every Silva UI plugin should depend on those resources.
     """
     silvaconf.resource(jqueryui.jqueryui)
     silvaconf.resource(jquery_jgrowl.jquery_jgrowl)
+    silvaconf.resource(jsontemplate.jsontemplate)
     silvaconf.resource('js/infrae.js')
     silvaconf.resource('js/infrae.deferred.js')
     silvaconf.resource('js/infrae.interfaces.js')
