@@ -26,6 +26,10 @@
              * Scroll the field into view if it is not.
              */
             var scroll_field_into_view = function($base, $field) {
+                if (!$field.length) {
+                    return;
+                };
+
                 var top = $field.position().top;
                 var height = $field.outerHeight();
                 var target, limit;
