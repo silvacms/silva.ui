@@ -1,0 +1,19 @@
+<div class="batching" i18n:domain="zeam">
+  <a class="open-screen previous ui-state-default" rel="${previous_url}"
+     tal:condition="previous_url">
+    <ins class="ui-icon ui-icon-seek-prev"></ins>
+    <tal:translate i18n:translate="">Previous</tal:translate></a>
+  <tal:repeat repeat="item batch">
+  <a class="open-screen ${item.style or ''}" rel="${item.url}"
+     tal:condition="item.url"
+     tal:content="item.name">
+  </a>
+  <span tal:condition="not item.url">...</span>
+  </tal:repeat>
+  <a class="open-screen next ui-state-default" rel="${next_url}"
+     tal:condition="next_url">
+    <ins class="ui-icon ui-icon-seek-next"></ins>
+    <tal:translate i18n:translate="">Next</tal:translate>
+  </a>
+</div>
+

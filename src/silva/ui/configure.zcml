@@ -1,6 +1,7 @@
 <configure
    xmlns="http://namespaces.zope.org/zope"
    xmlns:grok="http://namespaces.zope.org/grok"
+   xmlns:browser="http://namespaces.zope.org/browser"
    xmlns:five="http://namespaces.zope.org/five">
 
   <five:registerPackage package="." />
@@ -21,5 +22,23 @@
 
   <!-- Grok code -->
   <grok:grok package="." exclude="martiansupport" />
+
+
+  <!-- AbsoluteURL UIScreen -->
+  <view
+     for=".interfaces.IUIScreen"
+     factory=".batching.RESTAbsoluteURL"
+     type="zope.publisher.interfaces.http.IHTTPRequest"
+     permission="zope.Public"
+     provides="zope.traversing.browser.interfaces.IAbsoluteURL"
+     />
+
+  <browser:page
+     for=".interfaces.IUIScreen"
+     name="absolute_url"
+     class=".batching.RESTAbsoluteURL"
+     permission="zope.Public"
+     allowed_interface="zope.traversing.browser.interfaces.IAbsoluteURL"
+     />
 
 </configure>

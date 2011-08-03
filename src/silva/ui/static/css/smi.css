@@ -43,6 +43,24 @@ div.jGrowl div.error {
   background-color: #cc0000;
 }
 
+div.batching a, div.batching span {
+  display: block;
+  float: left;
+  margin: 0 0.25em;
+}
+
+div.batching a.previous ins {
+  float: left;
+  margin-right: 0.2em;
+}
+div.batching a.next ins {
+  float: right;
+  margin-left: 0.2em;
+}
+div.batching a.current {
+  font-weight: bold;
+}
+
 #main {
   position:absolute;
   top:20px;
@@ -69,7 +87,6 @@ div.jGrowl div.error {
 .focus.highlight {
   outline: 2px #fb0 solid;
 }
-
 
 .message ins.ui-icon {
   float: left;
