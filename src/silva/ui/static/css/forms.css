@@ -134,6 +134,10 @@ form {
 #workspace .form-table .form-controls td {
   padding: 10px 20px 10px 10px;
 }
+#workspace .form-table .footer-fields {
+  float: left;
+  margin: 5px 12px 5px 2px;
+}
 
 .form-content a.form-control,
 .form-content a.form-button {
