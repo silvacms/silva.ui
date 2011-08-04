@@ -1,11 +1,11 @@
 
-from Products.Five import BrowserView
 
 from five import grok
 from silva.ui.interfaces import IUIScreen
 from silva.ui.rest import Screen
 from zeam.utils.batch.interfaces import IBatch
 from zeam.utils.batch.views import Batching
+from zope.publisher.browser import BrowserView
 from zope.publisher.interfaces.http import IHTTPRequest
 import megrok.pagetemplate as pt
 
