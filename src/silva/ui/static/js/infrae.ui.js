@@ -29,11 +29,7 @@
                     '-moz-user-select': 'none',
                     '-webkit-user-select': 'none',
                     'user-select': 'none'
-                }).bind('selectstart', function() {
-                    return false;
-                }).bind('mousedown', function() {
-                    return false;
-                });
+                }).bind('selectstart', false).bind('mousedown', false);
             },
             /**
              * Enable previously disabled text selection.
