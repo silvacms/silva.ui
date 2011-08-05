@@ -13,18 +13,15 @@ from zope.i18n import translate
 from zope.i18n.interfaces import IUserPreferredLanguages
 from zope.intid.interfaces import IIntIds
 
-from zope.lifecycleevent.interfaces import IObjectMovedEvent
-from OFS.interfaces import IObjectWillBeMovedEvent
-
 from Acquisition import aq_parent
 
-from silva.core.cache.memcacheutils import MemcacheSlice
-from silva.core.interfaces import IRoot, IContainer, ISilvaObject
+from silva.core.interfaces import IRoot, ISilvaObject
 from silva.core.interfaces.adapters import IIconResolver
 from silva.core.messages.interfaces import IMessageService
 from silva.core.views.interfaces import IVirtualSite
 from silva.ui.smi import set_smi_skin
 from silva.ui.interfaces import IUIScreen
+from silva.ui.rest.invalidation import Invalidation
 from silva.ui.menu import ContentMenu, ViewMenu, ActionMenu
 
 import fanstatic
@@ -132,12 +129,29 @@ def get_resources(request):
     return data
 
 
+def get_navigation_changes(request):
+    nav_id = lambda id: 'nav' + str(id)
+    for change in Invalidation(request).get_changes():
+        if change['listing'] == 'container':
+            if change['action'] == 'add':
+                yield {
+                    'action': 'add',
+                    'info': {
+                        'parent': nav_id(change['container']),
+                        'target': nav_id(change['content']),
+                        'position': change['position']}}
+            elif change['action'] == 'remove':
+                yield {
+                    'action': 'remove',
+                    'info': {'target': nav_id(change['content'])}}
+
+
 class ActionREST(UIREST):
     grok.baseclass()
     grok.require('silva.ReadSilvaContent')
 
     def get_navigation(self):
-        return {'invalidation': NavigationSynchronizer(self.request).get_changes()}
+        return {'invalidation': list(get_navigation_changes(self.request))}
 
     def GET(self):
         data = {}
@@ -230,86 +244,4 @@ class PageWithTemplateREST(PageREST):
         self.update()
         return {'ifaces': ['form'],
                 'html': self.template.render(self)}
-
-
-class NavigationSynchronizer(object):
-
-    namespace = 'silva.navigation.invalidation'
-
-    def __init__(self, request):
-        self.request = request
-        self._storage = MemcacheSlice(self.namespace)
-
-    def get_path(self):
-        return IVirtualSite(self.request).get_root().absolute_url_path()
-
-    def get_client_version(self):
-        try:
-            return int(
-                self.request.cookies.get(self.namespace, None))
-        except TypeError:
-            return None
-
-    def set_client_version(self, version):
-        self.request.response.setCookie(
-            self.namespace, str(version), path=self.get_path())
-
-    def get_changes(self):
-        storage_version = self._storage.get_index()
-        client_version = self.get_client_version()
-
-        if client_version != storage_version:
-            self.set_client_version(storage_version)
-
-        if client_version is not None and client_version < storage_version:
-            return self._storage[client_version+1:storage_version+1]
-
-        return []
-
-
-@grok.subscribe(ISilvaObject, IObjectMovedEvent)
-def register_add(target, event):
-    if event.object != target:
-        return
-    if not IContainer.providedBy(target):
-        return
-    if event.newParent is None:
-        return
-    if event.oldParent is event.newParent:
-        return
-
-    service = getUtility(IIntIds)
-
-    def nav_id(ob):
-        return 'nav' + str(service.register(ob))
-
-    mem_slice = MemcacheSlice(NavigationSynchronizer.namespace)
-    mem_slice.push({'action': 'add',
-                    'info': {'parent': nav_id(event.newParent),
-                             'target': nav_id(target),
-                             'position': -1}})
-
-
-@grok.subscribe(ISilvaObject, IObjectWillBeMovedEvent)
-def register_remove(target, event):
-    if event.object != target:
-        return
-    if not IContainer.providedBy(target):
-        return
-    if IRoot.providedBy(target):
-        return
-    if event.oldParent is None:
-        return
-    if event.newParent is event.oldParent:
-        return
-
-    service = getUtility(IIntIds)
-
-    def nav_id(ob):
-        return 'nav' + str(service.register(ob))
-
-    mem_slice = MemcacheSlice(NavigationSynchronizer.namespace)
-    mem_slice.push({'action': 'remove',
-                    'info': {'target': nav_id(target)}})
-
 

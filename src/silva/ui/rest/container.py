@@ -8,26 +8,22 @@ from infrae import rest
 from megrok.chameleon.components import ChameleonPageTemplate
 from zope.component import getUtility
 from zope.intid.interfaces import IIntIds
-from zope.lifecycleevent.interfaces import IObjectModifiedEvent
-from zope.lifecycleevent.interfaces import IObjectMovedEvent
 
 from silva.core.cache.memcacheutils import MemcacheSlice
-from silva.core.interfaces import IRoot, IContainer, ISilvaObject
+from silva.core.interfaces import IContainer, ISilvaObject
 from silva.core.interfaces import IPublishable, INonPublishable
-from silva.core.interfaces import IVersion, IVersionedContent
-from silva.core.interfaces.adapters import IIconResolver, IOrderManager
+from silva.core.interfaces import IVersionedContent
+from silva.core.interfaces.adapters import IIconResolver
 from silva.core.messages.interfaces import IMessageService
 from silva.core.services.utils import walk_silva_tree
 from silva.core.views.interfaces import IVirtualSite
 from silva.translations import translate as _
 from silva.ui.rest.base import ActionREST
 from silva.ui.rest.base import UIREST
+from silva.ui.rest.invalidation import Invalidation
 
 from AccessControl import getSecurityManager
-from Acquisition import aq_parent
-from OFS.interfaces import IObjectWillBeMovedEvent
 from Products.SilvaMetadata.interfaces import IMetadataService
-from Products.SilvaMetadata.interfaces import IMetadataModifiedEvent
 
 
 CONTENT_IFACES = [
@@ -456,35 +452,35 @@ class FolderActionREST(ActionREST):
         serializer = ContentSerializer(self, self.request)
         container = serializer.get_id(self.context)
 
-        listing = ListingSynchronizer()
         updated = []
         removed = []
         added_publishables = []
-        added_nonpublishables = []
-        for info in listing.get_changes(self.request, container):
-            if info['action'] == 'remove':
-                removed.append(info['content'])
-            else:
-                content_data = serializer(id=info['content'])
-                content_data['position'] = info.get('position', -1)
-                if info['action'] == 'add':
-                    if info['listing'] == 'publishables':
-                        added_publishables.append(content_data)
-                    else:
-                        added_nonpublishables.append(content_data)
+        added_assets = []
+        for info in Invalidation(self.request).get_changes():
+            if info['container'] == container:
+                if info['action'] == 'remove':
+                    removed.append(info['content'])
                 else:
-                    updated.append(content_data)
+                    content_data = serializer(id=info['content'])
+                    content_data['position'] = info.get('position', -1)
+                    if info['action'] == 'add':
+                        if info['listing'] == 'assets':
+                            added_assets.append(content_data)
+                        else:
+                            added_publishables.append(content_data)
+                    else:
+                        updated.append(content_data)
 
         if removed:
             data['remove'] = removed
         if updated:
             data['update'] = updated
-        if added_publishables or added_nonpublishables:
+        if added_publishables or added_assets:
             data['add'] = {}
             if added_publishables:
                 data['add']['publishables'] = added_publishables
             else:
-                data['add']['assets'] = added_nonpublishables
+                data['add']['assets'] = added_assets
         return {'ifaces': ['action'], 'actions': data}
 
 
@@ -535,111 +531,3 @@ class ContentCounter(object):
                          'content': quotify(self.titles[-1])})
         return self.rest.translate(what)
 
-
-
-class ListingSynchronizer(object):
-
-    namespace = 'silva.listing.invalidation'
-
-    def initialize_client(self, request):
-        # Set version inconditionally. (We are not interested about
-        # what happened before).
-        storage = MemcacheSlice(self.namespace)
-        self.set_client_version(request, storage.get_index())
-
-    def get_path(self, request):
-        return IVirtualSite(request).get_root().absolute_url_path()
-
-    def get_client_version(self, request):
-        try:
-            return int(request.cookies.get(self.namespace, None))
-        except TypeError:
-            return None
-
-    def set_client_version(self, request, version):
-        request.response.setCookie(
-            self.namespace, str(version), path=self.get_path(request))
-
-    def get_changes(self, request, container):
-        storage = MemcacheSlice(self.namespace)
-        storage_version = storage.get_index()
-        client_version = self.get_client_version(request)
-
-        if client_version != storage_version:
-            self.set_client_version(request, storage_version)
-
-        if client_version is not None and client_version < storage_version:
-            return filter(
-                lambda r: r['container'] == container,
-                storage[client_version+1:storage_version+1])
-
-        return []
-
-# XXX Do position.
-
-def register_change(target, action):
-    get_id = getUtility(IIntIds).register
-    container = aq_parent(target)
-    is_publishable = IPublishable.providedBy(target)
-    data = {
-        'action': action,
-        'listing': 'publishables' if is_publishable else 'assets',
-        'container': get_id(container),
-        'content': get_id(target)}
-    if action != 'remove':
-        order = IOrderManager(container, None)
-        if order is not None:
-            position = order.get_position(target) + 1
-            if not position:
-                if not (is_publishable and target.is_default()):
-                    position = -1
-            data['position'] = position
-    MemcacheSlice(ListingSynchronizer.namespace).push(data)
-
-
-@grok.subscribe(ISilvaObject, IObjectModifiedEvent)
-def register_update(target, event):
-    register_change(target, 'update')
-
-
-@grok.subscribe(IVersion, IObjectModifiedEvent)
-def register_version_update(target, event):
-    register_change(target.get_content(), 'update')
-
-
-@grok.subscribe(ISilvaObject, IMetadataModifiedEvent)
-def register_title_update(target, event):
-    if 'maintitle' in event.changes:
-        register_change(target, 'update')
-
-
-@grok.subscribe(IVersion, IMetadataModifiedEvent)
-def register_vesion_title_update(target, event):
-    if 'maintitle' in event.changes:
-        register_change(target.get_content(), 'update')
-
-
-@grok.subscribe(ISilvaObject, IObjectMovedEvent)
-def register_move(target, event):
-    if event.object != target or not IContainer.providedBy(aq_parent(target)):
-        return
-    if event.newParent is not None:
-        # That was not a delete
-        if event.oldParent is event.newParent:
-            # This was a rename.
-            register_change(target, 'update')
-        else:
-            # This was an add.
-            register_change(target, 'add')
-
-
-@grok.subscribe(ISilvaObject, IObjectWillBeMovedEvent)
-def register_remove(target, event):
-    if event.object != target or not IContainer.providedBy(aq_parent(target)):
-        return
-    if IRoot.providedBy(target):
-        return
-    if event.oldParent is not None:
-        if event.newParent is not event.oldParent:
-            # That was a move or a delete, but not a rename
-            register_change(target, 'remove')

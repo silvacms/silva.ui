@@ -351,6 +351,20 @@
         // Collapse feature / table header.
         render_container_header($header, $content, configuration);
 
+        // Insert a line at the correct position.
+        var insert_line = function($line, data) {
+            if (data.position > -1) {
+                var $after = $container.children().eq(data.position);
+                if ($after.length) {
+                    $after.before($line);
+                } else {
+                    $container.append($line);
+                };
+            } else {
+                $container.append($line);
+            };
+        };
+
         var render_line = function(data) {
             // Add a data line to the table
             var $line = $('<tr class="item"></tr>');
@@ -399,6 +413,11 @@
                 update: function(data) {
                     if (data != undefined) {
                         $line.data('smilisting', data);
+                        // Position might have changed.
+                        if (data.position > 0 && $container.children().index($line) != data.position) {
+                            $line.detach();
+                            insert_line($line, data);
+                        };
                     } else {
                         data = $line.data('smilisting');
                     };
@@ -433,17 +452,7 @@
 
             line.update(data);
             $line.data('smilisting-line', line);
-            // Add the line at the correct position.
-            if (data.position > -1) {
-                $after = $container.children().eq(data.position);
-                if ($after.length) {
-                    $after.before($line)
-                } else {
-                    $container.append($line);
-                };
-            } else {
-                $container.append($line);
-            };
+            insert_line($line, data);
             return $line.get(0);
         };
 
