@@ -10,7 +10,6 @@ from zope.component import getUtility
 from zope.intid.interfaces import IIntIds
 from zope.lifecycleevent.interfaces import IObjectModifiedEvent
 from zope.lifecycleevent.interfaces import IObjectMovedEvent
-from OFS.interfaces import IObjectWillBeMovedEvent
 
 from silva.core.cache.memcacheutils import MemcacheSlice
 from silva.core.interfaces import IRoot, IContainer, ISilvaObject
@@ -26,7 +25,9 @@ from silva.ui.rest.base import UIREST
 
 from AccessControl import getSecurityManager
 from Acquisition import aq_parent
+from OFS.interfaces import IObjectWillBeMovedEvent
 from Products.SilvaMetadata.interfaces import IMetadataService
+from Products.SilvaMetadata.interfaces import IMetadataModifiedEvent
 
 
 CONTENT_IFACES = [
@@ -574,7 +575,7 @@ class ListingSynchronizer(object):
 
 # XXX Do position.
 
-def register_change(target, event, action):
+def register_change(target, action):
     service = getUtility(IIntIds)
     container = aq_parent(target)
     data = {
@@ -587,35 +588,47 @@ def register_change(target, event, action):
 
 @grok.subscribe(ISilvaObject, IObjectModifiedEvent)
 def register_update(target, event):
-    register_change(target, event, 'update')
+    register_change(target, 'update')
 
 
 @grok.subscribe(IVersion, IObjectModifiedEvent)
 def register_version_update(target, event):
-    register_change(target.get_content(), event, 'update')
+    register_change(target.get_content(), 'update')
+
+
+@grok.subscribe(ISilvaObject, IMetadataModifiedEvent)
+def register_title_update(target, event):
+    if 'maintitle' in event.changes:
+        register_change(target, 'update')
+
+
+@grok.subscribe(IVersion, IMetadataModifiedEvent)
+def register_vesion_title_update(target, event):
+    if 'maintitle' in event.changes:
+        register_change(target.get_content(), 'update')
 
 
 @grok.subscribe(ISilvaObject, IObjectMovedEvent)
 def register_move(target, event):
-    if event.object != target:
+    if event.object != target or not IContainer.providedBy(aq_parent(target)):
         return
     if event.newParent is not None:
         # That was not a delete
         if event.oldParent is event.newParent:
             # This was a rename.
-            register_change(target, event, 'update')
+            register_change(target, 'update')
         else:
             # This was an add.
-            register_change(target, event, 'add')
+            register_change(target, 'add')
 
 
 @grok.subscribe(ISilvaObject, IObjectWillBeMovedEvent)
 def register_remove(target, event):
-    if event.object != target:
+    if event.object != target or not IContainer.providedBy(aq_parent(target)):
         return
     if IRoot.providedBy(target):
         return
     if event.oldParent is not None:
         if event.newParent is not event.oldParent:
             # That was a move or a delete, but not a rename
-            register_change(target, event, 'remove')
+            register_change(target, 'remove')
