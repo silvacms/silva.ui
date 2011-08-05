@@ -433,7 +433,17 @@
 
             line.update(data);
             $line.data('smilisting-line', line);
-            $container.append($line);
+            // Add the line at the correct position.
+            if (data.position > -1) {
+                $after = $container.children().eq(data.position);
+                if ($after.length) {
+                    $after.before($line)
+                } else {
+                    $container.append($line);
+                };
+            } else {
+                $container.append($line);
+            };
             return $line.get(0);
         };
 

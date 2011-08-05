@@ -15,7 +15,7 @@ from silva.core.cache.memcacheutils import MemcacheSlice
 from silva.core.interfaces import IRoot, IContainer, ISilvaObject
 from silva.core.interfaces import IPublishable, INonPublishable
 from silva.core.interfaces import IVersion, IVersionedContent
-from silva.core.interfaces.adapters import IIconResolver
+from silva.core.interfaces.adapters import IIconResolver, IOrderManager
 from silva.core.messages.interfaces import IMessageService
 from silva.core.services.utils import walk_silva_tree
 from silva.core.views.interfaces import IVirtualSite
@@ -408,7 +408,8 @@ class ContentSerializer(object):
                 previewable, 'silva-extra', 'lastauthor'),
             'modified': format_date(self.get_metadata(
                     previewable, 'silva-extra', 'modificationtime')),
-            'access': self.get_access(content)}
+            'access': self.get_access(content),
+            'position': -1}
         if IPublishable.providedBy(content):
             data['status'] = get_content_status(content)
             data['moveable'] = not content.is_default()
@@ -465,6 +466,7 @@ class FolderActionREST(ActionREST):
                 removed.append(info['content'])
             else:
                 content_data = serializer(id=info['content'])
+                content_data['position'] = info.get('position', -1)
                 if info['action'] == 'add':
                     if info['listing'] == 'publishables':
                         added_publishables.append(content_data)
@@ -576,13 +578,22 @@ class ListingSynchronizer(object):
 # XXX Do position.
 
 def register_change(target, action):
-    service = getUtility(IIntIds)
+    get_id = getUtility(IIntIds).register
     container = aq_parent(target)
+    is_publishable = IPublishable.providedBy(target)
     data = {
         'action': action,
-        'listing': 'publishables' if IPublishable.providedBy(target) else 'assets',
-        'container': service.register(container),
-        'content': service.register(target)}
+        'listing': 'publishables' if is_publishable else 'assets',
+        'container': get_id(container),
+        'content': get_id(target)}
+    if action != 'remove':
+        order = IOrderManager(container, None)
+        if order is not None:
+            position = order.get_position(target) + 1
+            if not position:
+                if not (is_publishable and target.is_default()):
+                    position = -1
+            data['position'] = position
     MemcacheSlice(ListingSynchronizer.namespace).push(data)
 
 
