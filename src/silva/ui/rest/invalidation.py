@@ -81,7 +81,9 @@ def register_change(target, action):
             if not position:
                 if not (is_publishable and target.is_default()):
                     position = -1
-            data['position'] = position
+        else:
+            position = -1
+        data['position'] = position
     MemcacheSlice(NAMESPACE).push(data)
 
 

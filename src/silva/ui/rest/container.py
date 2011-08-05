@@ -462,7 +462,7 @@ class FolderActionREST(ActionREST):
                     removed.append(info['content'])
                 else:
                     content_data = serializer(id=info['content'])
-                    content_data['position'] = info.get('position', -1)
+                    content_data['position'] = info['position']
                     if info['action'] == 'add':
                         if info['listing'] == 'assets':
                             added_assets.append(content_data)

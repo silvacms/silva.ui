@@ -121,6 +121,7 @@
                             remove(datum['info']);
                             break;
                         case 'add':
+                        case 'update':
                             add(datum['info']);
                             break;
                         }
