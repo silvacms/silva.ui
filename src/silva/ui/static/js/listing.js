@@ -245,21 +245,23 @@
             smi.open_screen_from_link($(event.target).parents('a.open-screen'));
             return false;
         });
+        var preview_url_template = new jsontemplate.Template(smi.options.listing.preview, {});
         var preview_timer = null;
+        var $preview_target = null;
         $containers.delegate('tr.item a.open-screen', 'mouseenter', function(event) {
             if (preview_timer !== null) {
                 clearTimeout(preview_timer);
             };
-            var $target = $(event.target);
-            var $line = $target.closest('tr.item');
-            var info = $line.data('smilisting');
-            var preview_url_template = new jsontemplate.Template(smi.options.listing.preview, {});
+            $preview_target = $(event.target);
             preview_timer = setTimeout(function () {
+                var info = $preview_target.closest('tr.item').data('smilisting');
                 $.ajax({
                     url: preview_url_template.expand({path: info.path})
                 }).done(function(data) {
-                    $target.qtip({
-                        overwrite: true,
+                    if ($preview_target === null) {
+                        return;
+                    };
+                    $preview_target.qtip({
                         content: {text: data.preview,
                                   title: data.title},
                         position: {
@@ -269,7 +271,7 @@
                             adjust: {method: 'shift flip'}},
                         show: {event: false, ready: true},
                         hide: {event: 'mouseleave'},
-                        style: 'ui-tooltip-light'});
+                        style: 'ui-tooltip-shadow ui-tooltip-light'});
                 });
             }, 1000);
         });
@@ -277,6 +279,10 @@
             if (preview_timer !== null) {
                 clearTimeout(preview_timer);
                 preview_timer = null;
+            };
+            if ($preview_target !== null) {
+                $preview_target.qtip('destroy');
+                $preview_target = null;
             };
         });
 
