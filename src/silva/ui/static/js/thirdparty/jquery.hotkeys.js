@@ -69,7 +69,7 @@
             // directly bind to (unless it have some modifier.)
             if (!modif &&
                 this !== event.target &&
-                (/textarea|select/i.test(event.target.nodeName) || event.target.type === "text"))
+                (/textarea|select/i.test(event.target.nodeName) || /text|search/i.test(event.target.type)))
                 return;
 
             if (special) {
