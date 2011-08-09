@@ -9,14 +9,12 @@ from megrok.chameleon.components import ChameleonPageTemplate
 from zope.component import getUtility
 from zope.intid.interfaces import IIntIds
 
-from silva.core.cache.memcacheutils import MemcacheSlice
 from silva.core.interfaces import IContainer, ISilvaObject
 from silva.core.interfaces import IPublishable, INonPublishable
 from silva.core.interfaces import IVersionedContent
 from silva.core.interfaces.adapters import IIconResolver
 from silva.core.messages.interfaces import IMessageService
 from silva.core.services.utils import walk_silva_tree
-from silva.core.views.interfaces import IVirtualSite
 from silva.translations import translate as _
 from silva.ui.rest.base import ActionREST
 from silva.ui.rest.base import UIREST
@@ -393,6 +391,16 @@ class ContentSerializer(object):
         elif id is None:
             id = self.get_id(content)
         previewable = content.get_previewable()
+        author = self.get_metadata(
+            previewable, 'silva-extra', 'lastauthor')
+        if author is None:
+            author = u'-'
+        modified = self.get_metadata(
+            previewable, 'silva-extra', 'modificationtime')
+        if modified is None:
+            modified = u'-'
+        else:
+            modified = format_date(modified)
         data = {
             'ifaces': content_ifaces(content),
             'id': id,
@@ -400,10 +408,8 @@ class ContentSerializer(object):
             'path': self.rest.get_content_path(content),
             'icon': self.get_icon(content),
             'title': previewable.get_title_or_id(),
-            'author': self.get_metadata(
-                previewable, 'silva-extra', 'lastauthor'),
-            'modified': format_date(self.get_metadata(
-                    previewable, 'silva-extra', 'modificationtime')),
+            'author': author,
+            'modified': modified,
             'access': self.get_access(content),
             'position': -1}
         if IPublishable.providedBy(content):
