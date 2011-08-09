@@ -41,7 +41,8 @@ class ISilvaUI(ISilvaUIDependencies):
     silvaconf.resource('js/thirdparty/jquery.observehashchange.js')
     silvaconf.resource('js/thirdparty/jquery.jstree.js')
     silvaconf.resource('js/thirdparty/jquery.tablednd-0.5.js')
-
+    silvaconf.resource('js/thirdparty/jquery.qtip.js')
+    silvaconf.resource('js/thirdparty/jquery.qtip.css')
     silvaconf.resource('js/smi.js')
     silvaconf.resource('js/navigation.js')
     silvaconf.resource('js/workspace.js')

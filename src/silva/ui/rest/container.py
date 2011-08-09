@@ -49,6 +49,21 @@ class TemplateContainerListing(rest.REST):
         return self.template.render(self)
 
 
+class ListingPreview(rest.REST):
+    grok.baseclass()
+    grok.name('silva.ui.listing.preview')
+    grok.require('silva.ReadSilvaContent')
+
+    def preview(self):
+        raise NotImplementedError
+
+    def GET(self):
+        return self.json_response({
+            'title': self.context.get_title_or_id(),
+            'preview': self.preview()
+            })
+
+
 class TemplateToolbarContainerListing(rest.REST):
     grok.context(IContainer)
     grok.name('silva.ui.listing.template.toolbar')

@@ -74,7 +74,7 @@
         factory: function($content, data, column, value) {
             return {
                 column: column,
-                jsont: '<a class="open-screen" href="{data.path|htmltag}" rel="{column.action|htmltag}" title="{data.title|htmltag}"><ins class="icon"></ins></a>',
+                jsont: '<a class="open-screen" href="{data.path|htmltag}" rel="{column.action|htmltag}"><ins class="icon"></ins></a>',
                 render: function() {
                     infrae.ui.icon($content.find('ins'), value);
                     $content.addClass('active');
@@ -244,6 +244,40 @@
         $containers.delegate('tr.item a.open-screen', 'click', function(event) {
             smi.open_screen_from_link($(event.target).parents('a.open-screen'));
             return false;
+        });
+        var preview_timer = null;
+        $containers.delegate('tr.item a.open-screen', 'mouseenter', function(event) {
+            if (preview_timer !== null) {
+                clearTimeout(preview_timer);
+            };
+            var $target = $(event.target);
+            var $line = $target.closest('tr.item');
+            var info = $line.data('smilisting');
+            var preview_url_template = new jsontemplate.Template(smi.options.listing.preview, {});
+            preview_timer = setTimeout(function () {
+                $.ajax({
+                    url: preview_url_template.expand({path: info.path})
+                }).done(function(data) {
+                    $target.qtip({
+                        overwrite: true,
+                        content: {text: data.preview,
+                                  title: data.title},
+                        position: {
+                            at: 'right center',
+                            my: 'left center',
+                            viewport: $viewport,
+                            adjust: {method: 'shift flip'}},
+                        show: {event: false, ready: true},
+                        hide: {event: 'mouseleave'},
+                        style: 'ui-tooltip-light'});
+                });
+            }, 1000);
+        });
+        $containers.delegate('tr.item a.open-screen', 'mouseleave', function(event) {
+            if (preview_timer !== null) {
+                clearTimeout(preview_timer);
+                preview_timer = null;
+            };
         });
 
         // Drop-downs
