@@ -168,10 +168,11 @@
     /**
      * Render/bind the user selection process.
      */
-    var render_selection = function($viewport, $containers, selector, shortcuts) {
+    var render_selection = function($viewport, $containers, selector, smi) {
         // Row selection
         var last_selected_index = null;
         var $hovered_row = null;
+        var shortcuts = smi.shortcuts;
 
         var get_hovered_row = function() {
             if ($hovered_row === null) {
@@ -245,46 +246,48 @@
             smi.open_screen_from_link($(event.target).parents('a.open-screen'));
             return false;
         });
-        var preview_url_template = new jsontemplate.Template(smi.options.listing.preview, {});
-        var preview_timer = null;
-        var $preview_target = null;
-        $containers.delegate('tr.item a.open-screen', 'mouseenter', function(event) {
-            if (preview_timer !== null) {
-                clearTimeout(preview_timer);
-            };
-            $preview_target = $(event.target);
-            preview_timer = setTimeout(function () {
-                var info = $preview_target.closest('tr.item').data('smilisting');
-                $.ajax({
-                    url: preview_url_template.expand({path: info.path})
-                }).done(function(data) {
-                    if ($preview_target === null) {
-                        return;
-                    };
-                    $preview_target.qtip({
-                        content: {text: data.preview,
-                                  title: data.title},
-                        position: {
-                            at: 'right center',
-                            my: 'left center',
-                            viewport: $viewport,
-                            adjust: {method: 'shift flip'}},
-                        show: {event: false, ready: true},
-                        hide: {event: 'mouseleave'},
-                        style: 'ui-tooltip-shadow ui-tooltip-light'});
-                });
-            }, 1000);
-        });
-        $containers.delegate('tr.item a.open-screen', 'mouseleave', function(event) {
-            if (preview_timer !== null) {
-                clearTimeout(preview_timer);
-                preview_timer = null;
-            };
-            if ($preview_target !== null) {
-                $preview_target.qtip('destroy');
-                $preview_target = null;
-            };
-        });
+        if (smi.options.listing.preview !== undefined) {
+            var preview_url_template = new jsontemplate.Template(smi.options.listing.preview, {});
+            var preview_timer = null;
+            var $preview_target = null;
+            $containers.delegate('tr.item a.open-screen', 'mouseenter', function(event) {
+                if (preview_timer !== null) {
+                    clearTimeout(preview_timer);
+                };
+                $preview_target = $(event.target);
+                preview_timer = setTimeout(function () {
+                    var info = $preview_target.closest('tr.item').data('smilisting');
+                    $.ajax({
+                        url: preview_url_template.expand({path: info.path})
+                    }).done(function(data) {
+                        if ($preview_target === null && !data.preview) {
+                            return;
+                        };
+                        $preview_target.qtip({
+                            content: {text: data.preview,
+                                      title: data.title},
+                            position: {
+                                at: 'right center',
+                                my: 'left center',
+                                viewport: $viewport,
+                                adjust: {method: 'shift flip'}},
+                            show: {event: false, ready: true},
+                            hide: {event: 'mouseleave'},
+                            style: 'ui-tooltip-shadow ui-tooltip-light'});
+                    });
+                }, 1000);
+            });
+            $containers.delegate('tr.item a.open-screen', 'mouseleave', function(event) {
+                if (preview_timer !== null) {
+                    clearTimeout(preview_timer);
+                    preview_timer = null;
+                };
+                if ($preview_target !== null) {
+                    $preview_target.qtip('destroy');
+                    $preview_target = null;
+                };
+            });
+        };
 
         // Drop-downs
         var opened_dropdown = null;
@@ -875,7 +878,7 @@
                                     events.status.invoke();
                                 };
                             },
-                            smi.shortcuts);
+                            smi);
 
                         // Then collpasing change, update column sizes, and trigger a new status.
                         update_container_sizes();

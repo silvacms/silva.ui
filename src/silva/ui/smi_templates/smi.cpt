@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml"
-      tal:attributes="lang view.lang | nothing;
-                      xml:lang view.lang | nothing"
+      tal:attributes="lang view.language | nothing;
+                      xml:lang view.language | nothing"
       tal:define="imgs_url static.img()"
       i18n:domain="silva">
   <head>
@@ -148,7 +148,9 @@
           listing: {
               configuration: "${view.root_url}/++rest++silva.ui.listing.configuration",
               action: "${view.root_url}/{path}/++rest++silva.ui.listing.{action}",
+<tal:preview tal:condition="view.listing_preview">
               preview: "${view.root_url}/{path}/++rest++silva.ui.listing.preview",
+</tal:preview>
               templates: {
                 content: "${view.root_url}/++rest++silva.ui.listing.template",
                 toolbar: "${view.root_url}/++rest++silva.ui.listing.template.toolbar"

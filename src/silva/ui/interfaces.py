@@ -77,6 +77,11 @@ class IUIService(ISilvaLocalService):
     background = schema.TextLine(
         title=_(u"Background color"),
         required=False)
+    listing_preview = schema.Bool(
+        title=_(u"Enable content preview in folder listing"),
+        description=_(u"This can be disable in case of performance issue"),
+        default=True,
+        required=False)
 
 
 # Menu items

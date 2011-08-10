@@ -56,17 +56,22 @@ class SMI(grok.View):
             need(resource)
 
         # Customization from service.
-        ui_service = getUtility(IUIService)
-        if ui_service.logo != None:
-            self.logo_url = '/'.join((absoluteURL(ui_service, self.request), 'logo'))
+        service = getUtility(IUIService)
+        if service.logo != None:
+            self.logo_url = '/'.join(
+                (absoluteURL(service, self.request), 'logo'))
         else:
             self.logo_url = self.static['img']['silva.png']()
-        self.background = ui_service.background if ui_service.background else '#7996ac'
+        self.background =  '#7996ac'
+        self.listing_preview = service.listing_preview
+        if service.background:
+            self.background = service.background
 
         # Prepare values for template
-        languages = IUserPreferredLanguages(self.request).getPreferredLanguages()
+        languages = IUserPreferredLanguages(
+            self.request).getPreferredLanguages()
 
-        self.lang = languages[0] if languages else 'en'
+        self.language = languages[0] if languages else 'en'
         self.root_url = root_url
         self.can_manage = getSecurityManager().checkPermission(
             'View Management Screens', self.context)
