@@ -85,6 +85,9 @@
         });
 
         // Bind JStree event to set the autoscroll.
+        $tree.bind("select_node.jstree", function(event, data) {
+            scroll($(this), data.rslt.obj.parents('ul').length - 2);
+        });
         $tree.bind("open_node.jstree", function(event, data) {
             scroll($(this), data.rslt.obj.parents('ul').length - 2);
         });
