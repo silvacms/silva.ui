@@ -291,24 +291,10 @@ class ColumnsContainerListing(UIREST):
                                           'items_match':
                                               {'status': ['draft', 'approved', 'pending', None]}},
                                      'ifaces': ['container', 'versioned']},
-                                    {'title': self.translate(_(u'Close')),
-                                     'icon': 'close',
-                                     'accesskey': ['ctrl+l'],
-                                     'order': 15,
-                                     'action':
-                                         {'rest':
-                                              {'action': 'close',
-                                               'send': 'selected_ids'}},
-                                     'available':
-                                         {'content_match':
-                                              {'access': ['manage', 'publish']},
-                                          'items_match':
-                                              {'status': ['published', None]}},
-                                     'ifaces': ['container', 'versioned']},
                                     {'title': self.translate(_(u'New version')),
                                      'icon': 'document',
                                      'accesskey': ['ctrl+n'],
-                                     'order': 20,
+                                     'order': 15,
                                      'action':
                                          {'rest':
                                               {'action': 'newversion',
@@ -320,6 +306,20 @@ class ColumnsContainerListing(UIREST):
                                           'items_match':
                                               {'status': ['published', 'closed']}},
                                      'ifaces': ['versioned']},
+                                    {'title': self.translate(_(u'Close')),
+                                     'icon': 'close',
+                                     'accesskey': ['ctrl+l'],
+                                     'order': 20,
+                                     'action':
+                                         {'rest':
+                                              {'action': 'close',
+                                               'send': 'selected_ids'}},
+                                     'available':
+                                         {'content_match':
+                                              {'access': ['manage', 'publish']},
+                                          'items_match':
+                                              {'status': ['published', None]}},
+                                     'ifaces': ['container', 'versioned']},
                                     {'title': self.translate(_(u'Approve for future')),
                                      'icon': 'document',
                                      'order': 25,
