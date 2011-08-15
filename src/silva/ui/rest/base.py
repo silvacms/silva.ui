@@ -22,6 +22,7 @@ from silva.core.views.interfaces import IVirtualSite
 from silva.ui.smi import set_smi_skin
 from silva.ui.interfaces import IUIScreen
 from silva.ui.rest.invalidation import Invalidation
+from silva.ui.rest.exceptions import PageException
 from silva.ui.menu import ContentMenu, ViewMenu, ActionMenu
 
 import fanstatic
@@ -30,12 +31,6 @@ import fanstatic
 class Screen(rest.REST):
     grok.context(ISilvaObject)
     grok.name('silva.ui')
-
-
-class PageException(Exception):
-
-    def payload(self, caller):
-        raise NotImplementedError
 
 
 class UIHelper(object):
@@ -77,28 +72,6 @@ class UIHelper(object):
 
     def get_content_path(self, content):
         return content.absolute_url_path()[len(self.root_path):] or '/'
-
-
-class RedirectToPage(PageException):
-
-    def __init__(self, content, tab='content'):
-        self.content = content
-        self.tab = tab
-
-    def payload(self, caller):
-        return {'ifaces': ['redirect'],
-                'path': caller.get_content_path(self.content),
-                'screen': self.tab}
-
-
-class RedirectToUrl(PageException):
-
-    def __init__(self, url):
-        self.url = url
-
-    def payload(self, caller):
-        return {'ifaces': ['view'],
-                'url': self.url}
 
 
 class UIREST(rest.REST, UIHelper):

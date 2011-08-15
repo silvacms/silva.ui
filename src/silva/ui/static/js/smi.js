@@ -272,10 +272,13 @@
                             name: 'content',
                             args: [smi]
                         }).done(function() {
-                            $workspace_header.render({
-                                data: data.metadata,
-                                name: 'header',
-                                args: [smi, content_url, this]});
+                            if (data.metadata !== undefined) {
+                                $workspace_header.render({
+                                    data: data.metadata,
+                                    name: 'header',
+                                    args: [smi, content_url, this]
+                                });
+                            };
                         });
                     }
                 };
