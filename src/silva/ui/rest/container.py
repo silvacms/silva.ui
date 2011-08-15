@@ -338,11 +338,6 @@ class ColumnsContainerListing(UIREST):
                             ]}]})
 
 
-def format_date(date):
-    if date is not None:
-        return date.ISO()
-    return ''
-
 def get_content_status(content):
     public_version_status = None
     next_version_status = None
@@ -390,6 +385,9 @@ class ContentSerializer(object):
         self.get_metadata = getUtility(IMetadataService).getMetadataValue
         self.get_icon = IIconResolver(self.request).get_content_url
         self.check_permission = getSecurityManager().checkPermission
+        locale = self.request.locale
+        formatter = locale.dates.getFormatter('dateTime')
+        self.format_date = lambda d: formatter.format(d.asdatetime())
 
     def get_access(self, content):
         for access, permission in [
@@ -415,7 +413,7 @@ class ContentSerializer(object):
         if modified is None:
             modified = u'-'
         else:
-            modified = format_date(modified)
+            modified = self.format_date(modified)
         data = {
             'ifaces': content_ifaces(content),
             'id': id,
