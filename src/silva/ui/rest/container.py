@@ -403,7 +403,9 @@ class ContentSerializer(object):
             content = self.get_content(id)
         elif id is None:
             id = self.get_id(content)
-        previewable = content.get_previewable()
+        previewable = content.get_editable() or \
+            content.get_previewable() or \
+            content.get_viewable()
         author = self.get_metadata(
             previewable, 'silva-extra', 'lastauthor')
         if author is None:
