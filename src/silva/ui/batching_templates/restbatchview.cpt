@@ -1,4 +1,6 @@
-<div class="batching" i18n:domain="zeam">
+<div class="batching"
+     tal:condition="batch_length > 1"
+     i18n:domain="zeam">
   <a class="open-screen previous ui-state-default" rel="${previous_url}"
      tal:condition="previous_url">
     <ins class="ui-icon ui-icon-seek-prev"></ins>
