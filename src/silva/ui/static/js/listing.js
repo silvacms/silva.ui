@@ -532,7 +532,7 @@
 
         // Bind table sort if needed
         if (mover) {
-            var row_original_index = null;
+            var original_position = null;
 
             $container.tableDnD({
                 dragHandle: "moveable",
@@ -546,7 +546,7 @@
                         return false;
                     };
                     // Reset hover style and mouse last_selected_index. Save row index.
-                    row_original_index = $(row).parent('tr').index();
+                    original_position = $(row).parent('tr').index();
                     $table.trigger('resetselection-smilisting');
                     $table.removeClass('static');
                 },
@@ -555,10 +555,10 @@
                     var position = $line.index();
                     var data = $line.data('smilisting');
 
-                    if (position != row_original_index) {
+                    if (position != original_position) {
                         // The row moved.
-                        if (position > row_original_index)
-                            row_original_index -= 1; // Fix original index in case of failure.
+                        if (position > original_position)
+                            original_position -= 1; // Fix original index in case of failure.
 
                         // If the first line is not moveable, reduce the index of 1.
                         if (!$container.children('tr.item:first').data('smilisting').moveable) {
@@ -568,9 +568,12 @@
                                {name: 'position', value: position}]).pipe(function (success) {
                                    if (!success) {
                                        // The moving failed. Restore the row position.
+                                       if (position < original_position) {
+                                           original_position -= 1;
+                                       };
                                        $line.detach();
                                        $line.insertAfter(
-                                           $container.children('tr.item:eq(' + row_original_index + ')'));
+                                           $container.children('tr.item:eq(' + original_position + ')'));
                                    };
                                    $table.addClass('static');
                                    return success;
