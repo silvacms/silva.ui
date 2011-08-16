@@ -35,14 +35,23 @@ class RedirectToUrl(PageException):
                 'url': self.url}
 
 
-class RedirectToContentPreview(PageException):
+class RedirectToPreview(PageException):
+
+    def __init__(self, url):
+        self.url = url
+
+    def payload(self, caller):
+        return {'ifaces': ['screen'],
+                'screen': {'ifaces': ['preview'],
+                           'html_url': self.url}}
+
+
+class RedirectToContentPreview(RedirectToPreview):
 
     def __init__(self, content):
         self.content = content
 
     def payload(self, caller):
-        url = getMultiAdapter(
+        self.url = getMultiAdapter(
             (self.content, caller.request), ISilvaURL).preview()
-        return {'ifaces': ['screen'],
-                'screen': {'ifaces': ['preview'],
-                           'html_url': url}}
+        return super(RedirectToContentPreview, self).payload(caller)
