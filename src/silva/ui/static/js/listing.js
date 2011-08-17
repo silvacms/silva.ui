@@ -1,6 +1,6 @@
 
 
-(function($, infrae) {
+(function($, infrae, jsontemplate) {
 
     // Define columns renderers
     var listingcolumns = infrae.views.Registry();
@@ -260,7 +260,7 @@
                     $.ajax({
                         url: preview_url_template.expand({path: info.path})
                     }).done(function(data) {
-                        if ($preview_target === null && !data.preview) {
+                        if ($preview_target === null || !data.preview || !$preview_target.is(':visible')) {
                             return;
                         };
                         $preview_target.qtip({
@@ -273,7 +273,8 @@
                                 adjust: {method: 'shift flip'}},
                             show: {event: false, ready: true},
                             hide: {event: 'mouseleave'},
-                            style: 'ui-tooltip-shadow ui-tooltip-light'});
+                            style: 'ui-tooltip-shadow ui-tooltip-light'
+                        });
                     });
                 }, 1000);
             });
@@ -282,7 +283,7 @@
                     clearTimeout(preview_timer);
                     preview_timer = null;
                 };
-                if ($preview_target !== null) {
+                if ($preview_target.length) {
                     $preview_target.qtip('destroy');
                     $preview_target = null;
                 };
@@ -916,7 +917,7 @@
             url: smi.options.listing.configuration,
             async: false,
             dataType: 'json',
-            success:function(configuration) {
+            success: function(configuration) {
                 // Register content interfaces.
                 for (var iface in configuration.ifaces) {
                     infrae.interfaces.register(iface, configuration.ifaces[iface]);
@@ -956,4 +957,4 @@
         });
     });
 
-})(jQuery, infrae);
+})(jQuery, infrae, jsontemplate);

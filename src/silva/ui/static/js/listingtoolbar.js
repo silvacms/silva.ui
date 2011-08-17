@@ -366,9 +366,22 @@
         // We use a timeout of 100ms for fast typing people on poor computers.
         var timeout = null;
 
+        listing.events.content(function() {
+            var $parent = $filter.parent();
+
+            for (var name in this) {
+                if (this[name]) {
+                    $parent.show();
+                    return;
+                };
+            };
+            $parent.hide();
+        });
         shortcuts.bind('listing', null, ['ctrl+f'], function() {
-            $filter.focus();
-            return false;
+            if ($filter.is(':visible')) {
+                $filter.focus();
+                return false;
+            };
         });
         $filter.bind('keyup', function(event) {
             var clear = false;
