@@ -28,6 +28,7 @@
 
         $handle.draggable({
             axis: 'x',
+            iframeFix: true,
             drag: resizer,
             stop: resizer
         });
