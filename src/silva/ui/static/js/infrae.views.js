@@ -117,8 +117,10 @@
                 $content.one('cleanup-infrae-views', function() {
                     if (view.cleanup)
                         view.cleanup();
-                    if (view.iframe)
+                    if (view.iframe) {
                         $(window).unbind('resize.infrae-views-iframe');
+                        $(window).unbind('workspace-resize-smi.infrae-views-iframe');
+                    }
                 });
             };
 
@@ -145,6 +147,7 @@
                 };
                 resize();
                 $(window).bind('resize.infrae-views-iframe', resize);
+                $(window).bind('workspace-resize-smi.infrae-views-iframe', resize);
 
                 $content.html($iframe);
                 if (template) {

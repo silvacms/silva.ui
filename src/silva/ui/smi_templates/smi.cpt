@@ -58,6 +58,7 @@
           </div>
         </div>
       </div>
+      <div id="handle"></div>
       <div id="workspace">
         <div class="header">
           <div class="metadata">

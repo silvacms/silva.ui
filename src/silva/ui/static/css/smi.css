@@ -69,6 +69,18 @@ div.batching a.current {
   right:20px;
 }
 
+#handle {
+  position: absolute;
+  top: 46%;
+  bottom: 0;
+  left: 288px;
+  width: 4px;
+  height: 4%;
+  background-color: red;
+  z-index: 200;
+  cursor: move;
+}
+
 #workspace {
   -khtml-box-shadow:#1c2e3d 0 3px 10px;
   -moz-box-shadow:#1c2e3d 0 3px 10px;

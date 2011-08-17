@@ -1,45 +1,5 @@
 
 
-(function ($) {
-    $(document).ready(function () {
-        // Add a loading message on server request
-        var count = 0;
-        var message = $('div#loading-message');
-
-        if (message) {
-            $('body').ajaxSend(function() {
-                if (!count) {
-                    message.fadeIn('fast');
-                };
-                count += 1;
-            });
-            $(document).ajaxComplete(function() {
-                count -= 1;
-                if (!count) {
-                    message.fadeOut('fast');
-                };
-            });
-        };
-    });
-})(jQuery);
-
-(function ($) {
-    $(document).ready(function(){
-        // jQueryUI styling: this changes icon style on hover
-        $('a.ui-state-default').live('mouseenter', function() {
-            var context = $(this);
-            context.removeClass('ui-state-default');
-            context.addClass('ui-state-active');
-        });
-        $('a.ui-state-active').live('mouseleave', function() {
-            var context = $(this);
-            context.removeClass('ui-state-active');
-            context.addClass('ui-state-default');
-        });
-    });
-})(jQuery);
-
-
 (function($, infrae) {
     var HASH_REGEXP = /#([^!]*)!?(.*)/;
 
