@@ -9,11 +9,9 @@ from zope.intid.interfaces import IIntIds
 
 from silva.core.interfaces.adapters import IIconResolver
 from silva.ui.rest.base import UIREST
-from silva.core.interfaces import IContainer, IRoot
+from silva.core.interfaces import IContainer
 
 from Products.Silva.ExtensionRegistry import meta_types_for_interface
-
-
 
 
 class NotificationPoll(UIREST):
@@ -58,7 +56,7 @@ class NavigationListing(UIREST):
 
 
 class RootNavigationListing(NavigationListing):
-    grok.context(IRoot)
+    grok.context(IContainer)
     grok.name('silva.ui.navigation.root')
 
     def GET(self):

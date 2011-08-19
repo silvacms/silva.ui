@@ -7,6 +7,7 @@ from zope.interface import Interface, Attribute
 from zope.publisher.interfaces.browser import IDefaultBrowserLayer
 from zope import schema
 
+from js import jquery
 from js import jqueryui
 from js import jquery_jgrowl
 from infrae.rest.interfaces import IRESTComponent
@@ -16,6 +17,13 @@ from silva.core import conf as silvaconf
 from silva.core.interfaces import ISilvaLocalService
 from silva.core.conf import schema as silvaschema
 from silva.translations import translate as _
+
+
+class IJSTreeResources(IDefaultBrowserLayer):
+    # This is used by other packages
+    silvaconf.resource(jquery.jquery)
+    silvaconf.resource('js/thirdparty/jquery.jstree.js')
+    silvaconf.resource('css/jstree.css')
 
 
 class ISilvaUIDependencies(IDefaultBrowserLayer):
@@ -60,6 +68,7 @@ class ISilvaUITheme(IDefaultBrowserLayer):
     silvaconf.resource(jqueryui.smoothness)
     silvaconf.resource('css/style.css')
     silvaconf.resource('css/smi.css')
+    silvaconf.resource('css/jstree.css')
     silvaconf.resource('css/navigation.css')
     silvaconf.resource('css/actions.css')
     silvaconf.resource('css/forms.css')
