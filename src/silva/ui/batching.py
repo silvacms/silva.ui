@@ -3,8 +3,9 @@
 from five import grok
 from silva.ui.interfaces import IUIScreen
 from silva.ui.rest import Screen
-from zeam.utils.batch.interfaces import IBatch
+from zeam.utils.batch.interfaces import IBatch, IDateBatch
 from zeam.utils.batch.views import Batching
+from zeam.utils.batch.date.views import DateBatching
 from zope.publisher.browser import BrowserView
 from zope.publisher.interfaces.http import IHTTPRequest
 import megrok.pagetemplate as pt
@@ -36,4 +37,13 @@ class RESTBatching(Batching):
 
 class RESTBatchView(pt.PageTemplate):
     pt.view(RESTBatching)
+
+
+class RESTDateBatching(DateBatching):
+    grok.adapts(IUIScreen, IDateBatch, IHTTPRequest)
+    keep_query_string = False
+
+
+class RESTDateBatchView(pt.PageTemplate):
+    pt.view(RESTDateBatching)
 

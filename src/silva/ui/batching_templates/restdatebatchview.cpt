@@ -1,26 +1,22 @@
 <div class="batching"
-     tal:condition="batch.batch_length > 1"
      i18n:domain="zeam">
   <a class="open-screen previous ui-state-default"
      rel="${batch_previous.url}"
-     tal:define="batch_previous batch.batch_previous"
-     tal:condition="batch_previous">
+     tal:define="batch_previous batch.batch_previous">
     <ins class="ui-icon ui-icon-seek-prev"></ins>
-    <tal:translate i18n:translate="">Previous</tal:translate>
+    <tal:year tal:replace="batch_previous.year" />
   </a>
   <tal:repeat repeat="item batch.batch">
     <a class="open-screen ${item.style or ''}" rel="${item.url}"
        tal:condition="item.url"
-       tal:content="item.name">
+       tal:content="item.month">
     </a>
-    <span tal:condition="not item.url">...</span>
   </tal:repeat>
   <a class="open-screen next ui-state-default"
      rel="${batch_next.url}"
      tal:define="batch_next batch.batch_next"
      tal:condition="batch_next">
     <ins class="ui-icon ui-icon-seek-next"></ins>
-    <tal:translate i18n:translate="">Next</tal:translate>
+    <tal:year tal:replace="batch_next.year" />
   </a>
 </div>
-
