@@ -82,6 +82,11 @@
                 } else if (info.action) {
                     $link.addClass('open-action');
                     $link.attr('rel', info.action);
+                } else if (info.url) {
+                    $link.attr('href', info.url);
+                    if (info.target) {
+                        $link.attr('target', info.target);
+                    };
                 };
                 if (info.active) {
                     $link.addClass('active');
