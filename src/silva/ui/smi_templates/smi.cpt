@@ -96,6 +96,13 @@
           screen: "${view.root_url}/{path}/++rest++silva.ui/{screen}",
           action:"${view.root_url}/{path}/++rest++silva.ui.actions.{action}",
           error_messages: {
+              0: function () {
+                  return {
+                    ifaces: ['message'],
+                    title: '<tal:msg i18n:translate="">Server down</tal:msg>',
+                    message: '<p i18n:translate="">The server is down or inaccessible. Please retry later.</p>'
+                  };
+              },
               400: function (request) {
                   return {
                     ifaces: ['message'],
