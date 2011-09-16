@@ -113,17 +113,19 @@
             return {
                 data_template: true,
                 render: function() {
+                    var $content_form = null;
+
                     // Add content
                     $content.addClass('form-content');
                     if (data.portlets) {
-                        var $content_form = $('<div class="forms"></div>');
                         var $content_portlets = $('<div class="portlets"></div>');
 
+                        $content_form = $('<div class="forms"></div>');
                         $content_portlets.html(data.portlets);
                         $content.append($content_form);
                         $content.append($content_portlets);
                     } else {
-                        var $content_form = $content;
+                        $content_form = $content;
                     };
                     $content_form.html(data.forms);
 
@@ -139,14 +141,25 @@
 
                         var submit = function($control) {
                             var values = $form.serializeArray();
+                            var is_link = false;
 
-                            if ($control != undefined && $control.length) {
+                            if ($control !== undefined && $control.length) {
                                 values.push({
                                     name: $control.attr('name'),
-                                    value: $control.text()});
+                                    value: $control.text()
+                                });
+                                is_link = $control.hasClass('link-control');
                             };
-                            smi.ajax.send_to_opened(values);
-                            return false;
+                            if (is_link) {
+                                // If action is a link control, it will open in a different target.
+                                $control.attr(
+                                    'href',
+                                    [smi.get_screen_url(), '?', $.param(values)].join(''));
+                                return;
+                            } else {
+                                smi.ajax.send_to_opened(values);
+                                return false;
+                            }
                         };
                         var default_submit = function() {
                             return submit($form.find('.form-controls a.default-form-control'));

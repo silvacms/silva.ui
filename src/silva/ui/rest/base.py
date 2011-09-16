@@ -22,7 +22,7 @@ from silva.core.views.interfaces import IVirtualSite
 from silva.ui.smi import set_smi_skin
 from silva.ui.interfaces import IUIScreen
 from silva.ui.rest.invalidation import Invalidation
-from silva.ui.rest.exceptions import PageException
+from silva.ui.rest.exceptions import PageException, ContentException
 from silva.ui.menu import ContentMenu, ViewMenu, ActionMenu
 
 import fanstatic
@@ -131,6 +131,8 @@ class ActionREST(UIREST):
         data = {}
         try:
             data['content'] = self.get_payload()
+        except ContentException as error:
+            return error.content()
         except PageException as error:
             data['content'] = error.payload(self)
         else:

@@ -7,6 +7,12 @@ from silva.core.views.interfaces import ISilvaURL
 from zope.component import getMultiAdapter
 
 
+class ContentException(Exception):
+
+    def content(self):
+        return self.args[0]
+
+
 class PageException(Exception):
 
     def payload(self, caller):
