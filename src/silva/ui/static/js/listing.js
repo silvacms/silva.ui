@@ -74,7 +74,7 @@
         factory: function($content, data, column, value) {
             return {
                 column: column,
-                jsont: '<a class="open-screen" href="{data.path|htmltag}" rel="{column.action|htmltag}"><ins class="icon"></ins></a>',
+                jsont: '<a class="open-screen preview-icon" href="{data.path|htmltag}" rel="{column.action|htmltag}"><ins class="icon"></ins></a>',
                 render: function() {
                     infrae.ui.icon($content.find('ins'), value);
                     $content.addClass('active');
@@ -250,7 +250,7 @@
             var preview_url_template = new jsontemplate.Template(smi.options.listing.preview, {});
             var preview_timer = null;
             var $preview_target = null;
-            $containers.delegate('tr.item a.open-screen', 'mouseenter', function(event) {
+            $containers.delegate('tr.item a.preview-icon', 'mouseenter', function(event) {
                 if (preview_timer !== null) {
                     clearTimeout(preview_timer);
                 };
