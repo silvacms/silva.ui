@@ -1,0 +1,448 @@
+# -*- coding: utf-8 -*-
+# Copyright (c) 2011 Infrae. All rights reserved.
+# See also LICENSE.txt
+# $Id$
+
+from Acquisition import aq_parent
+from Products.Silva.testing import FunctionalLayer, assertTriggersEvents
+from silva.ui.rest.invalidation import Invalidation
+from silva.core.cache.memcacheutils import Reset
+from zope.publisher.browser import TestRequest
+from zope.component import getUtility
+from zope.intid.interfaces import IIntIds
+import unittest
+
+
+class InvalidationTestCase(unittest.TestCase):
+    layer = FunctionalLayer
+    maxDiff = None
+
+    def setUp(self):
+        with Reset():
+            self.root = self.layer.get_application()
+            self.layer.login('editor')
+            self.get_id = getUtility(IIntIds).register
+
+    def test_nothing(self):
+        request = TestRequest()
+        invalidation = Invalidation(request)
+        self.assertEqual(invalidation.get_path(), '/root')
+        self.assertEqual(list(invalidation.get_changes()), [])
+        self.assertEqual(request.response._cookies, {})
+
+        # This didn't change.
+        self.assertEqual(list(invalidation.get_changes()), [])
+
+    def test_delete_content(self):
+        with Reset():
+            factory = self.root.manage_addProduct['Silva']
+            factory.manage_addFolder('folder', 'Folder')
+            factory = self.root.folder.manage_addProduct['Silva']
+            factory.manage_addMockupVersionedContent('document', 'Document')
+
+        document_id = self.get_id(self.root.folder.document)
+        self.root.folder.manage_delObjects(['document'])
+
+        request = TestRequest()
+        invalidation = Invalidation(request)
+        self.assertEqual(request._cookies, {})
+        self.assertEqual(
+            list(invalidation.get_changes()),
+            [{'action': 'remove',
+              'container': self.get_id(self.root.folder),
+              'content': document_id,
+              'listing': 'publishables'},
+             {'action': 'update',
+              'container': self.get_id(self.root),
+              'content': self.get_id(self.root.folder),
+              'listing': 'container',
+              'position': 1}])
+        # A cookie is set (still)
+        self.assertEqual(
+            request.response._cookies,
+            {'silva.listing.invalidation': {'path': '/root', 'value': '1'}})
+
+    def test_delete_asset(self):
+        with Reset():
+            factory = self.root.manage_addProduct['Silva']
+            factory.manage_addFolder('folder', 'Folder')
+            factory = self.root.folder.manage_addProduct['Silva']
+            factory.manage_addFile('data_file', 'Data File')
+
+        file_id = self.get_id(self.root.folder.data_file)
+        self.root.folder.manage_delObjects(['data_file'])
+
+        request = TestRequest()
+        invalidation = Invalidation(request)
+        self.assertEqual(request._cookies, {})
+        self.assertEqual(
+            list(invalidation.get_changes()),
+            [{'action': 'remove',
+              'container': self.get_id(self.root.folder),
+              'content': file_id,
+              'listing': 'assets'},
+             {'action': 'update',
+              'container': self.get_id(self.root),
+              'content': self.get_id(self.root.folder),
+              'listing': 'container',
+              'position': 1}])
+        # A cookie is set (still)
+        self.assertEqual(
+            request.response._cookies,
+            {'silva.listing.invalidation': {'path': '/root', 'value': '1'}})
+
+    def test_add_content(self):
+        factory = self.root.manage_addProduct['Silva']
+        factory.manage_addFolder('folder', 'Folder')
+
+        request = TestRequest()
+        invalidation = Invalidation(request)
+        self.assertEqual(request._cookies, {})
+        self.assertEqual(
+            list(invalidation.get_changes()),
+            [{'action': 'add',
+              'listing': 'container',
+              'container': self.get_id(self.root),
+              'content': self.get_id(self.root.folder),
+              'position': -1},  # XXX Position should 1
+             {'action': 'update',
+              'listing': 'container',
+              'container': self.get_id(aq_parent(self.root)),
+              'content': self.get_id(self.root),
+              'position': -1}])
+        # A cookie is set
+        self.assertEqual(
+            request.response._cookies,
+            {'silva.listing.invalidation': {'path': '/root', 'value': '2'}})
+
+        # Now if we ask the next changes, there are none
+        request = TestRequest()
+        request._cookies = {'silva.listing.invalidation': '2'}
+        invalidation = Invalidation(request)
+        self.assertEqual(list(invalidation.get_changes()), [])
+
+    def test_add_asset(self):
+        factory = self.root.manage_addProduct['Silva']
+        factory.manage_addFile('examples_txt', 'Examples')
+
+        request = TestRequest()
+        invalidation = Invalidation(request)
+        self.assertEqual(request._cookies, {})
+        self.assertEqual(
+            list(invalidation.get_changes()),
+            [{'action': 'add',
+              'listing': 'assets',
+              'container': self.get_id(self.root),
+              'content': self.get_id(self.root.examples_txt),
+              'position': -1},
+             {'action': 'update',
+              'listing': 'container',
+              'container': self.get_id(aq_parent(self.root)),
+              'content': self.get_id(self.root),
+              'position': -1}])
+        # A cookie is set
+        self.assertEqual(
+            request.response._cookies,
+            {'silva.listing.invalidation': {'path': '/root', 'value': '2'}})
+
+        # Now if we ask the next changes, there are none
+        request = TestRequest()
+        request._cookies = {'silva.listing.invalidation': '2'}
+        invalidation = Invalidation(request)
+        self.assertEqual(list(invalidation.get_changes()), [])
+
+    def test_add_modify_content(self):
+        with Reset():
+            factory = self.root.manage_addProduct['Silva']
+            factory.manage_addFolder('padding', 'Padding Folder')
+            factory.manage_addFolder('folder', 'Folder')
+
+        factory = self.root.folder.manage_addProduct['Silva']
+        factory.manage_addMockupVersionedContent('document', 'Document')
+
+        content = self.root.folder.document
+
+        with assertTriggersEvents('MetadataModifiedEvent'):
+            content.set_title('New document')
+
+        request = TestRequest()
+        invalidation = Invalidation(request)
+        self.assertEqual(request._cookies, {})
+        self.assertEqual(
+            list(invalidation.get_changes()),
+            [{'action': 'add',
+              'listing': 'publishables',
+              'container': self.get_id(self.root.folder),
+              'content': self.get_id(content),
+              'position': -1},
+             {'action': 'update',
+              'container': self.get_id(self.root),
+              'content': self.get_id(self.root.folder),
+              'listing': 'container',
+              'position': 2}])
+        # A cookie is set
+        self.assertEqual(
+            request.response._cookies,
+            {'silva.listing.invalidation': {'path': '/root', 'value': '4'}})
+
+    def test_add_delete_content(self):
+        with Reset():
+            factory = self.root.manage_addProduct['Silva']
+            factory.manage_addFolder('padding', 'Padding Folder')
+            factory.manage_addFolder('folder', 'Folder')
+
+        factory = self.root.folder.manage_addProduct['Silva']
+        factory.manage_addMockupVersionedContent('document', 'Document')
+        self.root.folder.manage_delObjects(['document'])
+
+        request = TestRequest()
+        invalidation = Invalidation(request)
+        self.assertEqual(request._cookies, {})
+        # Since the document have added and deleted, we only see an
+        # update in the folder
+        self.assertEqual(list(invalidation.get_changes()), [
+                {'action': 'update',
+                 'container': self.get_id(self.root),
+                 'content': self.get_id(self.root.folder),
+                 'listing': 'container',
+                 'position': 2}])
+        # A cookie is set (still)
+        self.assertEqual(
+            request.response._cookies,
+            {'silva.listing.invalidation': {'path': '/root', 'value': '5'}})
+
+    def test_modify_delete_content(self):
+        with Reset():
+            factory = self.root.manage_addProduct['Silva']
+            factory.manage_addFolder('folder', 'Folder')
+            factory = self.root.folder.manage_addProduct['Silva']
+            factory.manage_addMockupVersionedContent('document', 'Document')
+
+        content = self.root.folder.document
+        content_id = self.get_id(content)
+
+        with assertTriggersEvents('MetadataModifiedEvent'):
+            content.set_title('New document')
+        self.root.folder.manage_delObjects(['document'])
+
+        request = TestRequest()
+        invalidation = Invalidation(request)
+        self.assertEqual(request._cookies, {})
+        self.assertEqual(
+            list(invalidation.get_changes()),
+            [{'action': 'remove',
+              'listing': 'publishables',
+              'container': self.get_id(self.root.folder),
+              'content': content_id},
+             {'action': 'update',
+              'container': self.get_id(self.root),
+              'content': self.get_id(self.root.folder),
+              'listing': 'container',
+              'position': 1},])
+        # A cookie is set
+        self.assertEqual(
+            request.response._cookies,
+            {'silva.listing.invalidation': {'path': '/root', 'value': '2'}})
+
+    def test_modify_delete_asset(self):
+        with Reset():
+            factory = self.root.manage_addProduct['Silva']
+            factory.manage_addFolder('folder', 'Folder')
+            factory = self.root.folder.manage_addProduct['Silva']
+            factory.manage_addImage('image', 'Data Image')
+
+        image = self.root.folder.image
+        image_id = self.get_id(image)
+
+        with assertTriggersEvents('MetadataModifiedEvent'):
+            image.set_title('New Image')
+        self.root.folder.manage_delObjects(['image'])
+
+        request = TestRequest()
+        invalidation = Invalidation(request)
+        self.assertEqual(request._cookies, {})
+        self.assertEqual(
+            list(invalidation.get_changes()),
+            [{'action': 'remove',
+              'listing': 'assets',
+              'container': self.get_id(self.root.folder),
+              'content': image_id},
+             {'action': 'update',
+              'container': self.get_id(self.root),
+              'content': self.get_id(self.root.folder),
+              'listing': 'container',
+              'position': 1},])
+        # A cookie is set
+        self.assertEqual(
+            request.response._cookies,
+            {'silva.listing.invalidation': {'path': '/root', 'value': '2'}})
+
+    def test_modify_delete_folder(self):
+        with Reset():
+            factory = self.root.manage_addProduct['Silva']
+            factory.manage_addFolder('folder', 'Folder')
+            factory = self.root.folder.manage_addProduct['Silva']
+            factory.manage_addMockupVersionedContent('document', 'Document')
+
+        factory.manage_addImage('image', 'Image')
+        with assertTriggersEvents('MetadataModifiedEvent'):
+            self.root.folder.document.set_title('New document')
+
+        folder_id = self.get_id(self.root.folder)
+        document_id = self.get_id(self.root.folder.document)
+        self.root.manage_delObjects(['folder'])
+
+        request = TestRequest()
+        invalidation = Invalidation(request)
+        self.assertEqual(request._cookies, {})
+        # In case of a container delete, all event inside the
+        # containers must not appear, except delete of previous content.
+        self.assertEqual(
+            list(invalidation.get_changes()),
+            [{'action': 'remove',
+              'listing': 'publishables',
+              'container': folder_id,
+              'content': document_id},
+             {'action': 'remove',
+              'listing': 'container',
+              'container': self.get_id(self.root),
+              'content': folder_id},
+             {'action': 'update',
+              'listing': 'container',
+              'container': self.get_id(aq_parent(self.root)),
+              'content': self.get_id(self.root),
+              'position': -1}])
+        # A cookie is set
+        self.assertEqual(
+            request.response._cookies,
+            {'silva.listing.invalidation': {'path': '/root', 'value': '7'}})
+
+    def test_title_title_content(self):
+        with Reset():
+            factory = self.root.manage_addProduct['Silva']
+            factory.manage_addFolder('folder', 'Folder')
+            factory = self.root.folder.manage_addProduct['Silva']
+            factory.manage_addMockupVersionedContent('document', 'Document')
+
+        content = self.root.folder.document
+
+        with assertTriggersEvents('MetadataModifiedEvent'):
+            content.set_title('New document')
+        with assertTriggersEvents('MetadataModifiedEvent'):
+            content.get_editable().set_title('Outdated Document')
+
+        request = TestRequest()
+        invalidation = Invalidation(request)
+        self.assertEqual(request._cookies, {})
+        self.assertEqual(
+            list(invalidation.get_changes()),
+            [{'action': 'update',
+              'listing': 'publishables',
+              'container': self.get_id(self.root.folder),
+              'content': self.get_id(content),
+              'position': 1}])
+        # A cookie is set
+        self.assertEqual(
+            request.response._cookies,
+            {'silva.listing.invalidation': {'path': '/root', 'value': '1'}})
+
+    def test_title_title_asset(self):
+        with Reset():
+            factory = self.root.manage_addProduct['Silva']
+            factory.manage_addFolder('folder', 'Folder')
+            factory = self.root.folder.manage_addProduct['Silva']
+            factory.manage_addFile('data_file', 'Data file')
+
+        data_file = self.root.folder.data_file
+
+        with assertTriggersEvents('MetadataModifiedEvent'):
+            data_file.set_title('New Data File')
+        with assertTriggersEvents('MetadataModifiedEvent'):
+            data_file.set_title('New File')
+
+        request = TestRequest()
+        invalidation = Invalidation(request)
+        self.assertEqual(request._cookies, {})
+        self.assertEqual(
+            list(invalidation.get_changes()),
+            [{'action': 'update',
+              'listing': 'assets',
+              'container': self.get_id(self.root.folder),
+              'content': self.get_id(data_file),
+              'position': -1}])
+        # A cookie is set
+        self.assertEqual(
+            request.response._cookies,
+            {'silva.listing.invalidation': {'path': '/root', 'value': '1'}})
+
+    def test_modify_modify_asset(self):
+        with Reset():
+            factory = self.root.manage_addProduct['Silva']
+            factory.manage_addFolder('folder', 'Folder')
+            factory = self.root.folder.manage_addProduct['Silva']
+            factory.manage_addFile('data_file', 'Data file')
+
+        data_file = self.root.folder.data_file
+
+        with assertTriggersEvents('ObjectModifiedEvent'):
+            data_file.set_text_file_data('Edit content')
+        with assertTriggersEvents('ObjectModifiedEvent'):
+            data_file.set_text_file_data('Actually, edit again the content')
+        with assertTriggersEvents('ObjectModifiedEvent'):
+            data_file.set_text_file_data('I am not sure at all')
+
+        request = TestRequest()
+        invalidation = Invalidation(request)
+        self.assertEqual(request._cookies, {})
+        self.assertEqual(
+            list(invalidation.get_changes()),
+            [{'action': 'update',
+              'listing': 'assets',
+              'container': self.get_id(self.root.folder),
+              'content': self.get_id(data_file),
+              'position': -1}])
+        # A cookie is set
+        self.assertEqual(
+            request.response._cookies,
+            {'silva.listing.invalidation': {'path': '/root', 'value': '2'}})
+
+    def test_filter_func(self):
+        with Reset():
+            factory = self.root.manage_addProduct['Silva']
+            factory.manage_addFolder('folder', 'Folder')
+            factory = self.root.folder.manage_addProduct['Silva']
+            factory.manage_addImage('image', 'Image')
+
+        factory.manage_addMockupVersionedContent('document', 'Document')
+        factory.manage_addFolder('images', 'Image Folder')
+        factory.manage_addPublication('publication', 'Publication')
+        self.root.folder.publication.set_title('Maybe not')
+        self.root.folder.manage_delObjects(['image', 'publication'])
+
+        request = TestRequest()
+        invalidation = Invalidation(request)
+        self.assertEqual(request._cookies, {})
+        # We ask only changes about container.
+        self.assertEqual(
+            list(invalidation.get_changes(
+                    filter_func=lambda c: c['listing'] == 'container')),
+            [{'action': 'update',
+              'listing': 'container',
+              'container': self.get_id(self.root),
+              'content': self.get_id(self.root.folder),
+              'position': 1},
+             {'action': 'add',
+              'listing': 'container',
+              'container': self.get_id(self.root.folder),
+              'content': self.get_id(self.root.folder.images),
+              'position': -1}])
+        # A cookie is set
+        self.assertEqual(
+            request.response._cookies,
+            {'silva.listing.invalidation': {'path': '/root', 'value': '13'}})
+
+
+def test_suite():
+    suite = unittest.TestSuite()
+    suite.addTest(unittest.makeSuite(InvalidationTestCase))
+    return suite

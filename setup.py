@@ -3,12 +3,15 @@ import os
 
 version = '1.0dev'
 
+tests_require = [
+    'Products.Silva [test]',
+    ]
+
 setup(name='silva.ui',
       version=version,
       description="Management interface for Silva",
       long_description=open("README.txt").read() + "\n" +
                        open(os.path.join("docs", "HISTORY.txt")).read(),
-      # Get more strings from http://pypi.python.org/pypi?%3Aaction=list_classifiers
       classifiers=[
         "Programming Language :: Python",
         ],
@@ -39,8 +42,9 @@ setup(name='silva.ui',
           'zope.interface',
       ],
       entry_points="""
-      # -*- Entry points: -*-
       [silva.ui.resources]
       smi = silva.ui.interfaces:ISilvaUI
       """,
+      tests_require = tests_require,
+      extras_require = {'test': tests_require},
       )

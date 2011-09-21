@@ -400,6 +400,9 @@ class ContentSerializer(object):
 
     def __call__(self, content=None, id=None):
         if content is None:
+            # XXX Need to handle case where the object
+            # disappeared. This can happen in case of conflict error
+            # with the invalidation code.
             content = self.get_content(id)
         elif id is None:
             id = self.get_id(content)
@@ -475,20 +478,20 @@ class FolderActionREST(ActionREST):
         removed = []
         added_publishables = []
         added_assets = []
-        for info in Invalidation(self.request).get_changes():
-            if info['container'] == container:
-                if info['action'] == 'remove':
-                    removed.append(info['content'])
-                else:
-                    content_data = serializer(id=info['content'])
-                    content_data['position'] = info['position']
-                    if info['action'] == 'add':
-                        if info['listing'] == 'assets':
-                            added_assets.append(content_data)
-                        else:
-                            added_publishables.append(content_data)
+        for info in Invalidation(self.request).get_changes(
+            filter_func=lambda change: change['container'] == container):
+            if info['action'] == 'remove':
+                removed.append(info['content'])
+            else:
+                content_data = serializer(id=info['content'])
+                content_data['position'] = info['position']
+                if info['action'] == 'add':
+                    if info['listing'] == 'assets':
+                        added_assets.append(content_data)
                     else:
-                        updated.append(content_data)
+                        added_publishables.append(content_data)
+                else:
+                    updated.append(content_data)
 
         if removed:
             data['remove'] = removed

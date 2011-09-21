@@ -37,13 +37,13 @@ class Invalidation(object):
             cookies = self.request.cookies
             return int(cookies.get(NAMESPACE, None))
         except TypeError:
-            return None
+            return -1
 
     def set_client_version(self, version):
         response = self.request.response
         response.setCookie(NAMESPACE, str(version), path=self.get_path())
 
-    def get_changes(self):
+    def get_changes(self, filter_func=lambda x: True):
         storage = MemcacheSlice(NAMESPACE)
         storage_version = storage.get_index()
         client_version = self.get_client_version()
@@ -51,12 +51,37 @@ class Invalidation(object):
         if client_version != storage_version:
             self.set_client_version(storage_version)
 
-        if client_version is not None and client_version < storage_version:
+        pass_two = []
+        if client_version < storage_version:
+            # Generate entries without duplicate add or update event
+            pass_one = []
+            updated_entries = set()
+            added_entries = set()
             for entry in storage[client_version+1:storage_version+1]:
-                yield entry
+                if not filter_func(entry):
+                    continue
+                if entry['action'] != 'remove':
+                    if entry['content'] in updated_entries:
+                        continue
+                    updated_entries.add(entry['content'])
+                    if entry['action'] == 'add':
+                        added_entries.add(entry['content'])
+                pass_one.append(entry)
+            # Remove add and update that have a delete event, and
+            # delete that have an add.
+            deleted_entries = set()
+            for entry in reversed(pass_one):
+                if entry['action'] != 'remove':
+                    if entry['content'] in deleted_entries:
+                        continue
+                else:
+                    deleted_entries.add(entry['content'])
+                    if entry['content'] in added_entries:
+                        continue
+                pass_two.append(entry)
+        # Return result in the correct order
+        return reversed(pass_two)
 
-
-# XXX Do position.
 
 def register_change(target, action):
     get_id = getUtility(IIntIds).register
@@ -104,7 +129,7 @@ def register_title_update(target, event):
 
 
 @grok.subscribe(IVersion, IMetadataModifiedEvent)
-def register_vesion_title_update(target, event):
+def register_version_title_update(target, event):
     if 'maintitle' in event.changes:
         register_change(target.get_content(), 'update')
 
@@ -125,11 +150,15 @@ def register_move(target, event):
 
 @grok.subscribe(ISilvaObject, IObjectWillBeMovedEvent)
 def register_remove(target, event):
-    if event.object != target or not IContainer.providedBy(aq_parent(target)):
+    if not IContainer.providedBy(aq_parent(target)):
         return
     if IRoot.providedBy(target):
         return
     if event.oldParent is not None:
-        if event.newParent is not event.oldParent:
-            # That was a move or a delete, but not a rename
+        if event.object is target:
+            if event.newParent is not event.oldParent:
+                # That was a move or a delete, but not a rename
+                register_change(target, 'remove')
+        elif event.newParent is None:
+            # This was a recursive delete
             register_change(target, 'remove')

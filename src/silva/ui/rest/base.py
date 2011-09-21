@@ -104,20 +104,20 @@ def get_resources(request):
 
 def get_navigation_changes(request):
     nav_id = lambda id: 'nav' + str(id)
-    for change in Invalidation(request).get_changes():
-        if change['listing'] == 'container':
-            if change['action'] == 'remove':
-                yield {
-                    'action': 'remove',
-                    'info': {'target': nav_id(change['content'])}}
-            else:
-                # Action add or update
-                yield {
-                    'action': change['action'],
-                    'info': {
-                        'parent': nav_id(change['container']),
-                        'target': nav_id(change['content']),
-                        'position': change['position']}}
+    for change in Invalidation(request).get_changes(
+        filter_func=lambda change: change['listing'] == 'container'):
+        if change['action'] == 'remove':
+            yield {
+                'action': 'remove',
+                'info': {'target': nav_id(change['content'])}}
+        else:
+            # Action add or update
+            yield {
+                'action': change['action'],
+                'info': {
+                    'parent': nav_id(change['container']),
+                    'target': nav_id(change['content']),
+                    'position': change['position']}}
 
 
 class ActionREST(UIREST):
