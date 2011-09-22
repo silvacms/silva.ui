@@ -26,8 +26,7 @@ class NavigationListing(UIREST):
     grok.context(IContainer)
     grok.name('silva.ui.navigation')
 
-    def __init__(self, context, request):
-        super(NavigationListing, self).__init__(context, request)
+    def update(self):
         self.get_icon = IIconResolver(self.request).get_content_url
         self.get_id = getUtility(IIntIds).register
 
@@ -47,6 +46,8 @@ class NavigationListing(UIREST):
         return info
 
     def GET(self):
+        self.update()
+
         meta_types = meta_types_for_interface(IContainer)
         children = []
         for child in self.context.get_ordered_publishables(IContainer):
@@ -60,6 +61,8 @@ class RootNavigationListing(NavigationListing):
     grok.name('silva.ui.navigation.root')
 
     def GET(self):
+        self.update()
+
         interfaces = meta_types_for_interface(IContainer)
         root_info = self.get_node_info(self.context, interfaces)
         return self.json_response(root_info)

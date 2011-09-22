@@ -53,7 +53,7 @@
                         var entry = column.menu[i];
 
                         if ((entry.item_implements === undefined ||
-                             infrae.interfaces.isImplementedBy(entry.item_implements, data)) &&
+                             infrae.interfaces.is_implemented_by(entry.item_implements, data)) &&
                             (entry.item_match === undefined ||
                              infrae.utils.match(entry.item_match, [data]))){
                             entries.push(
@@ -435,16 +435,24 @@
                         event.stopPropagation();
                         event.preventDefault();
                     });
-                    if (column.name) {
-                        $cell.bind('inputcell-smilisting', function(event, data) {
-                            var $cell = $(this);
-                            var $field = $('<input type="text" />');
+                    if (column.name !== undefined && column.renameable !== undefined) {
+                        $cell.addClass('renameable');
+                        $cell.bind('renamecell-smilisting', function(event, data) {
+                            event.stopPropagation();
+                            event.preventDefault();
 
+                            if (column.renameable.item_not_match !== undefined) {
+                                if (infrae.utils.match(column.renameable.item_not_match, [data])) {
+                                    return;
+                                };
+                            };
+                            var $cell = $(this);
+                            var $field = $('<input class="renaming" type="text" />');
+
+                            $field.attr('name', column.name);
                             $field.val(data[column.name]);
                             $cell.empty();
                             $cell.append($field);
-                            event.stopPropagation();
-                            event.preventDefault();
                         });
                     };
                 };
@@ -469,26 +477,20 @@
                         $(this).triggerHandler('refreshcell-smilisting', data);
                     });
                 },
-                input: function(names) {
+                rename: function() {
                     var data = $line.data('smilisting');
 
-                    infrae.utils.each(names, function(name) {
-                        var index = configuration.column_index(name);
-                        var $cell = $line.children(':eq(' + index + ')');
-
-                        $cell.triggerHandler('inputcell-smilisting', data);
+                    $line.find('td.renameable').each(function () {
+                        $(this).triggerHandler('renamecell-smilisting', data);
                     });
-                    $line.addClass('inputized');
                 },
-                values: function(names) {
+                values: function() {
                     var data = $line.data('smilisting');
                     var values = {id: data['id']};
 
-                    infrae.utils.each(names, function(name) {
-                        var index = configuration.column_index(name);
-                        var $cell = $line.children(':eq(' + index + ')');
-
-                        values[name] = $cell.find('input').val();
+                    $line.find('input.renaming').each(function () {
+                        var $input = $(this);
+                        values[$input.attr('name')] = $input.val();
                     });
                     return values;
                 }
@@ -669,9 +671,9 @@
                             var transaction = new_transaction();
 
                             $.extend(transaction, {
-                                input: {
-                                    input: function(deferred) {
-                                        if (selection.input(deferred))
+                                rename: {
+                                    rename: function(deferred) {
+                                        if (selection.rename(deferred))
                                             transaction.require(events.status.invoke);
                                     },
                                     collect: function(success) {

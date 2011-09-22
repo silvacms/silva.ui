@@ -8,19 +8,21 @@ from collections import defaultdict
 from five import grok
 from infrae import rest
 from zope.cachedescriptors.property import CachedProperty
-from zope.component import getUtility
+from zope.component import getUtility, getMultiAdapter
 from zope.i18n import translate
 from zope.i18n.interfaces import IUserPreferredLanguages
 from zope.intid.interfaces import IIntIds
+from grokcore.layout.interfaces import ILayout
 
 from Acquisition import aq_parent
+from ZPublisher.interfaces import IPubAfterTraversal
 
 from silva.core.interfaces import IRoot, ISilvaObject
 from silva.core.interfaces.adapters import IIconResolver
 from silva.core.messages.interfaces import IMessageService
 from silva.core.views.interfaces import IVirtualSite
 from silva.ui.smi import set_smi_skin
-from silva.ui.interfaces import IUIScreen
+from silva.ui.interfaces import IUIScreen, IUISkinless
 from silva.ui.rest.invalidation import Invalidation
 from silva.ui.rest.exceptions import PageException, ContentException
 from silva.ui.menu import ContentMenu, ViewMenu, ActionMenu
@@ -78,9 +80,11 @@ class UIREST(rest.REST, UIHelper):
     grok.require('silva.ReadSilvaContent')
     grok.baseclass()
 
-    def __init__(self, context, request):
-        set_smi_skin(context, request)
-        super(UIREST, self).__init__(context, request)
+
+@grok.subscribe(UIREST, rest.IRESTMethodPublishedEvent)
+def apply_smi_skin(view, event):
+    if not IUISkinless.providedBy(view):
+        set_smi_skin(view.context, view.request)
 
 
 def get_resources(request):
@@ -221,3 +225,15 @@ class PageWithTemplateREST(PageREST):
         return {'ifaces': ['form'],
                 'html': self.template.render(self)}
 
+
+class PageWithLayoutREST(PageREST):
+    grok.implements(IUISkinless)
+
+    def content(self):
+        raise NotImplementedError
+
+    def payload(self):
+        print list(self.request.__provides__.interfaces())
+        self.layout = getMultiAdapter((self.request, self.context), ILayout)
+        return {"ifaces": ["preview"],
+                "html": self.layout(self)}

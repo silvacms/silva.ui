@@ -248,7 +248,7 @@
 
             // Render the most specialized view for a JSON object
             var render_best_view = function($content, data, options) {
-                var ifaces = options.ifaces || infrae.interfaces.implementedBy(data);
+                var ifaces = options.ifaces || infrae.interfaces.implemented_by(data);
                 var named_views = views[options.name];
                 var to_render = null;
 
@@ -281,7 +281,7 @@
                     return [];
                 };
 
-                var ifaces = options.ifaces || infrae.interfaces.implementedBy(data);
+                var ifaces = options.ifaces || infrae.interfaces.implemented_by(data);
                 var seen_definitions = [];
                 var to_render = [];
 

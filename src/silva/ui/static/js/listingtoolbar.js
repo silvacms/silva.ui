@@ -19,11 +19,11 @@
             case 'items_implements':
                 conditions.push(function($content, data) {
                     if (typeof(predicates.items_implements) === "string") {
-                        return infrae.interfaces.isImplementedBy(
+                        return infrae.interfaces.is_implemented_by(
                             predicates.items_implements, data.selection);
                     };
                     for (var i=0; i < predicates.items_implements.length; i++) {
-                        if (infrae.interfaces.isImplementedBy(
+                        if (infrae.interfaces.is_implemented_by(
                             predicates.items_implements[i], data.selection)) {
                             return true;
                         };
@@ -213,14 +213,14 @@
                                                         return $content.render({data: result, args: [transaction]});
                                                     });
                                         });
-                                        transaction.input.input(save);
+                                        transaction.rename.rename(save);
                                         transaction.commit();
                                     };
                                     break;
                                 case 'input_mode':
                                     view['action'] = function() {
                                         var transaction = data.get_transaction();
-                                        transaction.input.collect(definition.action.input_mode);
+                                        transaction.rename.collect(definition.action.input_mode);
                                         transaction.commit();
                                     };
                                     break;

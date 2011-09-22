@@ -1,10 +1,10 @@
 
 (function($, infrae) {
 
-    $.fn.SMISelection = function() {
+    $.fn.SMISelection = function(configuration) {
         var selection = infrae.deferred.FluxCapacitor();
-        var collecting = null;
-        var collection = infrae.deferred.FluxCapacitor();
+        var renaming = null;
+        var renames = infrae.deferred.FluxCapacitor();
 
         // Default behavior of a SMI Selection.
         selection.events.incoming(function() {
@@ -18,10 +18,10 @@
         });
 
         // To collect values from lines.
-        collection.events.incoming(function() {
-            $(this).data('smilisting-line').input(['identifier', 'title']);
+        renames.events.incoming(function() {
+            $(this).data('smilisting-line').rename();
         });
-        collection.events.outgoing(function() {
+        renames.events.outgoing(function() {
             $(this).data('smilisting-line').update();
         });
 
@@ -71,16 +71,16 @@
                 });
                 return changed;
             },
-            input: function(deferred) {
-                if (!collecting) {
-                    collecting = deferred;
+            rename: function(deferred) {
+                if (renaming === null) {
+                    renaming = deferred;
                     selection.events.push();
                     selection.events.incoming(function() {
-                        collection.add(this);
+                        renames.add(this);
                     });
                     selection.events.failing(
                         selection.events.outgoing(function(){
-                            collection.remove(this, true);
+                            renames.remove(this, true);
                         })
                     );
                     selection.events.outgoing(function() {
@@ -91,21 +91,21 @@
                 return false;
             },
             collect: function(success) {
-                if (collecting) {
-                    var promise = collecting.promise();
+                if (renaming !== null) {
+                    var promise = renaming.promise();
                     if (success) {
-                        var values = collection.map(function() {
+                        var values = renames.map(function() {
                             return $(this).data('smilisting-line').values(['identifier', 'title']);
                         });
                         selection.events.pop();
-                        collection.clear();
-                        collecting.resolve(values);
+                        renames.clear();
+                        renaming.resolve(values);
                     } else {
                         selection.events.pop();
-                        collection.clear(false);
-                        collecting.reject();
+                        renames.clear(false);
+                        renaming.reject();
                     };
-                    collecting = null;
+                    renaming = null;
                     return promise;
                 };
                 return null;
@@ -139,7 +139,7 @@
                         items: data
                     },
                     input: {
-                        status: collecting != null
+                        status: renaming != null
                     }
                 };
             }

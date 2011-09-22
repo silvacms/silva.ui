@@ -110,10 +110,13 @@ class ColumnsContainerListing(UIREST):
                             {'name': 'identifier',
                              'caption': self.translate(_(u'Identifier')),
                              'view': 'text',
+                             'renameable': True,
                              'filterable': True},
                             {'name': 'title',
                              'caption': self.translate(_(u'Title')),
                              'view': 'text',
+                             'renameable': {'item_not_match': {'access': ['write'],
+                                                               'status': ['published']}},
                              'filterable': True},
                             {'name': 'modified',
                              'caption': self.translate(_(u'Modified')),
@@ -154,10 +157,12 @@ class ColumnsContainerListing(UIREST):
                             {'name': 'identifier',
                              'caption': self.translate(_(u'Identifier')),
                              'view': 'text',
+                             'renameable': True,
                              'filterable': True},
                             {'name': 'title',
                              'caption': self.translate(_(u'Title')),
                              'view': 'text',
+                             'renameable': True,
                              'filterable': True},
                             {'name': 'modified',
                              'caption': self.translate(_(u'Modified')),
@@ -290,7 +295,7 @@ class ColumnsContainerListing(UIREST):
                                               {'access': ['manage', 'publish']},
                                           'items_match':
                                               {'status': ['draft', 'approved', 'pending', None]}},
-                                     'ifaces': ['container', 'versioned']},
+                                     'Ifaces': ['container', 'versioned']},
                                     {'title': self.translate(_(u'New version')),
                                      'icon': 'document',
                                      'accesskey': ['ctrl+n'],
@@ -329,7 +334,7 @@ class ColumnsContainerListing(UIREST):
                                                'send': 'selected_ids'}},
                                      'available':
                                          {'content_match':
-                                              {'access': ['manage', 'publish', 'write']},
+                                              {'access': ['manage', 'publish']},
                                           'items_match':
                                               {'status': ['draft', 'closed']}},
                                      'ifaces': ['versioned']},
@@ -391,9 +396,9 @@ class ContentSerializer(object):
 
     def get_access(self, content):
         for access, permission in [
-            ('manage', 'Manage Silva Content Settings'),
-            ('publish', 'Approve Silva Content'),
-            ('write', 'Change Silva Content')]:
+            ('manage', 'Manage Silva content settings'),
+            ('publish', 'Approve Silva content'),
+            ('write', 'Change Silva content')]:
             if self.check_permission(permission, content):
                 return access
         return None

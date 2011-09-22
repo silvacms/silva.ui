@@ -137,6 +137,10 @@ class IViewMenu(IMenu):
 
 # Screens
 
+class IUISkinless(Interface):
+    """Don't apply the SMI skin.
+    """
+
 class IUIScreen(IRESTComponent):
     """Represent a screen in the interface.
     """

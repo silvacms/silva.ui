@@ -64,6 +64,14 @@
 }
 #workspace .content .listing tr.item input {
   width: 100%;
+  -khtml-border-radius:3px 3px 3px 3px;
+  -moz-border-radius:3px 3px 3px 3px;
+  -ms-border-radius:3px 3px 3px 3px;
+  -o-border-radius:3px 3px 3px 3px;
+  -webkit-border-radius:3px 3px 3px 3px;
+  border-radius:3px 3px 3px 3px;
+  border:1px #999 solid;
+  padding: 2px;
 }
 
 

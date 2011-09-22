@@ -24,7 +24,7 @@
          * Return a list of interface implemented by the object
          * @param object: object to interspect.
          */
-        implementedBy: function(object) {
+        implemented_by: function(object) {
             if (object === undefined) {
                 return [];
             }
@@ -52,8 +52,8 @@
         /**
          * Returns true of object implements base, false otherwise.
          */
-        isImplementedBy: function(base, object) {
-            return $.inArray(base, module.implementedBy(object)) > -1;
+        is_implemented_by: function(base, object) {
+            return $.inArray(base, module.implemented_by(object)) > -1;
         }
     });
 
