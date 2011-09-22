@@ -91,6 +91,37 @@ class InvalidationTestCase(unittest.TestCase):
             request.response._cookies,
             {'silva.listing.invalidation': {'path': '/root', 'value': '1'}})
 
+    def test_rename_content(self):
+        with Reset():
+            factory = self.root.manage_addProduct['Silva']
+            factory.manage_addFolder('folder', 'Folder')
+            factory = self.root.folder.manage_addProduct['Silva']
+            factory.manage_addMockupVersionedContent('padding', 'Padding')
+            factory.manage_addMockupVersionedContent('document', 'Document')
+
+        self.root.folder.manage_renameObject('document', 'stuff')
+
+        request = TestRequest()
+        invalidation = Invalidation(request)
+        self.assertEqual(request._cookies, {})
+        # We should have two update changes
+        self.assertEqual(
+            list(invalidation.get_changes()),
+            [{'action': 'update',
+              'container': self.get_id(self.root.folder),
+              'content': self.get_id(self.root.folder.stuff),
+              'listing': 'publishables',
+              'position': 2},
+             {'action': 'update',
+              'container': self.get_id(self.root),
+              'content': self.get_id(self.root.folder),
+              'listing': 'container',
+              'position': 1}])
+        # A cookie is set (still)
+        self.assertEqual(
+            request.response._cookies,
+            {'silva.listing.invalidation': {'path': '/root', 'value': '1'}})
+
     def test_add_content(self):
         factory = self.root.manage_addProduct['Silva']
         factory.manage_addFolder('folder', 'Folder')
