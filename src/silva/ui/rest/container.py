@@ -19,6 +19,7 @@ from silva.translations import translate as _
 from silva.ui.rest.base import ActionREST
 from silva.ui.rest.base import UIREST
 from silva.ui.rest.invalidation import Invalidation
+from silva.ui.rest.helpers import ContentNotifier, ContentGenerator
 
 from AccessControl import getSecurityManager
 from Products.SilvaMetadata.interfaces import IMetadataService
@@ -110,7 +111,8 @@ class ColumnsContainerListing(UIREST):
                             {'name': 'identifier',
                              'caption': self.translate(_(u'Identifier')),
                              'view': 'text',
-                             'renameable': True,
+                             'renameable': {'item_not_match': {'access': ['write'],
+                                                               'status': ['published']}},
                              'filterable': True},
                             {'name': 'title',
                              'caption': self.translate(_(u'Title')),
@@ -331,12 +333,12 @@ class ColumnsContainerListing(UIREST):
                                      'action':
                                          {'form':
                                               {'name': 'silva.core.smi.approveforfuture',
-                                               'send': 'selected_ids'}},
+                                               'identifier': 'form.prefix.contents'}},
                                      'available':
                                          {'content_match':
                                               {'access': ['manage', 'publish']},
                                           'items_match':
-                                              {'status': ['draft', 'closed']}},
+                                              {'status': ['draft']}},
                                      'ifaces': ['versioned']},
                                     ],
                              'ifaces': ['object']},
@@ -446,25 +448,13 @@ class FolderActionREST(ActionREST):
     grok.context(IContainer)
     grok.require('silva.ChangeSilvaContent')
 
-    def get_selected_content(self, key='content', recursive=False):
-        ids = self.request.form.get(key)
-        if ids is not None:
-            get_content = getUtility(IIntIds).getObject
-            if not isinstance(ids, list):
-                # If only one item have been submitted we won't get a list
-                ids = [ids]
-            for id in ids:
-                try:
-                    content = get_content(int(id))
-                except (KeyError, ValueError):
-                    pass
-                else:
-                    if recursive and IContainer.providedBy(content):
-                        for content in walk_silva_tree(content):
-                            yield id, content
-                            id = None
-                    else:
-                        yield id, content
+    def get_selected_contents(self, key='content', recursive=False):
+        for content in self.get_contents(self.request.form.get(key)):
+            if recursive and IContainer.providedBy(content):
+                for content in walk_silva_tree(content):
+                    yield content
+            else:
+                yield content
 
     def notify(self, message, type=u""):
         service = getUtility(IMessageService)
@@ -474,7 +464,11 @@ class FolderActionREST(ActionREST):
         raise NotImplementedError
 
     def get_payload(self):
-        data = self.payload()
+        content_getter = ContentGenerator(self.notify)
+        self.get_contents = content_getter.get_contents
+        self.notifier = ContentNotifier(self.request).notifier
+        with content_getter:
+            data = self.payload()
 
         serializer = ContentSerializer(self, self.request)
         container = serializer.get_id(self.context)
@@ -510,51 +504,4 @@ class FolderActionREST(ActionREST):
                 data['add']['assets'] = added_assets
         return {'ifaces': ['action'], 'actions': data}
 
-
-class ContentCounter(object):
-    """Report a sentance a number of content.
-    """
-    MAX_TITLES = 4
-
-    def __init__(self, rest):
-        self.rest = rest
-        self.size = 0
-        self.titles = []
-
-    def _get_title(self, content):
-        previewable = content.get_previewable()
-        return previewable.get_title_or_id()
-
-    def append(self, content):
-        if not (self.size > self.MAX_TITLES):
-            self.titles.append(self._get_title(content))
-        self.size += 1
-
-    def extend(self, contents):
-        if not ((self.size + len(contents)) > self.MAX_TITLES):
-            self.titles.extend(map(self._get_title, contents))
-        self.size += len(contents)
-
-    def __len__(self):
-        return self.size
-
-    def __unicode__(self):
-        if not self.size:
-            return u''
-
-        def quotify(element):
-            return u'"%s"' % element
-
-        if self.size == 1:
-            return quotify(self.titles[0])
-        if self.size > 4:
-            what = _(
-                u'${count} contents',
-                mapping={'count': self.size})
-        else:
-            what = _(
-                u'${contents} and ${content}',
-                mapping={'contents': ', '.join(map(quotify, self.titles[:-1])),
-                         'content': quotify(self.titles[-1])})
-        return self.rest.translate(what)
 

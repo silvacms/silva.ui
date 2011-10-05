@@ -1,0 +1,168 @@
+
+from zope.component import getUtility
+from zope.intid.interfaces import IIntIds
+from zope.i18n import translate
+from zope.i18n.interfaces import IUserPreferredLanguages
+
+from infrae.comethods import comethod
+
+from silva.translations import translate as _
+from silva.core.interfaces import SilvaError
+from silva.core.messages.interfaces import IMessageService
+
+
+class ContentGenerator(object):
+    """Generate content out of ids.
+    """
+
+    def __init__(self, logger=None):
+        self.__logger = logger
+        self.__get = getUtility(IIntIds).getObject
+        self.__errors = 0
+
+    def get_contents(self, ids):
+        """Get contents from ids. It can be None, one element or a
+        list of elements. Strings are accepted as well.
+        """
+        if ids is not None:
+            if not isinstance(ids, list):
+                ids = [ids]
+            for id in ids:
+                try:
+                    content = self.__get(int(id))
+                except (KeyError, ValueError):
+                    self.__errors += 1
+                yield content
+
+    def __enter__(self):
+        self.__errors = 0
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        if exc_type is None and self.__logger is not None:
+            if self.__errors:
+                self.__logger(
+                    _(u'${count} contents could not be found '
+                      u'(they probably have been deleted)',
+                      mapping={'count': self.__errors}))
+
+
+MAX_ENTRIES = 4
+
+
+class ContentCounter(object):
+    """Report a list of content.
+    """
+
+    def __init__(self, translate, max_entries=MAX_ENTRIES):
+        self.translate = translate
+        self.max_entries = max_entries
+        self.entries = []
+        self.size = 0
+
+    def _get_title(self, content):
+        previewable = content.get_previewable()
+        return previewable.get_title_or_id()
+
+    def append(self, content):
+        if not (self.size > self.max_entries):
+            self.entries.append(self._get_title(content))
+        self.size += 1
+
+    def __len__(self):
+        return self.size
+
+    def __call__(self):
+        if self.size:
+
+            def quotify(element):
+                return u'"%s"' % element
+
+            if self.size == 1:
+                yield quotify(self.entries[0])
+            else:
+                if self.size > 4:
+                    what = _(
+                        u'${count} contents',
+                        mapping={'count': self.size})
+                else:
+                    what = _(
+                        u'${contents} and ${content}',
+                        mapping={'contents': ', '.join(map(quotify,
+                                                           self.entries[:-1])),
+                                 'content': quotify(self.entries[-1])})
+                yield self.translate(what)
+
+
+class ErrorContentCounter(object):
+    """Report a list of errors on contents.
+    """
+
+    def __init__(self, translate, max_entries=MAX_ENTRIES):
+        self.translate = translate
+        self.size = 0
+        self.entries = {}
+        self.max_entries = max_entries
+
+    def append(self, error):
+        if error.reason not in self.entries:
+            self.entries[error.reason] = ContentCounter(
+                self.translate, self.max_entries)
+        self.entries[error.reason].append(error.content)
+        self.size += 1
+
+    def __len__(self):
+        return self.size
+
+    def __call__(self):
+        if self.size:
+            for reason, contents in self.entries.iteritems():
+                for content in contents():
+                    yield self.translate(reason), content
+
+
+class ContentNotifier(object):
+    """Notify status about content actions.
+    """
+
+    def __init__(self, request):
+        self.__send = getUtility(IMessageService).send
+        self.request = request
+
+        adapter = IUserPreferredLanguages(self.request)
+        languages = adapter.getPreferredLanguages()
+        if languages:
+            self.__language = languages[0]
+        else:
+            self.__language = 'en'
+
+    def translate(self, message):
+        return translate(
+            message, target_language=self.__language, context=self.request)
+
+
+    def send(self, message, type=u""):
+        self.__send(message, self.request, namespace=type)
+
+    @comethod
+    def notifier(self, parent, success_msg, failed_msg):
+        success = ContentCounter(self.translate)
+        failures = ErrorContentCounter(self.translate)
+
+        content = yield
+        while content is not None:
+            result = parent(content)
+            if isinstance(result, SilvaError):
+                failures.append(result)
+            else:
+                success.append(result)
+            content = yield result
+
+        for contents in success():
+            self.send(
+                _(success_msg,   mapping={"contents": contents}),
+                type="feedback")
+        for reason, contents in failures():
+            self.send(
+                _(failed_msg, mapping={"contents": contents,
+                                       "reason": reason}),
+                type="error")

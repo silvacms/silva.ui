@@ -257,6 +257,9 @@
                 $preview_target = $(event.target);
                 preview_timer = setTimeout(function () {
                     var info = $preview_target.closest('tr.item').data('smilisting');
+                    if (info === undefined) {
+                        return;
+                    };
                     $.ajax({
                         url: preview_url_template.expand({path: info.path})
                     }).done(function(data) {

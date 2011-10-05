@@ -15,7 +15,6 @@ from zope.intid.interfaces import IIntIds
 from grokcore.layout.interfaces import ILayout
 
 from Acquisition import aq_parent
-from ZPublisher.interfaces import IPubAfterTraversal
 
 from silva.core.interfaces import IRoot, ISilvaObject
 from silva.core.interfaces.adapters import IIconResolver

@@ -227,9 +227,15 @@
                                 case 'form':
                                     view['action'] = function() {
                                         var url = $('#content-url').attr('href');
+                                        var payload = [];
+
+                                        infrae.utils.map(data.selection.items, function(item) {
+                                            return {name: definition.action.form.identifier, value: item.id};
+                                        }, payload);
 
                                         return $content.SMIFormPopup({
-                                            url: url + '/++rest++' + definition.action.form.name});
+                                            url: url + '/++rest++' + definition.action.form.name,
+                                            payload: payload});
                                     };
                                     break;
                                 };
