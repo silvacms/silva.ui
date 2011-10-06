@@ -1,6 +1,10 @@
+# -*- coding: utf-8 -*-
+# Copyright (c) 2011 Infrae. All rights reserved.
+# See also LICENSE.txt
+# $Id$
 
 from zope.component import getUtility
-from zope.intid.interfaces import IIntIds
+
 from zope.i18n import translate
 from zope.i18n.interfaces import IUserPreferredLanguages
 
@@ -9,42 +13,6 @@ from infrae.comethods import comethod
 from silva.translations import translate as _
 from silva.core.interfaces import SilvaError
 from silva.core.messages.interfaces import IMessageService
-
-
-class ContentGenerator(object):
-    """Generate content out of ids.
-    """
-
-    def __init__(self, logger=None):
-        self.__logger = logger
-        self.__get = getUtility(IIntIds).getObject
-        self.__errors = 0
-
-    def get_contents(self, ids):
-        """Get contents from ids. It can be None, one element or a
-        list of elements. Strings are accepted as well.
-        """
-        if ids is not None:
-            if not isinstance(ids, list):
-                ids = [ids]
-            for id in ids:
-                try:
-                    content = self.__get(int(id))
-                except (KeyError, ValueError):
-                    self.__errors += 1
-                yield content
-
-    def __enter__(self):
-        self.__errors = 0
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        if exc_type is None and self.__logger is not None:
-            if self.__errors:
-                self.__logger(
-                    _(u'${count} contents could not be found '
-                      u'(they probably have been deleted)',
-                      mapping={'count': self.__errors}))
-
 
 MAX_ENTRIES = 4
 
@@ -140,11 +108,11 @@ class ContentNotifier(object):
             message, target_language=self.__language, context=self.request)
 
 
-    def send(self, message, type=u""):
+    def notify(self, message, type=u""):
         self.__send(message, self.request, namespace=type)
 
     @comethod
-    def notifier(self, parent, success_msg, failed_msg):
+    def __call__(self, parent, success_msg, failed_msg):
         success = ContentCounter(self.translate)
         failures = ErrorContentCounter(self.translate)
 
@@ -158,11 +126,11 @@ class ContentNotifier(object):
             content = yield result
 
         for contents in success():
-            self.send(
+            self.notify(
                 _(success_msg,   mapping={"contents": contents}),
                 type="feedback")
         for reason, contents in failures():
-            self.send(
+            self.notify(
                 _(failed_msg, mapping={"contents": contents,
                                        "reason": reason}),
                 type="error")

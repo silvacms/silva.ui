@@ -9,7 +9,6 @@ from zope import schema
 
 from js import jquery
 from js import jqueryui
-from js import jquery_jgrowl
 from infrae.rest.interfaces import IRESTComponent
 from zeam import jsontemplate
 
@@ -32,7 +31,6 @@ class ISilvaUIDependencies(IDefaultBrowserLayer):
     Every Silva UI plugin should depend on those resources.
     """
     silvaconf.resource(jqueryui.jqueryui)
-    silvaconf.resource(jquery_jgrowl.jquery_jgrowl)
     silvaconf.resource(jsontemplate.jsontemplate)
     silvaconf.resource('js/infrae.js')
     silvaconf.resource('js/infrae.deferred.js')
@@ -45,10 +43,12 @@ class ISilvaUIDependencies(IDefaultBrowserLayer):
 class ISilvaUI(ISilvaUIDependencies):
     """All required script to get the SMI working, without any CSS.
     """
+    silvaconf.resource('js/thirdparty/jquery.jgrowl.js')
+    silvaconf.resource('js/thirdparty/jquery.jgrowl.css')
     silvaconf.resource('js/thirdparty/jquery.hotkeys.js')
     silvaconf.resource('js/thirdparty/jquery.observehashchange.js')
     silvaconf.resource('js/thirdparty/jquery.jstree.js')
-    silvaconf.resource('js/thirdparty/jquery.tablednd-0.5.js')
+    silvaconf.resource('js/thirdparty/jquery.tablednd.js')
     silvaconf.resource('js/thirdparty/jquery.qtip.js')
     silvaconf.resource('js/thirdparty/jquery.qtip.css')
     silvaconf.resource('js/support.js')

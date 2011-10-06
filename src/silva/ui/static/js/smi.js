@@ -16,9 +16,9 @@
              * @param message: message.
              */
             notify: function(message) {
-                var options = {'themeState': 'ui-state-highlight'};
+                var options = {'themeState': 'feedback'};
                 if (message.category == 'error') {
-                    options['themeState'] = 'ui-state-error';
+                    options['themeState'] = 'error';
                 };
                 $.jGrowl(message.message, options);
             },
