@@ -152,7 +152,8 @@ def register_move(target, event):
 def register_remove(target, event):
     if not IContainer.providedBy(aq_parent(target)):
         return
-    if IRoot.providedBy(target):
+    if IRoot.providedBy(event.object):
+        # If you delete your Silva root, we don't care about anything.
         return
     if event.oldParent is not None:
         if event.object is target:
