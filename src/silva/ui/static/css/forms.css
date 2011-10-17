@@ -197,7 +197,9 @@ form {
 .form-content .field-collection .multi-actions {
   clear: both;
 }
-
+.form-content  a.field-uri {
+  text-decoration: underline;
+}
 
 /* Portlets */
 
