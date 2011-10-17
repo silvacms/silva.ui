@@ -49,14 +49,17 @@
             /**
              * Focus the form field on which it is applied.
              */
-            var focus_form_field = function($field) {
+            var focus_form_field = function($field, no_input_focus) {
                 var $section = $field.closest('.form-section');
 
-                if ($section.is('.form-focus'))
+                if ($section.is('.form-focus')) {
                     return;
+                };
                 unfocus_form_fields();
                 $section.addClass('form-focus');
-                $section.find('.field:first').focus();
+                if (!no_input_focus) {
+                    $section.find('.field:first').focus();
+                };
             };
             var focus_first_form_field = function($base) {
                 var $field = $base.find('.form-error:first').find('.field:first');
@@ -196,8 +199,8 @@
                         });
 
                         // Bind form focus
-                        $form.delegate('.form-section', 'click', function () {
-                            focus_form_field($(this));
+                        $form.delegate('.form-section', 'click', function (event) {
+                            focus_form_field($(this), $(event.target).is('input'));
                         });
 
                         // Set submit URL for helper
