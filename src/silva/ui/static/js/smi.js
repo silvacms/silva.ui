@@ -41,7 +41,6 @@
         });
         // Display a notification
         $(document).bind('notify-feedback-smi', function(event, data) {
-            manager.mark_as_seen(); // Clear old notification first.
             if (typeof(data) == "array") {
                 manager.notifies(data);
             } else {
