@@ -135,7 +135,7 @@
                   return {
                     ifaces: ['message'],
                     title: '<tal:msg i18n:translate="">An internal error happened</tal:msg>',
-                    message: '<p i18n:translate="">An error internal happened on the server. Please consult your system administrator for more information.</p>'
+                    message: '<p i18n:translate="">An internal error happened on the server. Please consult your system administrator for more information.</p>'
                   };
               }
           },
