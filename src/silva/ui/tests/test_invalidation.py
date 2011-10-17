@@ -416,11 +416,11 @@ class InvalidationTestCase(unittest.TestCase):
         data_file = self.root.folder.data_file
 
         with assertTriggersEvents('ObjectModifiedEvent'):
-            data_file.set_text_file_data('Edit content')
+            data_file.set_text('Edit content')
         with assertTriggersEvents('ObjectModifiedEvent'):
-            data_file.set_text_file_data('Actually, edit again the content')
+            data_file.set_text('Actually, edit again the content')
         with assertTriggersEvents('ObjectModifiedEvent'):
-            data_file.set_text_file_data('I am not sure at all')
+            data_file.set_text('I am not sure at all')
 
         request = TestRequest()
         invalidation = Invalidation(request)
