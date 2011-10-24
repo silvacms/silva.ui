@@ -75,10 +75,22 @@ div.batching a.current {
   bottom: 0;
   left: 288px;
   width: 4px;
-  height: 4%;
-  background-color: red;
+  height: 40px;
+  background-color: #666;
   z-index: 200;
   cursor: move;
+  -khtml-box-shadow:#1c2e3d 0 3px 10px;
+  -moz-box-shadow:#1c2e3d 0 3px 10px;
+  -ms-box-shadow:#1c2e3d 0 3px 10px;
+  -o-box-shadow:#1c2e3d 0 3px 10px;
+  -webkit-box-shadow:#1c2e3d 0 3px 10px;
+  box-shadow:#1c2e3d 0 3px 10px;
+  -khtml-border-radius:2px 2px 2px 2px;
+  -moz-border-radius:2px 2px 2px 2px;
+  -ms-border-radius:2px 2px 2px 2px;
+  -o-border-radius:2px 2px 2px 2px;
+  -webkit-border-radius:2px 2px 2px 2px;
+  border-radius:2px 2px 2px 2px;
 }
 
 #workspace {
@@ -274,11 +286,17 @@ div.batching a.current {
 }
 
 /*
- * Portait mode for iPad removes tree
+ * Portait mode for iPad removes tree. Or not wide enough
  */
 @media screen and (orientation: portrait) {
   #navigation { display:none; }
-  #workspace { left:0; }
+  #handle {display:none; }
+  #workspace { left:0 !important; }
+}
+@media screen and (max-width: 900px) {
+  #navigation { display:none; }
+  #handle {display:none; }
+  #workspace { left:0 !important; }
 }
 
 /*

@@ -10,20 +10,33 @@
         var $navigation = $('#navigation');
         var $workspace = $('#workspace');
         var $handle = $('#handle');
+        var min_position = NAVIGATION_MIN_WIDTH + 8;
 
-        var set_containment = function () {
-            var width = $(window).width();
-            var top = $handle.position().top;
-            $handle.draggable(
-                'option',
-                'containment',
-                [NAVIGATION_MIN_WIDTH + 8, top, width - WORKSPACE_MIN_WIDTH, top]);
-        };
-        var resizer =  function(event, ui) {
-            var position = $handle.position().left;
+        var set_size = function(position) {
             $navigation.css({width: position - 8});
             $workspace.css({left: position + 12});
             $(window).trigger('workspace-resize-smi');
+        };
+
+        var set_containment = function () {
+            if ($handle.is(':visible')) {
+                var width = $(window).width();
+                var top = $handle.position().top;
+                var current = $handle.position().left;
+                var max_position = width - WORKSPACE_MIN_WIDTH;
+
+                if (current > max_position) {
+                    set_size(max_position);
+                    $handle.css({left: max_position});
+                };
+                $handle.draggable(
+                    'option',
+                    'containment',
+                    [min_position, top, max_position, top]);
+            };
+        };
+        var resizer =  function(event, ui) {
+            set_size($handle.position().left);
         };
 
         $handle.draggable({

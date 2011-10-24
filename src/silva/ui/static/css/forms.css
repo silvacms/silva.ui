@@ -18,7 +18,7 @@ form {
 }
 .form-content .form-head p {
   border-left: 2px solid #ccc;
-  padding: 10px;
+  padding: 10px 8px;
 }
 
 #workspace .form-content h3 {
@@ -30,12 +30,12 @@ form {
 }
 
 #workspace .form-content h4 {
-  padding: 5px;
+  padding: 5px 10px;
   font-size: 120%;
 }
 
 #workspace .form-content h5 {
-  padding: 5px;
+  padding: 5px 10px;
   font-size: 110%;
 }
 
@@ -46,7 +46,7 @@ form {
 
 .form-content .form-section,
 .form-content .form-table {
-  padding: 10px;
+  padding: 10px 8px;
   border-left: 2px solid #ccc;
   border-bottom: 1px dotted #ccc;
 }
@@ -146,14 +146,14 @@ form {
   -ms-border-radius:3px;
   -o-border-radius:3px;
   -webkit-border-radius:3px;
-  background:#fff url(../img/gradient20m.png) repeat-x top;
-  border-radius:3px;
-  border:1px #777 solid;
-  display:block;
+  background: #fff url(../img/gradient20m.png) repeat-x top;
+  border-radius: 3px;
+  border: 1px #777 solid;
+  display: block;
   color: #000;
-  line-height:17px;
-  margin:5px 2px;
-  padding:0 4px;
+  line-height: 17px;
+  margin: 5px 4px 5px 0px;
+  padding: 0 4px;
   float: left;
 }
 
@@ -209,6 +209,11 @@ form {
   right: 0;
   width: 250px;
   bottom: 0px;
+}
+
+@media screen and (max-width: 600px) {
+  .portlets { display: none; }
+  .forms { right: 0px; }
 }
 
 .portlets p {

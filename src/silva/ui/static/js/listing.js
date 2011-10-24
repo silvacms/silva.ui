@@ -399,9 +399,9 @@
         render_container_header($header, $content, configuration);
 
         // Insert a line at the correct position.
-        var insert_line = function($line, data) {
-            if (data.position > -1) {
-                var $after = $container.children().eq(data.position);
+        var insert_line = function($line, data, position) {
+            if (position > -1) {
+                var $after = $container.children().eq(position);
                 if ($after.length) {
                     $after.before($line);
                 } else {
@@ -468,10 +468,18 @@
                 update: function(data) {
                     if (data != undefined) {
                         $line.data('smilisting', data);
-                        // Position might have changed.
-                        if (data.position > 0 && $container.children().index($line) != data.position) {
-                            $line.detach();
-                            insert_line($line, data);
+                        if (data.position > -1) {
+                            // Position might have changed.
+                            var new_position = data.position;
+                            if (!$container.children('tr.item:first').data('smilisting').moveable) {
+                                // If the first is a default one (not
+                                // movable) increase the position.
+                                new_position -= 1;
+                            };
+                            if (new_position > 0 && $container.children().index($line) != new_position) {
+                                $line.detach();
+                                insert_line($line, data, new_position);
+                            };
                         };
                     } else {
                         data = $line.data('smilisting');
@@ -501,7 +509,7 @@
 
             line.update(data);
             $line.data('smilisting-line', line);
-            insert_line($line, data);
+            insert_line($line, data, data.position);
             return $line.get(0);
         };
 
