@@ -64,7 +64,7 @@ class ColumnsContainerListing(UIREST):
                                       {'screen': 'publish',
                                        'caption': self.translate(_(u"Publish")),
                                        'item_implements': 'versioned',
-                                       'item_match': {'access': ['manage', 'publish']}},
+                                       'item_match': {'access': ['manage', 'publish', 'write']}},
                                       {'screen': 'settings/access',
                                        'caption': self.translate(_(u"Access")),
                                        'item_implements': 'container',
