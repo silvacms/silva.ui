@@ -84,8 +84,11 @@ class Invalidation(object):
 
 
 def register_change(target, action):
-    get_id = getUtility(IIntIds).register
     container = aq_parent(target)
+    if container is None:
+        # The object is not yet in the content tree.
+        return
+    get_id = getUtility(IIntIds).register
     is_publishable = IPublishable.providedBy(target)
     is_container = False
     listing = 'assets'
