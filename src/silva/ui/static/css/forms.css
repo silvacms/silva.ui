@@ -1,5 +1,6 @@
 form {
   color: black;
+  clear: both;
 }
 
 .forms {
@@ -19,6 +20,10 @@ form {
 .form-content .form-head p {
   border-left: 2px solid #ccc;
   padding: 10px 8px;
+}
+.form-content .form-batch {
+  border-left: 2px solid #ccc;
+  padding: 5px 8px;
 }
 
 #workspace .form-content h3 {
@@ -59,10 +64,6 @@ form {
   border-bottom: 1px dotted #ccc;
 }
 
-.form-content .form-section p {
-  font-style: italic;
-}
-
 .form-content .form-section .form-label label {
   font-weight: bold;
   font-size: 105%;
@@ -70,6 +71,10 @@ form {
 
 .form-content .form-section .form-label {
   margin-bottom: 10px;
+}
+
+.form-content .form-section .form-label p {
+  font-style: italic;
 }
 
 .form-content .form-required,
