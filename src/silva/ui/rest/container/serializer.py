@@ -69,7 +69,7 @@ class ContentSerializer(object):
         self.get_icon = IIconResolver(self.request).get_content_url
         self.check_permission = getSecurityManager().checkPermission
         locale = self.request.locale
-        formatter = locale.dates.getFormatter('dateTime')
+        formatter = locale.dates.getFormatter('dateTime', 'short')
         self.format_date = lambda d: formatter.format(d.asdatetime())
 
     def get_access(self, content):
