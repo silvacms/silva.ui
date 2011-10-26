@@ -69,7 +69,7 @@
     };
 
     infrae.views.view({
-        iface: ['action'],
+        iface: ['listing-changes'],
         factory: function($content, data, transaction) {
             return {
                 render: function() {
@@ -165,16 +165,19 @@
                                             break;
                                         case 'clipboard_ids':
                                             infrae.utils.map(data.clipboard.cutted, function(item) {
-                                                    return {name: 'cutted', value: item.id};
+                                                return {name: 'cutted', value: item.id};
                                             }, payload);
                                             infrae.utils.map(data.clipboard.copied, function(item) {
-                                                    return {name: 'copied', value: item.id};
+                                                return {name: 'copied', value: item.id};
                                             }, payload);
                                             break;
                                         }
                                         data.query_server(definition.action.rest.action, payload).pipe(
                                             function (result) {
-                                                return $content.render({data: result, args: [data.get_transaction()]});
+                                                return $content.render({
+                                                    data: result,
+                                                    args: [data.get_transaction()]
+                                                });
                                             });
                                     };
                                     break;
@@ -202,16 +205,22 @@
                                             var payload = [];
                                             infrae.utils.each(values, function(value) {
                                                 for (var name in value)
-                                                    payload.push({name: 'values.' + count + '.' + name, value: value[name]});
+                                                    payload.push({
+                                                        name: 'values.' + count + '.' + name,
+                                                        value: value[name]
+                                                    });
                                                 count += 1;
                                             });
                                             payload.push({name: 'values', value: count});
                                             return data.query_server(
                                                 definition.action.input.action,
-                                                payload).pipe(
-                                                    function (result) {
-                                                        return $content.render({data: result, args: [transaction]});
-                                                    });
+                                                payload
+                                            ).pipe(function (result) {
+                                                return $content.render({
+                                                    data: result,
+                                                    args: [transaction]
+                                                });
+                                            });
                                         });
                                         transaction.rename.rename(save);
                                         transaction.commit();
@@ -230,12 +239,24 @@
                                         var payload = [];
 
                                         infrae.utils.map(data.selection.items, function(item) {
-                                            return {name: definition.action.form.identifier, value: item.id};
+                                            return {
+                                                name: definition.action.form.identifier,
+                                                value: item.id
+                                            };
                                         }, payload);
 
                                         return $content.SMIFormPopup({
                                             url: url + '/++rest++' + definition.action.form.name,
-                                            payload: payload});
+                                            payload: payload
+                                        }).done(function(form_data) {
+                                            if (form_data.extra) {
+                                                return $content.render({
+                                                    data: form_data.extra,
+                                                    args: [data.get_transaction()]
+                                                });
+                                            }
+                                            return form_data;
+                                        });
                                     };
                                     break;
                                 };

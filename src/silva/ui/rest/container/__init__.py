@@ -65,6 +65,43 @@ class TemplateToolbarContainerListing(rest.REST):
         return self.template.render(self)
 
 
+def get_container_changes(rest):
+    serializer = ContentSerializer(rest, rest.request)
+    container = serializer.get_id(rest.context)
+
+    data = {}
+    updated = []
+    removed = []
+    added_publishables = []
+    added_assets = []
+    for info in Invalidation(rest.request).get_changes(
+        filter_func=lambda change: change['container'] == container):
+        if info['action'] == 'remove':
+            removed.append(info['content'])
+        else:
+            content_data = serializer(id=info['content'])
+            content_data['position'] = info['position']
+            if info['action'] == 'add':
+                if info['listing'] == 'assets':
+                    added_assets.append(content_data)
+                else:
+                    added_publishables.append(content_data)
+            else:
+                updated.append(content_data)
+
+    if removed:
+        data['remove'] = removed
+    if updated:
+        data['update'] = updated
+    if added_publishables or added_assets:
+        data['add'] = {}
+        if added_publishables:
+            data['add']['publishables'] = added_publishables
+        else:
+            data['add']['assets'] = added_assets
+    return {'ifaces': ['listing-changes'], 'actions': data}
+
+
 class FolderActionREST(ActionREST):
     """Base class for REST-based listing actions.
     """
@@ -89,38 +126,8 @@ class FolderActionREST(ActionREST):
         with self.get_contents:
             data = self.payload()
 
-        serializer = ContentSerializer(self, self.request)
-        container = serializer.get_id(self.context)
-
-        updated = []
-        removed = []
-        added_publishables = []
-        added_assets = []
-        for info in Invalidation(self.request).get_changes(
-            filter_func=lambda change: change['container'] == container):
-            if info['action'] == 'remove':
-                removed.append(info['content'])
-            else:
-                content_data = serializer(id=info['content'])
-                content_data['position'] = info['position']
-                if info['action'] == 'add':
-                    if info['listing'] == 'assets':
-                        added_assets.append(content_data)
-                    else:
-                        added_publishables.append(content_data)
-                else:
-                    updated.append(content_data)
-
-        if removed:
-            data['remove'] = removed
-        if updated:
-            data['update'] = updated
-        if added_publishables or added_assets:
-            data['add'] = {}
-            if added_publishables:
-                data['add']['publishables'] = added_publishables
-            else:
-                data['add']['assets'] = added_assets
-        return {'ifaces': ['action'], 'actions': data}
+        changes = get_container_changes(self)
+        changes['actions'].update(data)
+        return changes
 
 

@@ -169,7 +169,6 @@
                         };
 
                         // Bind default submit and refresh
-                        $form.bind('refresh-smi', submit);
                         $form.bind('submit', default_submit);
 
                         // Bind click submit
@@ -196,6 +195,18 @@
                                     return false;
                                 });
                             };
+                        });
+                        $form.find('.form-controls a.form-popup').each(function () {
+                            var $control = $(this);
+
+                            $control.bind('click', function() {
+                                $control.SMIFormPopup().done(function (data) {
+                                    if (data.extra && data.extra.refresh == form_prefix) {
+                                        submit();
+                                    };
+                                });
+                                return false;
+                            });
                         });
 
                         // Bind form focus
