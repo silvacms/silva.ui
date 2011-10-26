@@ -249,7 +249,8 @@
         if (smi.options.listing.preview !== undefined) {
             var preview_url_template = new jsontemplate.Template(smi.options.listing.preview, {});
             var preview_timer = null;
-            var $preview_target = null;
+            var $preview_target = $([]);
+
             $containers.delegate('tr.item a.preview-icon', 'mouseenter', function(event) {
                 if (preview_timer !== null) {
                     clearTimeout(preview_timer);
@@ -263,7 +264,7 @@
                     $.ajax({
                         url: preview_url_template.expand({path: info.path})
                     }).done(function(data) {
-                        if ($preview_target === null || !data.preview || !$preview_target.is(':visible')) {
+                        if (!data.preview || !$preview_target.is(':visible')) {
                             return;
                         };
                         $preview_target.qtip({
@@ -288,7 +289,7 @@
                 };
                 if ($preview_target.length) {
                     $preview_target.qtip('destroy');
-                    $preview_target = null;
+                    $preview_target = $([]);
                 };
             });
         };
