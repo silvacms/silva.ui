@@ -210,6 +210,11 @@
                         $form.trigger('load-smiform', data);
                     });
 
+                    // Remove errors if you click on it
+                    $content_form.delegate('.form-error-detail', 'click', function () {
+                        $(this).fadeOut().promise().done(function() {$(this).remove()});
+                    });
+
                     // Focus the first field of the first form.
                     focus_first_form_field($content);
 
