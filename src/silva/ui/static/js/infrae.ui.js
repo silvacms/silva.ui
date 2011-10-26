@@ -3,6 +3,7 @@
 
 (function (infrae, $) {
     var module = {};
+    var THRESHOLD = 15;
 
     $.extend(module, {
         /**
@@ -48,21 +49,73 @@
          *
          * @param $dialog: object representing the dialog.
          */
-        ShowDialog: function($dialog) {
+        ShowDialog: function($dialog, factor) {
             var $window = $(window);
             var $widget = $dialog.dialog('widget');
-            var max_width = Math.ceil($window.width() * 0.8);
-            var max_height = Math.ceil($window.height() * 0.8);
 
-            if ($widget.height() > max_height) {
-                $dialog.dialog('option', 'height', max_height);
+            if (factor === undefined){
+                factor = 0.8;
             };
-            if ($widget.width() > max_width) {
-                $dialog.dialog('option', 'width', max_width);
+
+            var resize = function(initial) {
+                var window_width = $window.width();
+                var window_height = $window.height();
+                var widget_width = $widget.width();
+                var widget_height = $widget.height();
+                var max_width = Math.ceil(window_width * factor);
+                var max_height = Math.ceil(window_height * factor);
+                var popup_position = $widget.position();
+                var need_reposition = (initial === true);
+                var changed_size = false;
+
+                if (widget_height > max_height) {
+                    $dialog.dialog('option', 'height', max_height);
+                    widget_height = max_height;
+                    changed_size = true;
+                };
+                if (popup_position.top) {
+                    if (window_height - (popup_position.top + widget_height + THRESHOLD) < 0) {
+                        need_reposition = true;
+                    };
+                };
+                if (widget_width > max_width) {
+                    $dialog.dialog('option', 'width', max_width);
+                    widget_width = max_width;
+                    changed_size = true;
+
+                };
+                if (popup_position.left) {
+                    if (window_width - (popup_position.left + widget_width + THRESHOLD) < 0) {
+                        need_reposition = true;
+                    };
+                };
+                $dialog.dialog('option', 'maxHeight', max_height);
+                $dialog.dialog('option', 'maxWidth', max_width);
+                if (need_reposition) {
+                    $dialog.dialog('option', 'position', 'center');
+                };
+                if (changed_size) {
+                    $dialog.trigger(
+                        'infrae-ui-dialog-resized',
+                        {height: widget_height, width: widget_width});
+                };
             };
-            $dialog.dialog('option', 'maxHeight', max_height);
-            $dialog.dialog('option', 'maxWidth', max_width);
+
+            $window.bind('resize.infrae-ui-dialog', function(event) {
+                if (event.target === window) {
+                    // We are only interrested about real window resize events.
+                    setTimeout(resize, 0);
+                } else if (event.target === $widget.get(0)) {
+                    $dialog.trigger(
+                        'infrae-ui-dialog-resized',
+                        {height: $widget.height(), width: $widget.width()});
+                };
+            });
+            $dialog.bind('dialogclose', function () {
+                $window.unbind('resize.infrae-ui-dialog');
+            });
             $dialog.dialog('open');
+            resize(true);
         },
         /**
          * Create a confirmation dialog that returns a promise.
