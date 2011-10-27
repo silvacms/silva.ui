@@ -54,7 +54,7 @@
             var $widget = $dialog.dialog('widget');
 
             if (options !== undefined) {
-                options = $.extend(options, dialog_options);
+                options = $.extend(dialog_options, options);
             } else {
                 options = dialog_options;
             };
