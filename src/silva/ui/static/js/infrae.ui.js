@@ -3,7 +3,7 @@
 
 (function (infrae, $) {
     var module = {};
-    var THRESHOLD = 15;
+    var dialog_options = {factor: 0.8, threshold: 15};
 
     $.extend(module, {
         /**
@@ -49,12 +49,14 @@
          *
          * @param $dialog: object representing the dialog.
          */
-        ShowDialog: function($dialog, factor) {
+        ShowDialog: function($dialog, options) {
             var $window = $(window);
             var $widget = $dialog.dialog('widget');
 
-            if (factor === undefined){
-                factor = 0.8;
+            if (options !== undefined) {
+                options = $.extend(options, dialog_options);
+            } else {
+                options = dialog_options;
             };
 
             var resize = function(initial) {
@@ -62,8 +64,8 @@
                 var window_height = $window.height();
                 var widget_width = $widget.width();
                 var widget_height = $widget.height();
-                var max_width = Math.ceil(window_width * factor);
-                var max_height = Math.ceil(window_height * factor);
+                var max_width = Math.ceil(window_width * options.factor);
+                var max_height = Math.ceil(window_height * options.factor);
                 var popup_position = $widget.position();
                 var need_reposition = (initial === true);
                 var changed_size = false;
@@ -74,7 +76,7 @@
                     changed_size = true;
                 };
                 if (popup_position.top) {
-                    if (window_height - (popup_position.top + widget_height + THRESHOLD) < 0) {
+                    if (window_height - (popup_position.top + widget_height + options.threshold) < 0) {
                         need_reposition = true;
                     };
                 };
@@ -85,7 +87,7 @@
 
                 };
                 if (popup_position.left) {
-                    if (window_width - (popup_position.left + widget_width + THRESHOLD) < 0) {
+                    if (window_width - (popup_position.left + widget_width + options.threshold) < 0) {
                         need_reposition = true;
                     };
                 };
