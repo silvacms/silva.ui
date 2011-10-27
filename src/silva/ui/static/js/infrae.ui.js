@@ -3,7 +3,7 @@
 
 (function (infrae, $) {
     var module = {};
-    var dialog_options = {factor: 0.8, threshold: 15};
+    var dialog_options = {factor: 0.8, threshold: 15, maxWidth: 0, maxHeight: 0};
 
     $.extend(module, {
         /**
@@ -70,6 +70,12 @@
                 var need_reposition = (initial === true);
                 var changed_size = false;
 
+                if (options.maxWidth) {
+                    max_width = Math.min(options.maxWidth, max_width);
+                };
+                if (options.maxHeight) {
+                    max_height = Math.min(options.maxHeight, max_height);
+                };
                 if (widget_height > max_height) {
                     $dialog.dialog('option', 'height', max_height);
                     widget_height = max_height;
