@@ -196,22 +196,15 @@
                                 });
                             };
                         });
-                        $form.find('.form-controls a.form-popup').each(function () {
+                        $form.delegate('.form-controls a.form-popup', 'click', function () {
                             var $control = $(this);
 
-                            $control.bind('click', function() {
-                                $control.SMIFormPopup().done(function (data) {
-                                    if (data.extra && data.extra.refresh == form_prefix) {
-                                        submit();
-                                    };
-                                });
-                                return false;
+                            $control.SMIFormPopup().done(function (data) {
+                                if (data.extra && data.extra.refresh == form_prefix) {
+                                    submit();
+                                };
                             });
-                        });
-
-                        // Bind form focus
-                        $form.delegate('.form-section', 'click', function (event) {
-                            focus_form_field($(this), $(event.target).is('input'));
+                            return false;
                         });
 
                         // Set submit URL for helper
@@ -221,13 +214,21 @@
                         $form.trigger('load-smiform', data);
                     });
 
+                    // Bind form focus
+                    $content_form.delegate('.form-section', 'click', function (event) {
+                        focus_form_field($(this), $(event.target).is('input'));
+                    });
+                    $content_form.delegate('.form-section', 'focusin', function (event) {
+                        focus_form_field($(this), $(event.target).is('input'));
+                    });
+
                     // Remove errors if you click on it
                     $content_form.delegate('.form-error-detail', 'click', function () {
                         $(this).fadeOut().promise().done(function() {$(this).remove()});
                     });
 
                     // Focus the first field of the first form.
-                    focus_first_form_field($content);
+                    focus_first_form_field($content_form);
 
                     // Shortcuts field navigation
                     smi.shortcuts.bind('form', null, ['ctrl+down', 'ctrl+shift+down'], function() {
