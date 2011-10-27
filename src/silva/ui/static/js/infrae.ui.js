@@ -109,7 +109,7 @@
                 };
             };
 
-            $window.bind('resize.infrae-ui-dialog', function(event) {
+            var handler = function(event) {
                 if (event.target === window) {
                     // We are only interrested about real window resize events.
                     setTimeout(resize, 0);
@@ -118,9 +118,11 @@
                         'infrae-ui-dialog-resized',
                         {height: $widget.height(), width: $widget.width()});
                 };
-            });
+            };
+
+            $window.bind('resize.infrae-ui-dialog', handler);
             $dialog.bind('dialogclose', function () {
-                $window.unbind('resize.infrae-ui-dialog');
+                $window.unbind('resize.infrae-ui-dialog', handler);
             });
             $dialog.dialog('open');
             resize(true);
