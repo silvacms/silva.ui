@@ -16,23 +16,22 @@ from Products.SilvaMetadata.interfaces import IMetadataService
 
 
 def get_content_status(content):
-    public_version_status = None
-    next_version_status = None
+    public_status = None
+    next_status = None
 
     if IVersionedContent.providedBy(content):
-        public = content.get_public_version_status()
-        if public == 'published':
-            public_version_status = 'published'
-        elif public == 'closed':
-            public_version_status = 'closed'
+        if content.get_public_version() is not None:
+            public_status = 'published'
+        elif content.get_previous_versions():
+            public_status = 'closed'
 
-        next_status = content.get_next_version_status()
-        if next_status == 'not_approved':
-            next_version_status = 'draft'
-        elif next_status == 'request_pending':
-            next_version_status = 'pending'
-        elif next_status == 'approved':
-            next_version_status = 'approved'
+        if content.get_unapproved_version() is not None:
+            if content.is_approval_requested():
+                next_status = "pending"
+            else:
+                next_status = "draft"
+        elif content.get_approved_version() is not None:
+            next_status = "approved"
 
     # XXX: define behavior for Folders
     # elif IFolder.providedBy(content):
@@ -40,7 +39,7 @@ def get_content_status(content):
     #         status[0] = 'published'
     #     if content.is_approved():
     #         status[1] = 'approved'
-    return (public_version_status, next_version_status)
+    return {'status_public': public_status, 'status_next': next_status}
 
 CONTENT_IFACES = [
     (IVersionedContent, 'versioned'),
@@ -112,7 +111,7 @@ class ContentSerializer(object):
             'access': self.get_access(content),
             'position': -1}
         if IPublishable.providedBy(content):
-            data['status'] = get_content_status(content)
+            data.update(get_content_status(content))
             data['moveable'] = not content.is_default()
         return data
 

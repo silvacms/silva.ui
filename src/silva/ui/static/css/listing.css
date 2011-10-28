@@ -59,8 +59,11 @@
   display: block;
   float: left;
 }
-#workspace .content .listing td ins.first {
-  margin-right: 1px;
+#workspace .content .listing td.status_public {
+  padding-right: 1px;
+}
+#workspace .content .listing td.status_next {
+  padding-left: 1px;
 }
 #workspace .content .listing tr.item input {
   width: 100%;

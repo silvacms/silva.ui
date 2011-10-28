@@ -86,16 +86,18 @@
     listingcolumns.register({
         name: 'workflow',
         factory: function($content, data, column, value) {
-            return {
-                html: '<ins class="state first"></ins><ins class="state"></ins>',
-                render: function() {
-                    if (value) {
-                        var states = $content.children('ins');
-                        states.first().addClass(value[0]);
-                        states.last().addClass(value[1]);
-                    };
-                }
+            if (value !== null) {
+                var state = ["state", value].join(" ");
+
+                return {
+                    state: state,
+                    jsont: '<ins class="{state|htmltag}"></ins>',
+                    render: function() {
+                        $content.addClass(column.name);
+                    }
+                };
             };
+            return {};
         }
     });
 

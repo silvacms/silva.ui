@@ -10,7 +10,8 @@ from silva.translations import translate as _
 from silva.core.interfaces import IContainer
 
 icon_width = 26
-pubstate_width = 32
+public_state_width = 16
+next_state_width = 16
 goto_width = 88
 move_width = 26
 
@@ -28,24 +29,30 @@ class ColumnsContainerListing(UIREST):
                            'versioned': ['content', 'object']},
                 'listing': [
                     {'name': 'publishables',
-                     'layout': {'fixed': {0:icon_width, 1:pubstate_width, 6:goto_width, 7:move_width}},
+                     'layout': {'fixed': {0:icon_width,
+                                          1:public_state_width,
+                                          2:next_state_width,
+                                          7:goto_width,
+                                          8:move_width}},
                      'columns': [
                             {'name': 'icon',
                              'view': 'action-icon',
                              'action': 'content'},
-                            {'name': 'status',
+                            {'name': 'status_public',
+                             'view': 'workflow'},
+                            {'name': 'status_next',
                              'view': 'workflow'},
                             {'name': 'identifier',
                              'caption': self.translate(_(u'Identifier')),
                              'view': 'text',
                              'renameable': {'item_not_match': {'access': ['write'],
-                                                               'status': ['published']}},
+                                                               'status_public': ['published']}},
                              'filterable': True},
                             {'name': 'title',
                              'caption': self.translate(_(u'Title')),
                              'view': 'text',
                              'renameable': {'item_not_match': {'access': ['write'],
-                                                               'status': ['published']}},
+                                                               'status_public': ['published']}},
                              'filterable': True},
                             {'name': 'modified',
                              'caption': self.translate(_(u'Modified')),
@@ -77,11 +84,16 @@ class ColumnsContainerListing(UIREST):
                           'action': 'order'},
                      'collapsed': False},
                     {'name': 'assets',
-                     'layout': {'fixed': {0:icon_width, 1:pubstate_width, 6:goto_width, 7:move_width}},
+                     'layout': {'fixed': {0:icon_width,
+                                          1:public_state_width,
+                                          2:next_state_width,
+                                          7:goto_width,
+                                          8:move_width}},
                      'columns': [
                             {'name': 'icon',
                              'view': 'action-icon',
                              'action': 'content'},
+                            {'view': None},
                             {'view': None},
                             {'name': 'identifier',
                              'caption': self.translate(_(u'Identifier')),
@@ -223,7 +235,7 @@ class ColumnsContainerListing(UIREST):
                                          {'content_match':
                                               {'access': ['manage', 'publish']},
                                           'items_match':
-                                              {'status': ['draft', 'approved', 'pending', None]}},
+                                              {'status_next': ['draft']}},
                                      'Ifaces': ['container', 'versioned']},
                                     {'title': self.translate(_(u'New version')),
                                      'icon': 'document',
@@ -238,7 +250,7 @@ class ColumnsContainerListing(UIREST):
                                          {'content_match':
                                               {'access': ['manage', 'publish', 'write']},
                                           'items_match':
-                                              {'status': ['published', 'closed']}},
+                                              {'status_public': ['published', 'closed']}},
                                      'ifaces': ['versioned']},
                                     {'title': self.translate(_(u'Close')),
                                      'icon': 'close',
@@ -252,7 +264,7 @@ class ColumnsContainerListing(UIREST):
                                          {'content_match':
                                               {'access': ['manage', 'publish']},
                                           'items_match':
-                                              {'status': ['published', None]}},
+                                              {'status_public': ['published', None]}},
                                      'ifaces': ['container', 'versioned']},
                                     {'title': self.translate(_(u'Approve for future')),
                                      'icon': 'document',
@@ -265,7 +277,7 @@ class ColumnsContainerListing(UIREST):
                                          {'content_match':
                                               {'access': ['manage', 'publish']},
                                           'items_match':
-                                              {'status': ['draft']}},
+                                              {'status_next': ['draft']}},
                                      'ifaces': ['versioned']},
                                     ],
                              'ifaces': ['object']},

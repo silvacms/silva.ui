@@ -57,9 +57,6 @@
                     var condition = conditions[property];
                     var value = object[property];
 
-                    if ($.isArray(value)) {
-                        value = last_non_null(value);
-                    };
                     if ($.inArray(value, condition) < 0) {
                         missing = true;
                         break;
