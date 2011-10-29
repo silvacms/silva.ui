@@ -13,27 +13,20 @@
             switch(predicate) {
             case 'content_match':
                 conditions.push(function($content, data) {
-                    return infrae.utils.match(predicates.content_match, [data.content]);
-                });
-                break;
-            case 'items_implements':
-                conditions.push(function($content, data) {
-                    if (typeof(predicates.items_implements) === "string") {
-                        return infrae.interfaces.is_implemented_by(
-                            predicates.items_implements, data.selection);
-                    };
-                    for (var i=0; i < predicates.items_implements.length; i++) {
-                        if (infrae.interfaces.is_implemented_by(
-                            predicates.items_implements[i], data.selection)) {
-                            return true;
-                        };
-                    };
-                    return false;
+                    return infrae.utils.test(data.content, predicates.content_match);
                 });
                 break;
             case 'items_match':
                 conditions.push(function($content, data) {
-                    return infrae.utils.match(predicates.items_match, data.selection.items);
+                    var items = data.selection.items;
+                    var index = items.length;
+
+                    while (index--) {
+                        if (infrae.utils.test(items[index], predicates.items_match)) {
+                            return true;
+                        };
+                    };
+                    return false;
                 });
                 break;
             case 'min_items':

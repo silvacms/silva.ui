@@ -24,49 +24,75 @@
 
 (function (infrae, $) {
     var module = {};
+    var predicates = {};
 
-    var last_non_null = function(values) {
-        var value = null;
-        var index = values.length;
+    $.extend(predicates, {
+        or: function() {
+            var max = arguments.length;
+            var index = 1;
 
-        while (index--) {
-            if (values[index]) {
-                value = values[index];
-                break;
+            while (index < max) {
+                if (predicates[arguments[index][0]].apply(this, arguments[index]) === true) {
+                    return true;
+                };
+                index += 1;
             };
-        };
-        return value;
-    };
+            return false;
+        },
+        and: function() {
+            var max = arguments.length;
+            var index = 1;
+
+            while (index < max) {
+                if (predicates[arguments[index][0]].apply(this, arguments[index]) !== true) {
+                    return false;
+                };
+                index += 1;
+            };
+            return true;
+        },
+        not: function() {
+            return !predicates[arguments[1][0]].apply(this, arguments[1]);
+        },
+        equal: function() {
+            var value = this[arguments[1]];
+            var max = arguments.length;
+            var index = 2;
+
+            while (index < max) {
+                if (arguments[index] == value) {
+                    return true;
+                };
+                index += 1;
+            };
+            return false;
+        },
+        provides: function() {
+            var max = arguments.length;
+            var index = 1;
+
+            while (index < max) {
+                if (infrae.interfaces.is_implemented_by(arguments[index], this)) {
+                    return true;
+                };
+                index += 1;
+            };
+            return false;
+        }
+    });
 
     $.extend(module, {
         /**
-         * Helper that return true if one object in array match all conditions.
+         * Helper that return true if one object in array match
+         * all conditions.
+         *
          * @param array: array of object with properties
          * @param conditions: object with properties that are list of
          *        possible values that a data object must have in order to
          *        match.
          */
-        match: function(conditions, array) {
-            var index = array.length;
-
-            while (index--) {
-                var object = array[index];
-                var missing = false;
-
-                for (var property in conditions) {
-                    var condition = conditions[property];
-                    var value = object[property];
-
-                    if ($.inArray(value, condition) < 0) {
-                        missing = true;
-                        break;
-                    };
-                };
-                if (!missing) {
-                    return true;
-                };
-            };
-            return false;
+        test: function(data, conditions) {
+            return predicates[conditions[0]].apply(data, conditions);
         },
         /**
          * Helper that call a callback on each element of an array.

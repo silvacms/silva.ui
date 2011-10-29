@@ -52,10 +52,8 @@
                     for (var i=0, len=column.menu.length; i < len; i++) {
                         var entry = column.menu[i];
 
-                        if ((entry.item_implements === undefined ||
-                             infrae.interfaces.is_implemented_by(entry.item_implements, data)) &&
-                            (entry.item_match === undefined ||
-                             infrae.utils.match(entry.item_match, [data]))){
+                        if (entry.item_match === undefined ||
+                            infrae.utils.test(data, entry.item_match)){
                             entries.push(
                                 '<li><a class="ui-state-default open-screen" href="' + data.path +
                                     '" rel="' + entry.screen + '"><span>' +
@@ -97,7 +95,12 @@
                     }
                 };
             };
-            return {};
+            // Ensure the icon is empty.
+            return {
+                render: function () {
+                    $content.html('');
+                }
+            };
         }
     });
 
@@ -447,10 +450,9 @@
                             event.stopPropagation();
                             event.preventDefault();
 
-                            if (column.renameable.item_not_match !== undefined) {
-                                if (infrae.utils.match(column.renameable.item_not_match, [data])) {
-                                    return;
-                                };
+                            if (column.renameable.item_match !== undefined &&
+                                infrae.utils.test(data, column.renameable.item_match)) {
+                                return;
                             };
                             var $cell = $(this);
                             var $field = $('<input class="renaming" type="text" />');
@@ -869,7 +871,7 @@
                             var mover = null;
 
                             if (configuration.sortable &&
-                                infrae.utils.match(configuration.sortable.content_match, [data.content])) {
+                                infrae.utils.test(data.content, configuration.sortable.content_match)) {
                                 mover = function (data) {
                                     return smi.ajax.query(
                                         action_url_template.expand(
