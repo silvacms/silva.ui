@@ -295,7 +295,7 @@ class ColumnsContainerListing(UIREST):
                                         'items_match': [
                                             'or',
                                             ['provides', 'container'],
-                                            ['equal', 'status_next', 'draft']
+                                            ['equal', 'status_next', 'draft', 'pending']
                                             ]},
                                     'ifaces': ['container', 'versioned']
                                     }, {
@@ -318,10 +318,24 @@ class ColumnsContainerListing(UIREST):
                                             ]},
                                     'ifaces': ['versioned']
                                     }, {
+                                    'title': self.translate(_(u'Approve for future')),
+                                    'icon': 'document',
+                                    'order': 20,
+                                    'action': {
+                                        'form': {
+                                            'name': 'silva.core.smi.approveforfuture',
+                                            'identifier': 'form.prefix.contents'}},
+                                    'available': {
+                                        'content_match': [
+                                            'equal', 'access', 'manage', 'publish'],
+                                        'items_match': [
+                                            'equal', 'status_next', 'draft', 'pending']},
+                                    'ifaces': ['versioned']
+                                    }, {
                                     'title': self.translate(_(u'Close')),
                                     'icon': 'close',
                                     'accesskey': ['ctrl+l'],
-                                    'order': 20,
+                                    'order': 25,
                                     'action': {
                                         'rest': {
                                             'action': 'close',
@@ -335,20 +349,6 @@ class ColumnsContainerListing(UIREST):
                                             ['equal', 'status_public', 'published']
                                             ]},
                                     'ifaces': ['container', 'versioned']
-                                    }, {
-                                    'title': self.translate(_(u'Approve for future')),
-                                    'icon': 'document',
-                                    'order': 25,
-                                    'action': {
-                                        'form': {
-                                            'name': 'silva.core.smi.approveforfuture',
-                                            'identifier': 'form.prefix.contents'}},
-                                    'available': {
-                                        'content_match': [
-                                            'equal', 'access', 'manage', 'publish'],
-                                        'items_match': [
-                                            'equal', 'status_next', 'draft']},
-                                    'ifaces': ['versioned']
                                     }],
                             'ifaces': ['object']
                             }]}
