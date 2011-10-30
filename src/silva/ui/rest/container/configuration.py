@@ -58,7 +58,9 @@ class ColumnsContainerListing(UIREST):
                                     'not', [
                                         'and',
                                         ['equal', 'access', 'write'],
-                                        ['equal', 'status_public', 'published']]
+                                        ['or',
+                                         ['equal', 'status_public', 'published'],
+                                         ['equal', 'status_next', 'approved']]]
                                     ]},
                             'filterable': True
                             }, {
@@ -67,10 +69,14 @@ class ColumnsContainerListing(UIREST):
                             'view': 'text',
                             'renameable': {
                                 'item_match': [
-                                    'not', [
-                                        'and',
-                                        ['equal', 'access', 'write'],
-                                        ['equal', 'status_public', 'published']]
+                                    'or',
+                                    ['not', ['provides', 'versioned']],
+                                    ['and',
+                                     ['equal', 'access', 'write'],
+                                     ['equal', 'status_next', 'draft']],
+                                    ['and',
+                                     ['not', ['equal', 'access', 'write']],
+                                     ['equal', 'status_next', 'draft', 'pending']],
                                     ]},
                             'filterable': True
                             }, {

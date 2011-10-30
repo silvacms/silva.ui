@@ -451,7 +451,7 @@
                             event.preventDefault();
 
                             if (column.renameable.item_match !== undefined &&
-                                infrae.utils.test(data, column.renameable.item_match)) {
+                                !infrae.utils.test(data, column.renameable.item_match)) {
                                 return;
                             };
                             var $cell = $(this);
@@ -501,10 +501,16 @@
                     });
                 },
                 values: function() {
+                    var $inputs = $line.find('input.renaming');
+
+                    if (!$inputs.length) {
+                        return undefined;
+                    };
+
                     var data = $line.data('smilisting');
                     var values = {id: data['id']};
 
-                    $line.find('input.renaming').each(function () {
+                    $inputs.each(function () {
                         var $input = $(this);
                         values[$input.attr('name')] = $input.val();
                     });

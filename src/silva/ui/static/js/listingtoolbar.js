@@ -196,14 +196,21 @@
                                         save.done(function(values) {
                                             var count = 0;
                                             var payload = [];
+
                                             infrae.utils.each(values, function(value) {
-                                                for (var name in value)
-                                                    payload.push({
-                                                        name: 'values.' + count + '.' + name,
-                                                        value: value[name]
-                                                    });
-                                                count += 1;
+                                                if (value !== undefined) {
+                                                    for (var name in value) {
+                                                        payload.push({
+                                                            name: 'values.' + count + '.' + name,
+                                                            value: value[name]
+                                                        });
+                                                    };
+                                                    count += 1;
+                                                };
                                             });
+                                            if (!count) {
+                                                return $.Deferred().reject();
+                                            };
                                             payload.push({name: 'values', value: count});
                                             return data.query_server(
                                                 definition.action.input.action,
