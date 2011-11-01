@@ -476,9 +476,7 @@
                         if (data.position > -1) {
                             // Position might have changed.
                             var new_position = data.position;
-                            if (!$container.children('tr.item:first').data('smilisting').moveable) {
-                                // If the first is a default one (not
-                                // movable) increase the position.
+                            if ($container.children('tr.item:first').data('smilisting').moveable) {
                                 new_position -= 1;
                             };
                             if (new_position > 0 && $container.children().index($line) != new_position) {
