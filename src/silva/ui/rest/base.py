@@ -20,11 +20,11 @@ from silva.core.interfaces import IRoot, ISilvaObject
 from silva.core.interfaces.adapters import IIconResolver
 from silva.core.messages.interfaces import IMessageService
 from silva.core.views.interfaces import IVirtualSite
-from silva.ui.smi import set_smi_skin
-from silva.ui.interfaces import IUIScreen, IUISkinless
-from silva.ui.rest.invalidation import Invalidation
-from silva.ui.rest.exceptions import PageException, ContentException
+from silva.ui.interfaces import IUIScreen
 from silva.ui.menu import ContentMenu, ViewMenu, ActionMenu
+from silva.ui.rest.exceptions import PageException, ContentException
+from silva.ui.rest.invalidation import Invalidation
+from silva.ui.smi import set_smi_skin
 
 import fanstatic
 
@@ -82,8 +82,7 @@ class UIREST(rest.REST, UIHelper):
 
 @grok.subscribe(UIREST, rest.IRESTMethodPublishedEvent)
 def apply_smi_skin(view, event):
-    if not IUISkinless.providedBy(view):
-        set_smi_skin(view.context, view.request)
+    set_smi_skin(view.context, view.request)
 
 
 def get_resources(request):
@@ -225,14 +224,14 @@ class PageWithTemplateREST(PageREST):
                 'html': self.template.render(self)}
 
 
-class PageWithLayoutREST(PageREST):
-    grok.implements(IUISkinless)
+class PageWithLayoutREST(rest.REST):
 
     def content(self):
         raise NotImplementedError
 
-    def payload(self):
-        print list(self.request.__provides__.interfaces())
+    def GET(self):
+        self.response.setHeader('Content-Type', 'text/html;charset=utf-8')
         self.layout = getMultiAdapter((self.request, self.context), ILayout)
-        return {"ifaces": ["preview"],
-                "html": self.layout(self)}
+        return self.layout(self)
+
+    POST = GET
