@@ -380,6 +380,20 @@ class ColumnsContainerListing(UIREST):
                                             'equal', 'status_next', 'pending']},
                                     'ifaces': ['versioned']
                                     }, {
+                                    'title': self.translate(_(u'Revoke approval')),
+                                    'icon': 'cancel',
+                                    'order': 40,
+                                    'action': {
+                                        'rest': {
+                                            'action': 'revokeapproval',
+                                            'send': 'selected_ids'}},
+                                    'available': {
+                                        'content_match': [
+                                            'equal', 'access', 'manage', 'publish'],
+                                        'items_match': [
+                                            'equal', 'status_next', 'approved']},
+                                    'ifaces': ['versioned']
+                                    }, {
                                     'title': self.translate(_(u'Close')),
                                     'icon': 'close',
                                     'accesskey': ['ctrl+l'],
