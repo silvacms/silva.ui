@@ -22,7 +22,7 @@ from silva.core.messages.interfaces import IMessageService
 from silva.core.views.interfaces import IVirtualSite
 from silva.ui.interfaces import IUIScreen
 from silva.ui.menu import ContentMenu, ViewMenu, ActionMenu
-from silva.ui.rest.exceptions import PageException, ContentException
+from silva.ui.rest.exceptions import PageResult, ActionResult, RESTResult
 from silva.ui.rest.invalidation import Invalidation
 from silva.ui.smi import set_smi_skin
 
@@ -133,10 +133,10 @@ class ActionREST(UIREST):
         data = {}
         try:
             data['content'] = self.get_payload()
-        except ContentException as error:
-            return error.content()
-        except PageException as error:
-            data['content'] = error.payload(self)
+        except ActionResult as error:
+            data['content'] = error.get_payload(self)
+        except RESTResult as error:
+            return error.get_payload(self)
         else:
             data['navigation'] = self.get_navigation()
             resources = get_resources(self.request)
@@ -182,7 +182,10 @@ class PageREST(ActionREST):
         return {'ifaces': ['menu'], 'entries': entries}
 
     def get_payload(self):
-        screen = self.payload()
+        try:
+            screen = self.payload()
+        except PageResult as error:
+            screen = error.get_payload(self)
         metadata = {
             'ifaces': screen.get('ifaces', []),
             'title': {
