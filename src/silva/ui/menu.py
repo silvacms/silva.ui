@@ -72,6 +72,7 @@ class MenuItem(grok.MultiSubscription):
     action = None
     accesskey = None
     interface = None
+    icon = None
 
     def __init__(self, menu, content):
         self.content = content
@@ -114,6 +115,8 @@ class MenuItem(grok.MultiSubscription):
             data['description'] = page.translate(self.description)
         if self.accesskey is not None:
             data['accesskey'] = self.accesskey
+        if self.icon is not None:
+            data['icon'] = self.icon
         return data
 
 
