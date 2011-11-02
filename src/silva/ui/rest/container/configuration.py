@@ -324,9 +324,23 @@ class ColumnsContainerListing(UIREST):
                                             ]},
                                     'ifaces': ['versioned']
                                     }, {
+                                    'title': self.translate(_(u'Request Approval')),
+                                    'icon': 'check',
+                                    'order': 20,
+                                    'action': {
+                                        'rest': {
+                                            'action': 'requestapproval',
+                                            'send': 'selected_ids'}},
+                                    'available': {
+                                        'content_match': [
+                                            'equal', 'access', 'write'],
+                                        'items_match': [
+                                            'equal', 'status_next', 'draft']},
+                                    'ifaces': ['versioned']
+                                    }, {
                                     'title': self.translate(_(u'Approve for future')),
                                     'icon': 'document',
-                                    'order': 20,
+                                    'order': 25,
                                     'action': {
                                         'form': {
                                             'name': 'silva.core.smi.approveforfuture',
@@ -337,11 +351,39 @@ class ColumnsContainerListing(UIREST):
                                         'items_match': [
                                             'equal', 'status_next', 'draft', 'pending']},
                                     'ifaces': ['versioned']
+                                    },  {
+                                    'title': self.translate(_(u'Reject request')),
+                                    'icon': 'close',
+                                    'order': 30,
+                                    'action': {
+                                        'rest': {
+                                            'action': 'rejectrequest',
+                                            'send': 'selected_ids'}},
+                                    'available': {
+                                        'content_match': [
+                                            'equal', 'access', 'manage', 'publish'],
+                                        'items_match': [
+                                            'equal', 'status_next', 'pending']},
+                                    'ifaces': ['versioned']
+                                    }, {
+                                    'title': self.translate(_(u'Withdraw request')),
+                                    'icon': 'close',
+                                    'order': 30,
+                                    'action': {
+                                        'rest': {
+                                            'action': 'withdrawrequest',
+                                            'send': 'selected_ids'}},
+                                    'available': {
+                                        'content_match': [
+                                            'equal', 'access', 'write'],
+                                        'items_match': [
+                                            'equal', 'status_next', 'pending']},
+                                    'ifaces': ['versioned']
                                     }, {
                                     'title': self.translate(_(u'Close')),
                                     'icon': 'close',
                                     'accesskey': ['ctrl+l'],
-                                    'order': 25,
+                                    'order': 50,
                                     'action': {
                                         'rest': {
                                             'action': 'close',
