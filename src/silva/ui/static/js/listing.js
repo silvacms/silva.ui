@@ -938,7 +938,7 @@
                 });
             }, 1000);
         });
-        $('.listing tr.item a.open-screen').live('mouseleave', clear_preview);
+        $('.listing tr.item a.preview-icon').live('mouseleave', clear_preview);
     });
 
 
