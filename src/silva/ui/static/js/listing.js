@@ -251,53 +251,6 @@
             smi.open_screen_from_link($(event.target).parents('a.open-screen'));
             return false;
         });
-        if (smi.options.listing.preview !== undefined) {
-            var preview_url_template = new jsontemplate.Template(smi.options.listing.preview, {});
-            var preview_timer = null;
-            var $preview_target = $([]);
-
-            $containers.delegate('tr.item a.preview-icon', 'mouseenter', function(event) {
-                if (preview_timer !== null) {
-                    clearTimeout(preview_timer);
-                };
-                $preview_target = $(event.target);
-                preview_timer = setTimeout(function () {
-                    var info = $preview_target.closest('tr.item').data('smilisting');
-                    if (info === undefined) {
-                        return;
-                    };
-                    $.ajax({
-                        url: preview_url_template.expand({path: info.path})
-                    }).done(function(data) {
-                        if (!data.preview || !$preview_target.is(':visible')) {
-                            return;
-                        };
-                        $preview_target.qtip({
-                            content: {text: data.preview,
-                                      title: data.title},
-                            position: {
-                                at: 'right center',
-                                my: 'left center',
-                                viewport: $viewport,
-                                adjust: {method: 'shift flip'}},
-                            show: {event: false, ready: true},
-                            hide: {event: 'mouseleave'},
-                            style: 'ui-tooltip-shadow ui-tooltip-light'
-                        });
-                    });
-                }, 1000);
-            });
-            $containers.delegate('tr.item a.open-screen', 'mouseleave', function(event) {
-                if (preview_timer !== null) {
-                    clearTimeout(preview_timer);
-                    preview_timer = null;
-                };
-                if ($preview_target.length) {
-                    $preview_target.qtip('destroy');
-                    $preview_target = $([]);
-                };
-            });
-        };
 
         // Drop-downs
         var opened_dropdown = null;
@@ -931,8 +884,63 @@
                 return listing;
             }
         });
-
     });
+
+    $(document).bind('load-smilisting', function(event, data) {
+        // Bind preview on the document, it will be useable by the reference popup
+        var smi = data.smi;
+
+        if (smi.options.listing.preview === undefined) {
+            return;
+        };
+
+        var url_template = new jsontemplate.Template(smi.options.listing.preview, {});
+        var timer = null;
+        var $target = $([]);
+
+        var clear_preview = function () {
+            if (timer !== null) {
+                clearTimeout(timer);
+                timer = null;
+            };
+            if ($target.length) {
+                $target.qtip('destroy');
+                $target = $([]);
+            };
+        };
+
+        $('.listing tr.item a.preview-icon').live('mouseenter', function(event) {
+            clear_preview();
+            $target = $(event.target);
+            timer = setTimeout(function () {
+                var info = $target.closest('tr.item').data('smilisting');
+                if (info === undefined) {
+                    return;
+                };
+                $.ajax({
+                    url: url_template.expand({path: info.path})
+                }).done(function(data) {
+                    if (!data.preview || !$target.is(':visible')) {
+                        return;
+                    };
+                    $target.qtip({
+                        content: {text: data.preview,
+                                  title: data.title},
+                        position: {
+                            at: 'right center',
+                            my: 'left center',
+                            viewport: $target.closest('.listing'),
+                            adjust: {method: 'shift flip'}},
+                        show: {event: false, ready: true},
+                        hide: {event: 'mouseleave'},
+                        style: 'ui-tooltip-shadow ui-tooltip-light'
+                    });
+                });
+            }, 1000);
+        });
+        $('.listing tr.item a.open-screen').live('mouseleave', clear_preview);
+    });
+
 
     $(document).bind('load-smiplugins', function(event, smi) {
         $.ajax({
