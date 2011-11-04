@@ -4,7 +4,43 @@
 # $Id$
 
 from silva.core.views.interfaces import ISilvaURL
-from zope.component import getMultiAdapter
+from zope.component import getMultiAdapter, queryMultiAdapter
+from zope.publisher.interfaces.browser import IBrowserPublisher
+from infrae.rest import lookupREST
+
+
+class RESTRedirectHandler(Exception):
+
+    def __init__(self, path, clear=False):
+        self.path = path
+        self.clear = clear
+
+    def publish(self, origin):
+        path = list(self.path.split('/'))
+        request = origin.request
+        del request.PARENTS[-1] # Remove the current item and traverse
+        if self.clear:
+            request.form.clear()
+        component = lookupREST(origin.context, request, path.pop(0))
+
+        while path:
+            while path:
+                part = path.pop(0)
+                component = request.traverseName(component, part)
+
+            adapter = None
+            if IBrowserPublisher.providedBy(component):
+                adapter = component
+            else:
+                adapter = queryMultiAdapter(
+                    (component, request), IBrowserPublisher)
+
+            if adapter is not None:
+                component, default_path = adapter.browserDefault(request)
+                if default_path:
+                    path.extend(default_path)
+
+        return component()
 
 
 class RESTResult(Exception):
