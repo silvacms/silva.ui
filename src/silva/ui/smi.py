@@ -7,9 +7,10 @@ from pkg_resources import iter_entry_points
 
 from five import grok
 from silva.core.interfaces import ISilvaObject
+from silva.core.views import views as silvaviews
 from silva.core.views.interfaces import IVirtualSite
-from silva.ui.interfaces import IUIService
 from silva.fanstatic import need
+from silva.ui.interfaces import IUIService
 
 from zope.component import getUtility
 from zope.i18n.interfaces import IUserPreferredLanguages
@@ -75,3 +76,7 @@ class SMI(grok.View):
         self.root_url = root_url
         self.can_manage = getSecurityManager().checkPermission(
             'View Management Screens', self.context)
+
+
+class SMIConfiguration(silvaviews.ViewletManager):
+    grok.view(SMI)

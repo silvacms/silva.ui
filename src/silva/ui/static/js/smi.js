@@ -216,7 +216,7 @@
 
         var navigation = $(options.navigation.selector).SMINavigation(smi, options.navigation);
         var notifications = NotificationManager(options.notifications);
-        var resources = infrae.views.HTMLResourceManager();
+        var resources = infrae.views.HTMLResourceManager($(document));
         var default_error_handlers = {};
 
         // Register the default content view.

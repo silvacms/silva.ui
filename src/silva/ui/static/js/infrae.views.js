@@ -1,5 +1,5 @@
 
-(function (infrae, $) {
+(function ($, infrae, jsontemplate) {
 
     // Disable all ajax caching, for IE 8.
     $.ajaxSetup({
@@ -10,11 +10,12 @@
         /**
          * HTMLResourceManager, load extra JS or CSS at run time.
          */
-        HTMLResourceManager: function() {
+        HTMLResourceManager: function($document) {
             var data = {
                 css: [],
                 js: []
             };
+            var root = $document.get(0);
             var resources = {
                 /**
                  * Return true if the given Javascript is already loaded.
@@ -37,8 +38,8 @@
                 load_js: function(script) {
                     if (!resources.is_js_loaded(script)) {
                         // We don't use jQuery here, as does strange things with scripts.
-                        var head = document.getElementsByTagName('head')[0];
-                        var script_tag = document.createElement('script');
+                        var head = root.getElementsByTagName('head')[0];
+                        var script_tag = root.createElement('script');
 
                         script_tag.type = 'text/javascript';
                         script_tag.src = script;
@@ -54,8 +55,8 @@
                 load_css: function(css) {
                     if (!resources.is_css_loaded(css)) {
                         // We don't use jQuery here, as does strange things with links.
-                        var head = document.getElementsByTagName('head')[0];
-                        var link_tag = document.createElement('link');
+                        var head = root.getElementsByTagName('head')[0];
+                        var link_tag = root.createElement('link');
 
                         link_tag.rel = 'stylesheet';
                         link_tag.type = 'text/css';
@@ -67,7 +68,7 @@
                 }
             };
 
-            $(document).ready(function() {
+            $document.ready(function() {
                 $('script').each(function () {
                     var src = $(this).attr('src');
 
@@ -418,4 +419,4 @@
     };
 
     infrae.views = module;
-})(infrae, jQuery);
+})(jQuery, infrae, jsontemplate);
