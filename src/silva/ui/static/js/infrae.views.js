@@ -126,13 +126,9 @@
 
             // Make a finalizer that call render and finish.
             var deferred = $.Deferred();
-            var finalizer = function(event) {
+            var $context = $content;
+            var finalizer = function() {
                 if (view.render != undefined) {
-                    var $context = $content;
-
-                    if (event !== undefined) {
-                        $context = $(event.target);
-                    };
                     view.render($context);
                 };
                 if (reject != undefined) {
@@ -163,9 +159,10 @@
                     };
                     var template_window = $iframe.get(0).contentWindow;
                     var template_document = template_window.document;
-                    $(template_document).ready(finalizer);
                     template_document.write(template);
                     template_document.close();
+                    $context = $(template_document);
+                    $context.ready(finalizer);
                 } else {
                     finalizer();
                 };
