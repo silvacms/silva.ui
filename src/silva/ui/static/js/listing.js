@@ -42,25 +42,25 @@
     listingcolumns.register({
         name: 'goto',
         factory: function($content, data, column, value) {
+            var entries = [];
+
+            for (var i=0, len=column.menu.length; i < len; i++) {
+                var entry = column.menu[i];
+
+                if (entry.item_match === undefined ||
+                    infrae.utils.test(data, entry.item_match)){
+                    entries.push(
+                        '<li><a class="ui-state-default open-screen" href="' + data.path +
+                            '" rel="' + entry.screen + '"><span>' +
+                            entry.caption + '</span></a></li>');
+                };
+            };
             return {
                 column: column,
                 value: value,
-                jsont: '<div class="actions"><ol><li class="last-action"><a class="ui-state-default open-screen" rel="{column.index.screen|htmltag}" href="{data.path|htmltag}"><div class="dropdown-icon"><ins class="ui-icon ui-icon-triangle-1-s" /></div><span>{column.index.caption}</span></a><div class="dropdown"><ol></ol></div></li></ol></div>',
+                dropdown: entries.join(''),
+                jsont: '<div class="actions"><ol><li class="last-action"><a class="ui-state-default open-screen" rel="{column.index.screen|htmltag}" href="{data.path|htmltag}"><div class="dropdown-icon"><ins class="ui-icon ui-icon-triangle-1-s" /></div><span>{column.index.caption}</span></a><div class="dropdown"><ol>{dropdown}</ol></div></li></ol></div>',
                 render: function() {
-                    var entries = [];
-
-                    for (var i=0, len=column.menu.length; i < len; i++) {
-                        var entry = column.menu[i];
-
-                        if (entry.item_match === undefined ||
-                            infrae.utils.test(data, entry.item_match)){
-                            entries.push(
-                                '<li><a class="ui-state-default open-screen" href="' + data.path +
-                                    '" rel="' + entry.screen + '"><span>' +
-                                    entry.caption + '</span></a></li>');
-                        };
-                    };
-                    $content.find('div.dropdown ol').html(entries.join(''));
                     $content.addClass('hasdropdown active');
                 }
             };
@@ -97,9 +97,7 @@
             };
             // Ensure the icon is empty.
             return {
-                render: function () {
-                    $content.html('');
-                }
+                html: ''
             };
         }
     });

@@ -152,7 +152,7 @@
                 $(window).bind('workspace-resize-smi.infrae-views-iframe', resize);
 
                 $content.html($iframe);
-                if (template) {
+                if (template !== undefined) {
                     if (template.indexOf('<html') < 0 &&
                         template.indexOf('<HTML') < 0) {
                         // no html tags, add missing html tag
@@ -168,7 +168,7 @@
                     finalizer();
                 };
             } else {
-                if (template) {
+                if (template !== undefined) {
                     $content.html(template);
                 };
                 finalizer();
@@ -178,13 +178,14 @@
 
         // render the view: retrieve a template to render it and render it
         return function() {
+            var template = undefined;
             // Remote JSON
             var jsont_url = view.data_template && data.jsont_url || view.jsont_url;
             if (jsont_url) {
                 // First look in the cache for data.
                 if (!view.nocache) {
-                    var template = template_cache[jsont_url];
-                    if (template) {
+                    template = template_cache[jsont_url];
+                    if (template !== undefined) {
                         return render(template.expand(view));
                     };
                 };
@@ -203,8 +204,8 @@
             if (html_url) {
                 // First look in the cache for data.
                 if (!view.nocache) {
-                    var template = template_cache[html_url];
-                    if (template) {
+                    template = template_cache[html_url];
+                    if (template !== undefined) {
                         return render(template);
                     };
                 };
@@ -219,10 +220,10 @@
 
             // Local JSON
             var jsont = view.data_template && data.jsont || view.jsont;
-            if (jsont) {
-                var template = template_cache[jsont];
+            if (jsont !==undefined) {
+                template = template_cache[jsont];
 
-                if (!template) {
+                if (template === undefined) {
                     template = new jsontemplate.Template(jsont, {});
                     template_cache[jsont] = template;
                 };
@@ -231,7 +232,7 @@
 
             // Local HTML
             var html = view.data_template && data.html || view.html;
-            if (html) {
+            if (html !== undefined) {
                 return render(html);
             };
 
