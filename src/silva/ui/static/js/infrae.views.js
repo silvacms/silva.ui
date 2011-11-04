@@ -126,10 +126,15 @@
 
             // Make a finalizer that call render and finish.
             var deferred = $.Deferred();
-            var finalizer = function() {
+            var finalizer = function(event) {
                 if (view.render != undefined) {
-                    view.render();
-                }
+                    var $context = $content;
+
+                    if (event !== undefined) {
+                        $context = $(event.target);
+                    };
+                    view.render($context);
+                };
                 if (reject != undefined) {
                     deferred.rejectWith(view, reject);
                 } else {
