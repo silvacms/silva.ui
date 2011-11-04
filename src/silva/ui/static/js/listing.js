@@ -52,10 +52,8 @@
                     for (var i=0, len=column.menu.length; i < len; i++) {
                         var entry = column.menu[i];
 
-                        if ((entry.item_implements === undefined ||
-                             infrae.interfaces.is_implemented_by(entry.item_implements, data)) &&
-                            (entry.item_match === undefined ||
-                             infrae.utils.match(entry.item_match, [data]))){
+                        if (entry.item_match === undefined ||
+                            infrae.utils.test(data, entry.item_match)){
                             entries.push(
                                 '<li><a class="ui-state-default open-screen" href="' + data.path +
                                     '" rel="' + entry.screen + '"><span>' +
@@ -97,7 +95,12 @@
                     }
                 };
             };
-            return {};
+            // Ensure the icon is empty.
+            return {
+                render: function () {
+                    $content.html('');
+                }
+            };
         }
     });
 
@@ -248,53 +251,6 @@
             smi.open_screen_from_link($(event.target).parents('a.open-screen'));
             return false;
         });
-        if (smi.options.listing.preview !== undefined) {
-            var preview_url_template = new jsontemplate.Template(smi.options.listing.preview, {});
-            var preview_timer = null;
-            var $preview_target = $([]);
-
-            $containers.delegate('tr.item a.preview-icon', 'mouseenter', function(event) {
-                if (preview_timer !== null) {
-                    clearTimeout(preview_timer);
-                };
-                $preview_target = $(event.target);
-                preview_timer = setTimeout(function () {
-                    var info = $preview_target.closest('tr.item').data('smilisting');
-                    if (info === undefined) {
-                        return;
-                    };
-                    $.ajax({
-                        url: preview_url_template.expand({path: info.path})
-                    }).done(function(data) {
-                        if (!data.preview || !$preview_target.is(':visible')) {
-                            return;
-                        };
-                        $preview_target.qtip({
-                            content: {text: data.preview,
-                                      title: data.title},
-                            position: {
-                                at: 'right center',
-                                my: 'left center',
-                                viewport: $viewport,
-                                adjust: {method: 'shift flip'}},
-                            show: {event: false, ready: true},
-                            hide: {event: 'mouseleave'},
-                            style: 'ui-tooltip-shadow ui-tooltip-light'
-                        });
-                    });
-                }, 1000);
-            });
-            $containers.delegate('tr.item a.open-screen', 'mouseleave', function(event) {
-                if (preview_timer !== null) {
-                    clearTimeout(preview_timer);
-                    preview_timer = null;
-                };
-                if ($preview_target.length) {
-                    $preview_target.qtip('destroy');
-                    $preview_target = $([]);
-                };
-            });
-        };
 
         // Drop-downs
         var opened_dropdown = null;
@@ -447,10 +403,9 @@
                             event.stopPropagation();
                             event.preventDefault();
 
-                            if (column.renameable.item_not_match !== undefined) {
-                                if (infrae.utils.match(column.renameable.item_not_match, [data])) {
-                                    return;
-                                };
+                            if (column.renameable.item_match !== undefined &&
+                                !infrae.utils.test(data, column.renameable.item_match)) {
+                                return;
                             };
                             var $cell = $(this);
                             var $field = $('<input class="renaming" type="text" />');
@@ -474,9 +429,7 @@
                         if (data.position > -1) {
                             // Position might have changed.
                             var new_position = data.position;
-                            if (!$container.children('tr.item:first').data('smilisting').moveable) {
-                                // If the first is a default one (not
-                                // movable) increase the position.
+                            if ($container.children('tr.item:first').data('smilisting').moveable) {
                                 new_position -= 1;
                             };
                             if (new_position > 0 && $container.children().index($line) != new_position) {
@@ -499,10 +452,16 @@
                     });
                 },
                 values: function() {
+                    var $inputs = $line.find('input.renaming');
+
+                    if (!$inputs.length) {
+                        return undefined;
+                    };
+
                     var data = $line.data('smilisting');
                     var values = {id: data['id']};
 
-                    $line.find('input.renaming').each(function () {
+                    $inputs.each(function () {
                         var $input = $(this);
                         values[$input.attr('name')] = $input.val();
                     });
@@ -869,7 +828,7 @@
                             var mover = null;
 
                             if (configuration.sortable &&
-                                infrae.utils.match(configuration.sortable.content_match, [data.content])) {
+                                infrae.utils.test(data.content, configuration.sortable.content_match)) {
                                 mover = function (data) {
                                     return smi.ajax.query(
                                         action_url_template.expand(
@@ -925,8 +884,63 @@
                 return listing;
             }
         });
-
     });
+
+    $(document).bind('load-smilisting', function(event, data) {
+        // Bind preview on the document, it will be useable by the reference popup
+        var smi = data.smi;
+
+        if (smi.options.listing.preview === undefined) {
+            return;
+        };
+
+        var url_template = new jsontemplate.Template(smi.options.listing.preview, {});
+        var timer = null;
+        var $target = $([]);
+
+        var clear_preview = function () {
+            if (timer !== null) {
+                clearTimeout(timer);
+                timer = null;
+            };
+            if ($target.length) {
+                $target.qtip('destroy');
+                $target = $([]);
+            };
+        };
+
+        $('.listing tr.item a.preview-icon').live('mouseenter', function(event) {
+            clear_preview();
+            $target = $(event.target);
+            timer = setTimeout(function () {
+                var info = $target.closest('tr.item').data('smilisting');
+                if (info === undefined) {
+                    return;
+                };
+                $.ajax({
+                    url: url_template.expand({path: info.path})
+                }).done(function(data) {
+                    if (!data.preview || !$target.is(':visible')) {
+                        return;
+                    };
+                    $target.qtip({
+                        content: {text: data.preview,
+                                  title: data.title},
+                        position: {
+                            at: 'right center',
+                            my: 'left center',
+                            viewport: $target.closest('.listing'),
+                            adjust: {method: 'shift flip'}},
+                        show: {event: false, ready: true},
+                        hide: {event: 'mouseleave'},
+                        style: 'ui-tooltip-shadow ui-tooltip-light'
+                    });
+                });
+            }, 1000);
+        });
+        $('.listing tr.item a.preview-icon').live('mouseleave', clear_preview);
+    });
+
 
     $(document).bind('load-smiplugins', function(event, smi) {
         $.ajax({

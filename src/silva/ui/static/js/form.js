@@ -2,136 +2,158 @@
 
 (function($, infrae) {
 
+    // This is not really usefull, we could take this as a parameter.
+    $.fn.invoke = function() {
+        return Array.prototype.splice.call(arguments, 0, 1)[0].apply(this, arguments);
+    };
+
+    // Scroll field into view.
+    var scroll_field_into_view = function($field) {
+        if (!$field.length) {
+            return;
+        };
+
+        var top = $field.position().top;
+        var height = $field.outerHeight();
+        var $container = $(this);
+        var target, limit;
+
+        if (top < 25) {
+            target = $container.scrollTop() - 25 + top;
+            infrae.ui.scroll($container, 'fast', 'absolute', target);
+        } else {
+            limit = $container.innerHeight() - height - 25;
+            if (top > limit) {
+                target = $container.scrollTop() + (top - limit);
+                infrae.ui.scroll($container, 'fast', 'absolute', target);
+            };
+        };
+    };
+
+    // Unfocus all field.
+    var unfocus_form_fields = function() {
+        $(this).find('.form-section').removeClass('form-focus');
+    };
+
+    // Focus form field.
+    var focus_form_field = function($field, no_input_focus) {
+        var $section = $field.closest('.form-section');
+
+        if ($section.is('.form-focus')) {
+            return;
+        };
+        $(this).invoke(unfocus_form_fields);
+        $section.addClass('form-focus');
+        if (!no_input_focus) {
+            $section.find('.field:first').focus();
+        };
+    };
+    var focus_first_form_field = function() {
+        var $forms = $(this);
+        var $field = $forms.find('.form-error:first').find('.field:first');
+
+        if (!$field.length){
+            $field = $forms.find('.field-required:first');
+            if (!$field.length)
+                $field = $forms.find('.field:first');
+        };
+        if ($field.length) {
+            $forms.invoke(focus_form_field, $field);
+            $forms.invoke(scroll_field_into_view, $field.closest('.form-section'));
+        };
+    };
+    var focus_next_form_field = function() {
+        var $forms = $(this);
+        var $focused = $forms.find('.form-focus');
+        var $field = $focused.next();
+
+        if (!$field.length) {
+            var $next_body = $focused.closest('.form-body').nextAll('.form-body');
+            if ($next_body.length)
+                $field = $next_body.find('.form-section:first');
+            else {
+                var $next_form = $focused.closest('form').nextAll('form');
+                if ($next_form.length)
+                    $field = $next_form.find('.form-section:first');
+                else
+                    $field = $forms.find('.form-section:first');
+            };
+        };
+        $forms.invoke(focus_form_field, $field);
+        $forms.invoke(scroll_field_into_view, $field);
+    };
+    var focus_previous_form_field = function() {
+        var $forms = $(this);
+        var $focused = $forms.find('.form-focus');
+        var $field = $focused.prev();
+
+        if (!$field.length) {
+            var $prev_body = $focused.closest('.form-body').prevAll('.form-body');
+            if ($prev_body.length)
+                $field = $prev_body.find('.form-section:last');
+            else {
+                var $prev_form = $focused.closest('form').prevAll('form');
+                if ($prev_form.length)
+                    $field = $prev_form.find('.form-section:last');
+                else
+                    $field = $forms.find('.form-section:last');
+            };
+        };
+        $forms.invoke(focus_form_field, $field);
+        $forms.invoke(scroll_field_into_view, $field);
+    };
+
+    // Bind form helpers: focus changes, cleanup error, load widgets JS
+    $('.form-content').live('load-smiform', function(event, data) {
+        var $container = data.container || $(this);
+        var $form = data.form || $container.find('form');
+
+        // Bind form focus
+        $container.delegate('.form-section', 'click', function (event) {
+            $container.invoke(focus_form_field, $(this), $(event.target).is('input'));
+        });
+        $container.delegate('.form-section', 'focusin', function (event) {
+            $container.invoke(focus_form_field, $(this), $(event.target).is('input'));
+        });
+
+        // Remove errors if you click on it
+        $container.delegate('.form-error-detail', 'click', function () {
+            $(this).fadeOut().promise().done(function() { $(this).remove() });
+        });
+
+        // Focus the first field of the first form.
+        $container.invoke(focus_first_form_field);
+        // Load the widgets.
+        $form.trigger('loadwidget-smiform');
+    });
+
     infrae.views.view({
         iface: 'form',
         name: 'content',
         factory: function($content, data, smi) {
-            // Store a jQuery object with all form objects.
-            var $forms = $([]);
-
-            /**
-             * Unfocus ALL form fields.
-             */
-            var unfocus_form_fields = function() {
-                $forms.each(function() {
-                    $(this).find('.form-section').removeClass('form-focus');
-                });
-            };
-
-            /**
-             * Scroll the field into view if it is not.
-             */
-            var scroll_field_into_view = function($base, $field) {
-                if (!$field.length) {
-                    return;
-                };
-
-                var top = $field.position().top;
-                var height = $field.outerHeight();
-                var target, limit;
-
-                if (top < 25) {
-                    target = $base.scrollTop() - 25 + top;
-                    infrae.ui.scroll($base, 'fast', 'absolute', target);
-                } else {
-                    limit = $base.innerHeight() - height - 25;
-                    if (top > limit) {
-                        target = $base.scrollTop() + (top - limit);
-                        infrae.ui.scroll($base, 'fast', 'absolute', target);
-                    };
-                };
-            };
-
-            /**
-             * Focus the form field on which it is applied.
-             */
-            var focus_form_field = function($field, no_input_focus) {
-                var $section = $field.closest('.form-section');
-
-                if ($section.is('.form-focus')) {
-                    return;
-                };
-                unfocus_form_fields();
-                $section.addClass('form-focus');
-                if (!no_input_focus) {
-                    $section.find('.field:first').focus();
-                };
-            };
-            var focus_first_form_field = function($base) {
-                var $field = $base.find('.form-error:first').find('.field:first');
-
-                if (!$field.length){
-                    $field = $base.find('.field-required:first');
-                    if (!$field.length)
-                        $field = $base.find('.field:first');
-                };
-                if ($field.length) {
-                    focus_form_field($field);
-                    scroll_field_into_view($base, $field.closest('.form-section'));
-                };
-            };
-            var focus_next_form_field = function($base) {
-                var $focused = $base.find('.form-focus');
-                var $field = $focused.next();
-
-                if (!$field.length) {
-                    var $next_body = $focused.closest('.form-body').nextAll('.form-body');
-                    if ($next_body.length)
-                        $field = $next_body.find('.form-section:first');
-                    else {
-                        var $next_form = $focused.closest('form').nextAll('form');
-                        if ($next_form.length)
-                            $field = $next_form.find('.form-section:first');
-                        else
-                            $field = $base.find('.form-section:first');
-                    };
-                };
-                focus_form_field($field);
-                scroll_field_into_view($base, $field);
-            };
-            var focus_previous_form_field = function($base) {
-                var $focused = $base.find('.form-focus');
-                var $field = $focused.prev();
-
-                if (!$field.length) {
-                    var $prev_body = $focused.closest('.form-body').prevAll('.form-body');
-                    if ($prev_body.length)
-                        $field = $prev_body.find('.form-section:last');
-                    else {
-                        var $prev_form = $focused.closest('form').prevAll('form');
-                        if ($prev_form.length)
-                            $field = $prev_form.find('.form-section:last');
-                        else
-                            $field = $base.find('.form-section:last');
-                    };
-                };
-                focus_form_field($field);
-                scroll_field_into_view($base, $field);
-            };
-
             return {
                 data_template: true,
                 render: function() {
                     var $content_form = null;
 
                     // Add content
-                    $content.addClass('form-content');
                     if (data.portlets) {
-                        var $content_portlets = $('<div class="portlets"></div>');
+                        var $content_portlets = $('<div class="portlets form-content"></div>');
 
-                        $content_form = $('<div class="forms"></div>');
+                        $content_form = $('<div class="forms form-content"></div>');
                         $content_portlets.html(data.portlets);
                         $content.append($content_form);
                         $content.append($content_portlets);
                     } else {
                         $content_form = $content;
+                        $content_form.addClass('form-content');
                     };
                     $content_form.html(data.forms);
 
                     // Find all forms.
-                    $forms = $content_form.find('form');
+                    var $forms = $content_form.find('form');
 
-                    smi.shortcuts.create('form', $content, true);
+                    smi.shortcuts.create('form', $content_form, true);
 
                     // Initialize each form.
                     $forms.each(function() {
@@ -206,33 +228,17 @@
                         // Set submit URL for helper
                         $form.attr('data-form-url', smi.get_screen_url());
 
-                        // Send an event form loaded to init specific JS field
-                        $form.trigger('load-smiform', data);
                     });
-
-                    // Bind form focus
-                    $content_form.delegate('.form-section', 'click', function (event) {
-                        focus_form_field($(this), $(event.target).is('input'));
-                    });
-                    $content_form.delegate('.form-section', 'focusin', function (event) {
-                        focus_form_field($(this), $(event.target).is('input'));
-                    });
-
-                    // Remove errors if you click on it
-                    $content_form.delegate('.form-error-detail', 'click', function () {
-                        $(this).fadeOut().promise().done(function() {$(this).remove()});
-                    });
-
-                    // Focus the first field of the first form.
-                    focus_first_form_field($content_form);
+                    // Send an event form loaded to init specific JS field
+                    $content_form.trigger('load-smiform', {form: $forms});
 
                     // Shortcuts field navigation
                     smi.shortcuts.bind('form', null, ['ctrl+down', 'ctrl+shift+down'], function() {
-                        focus_next_form_field($content);
+                        $content_form.invoke(focus_next_form_field);
                         return false;
                     });
                     smi.shortcuts.bind('form', null, ['ctrl+up', 'ctrl+shift+up'], function() {
-                        focus_previous_form_field($content);
+                        $content_form.invoke(focus_previous_form_field);
                         return false;
                     });
                 },

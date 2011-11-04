@@ -13,27 +13,20 @@
             switch(predicate) {
             case 'content_match':
                 conditions.push(function($content, data) {
-                    return infrae.utils.match(predicates.content_match, [data.content]);
-                });
-                break;
-            case 'items_implements':
-                conditions.push(function($content, data) {
-                    if (typeof(predicates.items_implements) === "string") {
-                        return infrae.interfaces.is_implemented_by(
-                            predicates.items_implements, data.selection);
-                    };
-                    for (var i=0; i < predicates.items_implements.length; i++) {
-                        if (infrae.interfaces.is_implemented_by(
-                            predicates.items_implements[i], data.selection)) {
-                            return true;
-                        };
-                    };
-                    return false;
+                    return infrae.utils.test(data.content, predicates.content_match);
                 });
                 break;
             case 'items_match':
                 conditions.push(function($content, data) {
-                    return infrae.utils.match(predicates.items_match, data.selection.items);
+                    var items = data.selection.items;
+                    var index = items.length;
+
+                    while (index--) {
+                        if (infrae.utils.test(items[index], predicates.items_match)) {
+                            return true;
+                        };
+                    };
+                    return false;
                 });
                 break;
             case 'min_items':
@@ -203,14 +196,21 @@
                                         save.done(function(values) {
                                             var count = 0;
                                             var payload = [];
+
                                             infrae.utils.each(values, function(value) {
-                                                for (var name in value)
-                                                    payload.push({
-                                                        name: 'values.' + count + '.' + name,
-                                                        value: value[name]
-                                                    });
-                                                count += 1;
+                                                if (value !== undefined) {
+                                                    for (var name in value) {
+                                                        payload.push({
+                                                            name: 'values.' + count + '.' + name,
+                                                            value: value[name]
+                                                        });
+                                                    };
+                                                    count += 1;
+                                                };
                                             });
+                                            if (!count) {
+                                                return $.Deferred().reject();
+                                            };
                                             payload.push({name: 'values', value: count});
                                             return data.query_server(
                                                 definition.action.input.action,

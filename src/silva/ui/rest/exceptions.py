@@ -7,46 +7,51 @@ from silva.core.views.interfaces import ISilvaURL
 from zope.component import getMultiAdapter
 
 
-class ContentException(Exception):
+class RESTResult(Exception):
 
-    def content(self):
-        return self.args[0]
+    def __init__(self, payload):
+        self.__payload = payload
 
-
-class PageException(Exception):
-
-    def payload(self, caller):
-        raise NotImplementedError
+    def get_payload(self, caller):
+        return self.__payload(caller)
 
 
-class RedirectToPage(PageException):
+class ActionResult(RESTResult):
+    pass
+
+
+class PageResult(RESTResult):
+    pass
+
+
+class RedirectToPage(ActionResult):
 
     def __init__(self, content, tab='content'):
         self.content = content
         self.tab = tab
 
-    def payload(self, caller):
+    def get_payload(self, caller):
         return {'ifaces': ['redirect'],
                 'path': caller.get_content_path(self.content),
                 'screen': self.tab}
 
 
-class RedirectToUrl(PageException):
+class RedirectToUrl(ActionResult):
 
     def __init__(self, url):
         self.url = url
 
-    def payload(self, caller):
+    def get_payload(self, caller):
         return {'ifaces': ['view'],
                 'url': self.url}
 
 
-class RedirectToPreview(PageException):
+class RedirectToPreview(ActionResult):
 
     def __init__(self, url):
         self.url = url
 
-    def payload(self, caller):
+    def get_payload(self, caller):
         return {'ifaces': ['screen'],
                 'screen': {'ifaces': ['preview'],
                            'html_url': self.url}}
@@ -57,7 +62,7 @@ class RedirectToContentPreview(RedirectToPreview):
     def __init__(self, content):
         self.content = content
 
-    def payload(self, caller):
+    def get_payload(self, caller):
         self.url = getMultiAdapter(
             (self.content, caller.request), ISilvaURL).preview()
         return super(RedirectToContentPreview, self).payload(caller)

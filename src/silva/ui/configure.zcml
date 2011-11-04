@@ -24,21 +24,4 @@
   <grok:grok package="." exclude="martiansupport" />
 
 
-  <!-- AbsoluteURL UIScreen -->
-  <view
-     for=".interfaces.IUIScreen"
-     factory=".batching.RESTAbsoluteURL"
-     type="zope.publisher.interfaces.http.IHTTPRequest"
-     permission="zope.Public"
-     provides="zope.traversing.browser.interfaces.IAbsoluteURL"
-     />
-
-  <browser:page
-     for=".interfaces.IUIScreen"
-     name="absolute_url"
-     class=".batching.RESTAbsoluteURL"
-     permission="zope.Public"
-     allowed_interface="zope.traversing.browser.interfaces.IAbsoluteURL"
-     />
-
 </configure>

@@ -1,38 +1,26 @@
 
-
 from five import grok
 from silva.ui.interfaces import IUIScreen
 from silva.ui.rest import Screen
 from zeam.utils.batch.interfaces import IBatch, IDateBatch
 from zeam.utils.batch.views import Batching
 from zeam.utils.batch.date.views import DateBatching
-from zope.publisher.browser import BrowserView
 from zope.publisher.interfaces.http import IHTTPRequest
 import megrok.pagetemplate as pt
 
 
-class RESTAbsoluteURL(BrowserView):
-    """Return the rel path for UIScreen elements.
-    """
+class RESTBatching(Batching):
+    grok.adapts(IUIScreen, IBatch, IHTTPRequest)
+    keep_query_string = False
 
-    def __init__(self, context, request):
-        self.context = context
-        self.request = request
-
-    def __str__(self):
+    @property
+    def url(self):
         component = self.context
         segments = []
         while not isinstance(component, Screen):
             segments.insert(0, component.__name__)
             component = component.__parent__
         return '/'.join(segments)
-
-    __call__ = __repr__ = __unicode__ = __str__
-
-
-class RESTBatching(Batching):
-    grok.adapts(IUIScreen, IBatch, IHTTPRequest)
-    keep_query_string = False
 
 
 class RESTBatchView(pt.PageTemplate):
@@ -42,6 +30,15 @@ class RESTBatchView(pt.PageTemplate):
 class RESTDateBatching(DateBatching):
     grok.adapts(IUIScreen, IDateBatch, IHTTPRequest)
     keep_query_string = False
+
+    @property
+    def url(self):
+        component = self.context
+        segments = []
+        while not isinstance(component, Screen):
+            segments.insert(0, component.__name__)
+            component = component.__parent__
+        return '/'.join(segments)
 
 
 class RESTDateBatchView(pt.PageTemplate):

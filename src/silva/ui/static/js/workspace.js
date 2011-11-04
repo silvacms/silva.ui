@@ -88,6 +88,12 @@
                         $link.attr('target', info.target);
                     };
                 };
+                if (info.icon && !tabsmode) {
+                    $link.addClass('ui-state-default');
+                    $link.prepend(
+                        '<div class="action-icon"><ins class="ui-icon ui-icon-' +
+                            info.icon + '"></ins></div>');
+                };
                 if (info.active) {
                     $link.addClass('active');
                 };
