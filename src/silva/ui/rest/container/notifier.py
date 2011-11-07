@@ -8,7 +8,7 @@ from zope.component import getUtility
 from zope.i18n import translate
 from zope.i18n.interfaces import IUserPreferredLanguages
 
-from infrae.comethods import comethod
+from infrae.comethods import cofunction
 
 from silva.translations import translate as _
 from silva.core.interfaces import SilvaError
@@ -111,7 +111,7 @@ class ContentNotifier(object):
     def notify(self, message, type=u""):
         self.__send(message, self.request, namespace=type)
 
-    @comethod
+    @cofunction
     def __call__(self, parent, success_msg, failed_msg):
         success = ContentCounter(self.translate)
         failures = ErrorContentCounter(self.translate)
