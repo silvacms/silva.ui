@@ -129,7 +129,7 @@
                   return {
                     ifaces: ['message'],
                     title: '<tal:msg i18n:translate="">Not found</tal:msg>',
-                    message: '<p i18n:translate="">The request content or screen was not found.</p>'
+                    message: '<p i18n:translate="">The requested content or screen was not found.</p>'
                   };
               },
               500: function () {
