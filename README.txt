@@ -1,3 +1,21 @@
 ========
 silva.ui
 ========
+
+Introduction
+============
+
+This extension contains core functionnality used to build the Silva
+Management Interface. Those are low level API, that Silva extension
+developer will be able to use as well in their extensions.
+
+For more information about this, please check the `Silva developer
+documentation`_.
+
+Code repository
+===============
+
+You can find the code of this extension in Mercurial:
+https://hg.infrae.com/silva.ui
+
+.. _Silva developer documentation: http://docs.infrae.com/silva/
