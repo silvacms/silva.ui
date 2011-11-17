@@ -30,7 +30,8 @@ class ContentGenerator(object):
                     content = self.__get(int(id))
                 except (KeyError, ValueError):
                     self.__errors += 1
-                yield content
+                else:
+                    yield content
 
     def __enter__(self):
         self.__errors = 0
