@@ -2,5 +2,6 @@
 .pyc
 .egg-info
 .cpt.py
+.DS_Store
 ~
 #
