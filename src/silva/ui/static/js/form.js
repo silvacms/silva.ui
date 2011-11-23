@@ -38,7 +38,6 @@
     // Focus form field.
     var focus_form_field = function($field, no_input_focus) {
         var $section = $field.closest('.form-section');
-        console.log($section);
 
         if ($section.is('.form-focus')) {
             return;
