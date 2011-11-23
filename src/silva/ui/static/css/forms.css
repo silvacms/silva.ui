@@ -189,6 +189,11 @@ form {
 .form-content div.field-collection-line {
   clear: both;
 }
+.form-content div.field-collection-line div.field-object {
+  margin: 10px 0px;
+  border-top: 1px dotted #CCCCCC;
+  clear: both;
+}
 .form-content .field-collection-lines div.line-actions {
   float: left;
   width: 60px;

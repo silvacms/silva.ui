@@ -38,6 +38,7 @@
     // Focus form field.
     var focus_form_field = function($field, no_input_focus) {
         var $section = $field.closest('.form-section');
+        console.log($section);
 
         if ($section.is('.form-focus')) {
             return;
@@ -109,12 +110,20 @@
         var $form = data.form || $container.find('form');
 
         // Bind form focus
-        $container.delegate('.form-section', 'click', function (event) {
-            $container.invoke(focus_form_field, $(this), $(event.target).is('input'));
-        });
-        $container.delegate('.form-section', 'focusin', function (event) {
-            $container.invoke(focus_form_field, $(this), $(event.target).is('input'));
-        });
+        var focus_form_event = function (event) {
+            var $target = $(event.target);
+            var is_target_input = $target.is('input');
+
+            $container.invoke(focus_form_field, $(this), is_target_input);
+            if (!is_target_input || $target.attr('type') !== 'submit') {
+                // If we click on a field, and that is not a submit,
+                // we prevent other handlers to be called.
+                event.stopPropagation();
+            };
+        };
+
+        $container.delegate('.form-section', 'click', focus_form_event);
+        $container.delegate('.form-section', 'focusin', focus_form_event);
 
         // Remove errors if you click on it
         $container.delegate('.form-error-detail', 'click', function () {
