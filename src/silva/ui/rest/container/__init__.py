@@ -5,7 +5,7 @@
 
 from five import grok
 from infrae import rest
-from megrok.chameleon.components import ChameleonPageTemplate
+from grokcore.chameleon.components import ChameleonPageTemplate
 
 from silva.core.interfaces import IContainer
 from silva.core.services.utils import walk_silva_tree
