@@ -5,7 +5,7 @@
 
 from five import grok
 from silva.ui.rest.base import UIHelper
-import simplejson
+import json
 
 
 class ErrorREST(grok.View, UIHelper):
@@ -19,7 +19,7 @@ class ErrorREST(grok.View, UIHelper):
             data['title'] = self.translate(self.title)
         self.response.setStatus(400)
         self.response.setHeader('Content-Type', 'application/json')
-        return simplejson.dumps({'content': data})
+        return json.dumps({'content': data})
 
     render.base_method = True
 
