@@ -82,7 +82,7 @@
 
     /**
      * Store the given items as a cut in the clipboard.
-     * @param items: Cutted items.
+     * @param items: Items to cut.
      */
     ClipBoard.prototype.cut = function(items, no_notification) {
         var count = 0;
@@ -98,7 +98,7 @@
         $('body').trigger('contentchange-smiclipboard');
         if (!no_notification) {
             var message = {
-                message: 'Cutted ' + count.toString() + ' content(s) in the clipboard.',
+                message: 'Cut ' + count.toString() + ' item(s) in the clipboard.',
                 autoclose: 4000};
             if (!count) {
                 message['category'] = 'error';
@@ -125,7 +125,7 @@
         $('body').trigger('contentchange-smiclipboard');
         if (!no_notification) {
             var message = {
-                message: 'Copied ' + count.toString() + ' content(s) in the clipboard.',
+                message: 'Copied ' + count.toString() + ' item(s) in the clipboard.',
                 autoclose: 4000};
             if (!count) {
                 message['category'] = 'error';
