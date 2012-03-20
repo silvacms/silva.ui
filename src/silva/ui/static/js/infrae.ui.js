@@ -124,8 +124,16 @@
             $dialog.bind('dialogclose', function () {
                 $window.unbind('resize.infrae-ui-dialog', handler);
             });
+            $dialog.bind('infrae-ui-dialog-resize', function () {
+                resize();
+            });
             $dialog.dialog('open');
             resize(true);
+        },
+        ResizeDialog: function($dialog) {
+            if ($dialog.dialog('isOpen')) {
+                $dialog.trigger('infrae-ui-dialog-resize');
+            }
         },
         /**
          * Create a confirmation dialog that returns a promise.
