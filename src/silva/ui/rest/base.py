@@ -23,6 +23,7 @@ from silva.core.views.interfaces import IVirtualSite
 from silva.ui.interfaces import IUIScreen
 from silva.ui.menu import ContentMenu, ViewMenu, ActionMenu
 from silva.ui.rest.exceptions import PageResult, ActionResult, RESTResult
+from silva.ui.rest.exceptions import RESTRedirectHandler
 from silva.ui.rest.invalidation import Invalidation
 from silva.ui.smi import set_smi_skin
 
@@ -137,6 +138,8 @@ class ActionREST(UIREST):
             data['content'] = error.get_payload(self)
         except RESTResult as error:
             return error.get_payload(self)
+        except RESTRedirectHandler as handler:
+            return handler.publish(self)
         else:
             data['navigation'] = self.get_navigation()
             resources = get_resources(self.request)

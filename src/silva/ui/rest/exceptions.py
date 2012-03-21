@@ -7,25 +7,39 @@ from silva.core.views.interfaces import ISilvaURL
 from zope.component import getMultiAdapter, queryMultiAdapter
 from zope.publisher.interfaces.browser import IBrowserPublisher
 from infrae.rest import lookupREST
+from infrae.rest.interfaces import IRESTComponent
+
+
+clean_path = lambda p: filter(None, p.split('/'))
+reversed_clean_path = lambda p: filter(None, reversed(p.split('/')))
+
+def get_tab_path(tab):
+    path = []
+    while IRESTComponent.providedBy(tab):
+        path.extend(reversed_clean_path(tab.__name__))
+        tab = tab.__parent__
+    return path
 
 
 class RESTRedirectHandler(Exception):
 
-    def __init__(self, path, clear=False):
+    def __init__(self, path, clear=False, relative=None):
+        path = reversed_clean_path(path)
+        path.extend(get_tab_path(relative))
         self.path = path
         self.clear = clear
 
     def publish(self, origin):
-        path = list(self.path.split('/'))
+        path = self.path
         request = origin.request
         del request.PARENTS[-1] # Remove the current item and traverse
         if self.clear:
             request.form.clear()
-        component = lookupREST(origin.context, request, path.pop(0))
+        component = lookupREST(origin.context, request, path.pop())
 
         while path:
             while path:
-                part = path.pop(0)
+                part = path.pop()
                 component = request.traverseName(component, part)
 
             adapter = None
@@ -38,7 +52,7 @@ class RESTRedirectHandler(Exception):
             if adapter is not None:
                 component, default_path = adapter.browserDefault(request)
                 if default_path:
-                    path.extend(default_path)
+                    path.extend(reversed(default_path))
 
         return component()
 
@@ -61,15 +75,29 @@ class PageResult(RESTResult):
 
 
 class RedirectToPage(ActionResult):
+    DEFAULT_TAB = 'content'
 
-    def __init__(self, content, tab='content'):
+    def __init__(self, content=None, tab=None, sub_tab=None):
         self.content = content
         self.tab = tab
+        self.sub_tab = sub_tab
 
     def get_payload(self, caller):
+        content = self.content
+        if content is None:
+            content = caller.context
+        tab = []
+        if self.tab is not None:
+            tab = clean_path(self.tab)
+        if self.sub_tab is not None:
+            if self.tab is None:
+                tab.extend(reversed(get_tab_path(caller)[:-1]))
+            tab.extend(clean_path(self.sub_tab))
+        elif self.tab is None:
+            tab.extend(clean_path(self.DEFAULT_TAB))
         return {'ifaces': ['redirect'],
-                'path': caller.get_content_path(self.content),
-                'screen': self.tab}
+                'path': caller.get_content_path(content),
+                'screen': '/'.join(tab)}
 
 
 class RedirectToUrl(ActionResult):
