@@ -144,8 +144,8 @@
                 var $iframe = $('<iframe src="">');
 
                 var resize = function() {
-                    $iframe.height($content.height());
-                    $iframe.width($content.width());
+                    $iframe.height($content.innerHeight());
+                    $iframe.width($content.innerWidth());
                 };
                 resize();
                 $(window).bind('resize.infrae-views-iframe', resize);
