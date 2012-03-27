@@ -25,6 +25,9 @@ form {
   border-left: 2px solid #ccc;
   padding: 5px 8px;
 }
+.form-content .form-head h4, .form-content .form-head h5 {
+  border-left: 2px solid #ccc;
+}
 
 #workspace .form-content h3 {
   background-image: url('../img/gradientblack.png');
