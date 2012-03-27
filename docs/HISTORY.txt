@@ -4,7 +4,8 @@ Changes
 3.0 (unreleased)
 ----------------
 
-* ...
+* move notification box more to bottom and to the left
+  [wim]
 
 3.0b1 (2011/11/10)
 ------------------
