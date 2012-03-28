@@ -45,8 +45,8 @@ div.jGrowl div.error {
 
 /* move notification box down so actions preview/view are visible */
 div.jGrowl.top-right {
-  right: 10px;
-  top: 40px;
+  right: 10px !important;
+  top: 40px !important;
 }
 
 div.batching a, div.batching span {
