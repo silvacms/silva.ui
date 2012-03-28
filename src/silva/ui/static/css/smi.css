@@ -44,9 +44,9 @@ div.jGrowl div.error {
 }
 
 /* move notification box down so actions preview/view are visible */
-div.jGrowl div.jGrowl-notification, div.jGrowl div.jGrowl-closer {
-    margin-top: 50px !important;
-    margin-right: 20px !important;
+div.jGrowl.top-right {
+  right: 10px;
+  top: 40px;
 }
 
 div.batching a, div.batching span {
