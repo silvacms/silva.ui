@@ -43,12 +43,6 @@ div.jGrowl div.error {
   background-color: #cc0000;
 }
 
-/* move notification box down so actions preview/view are visible */
-div.jGrowl.top-right {
-  right: 10px !important;
-  top: 40px !important;
-}
-
 div.batching a, div.batching span {
   display: block;
   float: left;
