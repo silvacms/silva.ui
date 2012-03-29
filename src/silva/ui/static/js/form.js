@@ -132,18 +132,19 @@
         // Focus the first field of the first form.
         $container.invoke(focus_first_form_field);
         // Load the widgets.
-        $form.trigger('loadwidget-smiform');
+        $form.trigger('loadwidget-smiform', data);
     });
 
     infrae.views.view({
         iface: 'form',
         name: 'content',
         factory: function($content, data, smi) {
+            var $content_form = null;
+            var $forms = $([]);
+
             return {
                 data_template: true,
                 render: function() {
-                    var $content_form = null;
-
                     // Add content
                     if (data.portlets) {
                         var $content_portlets = $('<div class="portlets form-content"></div>');
@@ -156,10 +157,9 @@
                         $content_form = $content;
                         $content_form.addClass('form-content');
                     };
+                    // Find forms.
                     $content_form.html(data.forms);
-
-                    // Find all forms.
-                    var $forms = $content_form.find('form');
+                    $forms = $content_form.find('form');
 
                     smi.shortcuts.create('form', $content_form, true);
 
@@ -169,6 +169,8 @@
                         var form_prefix = $form.attr('name');
 
                         var submit = function($control) {
+                            $form.trigger('serialize-smiform', {form: $form, container: $content_form});
+
                             var values = $form.serializeArray();
                             var is_link = false;
 
@@ -238,7 +240,7 @@
 
                     });
                     // Send an event form loaded to init specific JS field
-                    $content_form.trigger('load-smiform', {form: $forms});
+                    $content_form.trigger('load-smiform', {form: $forms, container: $content_form});
 
                     // Shortcuts field navigation
                     smi.shortcuts.bind('form', null, ['ctrl+down', 'ctrl+shift+down'], function() {
@@ -251,6 +253,11 @@
                     });
                 },
                 cleanup: function() {
+                    // Send cleanup event
+                    if ($content_form !== null) {
+                        $content_form.trigger('clean-smiform', {form: $forms, container: $content_form});
+                    };
+                    // Cleanup
                     smi.shortcuts.remove('form');
                     $content.undelegate('.form-section', 'focusin');
                     $content.undelegate('.form-section', 'click');
