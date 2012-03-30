@@ -26,22 +26,14 @@
              * @param $content: jQuery content on which the text selection must be disabled.
              */
             disable: function($content) {
-                return $content.css({
-                    '-moz-user-select': 'none',
-                    '-webkit-user-select': 'none',
-                    'user-select': 'none'
-                }).bind('selectstart', false).bind('mousedown', false);
+                return $content.disableSelection();
             },
             /**
              * Enable previously disabled text selection.
              * @param $content: jQuery content on which the text selection must be reenabled.
              */
             enable: function($content) {
-                return $content.css({
-                    '-moz-user-select': 'text',
-                    '-webkit-user-select': 'text',
-                    'user-select': 'text'
-                }).unbind('selectstart').unbind('mousedown');
+                return $content.enableSelection();
             }
         },
         /**
