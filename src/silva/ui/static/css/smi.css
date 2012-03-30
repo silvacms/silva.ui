@@ -321,39 +321,42 @@ ins.loading {
 
 
 /* Silva Content Types - uses !important to override default jstree-icon */
-ins.silva_autotoc { background-position:-100px -80px!important; }
-ins.silva_csvsource { background-position:-40px -120px!important; }
-ins.silva_link { background-position:-120px -80px!important; }
-ins.silva_document { background-position:-0px -100px!important; }
-ins.silva_file { background-position:-80px -120px!important; }
-ins.silva_find { background-position:-140px -80px!important; }
-ins.silva_folder { background-position:-20px -100px!important; }
-ins.silva_ghost { background-position:-0px -120px!important; }
-ins.silva_ghostfolder { background-position:-20px -120px!important; }
-ins.silva_image { background-position:-40px -100px!important; }
-ins.silva_indexer { background-position:-120px -120px!important; }
-ins.silva_root { background-position:-160px -60px!important; }
-ins.silva_publication { background-position:-20px -80px!important; }
+ins.silva_autotoc { background-position:-100px -40px!important; }
+ins.silva_csvsource { background-position:-120px -40px!important; }
+ins.silva_document { background-position: 0 -20px!important; }
+ins.silva_page { background-position: -20px -20px!important; }
+ins.silva_file { background-position:-100px -20px!important; }
+ins.silva_find { background-position:-120px -20px!important; }
+ins.silva_folder { background-position:-40px -20px!important; }
+ins.silva_ghostfolder { background-position:-20px -40px!important; }
+ins.silva_ghost { background-position: 0 -40px!important; }
+ins.silva_image { background-position:-80px -20px!important; }
+ins.silva_indexer { background-position:-40px -40px!important; }
+ins.silva_link { background-position:-60px -40px!important; }
+ins.silva_permanentredirectlink { background-position:-80px -40px!important; }
+ins.silva_publication { background-position:-60px -20px!important; }
+ins.silva_root { background-position:-160px -120px!important; }
+ins.silva_sourceasset { background-position:-140px -40px!important; }
+ins.silva_agendaitem { background-position:-20px -60px!important; }
+ins.silva_agendapage { background-position:-40px -60px!important; }
+ins.silva_agendafilter { background-position:-120px -60px!important; }
+ins.silva_agendaviewer { background-position:-100px -60px!important; }
+ins.silva_newsitem { background-position:0 -80px!important; }
+ins.silva_newspage { background-position: 0 -60px!important; }
+ins.silva_newsfilter { background-position:-80px -60px!important; }
+ins.silva_newscategoryfilter { background-position:-160px -60px!important; }
+ins.silva_newsviewer { background-position:-60px -60px!important; }
+ins.silva_newspublication { background-position:-160px -40px!important; }
+ins.silva_rssaggregator { background-position:-140px -60px!important; }
 
-ins.agendafilter { background-position:-60px -80px!important; }
-ins.agendaviewer { background-position:-80px -80px!important; }
-ins.categoryfilter { background-position:-160px -80px!important; }
-ins.newsfilter { background-position:-60px -100px!important; }
-ins.newssource { background-position:-160px -100px!important; }
-ins.newsviewer { background-position:-80px -100px!important; }
-ins.rssaggregator { background-position:-100px -120px!important; }
-
-ins.softwaregroup { background-position:-140px -120px!important; }
-ins.softwarepackage { background-position:-120px -100px!important; }
-ins.softwarerelease { background-position:-140px -100px!important; }
 
 /* Silva publication states */
 ins.state { width:10px!important; height:10px!important; }
-ins.state.draft { background-position:-5px -145px; }
-ins.state.pending { background-position:-25px -145px; }
-ins.state.approved { background-position:-45px -145px; }
-ins.state.published { background-position:-65px -145px; }
-ins.state.closed { background-position:-85px -145px; }
+ins.state.draft { background-position:-5px -105px; }
+ins.state.pending { background-position:-25px -105px; }
+ins.state.approved { background-position:-45px -105px; }
+ins.state.published { background-position:-65px -105px; }
+ins.state.closed { background-position:-85px -105px; }
 
 /* jquery ui overrides */
 

@@ -21,11 +21,11 @@
   display: block;
   background-image:url(../img/sprite.png);
 }
-#workspace .toolbar .selector ins.none { background-position:-0px -60px; }
-#workspace .toolbar .selector ins.single { background-position:-40px -60px; }
-#workspace .toolbar .selector ins.partial { background-position:-40px -60px; }
-#workspace .toolbar .selector ins.all { background-position:-20px -60px; }
-#workspace .toolbar .selector ins.disabled { background-position:-60px -60px; }
+#workspace .toolbar .selector ins.none { background-position:-0px -120px; }
+#workspace .toolbar .selector ins.single { background-position:-40px -120px; }
+#workspace .toolbar .selector ins.partial { background-position:-40px -120px; }
+#workspace .toolbar .selector ins.all { background-position:-20px -120px; }
+#workspace .toolbar .selector ins.disabled { background-position:-60px -120px; }
 
 #workspace .toolbar .filter {
   float: right;
