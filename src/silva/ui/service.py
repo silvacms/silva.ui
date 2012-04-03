@@ -28,6 +28,7 @@ class UIService(SilvaService):
     logo = None
     background = None
     listing_preview = True
+    maintenance_message = None
 
 
 class UISettings(silvaforms.ZMIForm):
@@ -50,6 +51,7 @@ class UISettings(silvaforms.ZMIForm):
         background = data['background']
         logo = data['logo']
         listing_preview = data['listing_preview']
+        maintenance_message = data['maintenance_message']
         if background != silvaforms.NO_VALUE:
             self.context.background = background
         else:
@@ -59,6 +61,10 @@ class UISettings(silvaforms.ZMIForm):
                 self.context.logo = ZopeImage('logo', 'SMI Logo', logo)
         else:
             self.context.logo = None
+        if maintenance_message != silvaforms.NO_VALUE:
+            self.context.maintenance_message = maintenance_message
+        else:
+            self.context.maintenance_message = None
         self.context.listing_preview = listing_preview
         self.status = u"Modification saved."
         return silvaforms.SUCCESS

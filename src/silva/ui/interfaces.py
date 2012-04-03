@@ -81,16 +81,22 @@ class ISilvaUITheme(IDefaultBrowserLayer):
 class IUIService(ISilvaLocalService):
     """Configuration settings for the UI.
     """
+    maintenance_message = schema.Text(
+        title=_(u"Maintenance SMI message"),
+        description=_(
+            u"Disable access to the SMI and display the specified text."),
+        default=u'',
+        required=False)
     logo = silvaschema.Bytes(
         title=_(u"Logo"),
-        description=_(u"Logo that appear at the top left of the SMI"),
+        description=_(u"Logo that appear at the top left of the SMI."),
         required=False)
     background = schema.TextLine(
         title=_(u"Background color"),
         required=False)
     listing_preview = schema.Bool(
         title=_(u"Enable content preview in folder listing"),
-        description=_(u"This can be disable in case of performance issue"),
+        description=_(u"This can be disabled in case of performance issue."),
         default=True,
         required=False)
 

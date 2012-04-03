@@ -5,6 +5,27 @@ html {
   overflow: hidden;
 }
 
+#maintenance {
+  position: absolute;
+  top: 20%;
+  left: 10%;
+  width: 80%;
+  height: 200px;
+  -khtml-box-shadow:#1c2e3d 0 3px 10px;
+  -moz-box-shadow:#1c2e3d 0 3px 10px;
+  -ms-box-shadow:#1c2e3d 0 3px 10px;
+  -o-box-shadow:#1c2e3d 0 3px 10px;
+  -webkit-box-shadow:#1c2e3d 0 3px 10px;
+  background:#fff;
+  bottom:0px;
+  box-shadow:#1c2e3d 0 3px 10px;
+  cursor: move;
+}
+
+#maintenance .message {
+  padding: 2em;
+}
+
 a {
   text-decoration: none;
   cursor: pointer;

@@ -24,70 +24,78 @@
       <img src="${imgs_url}/loader.gif" alt="Loading data from server"
            i18n:attributes="alt" />
     </div>
-    <div id="main">
-      <div id="navigation">
-        <div class="header">
-          <h1 i18n:translate="">
-            <a href="#!/"><img src="${view.logo_url}" alt="Silva" /></a>
-          </h1>
-        </div>
-        <div class="tree"></div>
-        <div class="footer">
-          <div class="actions">
-            <ol>
-              <li>
-                <a href="${view.root_url}/service_members/logout"
-                   i18n:translate="">
-                  <span>Logout</span>
-                </a>
-              </li>
-              <li tal:condition="view.can_manage">
-                <a href="${view.root_url}/manage_main"
-                   i18n:translate="">
-                  <span>Manage</span>
-                </a>
-              </li>
-              <li class="last-action">
-                <a class="form-popup"
-                   href="${view.root_url}/++rest++silva.core.smi.userpreferences"
-                   i18n:translate="">
-                  <span>User preferences</span>
-                </a>
-              </li>
-            </ol>
-          </div>
-        </div>
+    <div id="maintenance"
+         tal:condition="view.maintenance_message">
+      <div class="message"
+           tal:content="structure view.maintenance_message">
+        Maintenance message.
       </div>
-      <div id="handle"></div>
-      <div id="workspace">
-        <div class="header">
-          <div class="metadata">
-            <div class="actions admin-actions">
+    </div>
+    <tal:smi tal:condition="not view.maintenance_message">
+      <div id="main">
+        <div id="navigation">
+          <div class="header">
+            <h1 i18n:translate="">
+              <a href="#!/"><img src="${view.logo_url}" alt="Silva" /></a>
+            </h1>
+          </div>
+          <div class="tree"></div>
+          <div class="footer">
+            <div class="actions">
               <ol>
+                <li>
+                  <a href="${view.root_url}/service_members/logout"
+                     i18n:translate="">
+                    <span>Logout</span>
+                  </a>
+                </li>
+                <li tal:condition="view.can_manage">
+                  <a href="${view.root_url}/manage_main"
+                     i18n:translate="">
+                    <span>Manage</span>
+                  </a>
+                </li>
                 <li class="last-action">
-                  <a class="parent open-screen ui-state-default" href="" rel="">
-                    <ins class="ui-icon ui-icon-arrowreturnthick-1-n"></ins>
+                  <a class="form-popup"
+                     href="${view.root_url}/++rest++silva.core.smi.userpreferences"
+                     i18n:translate="">
+                    <span>User preferences</span>
                   </a>
                 </li>
               </ol>
             </div>
-            <ol class="tabs content-tabs"></ol>
-            <div class="actions view-actions">
-              <ol></ol>
-            </div>
-            <h2>
-              <ins class="icon loading"></ins>
-              <tal:msg i18n:translate="">Loading...</tal:msg>
-            </h2>
-            <a href="#" id="content-url"></a>
-          </div>
-          <div class="toolbar">
           </div>
         </div>
-        <div class="content"></div>
+        <div id="handle"></div>
+        <div id="workspace">
+          <div class="header">
+            <div class="metadata">
+              <div class="actions admin-actions">
+                <ol>
+                  <li class="last-action">
+                    <a class="parent open-screen ui-state-default" href="" rel="">
+                      <ins class="ui-icon ui-icon-arrowreturnthick-1-n"></ins>
+                    </a>
+                  </li>
+                </ol>
+              </div>
+              <ol class="tabs content-tabs"></ol>
+              <div class="actions view-actions">
+                <ol></ol>
+              </div>
+              <h2>
+                <ins class="icon loading"></ins>
+                <tal:msg i18n:translate="">Loading...</tal:msg>
+              </h2>
+              <a href="#" id="content-url"></a>
+            </div>
+            <div class="toolbar">
+            </div>
+          </div>
+          <div class="content"></div>
+        </div>
       </div>
-    </div>
-    <script type="text/javascript">
+      <script type="text/javascript">
       $(document).ready(function() {
       window.smi = $('body').SMI({
           <tal:cfg tal:replace="structure provider:smiconfiguration" />
@@ -170,6 +178,7 @@
           }
       });
       });
-    </script>
+      </script>
+    </tal:smi>
   </body>
 </html>
