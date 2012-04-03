@@ -82,9 +82,9 @@ class IUIService(ISilvaLocalService):
     """Configuration settings for the UI.
     """
     maintenance_message = schema.Text(
-        title=_(u"Maintenance SMI message"),
+        title=_(u"Maintenance UI message"),
         description=_(
-            u"Disable access to the SMI and display the specified text."),
+            u"Disable access to the UI and display the specified HTML."),
         default=u'',
         required=False)
     logo = silvaschema.Bytes(
