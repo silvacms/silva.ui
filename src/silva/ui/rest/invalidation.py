@@ -3,11 +3,15 @@
 # See also LICENSE.txt
 # $Id$
 
+import threading
+
 from five import grok
 from zope.component import getUtility
 from zope.intid.interfaces import IIntIds
 from zope.lifecycleevent.interfaces import IObjectModifiedEvent
 from zope.lifecycleevent.interfaces import IObjectMovedEvent
+from transaction.interfaces import ISavepointDataManager, IDataManagerSavepoint
+import transaction
 
 from silva.core.cache.memcacheutils import MemcacheSlice
 from silva.core.interfaces import IRoot, IContainer, ISilvaObject
@@ -22,6 +26,70 @@ from Products.SilvaMetadata.interfaces import IMetadataModifiedEvent
 
 
 NAMESPACE = 'silva.listing.invalidation'
+
+
+class InvalidationTransactionSavepoint(object):
+    grok.implements(IDataManagerSavepoint)
+
+    def __init__(self, manager, entries):
+        self._entries = entries
+        self._manager = manager
+
+    def rollback(self):
+        self._manager.set_entries(self._entries)
+
+
+class InvalidationTransaction(threading.local):
+    """Push invalidation data when the transaction is committed.
+    """
+    grok.implements(ISavepointDataManager)
+
+    def __init__(self, manager):
+        self.transaction_manager = manager
+        self.clear_entries()
+
+    def add_entry(self, entry):
+        if not self._joined:
+            self.transaction_manager.get().join(self)
+            self._joined = True
+        self._entries.append(entry)
+
+    def set_entries(self, entries):
+        self._entries = list(entries)
+
+    def clear_entries(self):
+        self._entries = []
+        self._joined = False
+
+    def sortKey(self):
+        return id(self)
+
+    def savepoint(self):
+        return InvalidationTransactionSavepoint(self, list(self._entries))
+
+    def commit(self, transaction):
+        pass
+
+    def abort(self, transaction):
+        self.clear_entries()
+
+    def tpc_begin(self, transaction):
+        pass
+
+    def tpc_vote(self, transaction):
+        pass
+
+    def tpc_finish(self, transaction):
+        memcache = MemcacheSlice(NAMESPACE)
+        for entry in self._entries:
+            memcache.push(entry)
+        self.clear_entries()
+
+    def tpc_abort(self, transaction):
+        self.clear_entries()
+
+
+invalidation_transaction = InvalidationTransaction(transaction.manager)
 
 
 class Invalidation(object):
@@ -112,6 +180,7 @@ def register_change(target, action):
         else:
             position = -1
         data['position'] = position
+    #invalidation_transaction.add_entry(data)
     MemcacheSlice(NAMESPACE).push(data)
 
 
