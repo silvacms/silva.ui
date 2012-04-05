@@ -163,7 +163,13 @@
                     template_document.write(template);
                     template_document.close();
                     $context = $(template_document);
-                    $context.ready(finalizer);
+                    if (template_document.readState == "complete") {
+                        finalizer();
+                    } else if (template_window.addEventListener) {
+                        template_window.addEventListener("load", finalizer, false);
+                    } else {
+                        template_window.attachEvent("onload", finalizer);
+                    };
                 } else {
                     finalizer();
                 };
