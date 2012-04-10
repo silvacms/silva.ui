@@ -121,6 +121,7 @@
                     if (view.iframe) {
                         $(window).unbind('resize.infrae-views-iframe');
                         $(window).unbind('workspace-resize-smi.infrae-views-iframe');
+                        $content.removeClass('iframe-view');
                     }
                 });
             };
@@ -150,25 +151,28 @@
                 resize();
                 $(window).bind('resize.infrae-views-iframe', resize);
                 $(window).bind('workspace-resize-smi.infrae-views-iframe', resize);
-
+                $content.addClass('iframe-view');
                 $content.html($iframe);
+
+                var iframe_window = $iframe.get(0).contentWindow;
+                var iframe_document = iframe_window.document;
+                view.$window = $(iframe_window);
+                view.$document = $(iframe_document);
+
                 if (template !== undefined) {
                     if (template.indexOf('<html') < 0 &&
                         template.indexOf('<HTML') < 0) {
                         // no html tags, add missing html tag
                         template = '<html><body>' + template + '</body></html>';
                     };
-                    var template_window = $iframe.get(0).contentWindow;
-                    var template_document = template_window.document;
-                    template_document.write(template);
-                    template_document.close();
-                    $context = $(template_document);
-                    if (template_document.readyState == "complete") {
+                    iframe_document.write(template);
+                    iframe_document.close();
+                    if (iframe_document.readyState == "complete") {
                         finalizer();
-                    } else if (template_window.addEventListener) {
-                        template_window.addEventListener("load", finalizer, false);
+                    } else if (iframe_window.addEventListener) {
+                        iframe_window.addEventListener("load", finalizer, false);
                     } else {
-                        template_window.attachEvent("onload", finalizer);
+                        iframe_window.attachEvent("onload", finalizer);
                     };
                 } else {
                     finalizer();

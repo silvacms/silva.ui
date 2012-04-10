@@ -15,6 +15,7 @@
             if (!callbacks) {
                 callbacks = [];
             };
+            var saved = [];
 
             return {
                 add: function(callback, invoke) {
@@ -23,6 +24,15 @@
                     };
                     callbacks.push(callback);
                     return callback;
+                },
+                push: function() {
+                    saved.push(callbacks);
+                    callbacks = [];
+                },
+                pop: function() {
+                    if (saved.length > 0) {
+                        callbacks = saved.pop();
+                    };
                 },
                 clone: function() {
                     return module.Callbacks([].concat(callbacks), context_provider);
@@ -153,6 +163,14 @@
             };
         },
         FluxCapacitor: function() {
+            /**
+             * This holds elements in a list. A callback is executed
+             * when items are added to the list, and removed. You have
+             * to different callback while removing items, either
+             * normal (outgoing) or with error (failing). Some other
+             * convience functions let you execute execute other
+             * callbacks on the items.
+             */
             var handlers = [{
                 incoming: module.Callbacks(),
                 outgoing: module.Callbacks(),

@@ -298,6 +298,11 @@ div.batching a.current {
   overflow-y: auto;
 }
 
+#workspace .iframe-view {
+  overflow-x: inherit;
+  overflow-y: inherit;
+}
+
 /*
  * Dialog disclaimer
  */
