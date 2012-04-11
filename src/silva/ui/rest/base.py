@@ -219,7 +219,8 @@ class PageWithTemplateREST(PageREST):
     def namespace(self):
         return {'rest': self,
                 'context': self.context,
-                'request': self.request}
+                'request': self.request,
+                'target_language': self.language}
 
     def update(self):
         pass

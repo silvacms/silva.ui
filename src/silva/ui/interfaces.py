@@ -147,3 +147,12 @@ class IViewMenu(IMenu):
 class IUIScreen(IRESTComponent):
     """Represent a screen in the interface.
     """
+
+
+class IJSView(Interface):
+    """Provides a JSON view to render the content view in the JS UI.
+    """
+
+    def __call__(screen):
+        """Return the JSON as a Python dictionnary for the given screen.
+        """
