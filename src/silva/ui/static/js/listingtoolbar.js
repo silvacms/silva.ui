@@ -370,7 +370,7 @@
             };
         });
 
-        var change_status = function() {
+        var switch_status = function() {
             if (status == 'none') {
                 listing.select_all();
             } else {
@@ -378,10 +378,15 @@
             };
             return false;
         };
+        var clear_status = function() {
+            listing.unselect_all();
+            return false;
+        };
 
         // Clicking on the selector change the selection.
-        $selector.bind('click', change_status);
-        shortcuts.bind('listing', null, ['ctrl+a'], change_status);
+        $selector.bind('click', switch_status);
+        shortcuts.bind('listing', null, ['ctrl+a'], switch_status);
+        shortcuts.bind('listing', null, ['esc'], clear_status);
     };
 
     /**

@@ -198,7 +198,7 @@
             options: options,
             opened: Screen('content'), // Currently opened screen
             opening: Screen('content'),// Screen being currently opened
-            shortcuts: infrae.keyboard.ShortcutManager()
+            shortcuts: infrae.keyboard.ShortcutManager(document)
         };
 
         var $workspace = $(options.workspace.selector);

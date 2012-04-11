@@ -7,7 +7,7 @@
      * shortcuts.
      */
     var module = {
-        ShortcutManager: function() {
+        ShortcutManager: function(document) {
             var handlers = {};
             var zones = {};
             var order = [];

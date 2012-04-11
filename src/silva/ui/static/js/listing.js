@@ -814,7 +814,7 @@
                         };
                     },
                     render: function() {
-                        // Shortcuts
+                        // Shortcut
                         smi.shortcuts.create('listing', $content, true);
 
                         // Render header
