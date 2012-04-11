@@ -3,14 +3,15 @@
 
 (function ($) {
     // Resize navigation - workspace support
-    var NAVIGATION_MIN_WIDTH = 300;
+    var NAVIGATION_MIN_WIDTH = 280;
     var WORKSPACE_MIN_WIDTH = 650;
 
     $(document).ready(function () {
         var $navigation = $('#navigation');
         var $workspace = $('#workspace');
         var $handle = $('#handle');
-        var min_position = NAVIGATION_MIN_WIDTH + 8;
+        var minized = false;
+        var timer = null;
 
         var set_size = function(position) {
             $navigation.css({width: position - 8});
@@ -32,20 +33,49 @@
                 $handle.draggable(
                     'option',
                     'containment',
-                    [min_position, top, max_position, top]);
+                    [8, top, max_position, top]);
             };
         };
-        var resizer =  function(event, ui) {
-            set_size($handle.position().left);
+        var resizer =  function() {
+            var position = $handle.position().left;
+
+            if (position > NAVIGATION_MIN_WIDTH / 2) {
+                if (minized) {
+                    $navigation.show();
+                    minized = false;
+                };
+                if (position > NAVIGATION_MIN_WIDTH + 8) {
+                    set_size(position);
+                    return null;
+                };
+                set_size(NAVIGATION_MIN_WIDTH + 8);
+                return true;
+            };
+            if (!minized) {
+                $navigation.hide();
+                minized = true;
+                set_size(-8);
+            };
+            return false;
+        };
+        var finalizer = function() {
+            var status = resizer();
+
+            if (status === true) {
+                $handle.css('left', NAVIGATION_MIN_WIDTH + 8);
+            } else if (status === false) {
+                $handle.css('left', -12);
+            };
         };
 
         $handle.draggable({
             axis: 'x',
             iframeFix: true,
-            drag: resizer,
-            stop: resizer
+            drag: function(event, ui) { resizer(); },
+            stop: function(event, ui) { finalizer(); }
         });
         set_containment();
+        infrae.ui.selection.disable($handle);
         $(window).bind('resize', set_containment);
     });
 })(jQuery);
