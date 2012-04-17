@@ -70,11 +70,27 @@
 
     infrae.views.view({
         iface: 'menu',
-        factory: function($content, data, tabsmode) {
-            var create = function(info) {
+        factory: function($content, data) {
+            var tabs = $content.hasClass('tabs');
+            var $opened = $([]);
+
+            var create = function(info, top_level) {
                 var $tab = $('<li><a><span>' + info.name + '</span></a></li>');
                 var $link = $tab.children('a');
 
+                if (tabs) {
+                    if (top_level) {
+                        if (info.screen) {
+                            $link.addClass('top-screen');
+                        } else {
+                            $link.addClass('top-label');
+                        };
+                        $link.addClass('top-entry');
+                        $tab.addClass('top-level');
+                    } else {
+                        $tab.addClass('sub-level');
+                    };
+                };
                 if (info.screen) {
                     $link.addClass('open-screen');
                     $link.attr('rel', info.screen);
@@ -87,7 +103,7 @@
                         $link.attr('target', info.target);
                     };
                 };
-                if (info.icon && !tabsmode) {
+                if (info.icon && !tabs) {
                     $link.addClass('ui-state-default');
                     $link.prepend(
                         '<div class="action-icon"><ins class="ui-icon ui-icon-' +
@@ -102,58 +118,77 @@
                 if (info.accesskey) {
                     $link.attr('accesskey', info.accesskey);
                 };
-                return $tab;
-            };
+                if (info.entries) {
+                    var $container = $('<ol></ol>');
+                    var $opener = $('<div class="subtab-icon"><ins></ins></div>');
+                    var $trigger = info.screen && top_level ? $opener : $link;
 
-            var $opened_container = null;
-            var bind = function($container, $trigger) {
-                $container.bind('mouseleave', function () {
-                    $opened_container.fadeOut('fast');
-                    $opened_container = null;
-                });
+                    var close = function(exclude) {
+                        var contained = [];
+                        var uncontained = [];
+                        var container = $container.get(0);
 
-                $trigger.bind('click', function () {
-                    if ($opened_container !== null) {
-                        $opened_container.fadeOut('fast');
+                        $opened.each(function() {
+                            if ((this === container && !exclude) || $.contains(this, container)) {
+                                contained.push(this);
+                            } else {
+                                uncontained.push(this);
+                            };
+                        });
+                        $(uncontained).fadeOut('fast');
+                        $opened = $(contained);
+                        if (!exclude) {
+                            $opened = $(contained).add(container);
+                        } else {
+                            $opened = $(contained);
+                        };
                     };
-                    $opened_container = $container;
-                    $opened_container.toggle();
-                    return false;
-                });
+
+                    $.each(info.entries, function(i, entry) {
+                        $container.append(create(entry));
+                    });
+
+                    $container.bind('mouseleave', function () {
+                        close(true);
+                    });
+
+                    $trigger.bind(top_level ? 'click' : 'mouseenter', function () {
+                        var origin = $link.offset().left;
+                        var width = $container.width();
+                        var available = $(document).width();
+
+                        if (!top_level) {
+                            var padding = $link.width();
+                            if (origin + padding + width < available) {
+                                $container.css('left', padding);
+                            } else {
+                                $container.css('right', width - 5);
+                            };
+                            $container.css('top', 0);
+                        } else {
+                            if (origin + width < available) {
+                                $container.css('left', 0);
+                            } else {
+                                $container.css('right', 0);
+                            };
+                        };
+                        close(false);
+                        $container.show();
+                        return false;
+                    });
+
+                    $link.prepend($opener);
+                    $tab.append($container);
+                };
+                return $tab;
             };
 
             return {
                 render: function() {
                     $.each(data.entries, function(i, info) {
-                        var $tab = create(info, true);
-                        var $link = $tab.children('a');
-
-                        if (tabsmode) {
-                            if (info.screen) {
-                                $link.addClass('top-screen');
-                            } else {
-                                $link.addClass('top-label');
-                            };
-                            $link.addClass('top-entry');
-                            $tab.addClass('top-level');
-                        };
-
-                        if (info.entries) {
-                            var $container = $('<ol></ol>');
-                            var $opener = $('<div class="subtab-icon"><ins></ins></div>');
-
-                            $.each(info.entries, function(i, entry) {
-                                $container.append(create(entry));
-                            });
-
-                            bind($container, info.screen ? $opener : $link);
-
-                            $link.prepend($opener);
-                            $tab.append($container);
-                        };
-                        $content.append($tab);
+                        $content.append(create(info, true));
                     });
-                    if (!tabsmode) {
+                    if (!tabs) {
                         // Add a class for style under IE 8
                         $content.children('li:last').addClass('last-action');
                     };
@@ -170,27 +205,57 @@
         iface: 'object',
         name: 'header',
         factory: function($content, data, smi, url, view) {
+            var make_menu = function($menu, data) {
+                if (data) {
+                    ($menu.is('ol') ? $menu : $menu.find('ol')).render({data: data});
+                    $menu.show();
+                } else {
+                    $menu.hide();
+                };
+            };
+            var make_all_menu = function($metadata, data, compact) {
+                // Mode pas compact
+                if (!compact) {
+                    make_menu($metadata.find('.view-actions'), data.view);
+                    make_menu($metadata.children('.content-tabs'), data.content);
+                    make_menu($metadata.find('.compact-tabs'), undefined);
+                } else {
+                    var entries = [];
+
+                    if (data.content) {
+                        entries = entries.concat(data.content.entries);
+                    };
+                    if (data.view) {
+                        entries = entries.concat(data.view.entries);
+                    };
+                    make_menu($metadata.find('.view-actions'), undefined);
+                    make_menu($metadata.children('.content-tabs'), undefined);
+                    make_menu(
+                        $metadata.find('.compact-tabs'), {
+                            ifaces: ['menu'],
+                            entries: [{
+                                name: "Options",
+                                active: true,
+                                entries: entries
+                            }]
+                        });
+                };
+            };
+
             return {
                 render: function() {
                     var $metadata = $content.children('.metadata');
                     var $parent = $content.find('a.parent');
-                    var $view_actions = $metadata.find('.view-actions');
+                    var compact = $content.hasClass('compact-header');
 
                     // Update header
                     $metadata.children('h2').render({data: data.title});
-                    $metadata.children('.content-tabs').render(
-                        {data: data.menu.content, args: [true]});
-                    if (data.menu.view) {
-                        $view_actions.children('ol').render({data: data.menu.view});
-                        $view_actions.show();
-                    } else {
-                        $view_actions.hide();
-                    };
+                    $metadata.children('#content-url').attr('href', url.expand({path: data.path}));
+
+                    make_all_menu($metadata, data.menu, compact);
+
                     $content.children('.toolbar').render(
                         {data: data, name: 'toolbar', args: [smi, view]});
-
-                    // Update content link hidden link
-                    $metadata.children('#content-url').attr('href', url.expand({path: data.path}));
 
                     // Update parent link
                     if (data.up != null) {
@@ -202,6 +267,13 @@
                         $parent.addClass('ui-state-disabled');
                         $parent.removeClass('ui-state-default');
                     };
+
+                    $(window).bind('fullscreen-resize-smi.default-header', function(event, info) {
+                        make_all_menu($metadata, data.menu, info.active);
+                    });
+                },
+                cleanup: function() {
+                    $(window).unbind('fullscreen-resize-smi.default-header');
                 }
             };
         }

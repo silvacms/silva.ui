@@ -12,13 +12,40 @@
         var $handle = $('#smi-handle');
         var minized = false;
         var timer = null;
+        var current = 288;
 
-        var set_size = function(position) {
+        var resize = function(position, minize) {
+            if (minize === undefined) {
+                if (position === undefined) {
+                    // Restore to previous
+                    position = current;
+                    if (position === undefined) {
+                        // We were minized, nothing to do.
+                        return;
+                    };
+                };
+                if (minized) {
+                    // We need unminize.
+                    $navigation.show();
+                    minized = false;
+                };
+            };
+            if (minize === true) {
+                current = undefined;
+            } else if (minize !== false) {
+                current = position;
+            };
             $navigation.css({width: position - 8});
             $workspace.css({left: position + 12});
             $(window).trigger('workspace-resize-smi');
         };
-
+        var minize = function(save) {
+            if (!minized) {
+                $navigation.hide();
+                minized = true;
+            };
+            resize(-8, save === true ? true : false);
+        };
         var set_containment = function () {
             if ($handle.is(':visible')) {
                 var width = $(window).width();
@@ -27,7 +54,7 @@
                 var max_position = width - WORKSPACE_MIN_WIDTH;
 
                 if (current > max_position) {
-                    set_size(max_position);
+                    resize(max_position);
                     $handle.css({left: max_position});
                 };
                 $handle.draggable(
@@ -36,26 +63,19 @@
                     [8, top, max_position, top]);
             };
         };
+
         var resizer =  function() {
             var position = $handle.position().left;
 
             if (position > NAVIGATION_MIN_WIDTH / 2) {
-                if (minized) {
-                    $navigation.show();
-                    minized = false;
-                };
                 if (position > NAVIGATION_MIN_WIDTH + 8) {
-                    set_size(position);
+                    resize(position);
                     return null;
                 };
-                set_size(NAVIGATION_MIN_WIDTH + 8);
+                resize(NAVIGATION_MIN_WIDTH + 8);
                 return true;
             };
-            if (!minized) {
-                $navigation.hide();
-                minized = true;
-                set_size(-8);
-            };
+            minize(true);
             return false;
         };
         var finalizer = function() {
@@ -87,6 +107,36 @@
         set_containment();
         infrae.ui.selection.disable($handle);
         $(window).bind('resize', set_containment);
+        $(window).bind('fullscreen-resize-smi', function(event, data) {
+            if (data.active) {
+                $handle.hide();
+                minize();
+            } else {
+                resize();
+                $handle.show();
+            };
+        });
+    });
+})(jQuery, infrae);
+
+(function ($) {
+    // Support for fullscreen mode
+
+    $(document).ready(function() {
+        var $fullscreen = $('#workspace .header .fullscreen');
+        var $header = $('#workspace .header');
+        var $content = $('#workspace .content');
+        var active = false;
+
+        $fullscreen.bind('click', function(event) {
+            $fullscreen.toggleClass('active');
+            $header.toggleClass('compact-header');
+            $content.toggleClass('extended-content');
+            active = !active;
+            $(window).trigger('fullscreen-resize-smi', {active: active});
+            event.stopPropagation();
+            event.preventDefault();
+        });
     });
 })(jQuery, infrae);
 

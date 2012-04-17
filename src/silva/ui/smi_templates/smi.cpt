@@ -72,9 +72,14 @@
             <div class="metadata">
               <div class="actions admin-actions">
                 <ol>
-                  <li class="last-action">
+                  <li>
                     <a class="parent open-screen ui-state-default" href="" rel="">
                       <ins class="ui-icon ui-icon-arrowreturnthick-1-n"></ins>
+                    </a>
+                  </li>
+                  <li class="last-action">
+                    <a class="fullscreen ui-state-default">
+                      <ins class="ui-icon ui-icon-zoomin"></ins>
                     </a>
                   </li>
                 </ol>
@@ -83,6 +88,7 @@
               <div class="actions view-actions">
                 <ol></ol>
               </div>
+              <ol class="tabs compact-tabs"></ol>
               <h2>
                 <ins class="icon loading"></ins>
                 <tal:msg i18n:translate="">Loading...</tal:msg>

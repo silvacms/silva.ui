@@ -94,7 +94,7 @@ div.batching a.current {
   position: absolute;
   width: 100%;
   height: 100%;
-  z-index: 599;
+  z-index: 600;
 }
 
 #smi-handle {
@@ -105,7 +105,7 @@ div.batching a.current {
   width: 4px;
   height: 40px;
   background-color: #666;
-  z-index: 500;
+  z-index: 700;
   cursor: move;
   -khtml-box-shadow:#1c2e3d 0 3px 10px;
   -moz-box-shadow:#1c2e3d 0 3px 10px;
@@ -147,9 +147,9 @@ div.batching a.current {
   background: url(../img/gradient50.png) repeat-x bottom;
   border-bottom: 1px #999 solid;
   color: #111;
-  height: 64px;
+  height: 66px;
   line-height: 24px;
-  padding: 0 10px 35px 10px;
+  padding: 0 10px 33px 10px;
 }
 #workspace .header a {
   color:#111;
@@ -157,7 +157,7 @@ div.batching a.current {
 #workspace .header h2 {
   clear: both;
   font-size:1.3em;
-  padding: 8px 0px 8px 0px;
+  padding: 8px 0px 4px 0px;
   height:24px;
   overflow:hidden;
   white-space:nowrap;
@@ -172,6 +172,12 @@ div.batching a.current {
   margin-right:4px;
   width:20px;
 }
+#workspace .compact-header {
+  height: 0px;
+}
+#workspace .compact-header h2 {
+  display: none;
+}
 
 #workspace .header .tabs {
   float:left;
@@ -180,36 +186,51 @@ div.batching a.current {
   padding:0;
 }
 
+#workspace .header .tabs li {
+  position: relative;
+  border-bottom: 1px solid #eee; /*Ugly*/
+}
+
+#workspace .header .tabs li a {
+  display: block;
+  padding: 0px 5px;
+}
+
+#workspace .header .tabs li.sub-level a.active {
+  background-color: #eee;
+}
+
+#workspace .header .tabs li.sub-level a:hover {
+  background:url('../img/gradient-tab-selected.png') repeat-x;
+  color: white;
+  text-shadow: #373737 1px 1px 1px;
+}
+
 #workspace .header .tabs li.top-level {
   border-radius:0 0 3px 3px;
   box-shadow: inset 0 0 2px #aaa;
-  -khtml-border-radius:0 0 3px 3px;
-  -khtml-box-shadow:inset 0 0 2px #aaa;
   -moz-border-radius:0 0 3px 3px;
   -moz-box-shadow:inset 0 0 2px #aaa;
   -ms-border-radius:0 0 3px 3px;
   -ms-box-shadow:inset 0 0 2px #aaa;
-  -o-border-radius:0 0 3px 3px;
-  -o-box-shadow:inset 0 0 2px #aaa;
   -webkit-border-radius:0 0 3px 3px;
   -webkit-box-shadow:inset 0 0 2px #aaa;
-  position: relative;
   background:url('../img/gradient-tab.png') repeat-x;
-  color:#222;
-  display:block;
-  float:left;
+  color: #222;
+  display: block;
+  float: left;
   margin-right: 10px;
   border: 1px solid #777;
   border-top: 0;
 }
 
 #workspace .header .tabs a.top-entry {
-  display:block;
   height: 26px;
   line-height: 26px;
+  padding: 0px;
 }
 
-#workspace .header .tabs a.top-entry .subtab-icon {
+#workspace .header .tabs a .subtab-icon {
   float: right;
 }
 #workspace .header .tabs a.top-entry .subtab-icon ins {
@@ -259,33 +280,26 @@ div.batching a.current {
   position:absolute;
   width: 210px;
   top: 32px;
-  left: 0px;
   background:#fff;
   border-radius:3px 3px 3px 3px;
   border:1px #777 solid;
   margin: 0px;
   list-style:none;
   display: none;
-  z-index: 100;
+  z-index: 1200;                 /*We want to be on top of jquery UI dialog*/
 }
 
-#workspace .header .tabs ol li {
-  border-bottom: 1px solid #eee;
+#workspace .header .actions {
+  margin: 5px;
 }
-
-#workspace .header .tabs ol li a {
-  display: block;
-  padding: 0px 5px;
+#workspace .header .compact-tabs {
+  display: none;
+  float: right;
 }
-
-#workspace .header .tabs ol li a.active,
-#workspace .header .tabs ol li a:hover {
-  background-color: #eee;
-}
-
 #workspace .header .view-actions {
   margin: 5px 5px 0px 5px;
   float:right;
+  display: none;
 }
 #workspace .header .admin-actions {
   margin: 5px 10px 0px 0px;
@@ -304,7 +318,9 @@ div.batching a.current {
   overflow: hidden;
   overflow-y: auto;
 }
-
+#workspace .extended-content {
+  top: 34px;
+}
 #workspace .iframe-view {
   overflow-x: inherit;
   overflow-y: inherit;
