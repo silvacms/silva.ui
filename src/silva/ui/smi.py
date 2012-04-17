@@ -6,7 +6,7 @@
 from pkg_resources import iter_entry_points
 
 from five import grok
-from silva.core.interfaces import ISilvaObject
+from silva.core.interfaces import ISilvaObject, IVersion
 from silva.core.views import views as silvaviews
 from silva.core.views.interfaces import IVirtualSite
 from silva.fanstatic import need
@@ -25,7 +25,7 @@ from zExceptions import Redirect
 def set_smi_skin(context, request, default='silva.ui.interfaces.ISilvaUITheme'):
     """Set the SMI skin.
     """
-    if ISilvaObject.providedBy(context):
+    if ISilvaObject.providedBy(context) or IVersion.providedBy(context):
         skin_name = context.get_root()._smi_skin
         if not skin_name:
             skin_name = default
