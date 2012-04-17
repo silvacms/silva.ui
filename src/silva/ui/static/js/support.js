@@ -1,7 +1,7 @@
 
 // Implement various support an FX details.
 
-(function ($) {
+(function ($, infrae) {
     // Resize navigation - workspace support
     var NAVIGATION_MIN_WIDTH = 280;
     var WORKSPACE_MIN_WIDTH = 650;
@@ -88,7 +88,7 @@
         infrae.ui.selection.disable($handle);
         $(window).bind('resize', set_containment);
     });
-})(jQuery);
+})(jQuery, infrae);
 
 (function ($) {
     // Add a loading message on server request

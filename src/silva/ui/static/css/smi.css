@@ -326,14 +326,14 @@ div.batching a.current {
  * Portait mode for iPad removes tree. Or not wide enough
  */
 @media screen and (orientation: portrait) {
-  #navigation { display:none; }
-  #handle {display:none; }
-  #workspace { left:0 !important; }
+  #navigation { display: none; }
+  #smi-handle {display: none; }
+  #workspace { left: 0 !important; }
 }
 @media screen and (max-width: 900px) {
-  #navigation { display:none; }
-  #handle {display:none; }
-  #workspace { left:0 !important; }
+  #navigation { display: none; }
+  #smi-handle {display: none; }
+  #workspace { left: 0 !important; }
 }
 
 /*
