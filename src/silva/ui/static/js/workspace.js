@@ -18,7 +18,6 @@
         }
     });
 
-
     infrae.views.view({
         iface: 'redirect',
         factory: function($content, data, smi) {
@@ -220,11 +219,10 @@
                         $content.html('<div class="actions content-actions"><ol></ol></div>');
                         infrae.ui.selection.disable($content);
                         $content.find('.content-actions ol').render({data: actions});
-                    } else {
-                        $content.empty();
                     };
                 },
                 cleanup: function() {
+                    $content.empty();
                     infrae.ui.selection.enable($content);
                 }
             };

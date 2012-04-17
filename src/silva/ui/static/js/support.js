@@ -9,7 +9,7 @@
     $(document).ready(function () {
         var $navigation = $('#navigation');
         var $workspace = $('#workspace');
-        var $handle = $('#handle');
+        var $handle = $('#smi-handle');
         var minized = false;
         var timer = null;
 
@@ -68,11 +68,21 @@
             };
         };
 
+        // Cover is used to cover the whole page, to prevent iframes
+        // to catch events.
+        var $cover = $('<div id="smi-cover">');
         $handle.draggable({
             axis: 'x',
-            iframeFix: true,
-            drag: function(event, ui) { resizer(); },
-            stop: function(event, ui) { finalizer(); }
+            start: function(event, ui) {
+                $('body').append($cover);
+            },
+            drag: function(event, ui) {
+                resizer();
+            },
+            stop: function(event, ui) {
+                $cover.detach();
+                finalizer();
+            }
         });
         set_containment();
         infrae.ui.selection.disable($handle);
