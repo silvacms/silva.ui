@@ -75,7 +75,7 @@
             var $opened = $([]);
 
             var create = function(info, top_level) {
-                var $tab = $('<li><a><span>' + info.name + '</span></a></li>');
+                var $tab = $('<li><a></a></li>');
                 var $link = $tab.children('a');
 
                 if (tabs) {
@@ -90,6 +90,11 @@
                     } else {
                         $tab.addClass('sub-level');
                     };
+                };
+                if (info.name) {
+                    $link.html('<span>' + info.name + '</span>');
+                } else if (info.logo) {
+                    $link.html('<ins class="tab-logo ' + info.logo + '"/>');
                 };
                 if (info.screen) {
                     $link.addClass('open-screen');
@@ -234,7 +239,7 @@
                         $metadata.find('.compact-tabs'), {
                             ifaces: ['menu'],
                             entries: [{
-                                name: "Options",
+                                logo: "tab-options",
                                 active: true,
                                 entries: entries
                             }]
