@@ -188,7 +188,6 @@ div.batching a.current {
 
 #workspace .header .tabs li {
   position: relative;
-  border-bottom: 1px solid #eee; /*Ugly*/
 }
 
 #workspace .header .tabs li a {
@@ -197,7 +196,8 @@ div.batching a.current {
 }
 
 #workspace .header .tabs li.sub-level a.active {
-  background-color: #eee;
+  color: white;
+  background-color:#4d96e6;
 }
 
 #workspace .header .tabs li.sub-level a:hover {
