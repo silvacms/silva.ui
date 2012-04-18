@@ -73,9 +73,9 @@ div.actions .dropdown li div.action-icon {
 div.actions .dropdown li span.have-icon {
   margin-left: 20px;
 }
-div.actions .dropdown li a:hover {
-  background:url('../img/gradient-tab-selected.png') repeat-x;
-  color: white;
+div.actions .dropdown ol li a:hover {
+  background: url('../img/gradient-tab-selected.png') repeat-x;
+  color: white !important;
   text-shadow: #373737 1px 1px 1px;
 }
 
