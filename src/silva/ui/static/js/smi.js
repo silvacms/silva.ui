@@ -10,6 +10,12 @@
      */
     var NotificationManager = function(options) {
         var $container = $(options.selector);
+
+        $('#jGrowl').live('click', function(event) {
+            $(this).remove();
+            event.stopPropagation();
+            event.preventDefault();
+        });
         var manager = {
             /**
              * Notify of a new notification
