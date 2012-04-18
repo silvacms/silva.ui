@@ -11,23 +11,27 @@
     var NotificationManager = function(options) {
         var $container = $(options.selector);
 
+        // Default jGrowl notifications
+        var default_notify = function(message) {
+            var options = {'themeState': 'feedback'};
+            if (message.category == 'error') {
+                options['themeState'] = 'error';
+            };
+            $.jGrowl(message.message, options);
+        };
+
         $('#jGrowl').live('click', function(event) {
-            $(this).remove();
+            $(this).jGrowl('close');
             event.stopPropagation();
             event.preventDefault();
         });
+
         var manager = {
             /**
              * Notify of a new notification
              * @param message: message.
              */
-            notify: function(message) {
-                var options = {'themeState': 'feedback'};
-                if (message.category == 'error') {
-                    options['themeState'] = 'error';
-                };
-                $.jGrowl(message.message, options);
-            },
+            notify: default_notify,
             /**
              * Notify a list of new notifications
              * @param messages: list of messages.
@@ -35,6 +39,34 @@
             notifies: function(messages) {
                 infrae.utils.each(messages, manager.notify);
             }
+        };
+
+        // Support for webkit notificatons.
+        if (window.webkitNotifications) {
+            var api = window.webkitNotifications;
+
+            $.extend(manager, {
+                notify: function(message) {
+                    var status = api.checkPermission();
+
+                    if (status == 0) {
+                        var notification = api.createNotification('', message.message, '');
+                        if (message.autoclose) {
+                            notification.ondisplay = function () {
+                                setTimeout(function() {
+                                    notification.cancel();
+                                }, message.autoclose);
+                            };
+                        };
+                        notification.show();
+                    } else {
+                        if (status == 1) {
+                            api.requestPermission();
+                        };
+                        default_notify(message);
+                    }
+                }
+            });
         };
 
         // Listen to pull notification events.
