@@ -3,7 +3,14 @@
 
 (function (infrae, $) {
     var module = {};
-    var dialog_options = {factor: 0.8, threshold: 15, maxWidth: 0, maxHeight: 0};
+    var dialog_options = {maxFactor: 0.8,
+                          minFactor: 0,
+                          threshold: 15,
+                          maxWidth: 0,
+                          maxHeight: 0,
+                          minWidth: 0,
+                          maxHeight: 0,
+                          center: true};
 
     $.extend(module, {
         /**
@@ -46,7 +53,7 @@
             var $widget = $dialog.dialog('widget');
 
             if (options !== undefined) {
-                options = $.extend(dialog_options, options);
+                options = $.extend({}, dialog_options, options);
             } else {
                 options = dialog_options;
             };
@@ -56,10 +63,12 @@
                 var window_height = $window.height();
                 var widget_width = $widget.width();
                 var widget_height = $widget.height();
-                var max_width = Math.ceil(window_width * options.factor);
-                var max_height = Math.ceil(window_height * options.factor);
+                var min_width = Math.ceil(window_width * options.minFactor);
+                var min_height = Math.ceil(window_height * options.minFactor);
+                var max_width = Math.ceil(window_width * options.maxFactor);
+                var max_height = Math.ceil(window_height * options.maxFactor);
                 var popup_position = $widget.position();
-                var need_reposition = (initial === true);
+                var need_reposition = (options.center && initial === true);
                 var changed_size = false;
 
                 if (options.maxWidth) {
@@ -68,7 +77,17 @@
                 if (options.maxHeight) {
                     max_height = Math.min(options.maxHeight, max_height);
                 };
-                if (widget_height > max_height) {
+                if (options.minWidth) {
+                    min_width = Math.max(options.minWidth, min_width);
+                };
+                if (options.minHeight) {
+                    min_height = Math.max(options.minHeight, min_height);
+                };
+                if (widget_height < min_height) {
+                    $dialog.dialog('option', 'height', min_height);
+                    widget_height = min_height;
+                    changed_size = true;
+                } else if (widget_height > max_height) {
                     $dialog.dialog('option', 'height', max_height);
                     widget_height = max_height;
                     changed_size = true;
@@ -78,11 +97,14 @@
                         need_reposition = true;
                     };
                 };
-                if (widget_width > max_width) {
+                if (widget_width < min_width) {
+                    $dialog.dialog('option', 'width', min_width);
+                    widget_width = min_width;
+                    changed_size = true;
+                } else if (widget_width > max_width) {
                     $dialog.dialog('option', 'width', max_width);
                     widget_width = max_width;
                     changed_size = true;
-
                 };
                 if (popup_position.left) {
                     if (window_width - (popup_position.left + widget_width + options.threshold) < 0) {
@@ -91,6 +113,8 @@
                 };
                 $dialog.dialog('option', 'maxHeight', max_height);
                 $dialog.dialog('option', 'maxWidth', max_width);
+                $dialog.dialog('option', 'minHeight', min_height);
+                $dialog.dialog('option', 'minWidth', min_width);
                 if (need_reposition) {
                     $dialog.dialog('option', 'position', 'center');
                 };
@@ -113,8 +137,9 @@
             };
 
             $window.bind('resize.infrae-ui-dialog', handler);
-            $dialog.bind('dialogclose', function () {
+            $dialog.one('dialogclose', function () {
                 $window.unbind('resize.infrae-ui-dialog', handler);
+                $dialog.unbind('infrae-ui-dialog-resize');
             });
             $dialog.bind('infrae-ui-dialog-resize', function () {
                 resize();
