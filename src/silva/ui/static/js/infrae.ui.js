@@ -10,7 +10,7 @@
                           maxHeight: 0,
                           minWidth: 0,
                           maxHeight: 0,
-                          center: true};
+                          position: ['center', 'center']};
 
     $.extend(module, {
         /**
@@ -53,7 +53,13 @@
             var $widget = $dialog.dialog('widget');
 
             if (options !== undefined) {
-                options = $.extend({}, dialog_options, options);
+                for (var name in dialog_options){
+                    if (options[name] === undefined) {
+                        // We don't use extend because we want to be
+                        // able to dynamically update values.
+                        options[name] = dialog_options[name];
+                    };
+                };
             } else {
                 options = dialog_options;
             };
@@ -68,7 +74,7 @@
                 var max_width = Math.ceil(window_width * options.maxFactor);
                 var max_height = Math.ceil(window_height * options.maxFactor);
                 var popup_position = $widget.position();
-                var need_reposition = (options.center && initial === true);
+                var need_reposition = (initial === true);
                 var changed_size = false;
 
                 if (options.maxWidth) {
@@ -116,7 +122,7 @@
                 $dialog.dialog('option', 'minHeight', min_height);
                 $dialog.dialog('option', 'minWidth', min_width);
                 if (need_reposition) {
-                    $dialog.dialog('option', 'position', 'center');
+                    $dialog.dialog('option', 'position', options.position);
                 };
                 if (changed_size) {
                     $dialog.trigger(
