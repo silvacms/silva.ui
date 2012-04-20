@@ -15,6 +15,7 @@ from infrae import rest
 from infrae.rest.interfaces import IRESTComponent
 from silva.core.interfaces import IRoot, ISilvaObject, IVersion
 from silva.core.interfaces.adapters import IIconResolver
+from silva.core.services.catalog import catalog_queue
 
 from ..interfaces import IUIScreen
 from ..menu import ContentMenu, ViewMenu, ActionMenu
@@ -53,6 +54,7 @@ class SMITransaction(object):
         # Note: this will abort any previous changes.
         transaction.get().abort()
         self.transaction = transaction.begin()
+        catalog_queue.activate(self.transaction)
 
     def __exit__(self, t, v, tb):
         if v is None and not self.transaction.isDoomed():
