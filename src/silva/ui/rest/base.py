@@ -3,31 +3,64 @@
 # See also LICENSE.txt
 # $Id$
 
-from collections import defaultdict
-
 from five import grok
-from infrae import rest
-from zope.cachedescriptors.property import CachedProperty
 from zope.component import getUtility, getMultiAdapter
-from zope.i18n import translate
-from zope.i18n.interfaces import IUserPreferredLanguages
 from zope.intid.interfaces import IIntIds
 from grokcore.layout.interfaces import ILayout
 
 from Acquisition import aq_parent
+from AccessControl import getSecurityManager
 
-from silva.core.interfaces import IRoot, ISilvaObject
+from infrae import rest
+from infrae.rest.interfaces import IRESTComponent
+from silva.core.interfaces import IRoot, ISilvaObject, IVersion
 from silva.core.interfaces.adapters import IIconResolver
-from silva.core.messages.interfaces import IMessageService
-from silva.core.views.interfaces import IVirtualSite
-from silva.ui.interfaces import IUIScreen
-from silva.ui.menu import ContentMenu, ViewMenu, ActionMenu
-from silva.ui.rest.exceptions import PageResult, ActionResult, RESTResult
-from silva.ui.rest.exceptions import RESTRedirectHandler
-from silva.ui.rest.invalidation import Invalidation
-from silva.ui.smi import set_smi_skin
 
-import fanstatic
+from ..interfaces import IUIScreen
+from ..menu import ContentMenu, ViewMenu, ActionMenu
+from ..smi import set_smi_skin
+from .exceptions import PageResult, ActionResult, RESTResult
+from .exceptions import RESTRedirectHandler
+from silva.ui.rest import helper as helper
+
+import transaction
+
+
+class SMITransaction(object):
+
+    def __init__(self, screen):
+        # Follow Zope 2 information to appear in the undo log.
+        note = []
+        if (ISilvaObject.providedBy(screen.context) or
+            IVersion.providedBy(screen.context)):
+            note.append('/'.join(screen.context.getPhysicalPath()))
+        else:
+            note.append('/')
+        names = []
+        while IRESTComponent.providedBy(screen):
+            names.append(grok.name.bind().get(screen))
+            screen = screen.__parent__
+        if names:
+            note.extend(['SMI action:', '/'.join(reversed(names))])
+        self.note = ' '.join(note)
+        self.user = getSecurityManager().getUser()
+        self.user_path = ''
+        auth_folder = aq_parent(self.user)
+        if auth_folder is not None:
+            self.user_path = '/'.join(auth_folder.getPhysicalPath()[1:-1])
+
+    def __enter__(self):
+        # Note: this will abort any previous changes.
+        transaction.get().abort()
+        self.transaction = transaction.begin()
+
+    def __exit__(self, t, v, tb):
+        if v is None and not self.transaction.isDoomed():
+            self.transaction.note(self.note)
+            self.transaction.setUser(self.user, self.user_path)
+            self.transaction.commit()
+        else:
+            self.transaction.abort()
 
 
 class Screen(rest.REST):
@@ -35,48 +68,7 @@ class Screen(rest.REST):
     grok.name('silva.ui')
 
 
-class UIHelper(object):
-
-    def __init__(self, context, request):
-        super(UIHelper, self).__init__(context, request)
-        self.context = context
-        self.request = request
-
-    @CachedProperty
-    def language(self):
-        adapter = IUserPreferredLanguages(self.request)
-        languages = adapter.getPreferredLanguages()
-        if languages:
-            return languages[0]
-        return 'en'
-
-    def translate(self, message):
-        return translate(
-            message, target_language=self.language, context=self.request)
-
-    def get_notifications(self):
-        messages = []
-        service = getUtility(IMessageService)
-        for message in service.receive_all(self.request):
-            data = {'message': self.translate(message.content),
-                    'category': message.namespace}
-            if message.namespace != 'error':
-                data['autoclose'] = 4000
-            messages.append(data)
-        if not messages:
-            return None
-        return messages
-
-    @CachedProperty
-    def root_path(self):
-        root = IVirtualSite(self.request).get_root()
-        return root.absolute_url_path()
-
-    def get_content_path(self, content):
-        return content.absolute_url_path()[len(self.root_path):] or '/'
-
-
-class UIREST(rest.REST, UIHelper):
+class UIREST(helper.UIHelper, rest.REST):
     grok.require('silva.ReadSilvaContent')
     grok.baseclass()
 
@@ -86,69 +78,27 @@ def apply_smi_skin(view, event):
     set_smi_skin(view.context, view.request)
 
 
-def get_resources(request):
-    needed = fanstatic.get_needed()
-    if not needed.has_resources():
-        return None
-    if not needed.has_base_url():
-        needed.set_base_url(IVirtualSite(request).get_root_url())
-    data = defaultdict(list)
-    url_cache = {}
-    for resource in needed.resources():
-        library = resource.library
-        library_url = url_cache.get(library.name)
-        if library_url is None:
-            library_url = url_cache[library.name] = needed.library_url(library)
-        resource_url =  '/'.join((library_url, resource.relpath))
-        data[resource.ext[1:]].append(resource_url)
-
-    return data
-
-
-def get_navigation_changes(request):
-    nav_id = lambda id: 'nav' + str(id)
-    for change in Invalidation(request).get_changes(
-        filter_func=lambda change: change['listing'] == 'container'):
-        if change['action'] == 'remove':
-            yield {
-                'action': 'remove',
-                'info': {'target': nav_id(change['content'])}}
-        else:
-            # Action add or update
-            yield {
-                'action': change['action'],
-                'info': {
-                    'parent': nav_id(change['container']),
-                    'target': nav_id(change['content']),
-                    'position': change['position']}}
-
-
 class ActionREST(UIREST):
     grok.baseclass()
     grok.require('silva.ReadSilvaContent')
 
-    def get_navigation(self):
-        return {'invalidation': list(get_navigation_changes(self.request))}
-
     def GET(self):
-        data = {}
-        try:
-            data['content'] = self.get_payload()
-        except ActionResult as error:
-            data['content'] = error.get_payload(self)
-        except RESTResult as error:
-            return error.get_payload(self)
-        except RESTRedirectHandler as handler:
-            return handler.publish(self)
-        else:
-            data['navigation'] = self.get_navigation()
-            resources = get_resources(self.request)
-            if resources is not None:
-                data['resources'] = resources
+        self.need(helper.get_notifications)
+        self.need(helper.get_resources)
+        with SMITransaction(self):
+            try:
+                data = self.get_payload()
+                self.need(helper.get_navigation)
+            except ActionResult as error:
+                data = error.get_payload(self)
+            except RESTResult as error:
+                return error.get_payload(self)
+            except RESTRedirectHandler as handler:
+                return handler.publish(self)
 
-        notifications =  self.get_notifications()
-        if notifications is not None:
-            data['notifications'] = notifications
+        for provider in self.needed():
+            provider(self, data)
+
         return self.json_response(data)
 
     POST = GET
@@ -174,9 +124,7 @@ class PageREST(ActionREST):
             content = aq_parent(content)
 
         parents.reverse()
-        navigation = {'current': parents}
-        navigation.update(super(PageREST, self).get_navigation())
-        return navigation
+        return {'current': parents}
 
     def get_metadata_menu(self, menu):
         entries = menu.get_entries(self.context).describe(self)
@@ -205,9 +153,10 @@ class PageREST(ActionREST):
             }
         if not IRoot.providedBy(self.context):
             metadata['up'] = self.get_content_path(aq_parent(self.context))
-        return {'ifaces': ['screen'],
-                'metadata': metadata,
-                'screen': screen}
+        return {'content': {'ifaces': ['screen'],
+                            'metadata': metadata,
+                            'screen': screen},
+                'navigation': self.get_navigation()}
 
 
 class PageWithTemplateREST(PageREST):

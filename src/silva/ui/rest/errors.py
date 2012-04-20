@@ -4,8 +4,9 @@
 # $Id$
 
 from five import grok
-from silva.ui.rest.base import UIHelper
 import json
+
+from .helper import UIHelper
 
 
 class ErrorREST(grok.View, UIHelper):

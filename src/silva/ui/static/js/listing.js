@@ -427,7 +427,9 @@
                         if (data.position > -1) {
                             // Position might have changed.
                             var new_position = data.position;
-                            if ($container.children('tr.item:first').data('smilisting').moveable) {
+                            var $first = $container.children('tr.item:first');
+
+                            if ($first.length && $first.data('smilisting').moveable) {
                                 new_position -= 1;
                             };
                             if (new_position > 0 && $container.children().index($line) != new_position) {

@@ -65,16 +65,17 @@ class TemplateToolbarContainerListing(rest.REST):
         return self.template.render(self)
 
 
-def get_container_changes(rest):
-    serializer = ContentSerializer(rest, rest.request)
-    container = serializer.get_id(rest.context)
+def get_container_changes(helper, data):
+    serializer = ContentSerializer(helper, helper.request)
+    container = serializer.get_id(helper.context)
+    invalidations = Invalidation(helper.request)
 
-    data = {}
+    changes = {}
     updated = []
     removed = []
     added_publishables = []
     added_assets = []
-    for info in Invalidation(rest.request).get_changes(
+    for info in invalidations.get_changes(
         filter_func=lambda change: change['container'] == container):
         if info['action'] == 'remove':
             removed.append(info['content'])
@@ -90,16 +91,18 @@ def get_container_changes(rest):
                 updated.append(content_data)
 
     if removed:
-        data['remove'] = removed
+        changes['remove'] = removed
     if updated:
-        data['update'] = updated
+        changes['update'] = updated
     if added_publishables or added_assets:
-        data['add'] = {}
+        changes['add'] = {}
         if added_publishables:
-            data['add']['publishables'] = added_publishables
+            changes['add']['publishables'] = added_publishables
         else:
-            data['add']['assets'] = added_assets
-    return {'ifaces': ['listing-changes'], 'actions': data}
+            changes['add']['assets'] = added_assets
+
+    if changes:
+        data['content']['actions'].update(changes)
 
 
 class FolderActionREST(ActionREST):
@@ -123,11 +126,12 @@ class FolderActionREST(ActionREST):
     def get_payload(self):
         self.notifier = ContentNotifier(self.request)
         self.get_contents = ContentGenerator(self.notifier.notify)
-        with self.get_contents:
-            data = self.payload()
 
-        changes = get_container_changes(self)
-        changes['actions'].update(data)
-        return changes
+        with self.get_contents:
+            actions = self.payload()
+
+        self.need(get_container_changes)
+        return {'content': {'ifaces': ['listing-changes'],
+                            'actions': actions}}
 
 

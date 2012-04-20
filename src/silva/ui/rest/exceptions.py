@@ -95,9 +95,9 @@ class RedirectToPage(ActionResult):
             tab.extend(clean_path(self.sub_tab))
         elif self.tab is None:
             tab.extend(clean_path(self.DEFAULT_TAB))
-        return {'ifaces': ['redirect'],
-                'path': caller.get_content_path(content),
-                'screen': '/'.join(tab)}
+        return {'content': {'ifaces': ['redirect'],
+                            'path': caller.get_content_path(content),
+                            'screen': '/'.join(tab)}}
 
 
 class RedirectToUrl(ActionResult):
@@ -106,8 +106,8 @@ class RedirectToUrl(ActionResult):
         self.url = url
 
     def get_payload(self, caller):
-        return {'ifaces': ['view'],
-                'url': self.url}
+        return {'content': {'ifaces': ['view'],
+                            'url': self.url}}
 
 
 class RedirectToPreview(ActionResult):
@@ -116,9 +116,9 @@ class RedirectToPreview(ActionResult):
         self.url = url
 
     def get_payload(self, caller):
-        return {'ifaces': ['screen'],
-                'screen': {'ifaces': ['preview'],
-                           'html_url': self.url}}
+        return {'content': {'ifaces': ['screen'],
+                            'screen': {'ifaces': ['preview'],
+                                       'html_url': self.url}}}
 
 
 class RedirectToContentPreview(RedirectToPreview):

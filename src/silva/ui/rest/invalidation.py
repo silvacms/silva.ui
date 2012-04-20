@@ -62,7 +62,8 @@ class InvalidationTransaction(threading.local):
         self._joined = False
 
     def sortKey(self):
-        return id(self)
+        # This should let us appear after the Data.fs ...
+        return 'z' * 50
 
     def savepoint(self):
         return InvalidationTransactionSavepoint(self, list(self._entries))
@@ -180,8 +181,7 @@ def register_change(target, action):
         else:
             position = -1
         data['position'] = position
-    #invalidation_transaction.add_entry(data)
-    MemcacheSlice(NAMESPACE).push(data)
+    invalidation_transaction.add_entry(data)
 
 
 @grok.subscribe(ISilvaObject, IObjectModifiedEvent)
