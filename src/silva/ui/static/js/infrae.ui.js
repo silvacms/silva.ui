@@ -93,6 +93,9 @@
                     $dialog.dialog('option', 'height', min_height);
                     widget_height = min_height;
                     changed_size = true;
+                    if (max_height < min_height) {
+                        max_height = min_height;
+                    };
                 } else if (widget_height > max_height) {
                     $dialog.dialog('option', 'height', max_height);
                     widget_height = max_height;
@@ -107,6 +110,9 @@
                     $dialog.dialog('option', 'width', min_width);
                     widget_width = min_width;
                     changed_size = true;
+                    if (max_width < min_width) {
+                        max_width = min_width;
+                    };
                 } else if (widget_width > max_width) {
                     $dialog.dialog('option', 'width', max_width);
                     widget_width = max_width;
