@@ -38,7 +38,7 @@ class SMITransaction(object):
             note.append('/')
         names = []
         while IRESTComponent.providedBy(screen):
-            names.append(grok.name.bind().get(screen))
+            names.append(screen.__name__)
             screen = screen.__parent__
         if names:
             note.extend(['SMI action:', '/'.join(reversed(names))])
