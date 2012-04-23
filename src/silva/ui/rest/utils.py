@@ -8,10 +8,12 @@ from zope.component import getUtility
 from zope.intid.interfaces import IIntIds
 
 from silva.core.interfaces.adapters import IIconResolver
-from silva.ui.rest.base import UIREST
 from silva.core.interfaces import IContainer
 
 from Products.Silva.ExtensionRegistry import meta_types_for_interface
+
+from .base import UIREST
+from .helper import get_notifications
 
 
 class NotificationPoll(UIREST):
@@ -19,7 +21,9 @@ class NotificationPoll(UIREST):
     grok.context(IContainer)
 
     def GET(self):
-        return self.json_response(self.get_notifications())
+        data = {}
+        get_notifications(self, data)
+        return self.json_response(data)
 
 
 class NavigationListing(UIREST):

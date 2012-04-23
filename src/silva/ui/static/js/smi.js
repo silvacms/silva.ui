@@ -72,8 +72,8 @@
         // Listen to pull notification events.
         $(document).bind('refresh-feedback-smi', function() {
             $.getJSON(options.url, function(messages) {
-                if (messages) {
-                    manager.notifies(messages);
+                if (messages.notifications) {
+                    manager.notifies(messages.notifications);
                 };
             });
         });
