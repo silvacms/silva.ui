@@ -124,7 +124,7 @@
                     $link.attr('accesskey', info.accesskey);
                 };
                 if (info.entries) {
-                    var $container = $('<ol></ol>');
+                    var $container = $('<ol class="subtabs"></ol>');
                     var $opener = $('<div class="subtab-icon"><ins></ins></div>');
                     var $trigger = info.screen && top_level ? $opener : $link;
 

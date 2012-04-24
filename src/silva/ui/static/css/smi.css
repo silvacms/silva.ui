@@ -185,6 +185,11 @@ div.batching a.current {
   margin:0;
   padding:0;
 }
+#workspace .header .subtabs {
+  -webkit-box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.15);
+  -moz-box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.15);
+  box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.15);
+}
 #workspace .header .tabs li {
   position: relative;
 }
