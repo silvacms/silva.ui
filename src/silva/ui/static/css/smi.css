@@ -186,9 +186,23 @@ div.batching a.current {
   padding:0;
 }
 #workspace .header .subtabs {
+  -moz-border-radius: 3px 3px 3px 3px;
+  -ms-border-radius: 3px 3px 3px 3px;
+  -o-border-radius: 3px 3px 3px 3px;
+  -webkit-border-radius: 3px 3px 3px 3px;
   -webkit-box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.15);
   -moz-box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.15);
+  position: absolute;
+  width: 210px;
+  top: 32px;
+  background: #fff;
+  border-radius: 3px 3px 3px 3px;
+  border: 1px #AAA solid;
   box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.15);
+  margin: 0px;
+  list-style: none;
+  display: none;
+  z-index: 1200;                 /*We want to be on top of jquery UI dialog*/
 }
 #workspace .header .tabs li {
   position: relative;
@@ -278,25 +292,6 @@ div.batching a.current {
 #workspace .header .tabs a.top-screen.active span,
 #workspace .header .tabs a.top-label.active {
   background:url('../img/gradient-tab-selected.png') repeat-x;
-}
-
-
-#workspace .header .tabs ol {
-  -khtml-border-radius:3px 3px 3px 3px;
-  -moz-border-radius:3px 3px 3px 3px;
-  -ms-border-radius:3px 3px 3px 3px;
-  -o-border-radius:3px 3px 3px 3px;
-  -webkit-border-radius:3px 3px 3px 3px;
-  position:absolute;
-  width: 210px;
-  top: 32px;
-  background:#fff;
-  border-radius:3px 3px 3px 3px;
-  border:1px #777 solid;
-  margin: 0px;
-  list-style:none;
-  display: none;
-  z-index: 1200;                 /*We want to be on top of jquery UI dialog*/
 }
 
 #workspace .header .actions {
@@ -426,14 +421,13 @@ body .ui-state-active {
   color: inherit;
   border: inherit;
 }
+body .ui-widget .ui-button-text {
+  line-height: inherit;
+}
 
 body .ui-widget {
   font-family: sans-serif;
   font-size: inherit;
-}
-
-body .ui-widget .ui-button-text {
-  line-height: inherit;
 }
 
 body .upload-file .upload-progress {
