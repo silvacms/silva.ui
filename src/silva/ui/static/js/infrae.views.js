@@ -160,6 +160,12 @@
                 view.$document = $(iframe_document);
 
                 if (template !== undefined) {
+                    view.ready = $.Deferred();
+
+                    var loader = function() {
+                        view.ready.resolve(view);
+                    };
+
                     if (template.indexOf('<html') < 0 &&
                         template.indexOf('<HTML') < 0) {
                         // no html tags, add missing html tag
@@ -168,21 +174,19 @@
                     iframe_document.write(template);
                     iframe_document.close();
                     if (iframe_document.readyState == "complete") {
-                        finalizer();
+                        loader();
                     } else if (iframe_window.addEventListener) {
-                        iframe_window.addEventListener("load", finalizer, false);
+                        iframe_window.addEventListener("load", loader, false);
                     } else {
-                        iframe_window.attachEvent("onload", finalizer);
+                        iframe_window.attachEvent("onload", loader);
                     };
-                } else {
-                    finalizer();
                 };
             } else {
                 if (template !== undefined) {
                     $content.html(template);
                 };
-                finalizer();
             };
+            finalizer();
             return deferred.promise();
         };
 
