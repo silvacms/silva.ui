@@ -111,12 +111,10 @@
         // Bind form focus
         var focus_form_event = function (event) {
             var $target = $(event.target);
-            var is_target_input = $target.is('input');
+            var is_cancelable = $target.is('input') || $target.is('a');
 
-            $container.invoke(focus_form_field, $(this), is_target_input);
-            if (!is_target_input || $target.attr('type') !== 'submit') {
-                // If we click on a field, and that is not a submit,
-                // we prevent other handlers to be called.
+            $container.invoke(focus_form_field, $(this), is_cancelable);
+            if (!is_cancelable) {
                 event.stopPropagation();
             };
         };
