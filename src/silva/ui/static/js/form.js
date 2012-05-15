@@ -111,9 +111,10 @@
         // Bind form focus
         var focus_form_event = function (event) {
             var $target = $(event.target);
+            var $section = $target.closest('.form-section');
             var is_cancelable = $target.is('input') || $target.is('a');
 
-            $container.invoke(focus_form_field, $(this), is_cancelable);
+            $container.invoke(focus_form_field, $section, is_cancelable);
             if (!is_cancelable) {
                 event.stopPropagation();
             };
