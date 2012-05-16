@@ -11,7 +11,7 @@ from zope.i18n.interfaces import IUserPreferredLanguages
 from infrae.comethods import cofunction
 
 from silva.translations import translate as _
-from silva.core.interfaces import SilvaError
+from silva.core.interfaces import IError
 from silva.core.messages.interfaces import IMessageService
 
 MAX_ENTRIES = 4
@@ -119,7 +119,7 @@ class ContentNotifier(object):
         content = yield
         while content is not None:
             result = parent(content)
-            if isinstance(result, SilvaError):
+            if IError.providedBy(result):
                 failures.append(result)
             else:
                 success.append(result)
