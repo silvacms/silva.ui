@@ -9,7 +9,12 @@
   display: none;
 }
 .field-combobox .combobox-input {
-  height: 14px;
+  height: 20px;
+  line-height: 20px;
+  border: 1px solid #999;
+  border-right: 0px;
+  border-radius: 3px 0px 0px 3px;
+  padding: 0 2px;
 }
 .field-combobox .combobox-opener {
   float: right;
@@ -17,7 +22,7 @@
   padding: 2px;
   width: 1.4em;
   border-radius: 0px 3px 3px 0px;
-  border: 1px #999 solid;
+  border: 1px solid #999;
   background: #fff url(../img/gradient20m.png) repeat-x top;
 }
 .field-combobox .combobox-opener:hover {
