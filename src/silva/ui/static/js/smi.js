@@ -350,11 +350,18 @@
                     };
                     return $.ajax(query).pipe(
                         function (payload) {
+                            var delayed = $.Deferred().resolve();
+                            var result = $.Deferred();
+
                             // Default success handler.
                             if (payload.resources != undefined) {
-                                // Resources
+                                // Resources. If there are Javascript, we delay the execution of
+                                // the callback up until the javascript are loaded.
                                 if (payload.resources.js) {
-                                    infrae.utils.each(payload.resources.js, resources.load_js);
+                                    delayed = delayed.pipe(function() {
+                                        return $.when.apply(
+                                            $, infrae.utils.map(payload.resources.js, resources.load_js));
+                                    });
                                 };
                                 if (payload.resources.css) {
                                     infrae.utils.each(payload.resources.css, resources.load_css);
@@ -371,8 +378,11 @@
                                 // Display any notification.
                                 notifications.notifies(payload.notifications);
                             };
+                            delayed.done(function () {
+                                result.resolve(payload.content);
+                            });
                             // Return content attribute if any. Next handler will work on it.
-                            return payload.content;
+                            return result;
                         },
                         function (request) {
                             if (error_handlers === undefined) {

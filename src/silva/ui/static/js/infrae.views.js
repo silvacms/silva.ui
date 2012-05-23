@@ -16,6 +16,8 @@
                 js: []
             };
             var root = $document.get(0);
+            var head = root.getElementsByTagName('head')[0];
+
             var resources = {
                 /**
                  * Return true if the given Javascript is already loaded.
@@ -36,17 +38,33 @@
                  * @param script: url of the JS file.
                  */
                 load_js: function(script) {
+                    var done = $.Deferred();
+
                     if (!resources.is_js_loaded(script)) {
                         // We don't use jQuery here, as does strange things with scripts.
-                        var head = root.getElementsByTagName('head')[0];
                         var script_tag = root.createElement('script');
 
+                        script_tag.async = 'async';
                         script_tag.type = 'text/javascript';
+                        if (script_tag.readyState) {
+                            script_tag.onreadystatechange = function () {
+                                if (script_tag.readyState == "loaded" ||
+                                    script_tag.readyState == "complete") {
+                                    script_tag.onreadystatechange = null;
+                                    done.resolve();
+                                };
+                            };
+                        } else {
+                            script_tag.onload = function() {
+                                done.resolve();
+                            };
+                        };
                         script_tag.src = script;
                         head.appendChild(script_tag);
-
                         data.js.push(script);
+                        return done;
                     };
+                    return done.resolve();
                 },
                 /**
                  * Load a given CSS file.
@@ -55,7 +73,6 @@
                 load_css: function(css) {
                     if (!resources.is_css_loaded(css)) {
                         // We don't use jQuery here, as does strange things with links.
-                        var head = root.getElementsByTagName('head')[0];
                         var link_tag = root.createElement('link');
 
                         link_tag.rel = 'stylesheet';
