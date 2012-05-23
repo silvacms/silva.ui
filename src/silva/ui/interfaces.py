@@ -73,6 +73,7 @@ class ISilvaUITheme(IDefaultBrowserLayer):
     silvaconf.resource('css/navigation.css')
     silvaconf.resource('css/actions.css')
     silvaconf.resource('css/forms.css')
+    silvaconf.resource('css/formwidgets.css')
     silvaconf.resource('css/listing.css')
 
 

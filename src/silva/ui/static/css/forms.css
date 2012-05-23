@@ -232,38 +232,6 @@ form {
   text-decoration: underline;
 }
 
-.field-combobox {
-  position: relative;
-  display: inline-block;
-}
-.field-combobox .combobox-values {
-  display: none;
-}
-.field-combobox .combobox-opener {
-  float: right;
-  height: 1.2em;
-  padding: 0.1em;
-  width: 1.4em;
-  border-radius: 0px 3px 3px 0px;
-  border: 1px #999 solid;
-  background: #fff url(../img/gradient20m.png) repeat-x top;
-}
-.field-combobox .combobox-opener:hover {
-  background: #fff;
-}
-
-.ui-autocomplete {
-  max-height: 125px;
-  overflow-y: auto;
-  overflow-x: hidden;
-  -webkit-box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.15);
-  -moz-box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.15);
-  box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.15);
-}
-.ui-autocomplete ins.icon {
-  padding: 2px 1px;
-}
-
 /* Portlets */
 
 .portlets {
