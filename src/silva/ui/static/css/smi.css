@@ -189,15 +189,15 @@ div.batching a.current {
   -ms-border-radius: 3px 3px 3px 3px;
   -o-border-radius: 3px 3px 3px 3px;
   -webkit-border-radius: 3px 3px 3px 3px;
-  -webkit-box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.15);
-  -moz-box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.15);
+  border-radius: 3px 3px 3px 3px;
+  -webkit-box-shadow: #A0A0A0 0px 2px 8px;
+  -moz-box-shadow: #A0A0A0 0px 2px 8px;
+  box-shadow: #A0A0A0 0px 2px 8px;
   position: absolute;
   width: 210px;
   top: 32px;
   background: #fff;
-  border-radius: 3px 3px 3px 3px;
   border: 1px #AAA solid;
-  box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.15);
   margin: 0px;
   list-style: none;
   display: none;
@@ -435,7 +435,7 @@ body .upload-file .upload-progress {
 }
 
 body .ui-dialog {
-  -webkit-box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.15);
-  -moz-box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.15);
-  box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.15);
+  -webkit-box-shadow: #A0A0A0 0px 2px 8px;
+  -moz-box-shadow: #A0A0A0 0px 2px 8px;
+  box-shadow: #A0A0A0 0px 2px 8px;
 }
