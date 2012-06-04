@@ -8,7 +8,7 @@ from zope.component import getUtility
 
 from silva.core.interfaces import IContainer, ISilvaObject
 from silva.core.interfaces import IPublishable, INonPublishable
-from silva.core.interfaces import IVersionedContent
+from silva.core.interfaces import IVersionedContent, IVersionedObject
 from silva.core.interfaces.adapters import IIconResolver
 
 from AccessControl import getSecurityManager
@@ -19,7 +19,7 @@ def get_content_status(content):
     public_status = None
     next_status = None
 
-    if IVersionedContent.providedBy(content):
+    if IVersionedObject.providedBy(content):
         if content.get_public_version() is not None:
             public_status = 'published'
         elif content.get_previous_versions():
@@ -40,6 +40,7 @@ def get_content_status(content):
     #     if content.is_approved():
     #         status[1] = 'approved'
     return {'status_public': public_status, 'status_next': next_status}
+
 
 CONTENT_IFACES = [
     (IVersionedContent, 'versioned'),
@@ -110,8 +111,8 @@ class ContentSerializer(object):
             'modified': modified,
             'access': self.get_access(content),
             'position': -1}
+        data.update(get_content_status(content))
         if IPublishable.providedBy(content):
-            data.update(get_content_status(content))
             data['moveable'] = not content.is_default()
         return data
 

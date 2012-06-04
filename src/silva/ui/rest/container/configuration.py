@@ -140,9 +140,11 @@ class ColumnsContainerListing(UIREST):
                             'view': 'action-icon',
                             'action': 'content'
                             }, {
-                            'view': None
+                            'name': 'status_public',
+                            'view': 'workflow'
                             }, {
-                            'view': None
+                            'name': 'status_next',
+                            'view': 'workflow'
                             }, {
                             'name': 'identifier',
                             'caption': self.translate(_(u'Identifier')),

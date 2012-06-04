@@ -191,7 +191,7 @@ def register_update(target, event):
 
 @grok.subscribe(IVersion, IObjectModifiedEvent)
 def register_version_update(target, event):
-    register_change(target.get_content(), 'update')
+    register_change(target.get_silva_object(), 'update')
 
 
 @grok.subscribe(ISilvaObject, IMetadataModifiedEvent)
@@ -203,7 +203,7 @@ def register_title_update(target, event):
 @grok.subscribe(IVersion, IMetadataModifiedEvent)
 def register_version_title_update(target, event):
     if 'maintitle' in event.changes:
-        register_change(target.get_content(), 'update')
+        register_change(target.get_silva_object(), 'update')
 
 
 @grok.subscribe(ISilvaObject, IObjectMovedEvent)
