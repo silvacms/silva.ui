@@ -1,9 +1,9 @@
-(function($, infrae) {
+(function($, infrae, jsontemplate) {
     /**
      * Folder navigation tree using JSTree plugin.
      */
-    $.fn.SMINavigation = function(smi, options) {
-        var $navigation = this;
+    var NavigationManager = function(smi, options) {
+        var $navigation = $(options.selector);
         var $tree = $navigation.children('.tree');
         var root_url = options.root_url;
         var url = new jsontemplate.Template(options.url, {});
@@ -136,4 +136,6 @@
             }
         };
     };
-})(jQuery, infrae);
+
+    infrae.smi.NavigationManager = NavigationManager;
+})(jQuery, infrae, jsontemplate);

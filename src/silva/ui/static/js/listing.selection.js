@@ -1,7 +1,7 @@
 
 (function($, infrae) {
 
-    $.fn.SMISelection = function(configuration) {
+    var Selection = function(configuration) {
         var selection = infrae.deferred.FluxCapacitor();
         var renaming = null;
         var renames = infrae.deferred.FluxCapacitor();
@@ -145,5 +145,7 @@
             }
         };
     };
+
+    infrae.smi.listing.Selection = Selection;
 
 })(jQuery, infrae);

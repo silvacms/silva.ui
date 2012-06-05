@@ -1,229 +1,57 @@
 
-
-(function($, infrae) {
+(function($, infrae, jsontemplate) {
     var HASH_REGEXP = /#([^!]*)!?(.*)/;
 
-
     /**
-     * NotificationManager manage notifications
-     * @param options: configuration options.
+     * Screen location. This permit you define the default screen
+       location, test for a location, or open a location.
      */
-    var NotificationManager = function(options) {
-        var $container = $(options.selector);
-
-        // Default jGrowl notifications
-        var default_notify = function(message) {
-            var options = {'themeState': 'feedback'};
-            if (message.category == 'error') {
-                options['themeState'] = 'error';
-            };
-            $.jGrowl(message.message, options);
-        };
-
-        $('#jGrowl').live('click', function(event) {
-            $(this).jGrowl('close');
-            event.stopPropagation();
-            event.preventDefault();
-        });
-
-        var manager = {
-            /**
-             * Notify of a new notification
-             * @param message: message.
-             */
-            notify: default_notify,
-            /**
-             * Notify a list of new notifications
-             * @param messages: list of messages.
-             */
-            notifies: function(messages) {
-                infrae.utils.each(messages, manager.notify);
-            }
-        };
-
-        // Support for webkit notificatons.
-        if (window.webkitNotifications) {
-            var api = window.webkitNotifications;
-
-            $.extend(manager, {
-                notify: function(message) {
-                    var status = api.checkPermission();
-
-                    if (status == 0) {
-                        var notification = api.createNotification('', message.message, '');
-                        if (message.autoclose) {
-                            notification.ondisplay = function () {
-                                setTimeout(function() {
-                                    notification.cancel();
-                                }, message.autoclose);
-                            };
-                        };
-                        notification.show();
-                    } else {
-                        if (status == 1) {
-                            api.requestPermission();
-                        };
-                        default_notify(message);
-                    }
-                }
-            });
-        };
-
-        // Listen to pull notification events.
-        $(document).bind('refresh-feedback-smi', function() {
-            $.getJSON(options.url, function(messages) {
-                if (messages.notifications) {
-                    manager.notifies(messages.notifications);
-                };
-            });
-        });
-        // Display a notification
-        $(document).bind('notify-feedback-smi', function(event, data) {
-            if (typeof(data) == "array") {
-                manager.notifies(data);
-            } else {
-                manager.notify(data);
-            };
-        });
-        return manager;
-    };
-
-    /**
-     * Clipboard used for listing content.
-     * @param notification: notification manage used to send notifications.
-     */
-    var ClipBoard = function(notifications) {
-        this.notifications = notifications;
-        this._clear();
-    };
-
-    // Internal clear.
-    ClipBoard.prototype._clear = function() {
-        this.cutted = [];
-        this._cutted_ids = [];
-        this.copied = [];
-        this._copied_ids = [];
-    };
-
-    /**
-     * Clear the clipboard.
-     */
-    ClipBoard.prototype.clear = function(no_notification) {
-        this._clear();
-        $('body').trigger('contentchange-smiclipboard');
-        if (!no_notification) {
-            this.notifications.notify({
-                message: 'Clipboard cleared.',
-                autoclose: 4000});
-        };
-    };
-
-    /**
-     * Store the given items as a cut in the clipboard.
-     * @param items: Items to cut.
-     */
-    ClipBoard.prototype.cut = function(items, no_notification) {
-        var count = 0;
-
-        this._clear();
-        $.each(items, function(i, item) {
-            if ($.inArray(item.id, this._cutted_ids) < 0) {
-                this._cutted_ids.push(item.id);
-                this.cutted.push(item);
-                count += 1;
-            };
-        }.scope(this));
-        $('body').trigger('contentchange-smiclipboard');
-        if (!no_notification) {
-            var message = {
-                message: 'Cut ' + count.toString() + ' item(s) in the clipboard.',
-                autoclose: 4000};
-            if (!count) {
-                message['category'] = 'error';
-            };
-            this.notifications.notify(message);
-        };
-    };
-
-    /**
-     * Store the given items as a copy in the clipboard.
-     * @param items: Copied items.
-     */
-    ClipBoard.prototype.copy = function(items, no_notification) {
-        var count = 0;
-
-        this._clear();
-        $.each(items, function(i, item) {
-            if ($.inArray(item.id, this._copied_ids) < 0) {
-                this._copied_ids.push(item.id);
-                this.copied.push(item);
-                count += 1;
-            };
-        }.scope(this));
-        $('body').trigger('contentchange-smiclipboard');
-        if (!no_notification) {
-            var message = {
-                message: 'Copied ' + count.toString() + ' item(s) in the clipboard.',
-                autoclose: 4000};
-            if (!count) {
-                message['category'] = 'error';
-            };
-            this.notifications.notify(message);
-        };
-    };
-
-    /**
-     * Return the size of the clipboard.
-     */
-    ClipBoard.prototype.length = function() {
-        return this.cutted.length + this.copied.length;
-    };
-
-
     var Screen = function(default_screen) {
-        var screen = {ifaces: ['redirect'], path: '', screen: ''};
-
-        $.extend(screen, {
+        var api = {
+            ifaces: ['redirect'],
+            path: '',
+            screen: '',
             default_screen: function() {
                 var current_default = Screen(default_screen);
-                current_default.path = screen.path;
+
+                current_default.path = api.path;
                 current_default.screen = default_screen;
                 return current_default;
             },
             is_default_screen: function() {
-                return screen.screen === default_screen;
+                return api.screen === default_screen;
             },
             copy: function(other) {
-                screen.path = other.path;
-                screen.screen = other.screen;
+                api.path = other.path;
+                api.screen = other.screen;
             },
             equal: function(other) {
-                return screen.path == other.path && screen.screen == other.screen;
+                return api.path == other.path && api.screen == other.screen;
             },
             open: function(new_path, new_screen) {
                 if (!new_path)
-                    new_path = screen.path;
+                    new_path = api.path;
                 if (!new_screen)
-                    new_screen = screen.screen;
+                    new_screen = api.screen;
                 document.location.hash = new_screen + '!' + new_path;
             },
             read: function(hash) {
                 var parts = HASH_REGEXP.exec(hash);
 
                 if (parts) {
-                    screen.screen = parts[1];
-                    screen.path = parts[2];
+                    api.screen = parts[1];
+                    api.path = parts[2];
                 } else {
-                    screen.screen = '';
-                    screen.path = '';
+                    api.screen = '';
+                    api.path = '';
                 };
 
-                if (!screen.screen.length) {
-                    screen.screen = default_screen;
+                if (!api.screen.length) {
+                    api.screen = default_screen;
                 };
             }
-        });
-        return screen;
+        };
+        return api;
     };
 
     /**
@@ -252,8 +80,8 @@
         var action_url = new jsontemplate.Template(options.action, {});
         var content_url = new jsontemplate.Template(options.workspace.url, {});
 
-        var navigation = $(options.navigation.selector).SMINavigation(smi, options.navigation);
-        var notifications = NotificationManager(options.notifications);
+        var navigation = infrae.smi.NavigationManager(smi, options.navigation);
+        var notifications = infrae.smi.NotificationManager(options.notifications);
         var resources = infrae.views.HTMLResourceManager($(document));
         var default_error_handlers = {};
 
@@ -284,7 +112,7 @@
 
         // Add utilities and screen open functions
         $.extend(smi, {
-            clipboard: new ClipBoard(notifications),
+            clipboard: infrae.smi.ClipBoardManager(notifications),
             /**
              * Retrieve the language used by the SMI.
              */
@@ -583,6 +411,8 @@
         return smi;
     };
 
-})(jQuery, infrae);
+    infrae.smi = {};
+
+})(jQuery, infrae, jsontemplate);
 
 
