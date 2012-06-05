@@ -8,7 +8,7 @@ from zope.component import getUtility
 
 from silva.core.interfaces import IContainer, ISilvaObject
 from silva.core.interfaces import IPublishable, INonPublishable
-from silva.core.interfaces import IVersionedContent, IVersionedObject
+from silva.core.interfaces import IVersionedObject
 from silva.core.interfaces.adapters import IIconResolver
 
 from AccessControl import getSecurityManager
@@ -43,7 +43,7 @@ def get_content_status(content):
 
 
 CONTENT_IFACES = [
-    (IVersionedContent, 'versioned'),
+    (IVersionedObject, 'versioned'),
     (IContainer, 'container'),
     (INonPublishable, 'asset'),
     (ISilvaObject, 'content')]

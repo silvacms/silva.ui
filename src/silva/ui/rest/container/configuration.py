@@ -178,7 +178,14 @@ class ColumnsContainerListing(UIREST):
                                     'caption': self.translate(_(u"Properties")),
                                     'item_match': [
                                         'not', ['equal', 'access', None]]
-                                    }]
+                                    }, {
+                                    'screen': 'publish',
+                                    'caption': self.translate(_(u"Publish")),
+                                    'item_match': [
+                                        'and',
+                                        ['not', ['equal', 'access', None]],
+                                        ['provides', 'versioned']]
+                                    } ]
                             }, {
                             'view': None
                             }],
