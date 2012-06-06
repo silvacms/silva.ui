@@ -3,11 +3,16 @@
 # See also LICENSE.txt
 # $Id$
 
+from operator import itemgetter
+
 from five import grok
+from grokcore.component.util import sort_components
 
 from silva.ui.rest.base import UIREST
 from silva.translations import translate as _
 from silva.core.interfaces import IContainer
+from silva.ui.interfaces import IContainerJSListing
+from zeam.component import getAllComponents
 
 icon_width = 26
 public_state_width = 16
@@ -22,6 +27,11 @@ class ColumnsContainerListing(UIREST):
     grok.require('silva.ReadSilvaContent')
 
     def GET(self):
+        listing_cfg = map(
+            lambda (name, listing): listing.configuration(self),
+            sort_components(
+                getAllComponents(provided=IContainerJSListing),
+                key=itemgetter(1)))
         cfg = {
             'ifaces': {
                 'content': ['object'],
@@ -29,170 +39,7 @@ class ColumnsContainerListing(UIREST):
                 'container': ['content', 'object'],
                 'versioned': ['content', 'object']
                 },
-            'listing': [{
-                    'name': 'publishables',
-                    'title': self.translate(_(u'Structual content(s)')),
-                    'layout': {
-                        'fixed': {
-                            0:icon_width,
-                            1:public_state_width,
-                            2:next_state_width,
-                            7:goto_width,
-                            8:move_width
-                            }},
-                    'columns': [{
-                            'name': 'icon',
-                            'view': 'action-icon',
-                            'action': 'content'
-                            }, {
-                            'name': 'status_public',
-                            'view': 'workflow'
-                            }, {
-                            'name': 'status_next',
-                            'view': 'workflow'
-                            }, {
-                            'name': 'identifier',
-                            'caption': self.translate(_(u'Identifier')),
-                            'view': 'text',
-                            'renameable': {
-                                'item_match': [
-                                    'not', [
-                                        'and',
-                                        ['equal', 'access', 'write'],
-                                        ['or',
-                                         ['equal', 'status_public', 'published'],
-                                         ['equal', 'status_next', 'approved']]]
-                                    ]},
-                            'filterable': True
-                            }, {
-                            'name': 'title',
-                            'caption': self.translate(_(u'Title')),
-                            'view': 'text',
-                            'renameable': {
-                                'item_match': [
-                                    'or',
-                                    ['not', ['provides', 'versioned']],
-                                    ['and',
-                                     ['equal', 'access', 'write'],
-                                     ['equal', 'status_next', 'draft']],
-                                    ['and',
-                                     ['not', ['equal', 'access', 'write']],
-                                     ['equal', 'status_next', 'draft', 'pending']],
-                                    ]},
-                            'filterable': True
-                            }, {
-                            'name': 'modified',
-                            'caption': self.translate(_(u'Modified')),
-                            'view': 'text'
-                            }, {
-                            'name': 'author',
-                            'caption': self.translate(_(u'Author')),
-                            'view': 'text'
-                            }, {
-                            'view': 'goto',
-                            'index': {
-                                'screen': 'content',
-                                'caption': self.translate(_(u"Go to"))
-                                },
-                            'menu': [{
-                                    'screen': 'preview',
-                                    'caption': self.translate(_(u"Preview"))
-                                    }, {
-                                    'screen': 'properties',
-                                    'caption': self.translate(_(u"Properties")),
-                                    'item_match': [
-                                        'not', ['equal', 'access', None]]
-                                    }, {
-                                    'screen': 'publish',
-                                    'caption': self.translate(_(u"Publish")),
-                                    'item_match': [
-                                        'and',
-                                        ['not', ['equal', 'access', None]],
-                                        ['provides', 'versioned']]
-                                    }, {
-                                    'screen': 'settings/access',
-                                    'caption': self.translate(_(u"Access")),
-                                    'item_match': [
-                                        'and',
-                                        ['equal', 'access', 'manage'],
-                                        ['provides', 'container']]
-                                    }]
-                            },{
-                            'view': 'move',
-                            'name': 'moveable'
-                            }],
-                    'sortable': {
-                        'content_match': [
-                            'not', ['equal', 'access', None]],
-                        'action': 'order'
-                        },
-                    'collapsed': False
-                    }, {
-                    'name': 'assets',
-                    'title': self.translate(_(u'Asset(s)')),
-                    'layout': {
-                        'fixed': {
-                            0:icon_width,
-                            1:public_state_width,
-                            2:next_state_width,
-                            7:goto_width,
-                            8:move_width}},
-                    'columns': [{
-                            'name': 'icon',
-                            'view': 'action-icon',
-                            'action': 'content'
-                            }, {
-                            'name': 'status_public',
-                            'view': 'workflow'
-                            }, {
-                            'name': 'status_next',
-                            'view': 'workflow'
-                            }, {
-                            'name': 'identifier',
-                            'caption': self.translate(_(u'Identifier')),
-                            'view': 'text',
-                            'renameable': True,
-                            'filterable': True
-                            }, {
-                            'name': 'title',
-                            'caption': self.translate(_(u'Title')),
-                            'view': 'text',
-                            'renameable': True,
-                            'filterable': True
-                            }, {
-                            'name': 'modified',
-                            'caption': self.translate(_(u'Modified')),
-                            'view': 'text'
-                            }, {
-                            'name': 'author',
-                            'caption': self.translate(_(u'Author')),
-                            'view': 'text'
-                            }, {
-                            'view': 'goto',
-                            'index': {
-                                'screen': 'content',
-                                'caption': self.translate(_(u"Go to"))},
-                            'menu': [{
-                                    'screen': 'preview',
-                                    'caption': self.translate(_(u"Preview"))
-                                    }, {
-                                    'screen': 'properties',
-                                    'caption': self.translate(_(u"Properties")),
-                                    'item_match': [
-                                        'not', ['equal', 'access', None]]
-                                    }, {
-                                    'screen': 'publish',
-                                    'caption': self.translate(_(u"Publish")),
-                                    'item_match': [
-                                        'and',
-                                        ['not', ['equal', 'access', None]],
-                                        ['provides', 'versioned']]
-                                    } ]
-                            }, {
-                            'view': None
-                            }],
-                    'collapsed': True
-                    }],
+            'listing': listing_cfg,
             'actions': [{
                     'available': {'input_mode': True},
                     'actions': [{

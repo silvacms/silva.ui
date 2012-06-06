@@ -14,9 +14,9 @@ class ContentGenerator(object):
     """
 
     def __init__(self, logger=None):
-        self.__logger = logger
-        self.__get = getUtility(IIntIds).getObject
-        self.__errors = 0
+        self._logger = logger
+        self._get = getUtility(IIntIds).getObject
+        self._errors = 0
 
     def __call__(self, ids):
         """Get contents from ids. It can be None, one element or a
@@ -27,21 +27,21 @@ class ContentGenerator(object):
                 ids = [ids]
             for id in ids:
                 try:
-                    content = self.__get(int(id))
+                    content = self._get(int(id))
                 except (KeyError, ValueError):
-                    self.__errors += 1
+                    self._errors += 1
                 else:
                     yield content
 
     def __enter__(self):
-        self.__errors = 0
+        self._errors = 0
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        if exc_type is None and self.__logger is not None:
-            if self.__errors:
-                self.__logger(
+        if exc_type is None and self._logger is not None:
+            if self._errors:
+                self._logger(
                     _(u'${count} contents could not be found '
-                      u'(they probably have been deleted)',
-                      mapping={'count': self.__errors}))
+                      u'(they probably have been deleted).',
+                      mapping={'count': self._errors}))
 

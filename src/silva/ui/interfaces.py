@@ -161,3 +161,19 @@ class IJSView(Interface):
     def __call__(screen):
         """Return the JSON as a Python dictionnary for the given screen.
         """
+
+
+class IContainerJSListing(Interface):
+    """List items from a container.
+    """
+    name = Attribute(u"Unique name used to refer to listed items")
+    title = Attribute(u"User friendly title")
+    interface = Attribute(u"Unique interface that the listed items implements")
+
+    def configuration(screen):
+        """Return column configuration.
+        """
+
+    def list(container):
+        """List items (to be serialized) in the container
+        """

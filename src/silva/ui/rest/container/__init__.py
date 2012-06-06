@@ -10,12 +10,13 @@ from zope.interface import Interface
 
 from silva.core.interfaces import IContainer
 from silva.core.services.utils import walk_silva_tree
-from silva.ui.interfaces import IJSView
+from silva.ui.interfaces import IJSView, IContainerJSListing
 from silva.ui.rest.base import ActionREST
 from silva.ui.rest.invalidation import Invalidation
 from silva.ui.rest.container.serializer import ContentSerializer
 from silva.ui.rest.container.notifier import ContentNotifier
 from silva.ui.rest.container.generator import ContentGenerator
+from zeam.component import getAllComponents
 
 
 class TemplateContainerListing(rest.REST):
@@ -72,23 +73,22 @@ def get_container_changes(helper, data):
     container = serializer.get_id(helper.context)
     invalidations = Invalidation(helper.request)
 
+    added = {}
     changes = {}
     updated = []
     removed = []
-    added_publishables = []
-    added_assets = []
+
     for info in invalidations.get_changes(
         filter_func=lambda change: change['container'] == container):
         if info['action'] == 'remove':
             removed.append(info['content'])
         else:
+            if info['listing'] is None:
+                continue
             content_data = serializer(id=info['content'])
             content_data['position'] = info['position']
             if info['action'] == 'add':
-                if info['listing'] == 'assets':
-                    added_assets.append(content_data)
-                else:
-                    added_publishables.append(content_data)
+                added.setdefault(info['listing'], []).append(content_data)
             else:
                 updated.append(content_data)
 
@@ -96,13 +96,8 @@ def get_container_changes(helper, data):
         changes['remove'] = removed
     if updated:
         changes['update'] = updated
-    if added_publishables or added_assets:
-        changes['add'] = {}
-        if added_publishables:
-            changes['add']['publishables'] = added_publishables
-        else:
-            changes['add']['assets'] = added_assets
-
+    if added:
+        changes['add'] = added
     if changes:
         data['content']['actions'].update(changes)
 
@@ -146,39 +141,18 @@ class ContainerJSView(grok.MultiAdapter):
         self.context = context
         self.request = request
 
-    def get_publishable_content(self):
-        """Return all the publishable content of the container.
-        """
-        default = self.context.get_default()
-        if default is not None:
-            yield default
-        for content in self.context.get_ordered_publishables():
-            yield content
-
-    def get_non_publishable_content(self):
-        """Return all the non-publishable content of the container.
-        """
-        for content in self.context.get_non_publishables():
-            yield content
-
     def __call__(self, screen):
         serializer = ContentSerializer(screen, self.request)
+        items = {}
+        for name, listing in getAllComponents(provided=IContainerJSListing):
+            items[name] = {
+                "ifaces": ["listing-items"],
+                "items": map(
+                    serializer,
+                    listing.list(self.context))}
+
         return {
             "ifaces": ["listing"],
             "content": serializer(self.context),
-            "items": {
-                "publishables": {
-                    "ifaces": ["listing-items"],
-                    "items": map(
-                        serializer,
-                        self.get_publishable_content()),
-                    },
-                "assets": {
-                    "ifaces": ["listing-items"],
-                    "items": map(
-                        serializer,
-                        self.get_non_publishable_content()),
-                    }
-                }
-            }
+            "items": items}
 

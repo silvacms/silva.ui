@@ -3,9 +3,11 @@
 # See also LICENSE.txt
 # $Id$
 
+import operator
 import threading
 
 from five import grok
+from grokcore.component.util import sort_components
 from zope.component import getUtility
 from zope.intid.interfaces import IIntIds
 from zope.lifecycleevent.interfaces import IObjectModifiedEvent
@@ -13,12 +15,14 @@ from zope.lifecycleevent.interfaces import IObjectMovedEvent
 from transaction.interfaces import ISavepointDataManager, IDataManagerSavepoint
 import transaction
 
+from silva.ui.interfaces import IContainerJSListing
 from silva.core.cache.memcacheutils import MemcacheSlice
 from silva.core.interfaces import IRoot, IContainer, ISilvaObject
 from silva.core.interfaces import IPublishable
 from silva.core.interfaces import IVersion
 from silva.core.interfaces.adapters import IOrderManager
 from silva.core.views.interfaces import IVirtualSite
+from zeam.component import getAllComponents
 
 from Acquisition import aq_parent
 from OFS.interfaces import IObjectWillBeMovedEvent
@@ -26,6 +30,14 @@ from Products.SilvaMetadata.interfaces import IMetadataModifiedEvent
 
 
 NAMESPACE = 'silva.listing.invalidation'
+
+
+def get_interfaces():
+    return map(
+        lambda (name, listing): (name, listing.interface),
+        sort_components(
+            getAllComponents(provided=IContainerJSListing),
+            key=operator.itemgetter(1)))
 
 
 class InvalidationTransactionSavepoint(object):
@@ -48,10 +60,16 @@ class InvalidationTransaction(threading.local):
         self.transaction_manager = manager
         self.clear_entries()
 
+    def _follow(self):
+        if not self._followed:
+            transaction = self.transaction_manager.get()
+            transaction.join(self)
+            self._get_id = getUtility(IIntIds).register
+            self._interfaces = get_interfaces()
+            self._followed = True
+
     def add_entry(self, entry):
-        if not self._joined:
-            self.transaction_manager.get().join(self)
-            self._joined = True
+        self._follow()
         self._entries.append(entry)
 
     def set_entries(self, entries):
@@ -59,7 +77,37 @@ class InvalidationTransaction(threading.local):
 
     def clear_entries(self):
         self._entries = []
-        self._joined = False
+        self._get_id = None
+        self._followed = False
+
+    def register_entry(self, target, action):
+        container = aq_parent(target)
+        if container is None:
+            # The object is not yet in the content tree.
+            return
+        self._follow()
+        listing = None
+        for name, iface in self._interfaces:
+            if iface.providedBy(target):
+                listing = name
+                break
+        data = {
+            'action': action,
+            'listing': listing,
+            'container': self._get_id(container),
+            'content': self._get_id(target)}
+        if action != 'remove':
+            order = IOrderManager(container, None)
+            if order is not None:
+                position = order.get_position(target) + 1
+                if not position:
+                    if not (IPublishable.providedBy(target) and
+                            target.is_default()):
+                        position = -1
+            else:
+                position = -1
+            data['position'] = position
+        self.add_entry(data)
 
     def sortKey(self):
         # This should let us appear after the Data.fs ...
@@ -152,58 +200,29 @@ class Invalidation(object):
         return reversed(pass_two)
 
 
-def register_change(target, action):
-    container = aq_parent(target)
-    if container is None:
-        # The object is not yet in the content tree.
-        return
-    get_id = getUtility(IIntIds).register
-    is_publishable = IPublishable.providedBy(target)
-    is_container = False
-    listing = 'assets'
-    if is_publishable:
-        is_container = IContainer.providedBy(target)
-        listing = 'publishables'
-        if is_container:
-            listing = 'container'
-    data = {
-        'action': action,
-        'listing': listing,
-        'container': get_id(container),
-        'content': get_id(target)}
-    if action != 'remove':
-        order = IOrderManager(container, None)
-        if order is not None:
-            position = order.get_position(target) + 1
-            if not position:
-                if not (is_publishable and target.is_default()):
-                    position = -1
-        else:
-            position = -1
-        data['position'] = position
-    invalidation_transaction.add_entry(data)
-
-
 @grok.subscribe(ISilvaObject, IObjectModifiedEvent)
 def register_update(target, event):
-    register_change(target, 'update')
+    invalidation_transaction.register_entry(target, 'update')
 
 
 @grok.subscribe(IVersion, IObjectModifiedEvent)
 def register_version_update(target, event):
-    register_change(target.get_silva_object(), 'update')
+    invalidation_transaction.register_entry(
+        target.get_silva_object(), 'update')
 
 
 @grok.subscribe(ISilvaObject, IMetadataModifiedEvent)
 def register_title_update(target, event):
     if 'maintitle' in event.changes:
-        register_change(target, 'update')
+        invalidation_transaction.register_entry(
+            target, 'update')
 
 
 @grok.subscribe(IVersion, IMetadataModifiedEvent)
 def register_version_title_update(target, event):
     if 'maintitle' in event.changes:
-        register_change(target.get_silva_object(), 'update')
+        invalidation_transaction.register_entry(
+            target.get_silva_object(), 'update')
 
 
 @grok.subscribe(ISilvaObject, IObjectMovedEvent)
@@ -214,10 +233,12 @@ def register_move(target, event):
         # That was not a delete
         if event.oldParent is event.newParent:
             # This was a rename.
-            register_change(target, 'update')
+            invalidation_transaction.register_entry(
+                target, 'update')
         else:
             # This was an add.
-            register_change(target, 'add')
+            invalidation_transaction.register_entry(
+                target, 'add')
 
 
 @grok.subscribe(ISilvaObject, IObjectWillBeMovedEvent)
@@ -231,7 +252,9 @@ def register_remove(target, event):
         if event.object is target:
             if event.newParent is not event.oldParent:
                 # That was a move or a delete, but not a rename
-                register_change(target, 'remove')
+                invalidation_transaction.register_entry(
+                    target, 'remove')
         elif event.newParent is None:
             # This was a recursive delete
-            register_change(target, 'remove')
+            invalidation_transaction.register_entry(
+                target, 'remove')
