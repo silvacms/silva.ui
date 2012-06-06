@@ -6,9 +6,11 @@
 from five import grok
 from infrae import rest
 from grokcore.chameleon.components import ChameleonPageTemplate
+from zope.interface import Interface
 
 from silva.core.interfaces import IContainer
 from silva.core.services.utils import walk_silva_tree
+from silva.ui.interfaces import IJSView
 from silva.ui.rest.base import ActionREST
 from silva.ui.rest.invalidation import Invalidation
 from silva.ui.rest.container.serializer import ContentSerializer
@@ -134,4 +136,49 @@ class FolderActionREST(ActionREST):
         return {'content': {'ifaces': ['listing-changes'],
                             'actions': actions}}
 
+
+class ContainerJSView(grok.MultiAdapter):
+    grok.provides(IJSView)
+    grok.adapts(IContainer, Interface)
+    grok.name('container')
+
+    def __init__(self, context, request):
+        self.context = context
+        self.request = request
+
+    def get_publishable_content(self):
+        """Return all the publishable content of the container.
+        """
+        default = self.context.get_default()
+        if default is not None:
+            yield default
+        for content in self.context.get_ordered_publishables():
+            yield content
+
+    def get_non_publishable_content(self):
+        """Return all the non-publishable content of the container.
+        """
+        for content in self.context.get_non_publishables():
+            yield content
+
+    def __call__(self, screen):
+        serializer = ContentSerializer(screen, self.request)
+        return {
+            "ifaces": ["listing"],
+            "content": serializer(self.context),
+            "items": {
+                "publishables": {
+                    "ifaces": ["listing-items"],
+                    "items": map(
+                        serializer,
+                        self.get_publishable_content()),
+                    },
+                "assets": {
+                    "ifaces": ["listing-items"],
+                    "items": map(
+                        serializer,
+                        self.get_non_publishable_content()),
+                    }
+                }
+            }
 
