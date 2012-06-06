@@ -28,45 +28,6 @@
         infrae.ui.selection.disable($header);
     };
 
-    /**
-     * Render/bind top container header (of publishables or assets for instance).
-     * @param $header: header JQuery element.
-     * @param $container: container JQuery element associated to the header.
-     * @param configuration: listing configuration.
-     */
-    var render_container_header = function($header, $container, configuration) {
-        var $marker = $header.children('ins.ui-icon');
-
-        var toggle_marker = function() {
-            // Update the jQueryUI class on the marker (would be
-            // too easy otherwise).
-            if ($marker.hasClass('ui-icon-triangle-1-e')) {
-                $marker.removeClass('ui-icon-triangle-1-e');
-                $marker.addClass('ui-icon-triangle-1-s');
-            } else {
-                $marker.removeClass('ui-icon-triangle-1-s');
-                $marker.addClass('ui-icon-triangle-1-e');
-            };
-        };
-        var toggle_collapsing = function () {
-            configuration.collapsed = !configuration.collapsed;
-            toggle_marker();
-            $header.toggleClass('collapsed');
-            $container.toggleClass('collapsed');
-            $header.trigger('collapsingchange-smilisting');
-        };
-
-        if (configuration.collapsed) {
-            toggle_marker();
-            $header.addClass('collapsed');
-            $container.addClass('collapsed');
-            $header.trigger('collapsingchange-smilisting');
-        };
-        $header.bind('click', function(event) {
-            toggle_collapsing();
-            return false;
-        });
-    };
 
     /**
      * Render/bind the user selection process.
@@ -246,224 +207,6 @@
 
     var worker = infrae.deferred.LazyCallbacks();
 
-    var render_container = function(name, configuration, lines, mover) {
-        var $content = $('dd.' + name);
-        var $header = $('dt.' + name);
-        var $table = $content.find('table');
-        var $container = $table.find('tbody');
-
-        // Collapse feature / table header.
-        render_container_header($header, $content, configuration);
-
-        // Insert a line at the correct position.
-        var insert_line = function($line, data, position) {
-            if (position > -1) {
-                var $after = $container.children().eq(position);
-                if ($after.length) {
-                    $after.before($line);
-                } else {
-                    $container.append($line);
-                };
-            } else {
-                $container.append($line);
-            };
-        };
-
-        var render_line = function(data) {
-            // Add a data line to the table
-            var $line = $('<tr class="item"></tr>');
-            var line = {};
-
-            $line.attr('id', 'list' + data['id'].toString());
-
-            var render_cell = function(column) {
-                var $cell = $('<td></td>');
-
-                if (column.view) {
-                    $cell.bind('refreshcell-smilisting', function(event, data) {
-                        var $cell = $(this);
-                        var value = null;
-
-                        if (column.name) {
-                            value = data[column.name];
-                        };
-                        infrae.smi.listing.columns.render($cell, {
-                            data: data,
-                            name: column.view,
-                            ifaces: ['object'],
-                            args: [column, value]});
-                        event.stopPropagation();
-                        event.preventDefault();
-                    });
-                    if (column.name !== undefined && column.renameable !== undefined) {
-                        $cell.addClass('renameable');
-                        $cell.bind('renamecell-smilisting', function(event, data) {
-                            event.stopPropagation();
-                            event.preventDefault();
-
-                            if (column.renameable.item_match !== undefined &&
-                                !infrae.utils.test(data, column.renameable.item_match)) {
-                                return;
-                            };
-                            var $cell = $(this);
-                            var $field = $('<input class="renaming" type="text" />');
-
-                            $field.attr('name', column.name);
-                            $field.val(data[column.name]);
-                            $cell.empty();
-                            $cell.append($field);
-                        });
-                    };
-                };
-                $line.append($cell);
-            };
-
-            infrae.utils.each(configuration.columns, render_cell);
-
-            $.extend(line, {
-                update: function(data) {
-                    if (data != undefined) {
-                        $line.data('smilisting', data);
-                        if (data.position > -1) {
-                            // Position might have changed.
-                            var new_position = data.position;
-                            var $first = $container.children('tr.item:first');
-
-                            if ($first.length && $first.data('smilisting').moveable) {
-                                new_position -= 1;
-                            };
-                            if (new_position > 0 && $container.children().index($line) != new_position) {
-                                $line.detach();
-                                insert_line($line, data, new_position);
-                            };
-                        };
-                    } else {
-                        data = $line.data('smilisting');
-                    };
-                    $line.children().each(function() {
-                        $(this).triggerHandler('refreshcell-smilisting', data);
-                    });
-                },
-                rename: function() {
-                    var data = $line.data('smilisting');
-
-                    $line.find('td.renameable').each(function () {
-                        $(this).triggerHandler('renamecell-smilisting', data);
-                    });
-                },
-                values: function() {
-                    var $inputs = $line.find('input.renaming');
-
-                    if (!$inputs.length) {
-                        return undefined;
-                    };
-
-                    var data = $line.data('smilisting');
-                    var values = {id: data['id']};
-
-                    $inputs.each(function () {
-                        var $input = $(this);
-                        values[$input.attr('name')] = $input.val();
-                    });
-                    return values;
-                }
-            });
-
-            line.update(data);
-            $line.data('smilisting-line', line);
-            insert_line($line, data, data.position);
-            return $line.get(0);
-        };
-
-        var container = {
-            add: function(lines, initial) {
-                if (lines.length) {
-                    if (!initial) {
-                        $container.children('.empty').remove();
-                    };
-                    // For setting column widths, set column groups.
-                    $table.prepend("<colgroup>" +
-                                   Array(configuration.columns.length + 1).join("<col></col>") +
-                                   "</colgroup>");
-
-                    this.add = function(lines) {
-                        return worker.add(lines, render_line);
-                    };
-                    return container.add(lines);
-                } else if (initial) {
-                    // Add a message no lines.
-                    $container.append(
-                        '<tr class="empty"><td colpsan="' + configuration.columns.length + '">There is no items here.</td></tr>');
-                };
-                var deferred = $.Deferred();
-                deferred.resolve([]);
-                return deferred.promise();
-            },
-            $container: $container,
-            $table: $table
-        };
-
-        // Add default data
-        container.promise = container.add(lines, true);
-
-        // Bind table sort if needed
-        if (mover) {
-            var original_position = null;
-
-            $container.tableDnD({
-                dragHandle: "moveable",
-                onDragClass: "moving",
-                onAllowDrop: function(row, candidate){
-                    // don't drop on the first row, it is default.
-                    return $(candidate).data('smilisting').moveable != 0;
-                },
-                onDragStart: function(row) {
-                    if ($table.hasClass('filtering')) {
-                        return false;
-                    };
-                    // Reset hover style and mouse last_selected_index. Save row index.
-                    original_position = $(row).parent('tr').index();
-                    $table.trigger('resetselection-smilisting');
-                    $table.removeClass('static');
-                },
-                onDrop: function(row) {
-                    var $line = $(row);
-                    var position = $line.index();
-                    var data = $line.data('smilisting');
-
-                    if (position != original_position) {
-                        // The row moved.
-                        if (position > original_position)
-                            original_position -= 1; // Fix original index in case of failure.
-
-                        // If the first line is not moveable, reduce the index of 1.
-                        if (!$container.children('tr.item:first').data('smilisting').moveable) {
-                            position -= 1;
-                        };
-                        mover([{name: 'content', value: data['id']},
-                               {name: 'position', value: position}]).pipe(function (success) {
-                                   if (!success) {
-                                       // The moving failed. Restore the row position.
-                                       if (position < original_position) {
-                                           original_position -= 1;
-                                       };
-                                       $line.detach();
-                                       $line.insertAfter(
-                                           $container.children('tr.item:eq(' + original_position + ')'));
-                                   };
-                                   $table.addClass('static');
-                                   return success;
-                               });
-                    } else {
-                        $table.addClass('static');
-                    };
-                }
-            });
-        };
-
-        return container;
-    };
-
     var get_dom_line = function(id) {
         return document.getElementById('list' + id.toString());
     };
@@ -504,7 +247,6 @@
     $(document).bind('load-smilisting', function(event, data) {
         var smi = data.smi;
         var configuration = data.configuration;
-        var action_url_template = new jsontemplate.Template(smi.options.listing.action, {});
 
         infrae.views.view({
             iface: 'listing',
@@ -622,11 +364,7 @@
                             });
                             return transaction;
                         },
-                        query_server: function(action, data) {
-                            return smi.ajax.query(
-                                action_url_template.expand({path: smi.opened.path, action: action}),
-                                data);
-                        }
+                        query: configuration.query
                     });
                     return status;
                 });
@@ -686,7 +424,7 @@
                                 $container.children('.item').each(function (i) {
                                     var $line = $(this);
 
-                                    if (configuration.filter_entry(pattern, $line.data('smilisting'))) {
+                                    if (configuration.filter(pattern, $line.data('smilisting'))) {
                                         $line.show();
                                     } else {
                                         $line.hide();
@@ -716,6 +454,8 @@
                         };
                     },
                     render: function() {
+                        var $listing = $content.find('dl.listing');
+
                         // Shortcut
                         smi.shortcuts.create('listing', $content, true);
 
@@ -724,33 +464,29 @@
 
                         // Create containers
                         var promises = [];
+
                         $.each(configuration.listing, function(i, configuration) {
-                            var mover = null;
+                            var api = {worker: worker};
 
                             if (configuration.sortable &&
                                 infrae.utils.test(data.content, configuration.sortable.content_match)) {
-                                mover = function (data) {
-                                    return smi.ajax.query(
-                                        action_url_template.expand(
-                                            {path: smi.opened.path,
-                                             action: configuration.sortable.action}),
-                                        data);
-                                };
+                                api.sort = configuration.sortable.sort;
                             };
 
-                            var container = render_container(
-                                configuration.name,
-                                configuration,
-                                data.items[configuration.name],
-                                mover);
-                            promises.push(container.promise);
-                            $containers = $containers.add(container.$container);
-                            by_name[configuration.name] = container;
+                            promises.push(
+                                infrae.views.render(
+                                    $listing,
+                                    {data: data.items[configuration.name],
+                                     name: 'listing-container',
+                                     args: [configuration, api]}));
+
+                            $containers = $containers.add(api.$container);
+                            by_name[configuration.name] = api;
                         });
 
                         // Selection
                         render_selection(
-                            $content.find('dl.listing'),
+                            $listing,
                             $containers,
                             function ($items) {
                                 if (selection.toggle($items)) {
@@ -848,37 +584,48 @@
             async: false,
             dataType: 'json',
             success: function(configuration) {
+                var url_template = new jsontemplate.Template(smi.options.listing.action, {});
+
                 // Register content interfaces.
                 for (var iface in configuration.ifaces) {
                     infrae.interfaces.register(iface, configuration.ifaces[iface]);
                 };
 
-                // Add some usefull methods to the configuration object.
-                $.each(configuration.listing, function(i, configuration) {
-                    // Add column_index function
-                    configuration.column_index = function(name) {
-                        for (var i=0; i < configuration.columns.length; i++) {
-                            if (name == configuration.columns[i].name)
-                                return i;
-                        };
-                        return -1;
-                    };
+                $.extend(configuration, {
+                    query: function(action, data) {
+                        return smi.ajax.query(
+                            url_template.expand({path: smi.opened.path, action: action}),
+                            data);
+                    }
+                });
 
-                    // Add filter_entry function
+                // Add some usefull methods to the configuration object.
+                $.each(configuration.listing, function(i, section) {
+                    // Add filter function
                     var names = [];
 
-                    $.each(configuration.columns, function(e, column) {
+                    $.each(section.columns, function(e, column) {
                         if (column.filterable) {
                             names.push(column.name);
                         };
                     });
-                    configuration.filter_entry = function(pattern, data) {
-                        for (var i=0; i < names.length ; i++) {
-                            if (data[names[i]].match(pattern))
-                                return true;
-                        };
-                        return false;
-                    };
+
+                    $.extend(section, {
+                        filter: function(pattern, data) {
+                            for (var i=0, len=names.length; i < len; i++) {
+                                if (data[names[i]].match(pattern))
+                                    return true;
+                            };
+                            return false;
+                        }
+                    });
+                    if (section.sortable) {
+                        $.extend(section.sortable, {
+                            sort: function(data) {
+                                return configuration.query(section.sortable.action, data);
+                            }
+                        });
+                    }
                 });
 
                 // Load smilisting.

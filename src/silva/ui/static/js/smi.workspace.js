@@ -8,9 +8,9 @@
         name: 'content',
         factory: function($content, data, smi) {
             return {
-                data_template: true,
+                template_data: true,
+                template_nocache: true,
                 iframe: true,
-                nocache: true,
                 cleanup: function() {
                     $content.empty();
                 }

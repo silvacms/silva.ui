@@ -62,6 +62,7 @@ class ISilvaUI(ISilvaUIDependencies):
     silvaconf.resource('js/listing.js')
     silvaconf.resource('js/listing.selection.js')
     silvaconf.resource('js/listing.columns.js')
+    silvaconf.resource('js/listing.items.js')
     silvaconf.resource('js/listing.toolbar.js')
     silvaconf.resource('js/listing.footer.js')
 

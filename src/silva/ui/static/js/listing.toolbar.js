@@ -165,7 +165,7 @@
                                             }, payload);
                                             break;
                                         }
-                                        data.query_server(definition.action.rest.action, payload).pipe(
+                                        data.query(definition.action.rest.action, payload).pipe(
                                             function (result) {
                                                 return $content.render({
                                                     data: result,
@@ -212,7 +212,7 @@
                                                 return $.Deferred().reject();
                                             };
                                             payload.push({name: 'values', value: count});
-                                            return data.query_server(
+                                            return data.query(
                                                 definition.action.input.action,
                                                 payload
                                             ).pipe(function (result) {

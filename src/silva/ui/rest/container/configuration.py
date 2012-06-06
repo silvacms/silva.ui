@@ -31,6 +31,7 @@ class ColumnsContainerListing(UIREST):
                 },
             'listing': [{
                     'name': 'publishables',
+                    'title': self.translate(_(u'Structual content(s)')),
                     'layout': {
                         'fixed': {
                             0:icon_width,
@@ -128,6 +129,7 @@ class ColumnsContainerListing(UIREST):
                     'collapsed': False
                     }, {
                     'name': 'assets',
+                    'title': self.translate(_(u'Asset(s)')),
                     'layout': {
                         'fixed': {
                             0:icon_width,

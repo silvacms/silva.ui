@@ -5,24 +5,6 @@
     </table>
   </div>
   <dl class="listing">
-    <dt class="publishables ui-state-default">
-      <ins class="ui-icon ui-icon-triangle-1-s"></ins>
-      <tal:msg i18n:translate="">Structural content(s)</tal:msg>
-    </dt>
-    <dd class="publishables">
-      <table class="static">
-        <tbody></tbody>
-      </table>
-    </dd>
-    <dt class="assets ui-state-default">
-      <ins class="ui-icon ui-icon-triangle-1-s"></ins>
-      <tal:msg i18n:translate="">Asset(s)</tal:msg>
-    </dt>
-    <dd class="assets">
-      <table class="static">
-        <tbody></tbody>
-      </table>
-    </dd>
   </dl>
   <div class="listing-footer">
     <div class="listing-footer-loading">

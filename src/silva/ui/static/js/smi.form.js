@@ -142,7 +142,7 @@
             var $forms = $([]);
 
             return {
-                data_template: true,
+                template_data: true,
                 render: function() {
                     // Add content
                     if (data.portlets) {

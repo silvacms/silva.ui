@@ -127,38 +127,52 @@
 
         // finish to render the view using the given template
         var render = function(template) {
-            // Clean content if needed (call cleanup callback)
-            $content.triggerHandler('cleanup-infrae-views');
+            if (!view.template_append) {
+                // Clean content if needed (call cleanup callback)
+                $content.triggerHandler('cleanup-infrae-views');
 
-            if (view.cleanup || view.iframe) {
-                // Install new cleanup callback
-                $content.one('cleanup-infrae-views', function() {
-                    if (view.cleanup)
-                        view.cleanup();
-                    if (view.iframe) {
-                        $(window).unbind('resize.infrae-views-iframe');
-                        $(window).unbind('workspace-resize-smi.infrae-views-iframe');
-                        $content.removeClass('iframe-view');
-                    }
-                });
+                if (view.cleanup || view.iframe) {
+                    // Install new cleanup callback
+                    $content.one('cleanup-infrae-views', function() {
+                        if (view.cleanup)
+                            view.cleanup();
+                        if (view.iframe) {
+                            $(window).unbind('resize.infrae-views-iframe');
+                            $(window).unbind('workspace-resize-smi.infrae-views-iframe');
+                            $content.removeClass('iframe-view');
+                        }
+                    });
+                };
             };
 
             // Make a finalizer that call render and finish.
             var deferred = $.Deferred();
             var $context = $content;
-            var finalizer = function() {
-                if (view.render != undefined) {
-                    view.render($context);
-                };
+            var resolve = function() {
                 if (reject != undefined) {
                     deferred.rejectWith(view, reject);
                 } else {
                     deferred.resolveWith(view);
                 };
             };
+            var finalizer = function() {
+                var done = null;
+
+                if (view.render != undefined) {
+                    done = view.render($context);
+                    if (done && done.promise) {
+                        done.promise().done(resolve);
+                        return;
+                    };
+                };
+                resolve();
+            };
 
             // Insert content and call render.
             if (view.iframe) {
+                if (view.template_append) {
+                    throw {message: 'Cannot use iframe and template_append together'};
+                };
                 var $iframe = $('<iframe src="">');
 
                 var resize = function() {
@@ -200,7 +214,12 @@
                 };
             } else {
                 if (template !== undefined) {
-                    $content.html(template);
+                    if (view.template_append) {
+                        $context = $(template);
+                        $content.append($context);
+                    } else {
+                        $content.html(template);
+                    };
                 };
             };
             finalizer();
@@ -211,10 +230,10 @@
         return function() {
             var template = undefined;
             // Remote JSON
-            var jsont_url = view.data_template && data.jsont_url || view.jsont_url;
+            var jsont_url = view.template_data && data.jsont_url || view.jsont_url;
             if (jsont_url) {
                 // First look in the cache for data.
-                if (!view.nocache) {
+                if (!view.template_nocache) {
                     template = template_cache[jsont_url];
                     if (template !== undefined) {
                         return render(template.expand(view));
@@ -231,10 +250,10 @@
             };
 
             // Remote HTML
-            var html_url = view.data_template && data.html_url || view.html_url;
+            var html_url = view.template_data && data.html_url || view.html_url;
             if (html_url) {
                 // First look in the cache for data.
-                if (!view.nocache) {
+                if (!view.template_nocache) {
                     template = template_cache[html_url];
                     if (template !== undefined) {
                         return render(template);
@@ -250,7 +269,7 @@
             };
 
             // Local JSON
-            var jsont = view.data_template && data.jsont || view.jsont;
+            var jsont = view.template_data && data.jsont || view.jsont;
             if (jsont !==undefined) {
                 template = template_cache[jsont];
 
@@ -262,7 +281,7 @@
             };
 
             // Local HTML
-            var html = view.data_template && data.html || view.html;
+            var html = view.template_data && data.html || view.html;
             if (html !== undefined) {
                 return render(html);
             };
