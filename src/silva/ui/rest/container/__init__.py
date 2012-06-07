@@ -6,34 +6,14 @@
 from five import grok
 from infrae import rest
 from grokcore.chameleon.components import ChameleonPageTemplate
-from zope.interface import Interface
 
 from silva.core.interfaces import IContainer
 from silva.core.services.utils import walk_silva_tree
-from silva.ui.interfaces import IJSView, IContainerJSListing
 from silva.ui.rest.base import ActionREST
 from silva.ui.rest.invalidation import Invalidation
 from silva.ui.rest.container.serializer import ContentSerializer
 from silva.ui.rest.container.notifier import ContentNotifier
 from silva.ui.rest.container.generator import ContentGenerator
-from zeam.component import getAllComponents
-
-
-class TemplateContainerListing(rest.REST):
-    grok.context(IContainer)
-    grok.name('silva.ui.listing.template')
-    grok.require('silva.ReadSilvaContent')
-
-    template = ChameleonPageTemplate(filename="templates/listing.cpt")
-
-    def default_namespace(self):
-        return {}
-
-    def namespace(self):
-        return {'rest': self}
-
-    def GET(self):
-        return self.template.render(self)
 
 
 class ListingPreview(rest.REST):
@@ -130,29 +110,3 @@ class FolderActionREST(ActionREST):
         self.need(get_container_changes)
         return {'content': {'ifaces': ['listing-changes'],
                             'actions': actions}}
-
-
-class ContainerJSView(grok.MultiAdapter):
-    grok.provides(IJSView)
-    grok.adapts(IContainer, Interface)
-    grok.name('container')
-
-    def __init__(self, context, request):
-        self.context = context
-        self.request = request
-
-    def __call__(self, screen):
-        serializer = ContentSerializer(screen, self.request)
-        items = {}
-        for name, listing in getAllComponents(provided=IContainerJSListing):
-            items[name] = {
-                "ifaces": ["listing-items"],
-                "items": map(
-                    serializer,
-                    listing.list(self.context))}
-
-        return {
-            "ifaces": ["listing"],
-            "content": serializer(self.context),
-            "items": items}
-

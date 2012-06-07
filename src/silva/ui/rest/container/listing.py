@@ -4,21 +4,69 @@
 # $Id$
 
 from five import grok
-from zeam import component
-from silva.translations import translate as _
-from silva.ui.interfaces import IContainerJSListing
+from grokcore.chameleon.components import ChameleonPageTemplate
+from infrae import rest
+from zope.interface import Interface
+
+from silva.core.interfaces import IContainer
 from silva.core.interfaces import IPublishable, INonPublishable
+from silva.translations import translate as _
+from silva.ui.interfaces import IJSView, IContainerJSListing
+from silva.ui.rest.container.serializer import ContentSerializer
+from zeam.component import Component, getAllComponents
 
 from Products.Silva.ExtensionRegistry import meta_types_for_interface
 
-icon_width = 26
-public_state_width = 16
-next_state_width = 16
-goto_width = 88
-move_width = 26
+ICON_WIDTH = 26
+PUBLIC_STATE_WIDTH = 16
+NEXT_STATE_WIDTH = 16
+GOTO_WIDTH = 88
+MOVE_WIDTH = 26
 
 
-class ContainerListing(component.Component):
+class ContainerJSView(grok.MultiAdapter):
+    grok.provides(IJSView)
+    grok.adapts(IContainer, Interface)
+    grok.name('container')
+
+    def __init__(self, context, request):
+        self.context = context
+        self.request = request
+
+    def __call__(self, screen):
+        serializer = ContentSerializer(screen, self.request)
+        items = {}
+        for name, listing in getAllComponents(provided=IContainerJSListing):
+            items[name] = {
+                "ifaces": ["listing-items"],
+                "items": map(
+                    serializer,
+                    listing.list(self.context))}
+
+        return {
+            "ifaces": ["listing"],
+            "content": serializer(self.context),
+            "items": items}
+
+
+class TemplateContainerListing(rest.REST):
+    grok.context(IContainer)
+    grok.name('silva.ui.listing.template')
+    grok.require('silva.ReadSilvaContent')
+
+    template = ChameleonPageTemplate(filename="templates/listing.cpt")
+
+    def default_namespace(self):
+        return {}
+
+    def namespace(self):
+        return {'rest': self}
+
+    def GET(self):
+        return self.template.render(self)
+
+
+class ContainerListing(Component):
     grok.implements(IContainerJSListing)
     grok.provides(IContainerJSListing)
     grok.baseclass()
@@ -32,12 +80,13 @@ class ContainerListing(component.Component):
             'title': screen.translate(cls.title),
             'layout': {
                 'fixed': {
-                    0:icon_width,
-                    1:public_state_width,
-                    2:next_state_width,
-                    7:goto_width,
-                    8:move_width
+                    0: ICON_WIDTH,
+                    1: PUBLIC_STATE_WIDTH,
+                    2: NEXT_STATE_WIDTH,
+                    7: GOTO_WIDTH,
+                    8: MOVE_WIDTH
                     }},
+            'collapsed': True,
             'columns': [{
                     'name': 'icon',
                     'view': 'action-icon',
@@ -119,12 +168,6 @@ class ContainerListing(component.Component):
                     'view': 'move',
                     'name': 'moveable'
                     }],
-            'sortable': {
-                'content_match': [
-                    'not', ['equal', 'access', None]],
-                'action': 'order'
-                },
-            'collapsed': False
             }
 
     @classmethod
@@ -139,6 +182,19 @@ class PublishableContainerListing(ContainerListing):
     grok.order(10)
     title = _(u'Structual content(s)')
     interface = IPublishable
+
+    @classmethod
+    def configuration(cls, screen):
+        cfg = super(PublishableContainerListing, cls).configuration(screen)
+        cfg.update({
+            'sortable': {
+                'content_match': [
+                    'not', ['equal', 'access', None]],
+                'action': 'order'
+                },
+            'collapsed': False
+            })
+        return cfg
 
     @classmethod
     def list(cls, container):
