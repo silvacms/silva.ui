@@ -376,22 +376,29 @@
                     var others = [];
                     var other_layouts = [];
 
-                    $.each(configuration.listing, function(i, configuration) {
-                        var $table = by_name[configuration.name].$table;
+                    $.each(configuration.listing, function(i, section) {
+                        var container = by_name[section.name];
+                        var $table;
+
+                        if (container === undefined) {
+                            return;
+                        };
+                        $table = container.$table;
 
                         if ($table.is(':visible') && $table.find('tr.item').length) {
                             if ($reference === null) {
                                 $reference = $table;
-                                layout = configuration.layout;
+                                layout = section.layout;
                             } else {
                                 others.push($table);
-                                other_layouts.push(configuration.layout);
+                                other_layouts.push(section.layout);
                             };
                         };
                     });
 
                     if ($reference !== null) {
-                        var update = infrae.ui.updateTableColumnsWidths;
+                        var update = infrae.ui.update_table_columns;
+
                         update($reference, layout);
                         update($header, {}, $reference);
 
@@ -467,6 +474,11 @@
 
                         $.each(configuration.listing, function(i, configuration) {
                             var api = {worker: worker};
+
+                            if (configuration.content_match &&
+                                !infrae.utils.test(data.content, configuration.content_match)) {
+                                return;
+                            };
 
                             if (configuration.sortable &&
                                 infrae.utils.test(data.content, configuration.sortable.content_match)) {

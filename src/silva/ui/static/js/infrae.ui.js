@@ -262,7 +262,7 @@
          * @param options: Object which can contain a 'source' jQuery object or a
          * 'fixedColumns' object containing columnindex:pixelwidth values
          */
-        updateTableColumnsWidths: function($table, options, $reference) {
+        update_table_columns: function($table, options, $reference) {
             if (typeof(options.fixed) != 'object') {
                 options.fixed = {};
             };
