@@ -64,6 +64,7 @@ class SMI(grok.View):
         else:
             self.logo_url = self.static['img']['silva.png']()
         self.background =  '#7996ac'
+        self.name = service.name
         self.listing_preview = service.listing_preview
         self.maintenance_message = service.maintenance_message
         if service.background:

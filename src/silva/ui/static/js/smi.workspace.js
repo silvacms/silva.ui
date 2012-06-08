@@ -58,11 +58,16 @@
 
     infrae.views.view({
         iface: 'title',
-        factory: function($content, data) {
+        factory: function($content, data, smi) {
             return {
                 jsont: '<ins class="icon"></ins>{data.title}',
                 render: function() {
+                    var name = "Silva";
+                    if (smi.options.theme && smi.options.theme.name) {
+                        name = smi.options.theme.name;
+                    };
                     infrae.ui.icon($content.children('ins'), data.icon);
+                    $('head > title').html(name + " - " + data.title);
                 }
             };
         }
@@ -254,7 +259,7 @@
                     var compact = $content.hasClass('compact-header');
 
                     // Update header
-                    $metadata.children('h2').render({data: data.title});
+                    $metadata.children('h2').render({data: data.title, args: [smi, view]});
                     $metadata.children('#content-url').attr('href', url.expand({path: data.path}));
 
                     make_all_menu($metadata, data.menu, compact);

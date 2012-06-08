@@ -10,7 +10,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0;"/>
     <meta name="generator" content="Silva" />
-    <title tal:content="context.get_title_or_id()">Silva</title>
+    <title tal:content="view.name">Silva</title>
 
     <link rel="shortcut icon" href="${imgs_url}/silva.ico" />
     <link rel="apple-touch-icon" href="${imgs_url}/apple-touch-icon.png" />
@@ -88,11 +88,11 @@
               <div class="actions view-actions">
                 <ol></ol>
               </div>
-              <ol class="tabs compact-tabs"></ol>
               <h2>
                 <ins class="icon loading"></ins>
                 <tal:msg i18n:translate="">Loading...</tal:msg>
               </h2>
+              <ol class="tabs compact-tabs"></ol>
               <a href="#" id="content-url"></a>
             </div>
             <div class="toolbar">
@@ -106,6 +106,7 @@
       window.smi = $('body').SMI({
           <tal:cfg tal:replace="structure provider:smiconfiguration" />
           theme: {
+            name: "${view.name}",
             background: "${view.background}"
           },
           screen: "${view.root_url}/{path}/++rest++silva.ui/{screen}",

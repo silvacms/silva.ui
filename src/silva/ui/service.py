@@ -8,6 +8,7 @@ from five import grok
 from silva.core import conf as silvaconf
 from silva.core.services.base import SilvaService
 from silva.ui.interfaces import IUIService
+from silva.translations import translate as _
 from zeam.form import silva as silvaforms
 
 from OFS.Image import Image as ZopeImage
@@ -25,6 +26,7 @@ class UIService(SilvaService):
          'action': 'manage_settings'},) + SilvaService.manage_options
 
     # Default values
+    name = u"Silva"
     logo = None
     background = None
     listing_preview = True
@@ -46,9 +48,10 @@ class UISettings(silvaforms.ZMIForm):
     def save(self):
         data, errors = self.extractData()
         if errors:
-            self.status = u"There were errors."
+            self.status = _(u"There were errors.")
             return silvaforms.FAILURE
         background = data['background']
+        name = data['name']
         logo = data['logo']
         listing_preview = data['listing_preview']
         maintenance_message = data['maintenance_message']
@@ -65,6 +68,7 @@ class UISettings(silvaforms.ZMIForm):
             self.context.maintenance_message = maintenance_message
         else:
             self.context.maintenance_message = None
+        self.context.name = name
         self.context.listing_preview = listing_preview
         self.status = u"Modification saved."
         return silvaforms.SUCCESS
