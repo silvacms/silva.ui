@@ -9,6 +9,7 @@ import threading
 from five import grok
 from grokcore.component.util import sort_components
 from zope.component import getUtility
+from zope.interface.interfaces import ISpecification
 from zope.intid.interfaces import IIntIds
 from zope.lifecycleevent.interfaces import IObjectModifiedEvent
 from zope.lifecycleevent.interfaces import IObjectMovedEvent
@@ -33,11 +34,22 @@ NAMESPACE = 'silva.listing.invalidation'
 
 
 def get_interfaces():
-    return map(
-        lambda (name, listing): (name, listing.interface),
-        sort_components(
-            getAllComponents(provided=IContainerJSListing),
-            key=operator.itemgetter(1)))
+    """This collect all the listing interfaces available.
+    """
+
+    def get_interface((name, listing)):
+        if not ISpecification.providedBy(listing.interface):
+            return listing.interface
+        return [(str(name), listing.interface)]
+
+    return reduce(
+        operator.add,
+        map(
+            get_interface,
+            sort_components(
+                getAllComponents(provided=IContainerJSListing),
+                key=operator.itemgetter(1))),
+        [])
 
 
 class InvalidationTransactionSavepoint(object):
@@ -65,6 +77,8 @@ class InvalidationTransaction(threading.local):
             transaction = self.transaction_manager.get()
             transaction.join(self)
             self._get_id = getUtility(IIntIds).register
+            # We could get the interfaces after configuration and
+            # cache them forever
             self._interfaces = get_interfaces()
             self._followed = True
 

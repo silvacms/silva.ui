@@ -5,11 +5,14 @@
 
 from Acquisition import aq_parent
 from Products.Silva.testing import FunctionalLayer, assertTriggersEvents
-from silva.ui.rest.invalidation import Invalidation
-from silva.core.cache.memcacheutils import Reset
 from zope.publisher.browser import TestRequest
 from zope.component import getUtility
 from zope.intid.interfaces import IIntIds
+
+from silva.core.cache.memcacheutils import Reset
+from silva.core.interfaces import IContainer
+from silva.core.interfaces import IPublishable, INonPublishable
+from silva.ui.rest.invalidation import Invalidation, get_interfaces
 
 import unittest
 import transaction
@@ -38,6 +41,13 @@ class InvalidationTestCase(unittest.TestCase):
                 self.root = self.layer.get_application()
                 self.layer.login('editor')
                 self.get_id = getUtility(IIntIds).register
+
+    def test_listing_interfaces(self):
+        self.assertEqual(
+            get_interfaces(),
+            [('container', IContainer),
+             ('publishables', IPublishable),
+             ('assets', INonPublishable)])
 
     def test_nothing(self):
         request = TestRequest()
