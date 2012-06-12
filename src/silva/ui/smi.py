@@ -9,11 +9,13 @@ from five import grok
 from silva.core.interfaces import ISilvaObject, IVersion
 from silva.core.views import views as silvaviews
 from silva.core.views.interfaces import IVirtualSite
+from silva.core.views.httpheaders import ResponseHeaders
 from silva.fanstatic import need
 from silva.ui.interfaces import IUIService
 
 from zope.component import getUtility
 from zope.i18n.interfaces import IUserPreferredLanguages
+from zope.publisher.interfaces.browser import IBrowserRequest
 from zope.interface import Interface
 from zope.publisher.browser import applySkin
 from zope.traversing.browser import absoluteURL
@@ -78,6 +80,13 @@ class SMI(grok.View):
         self.root_url = root_url
         self.can_manage = getSecurityManager().checkPermission(
             'View Management Screens', self.context)
+
+
+class SMIResponseHeaders(ResponseHeaders):
+    grok.adapts(IBrowserRequest, SMI)
+
+    def cachable(self):
+        return False
 
 
 class SMIConfiguration(silvaviews.ViewletManager):
