@@ -1,8 +1,11 @@
-
+# -*- coding: utf-8 -*-
+# Copyright (c) 2012 Infrae. All rights reserved.
+# See also LICENSE.txt
+# $Id$
 
 from collections import defaultdict
 
-from zope.component import getUtility
+from zope.component import getUtility, getMultiAdapter
 from zope.cachedescriptors.property import CachedProperty
 from zope.i18n import translate
 from zope.i18n.interfaces import IUserPreferredLanguages
@@ -10,7 +13,7 @@ from zope.i18n.interfaces import IUserPreferredLanguages
 import fanstatic
 
 from silva.core.messages.interfaces import IMessageService
-from silva.core.views.interfaces import IVirtualSite
+from silva.core.views.interfaces import IVirtualSite, IContentURL
 
 from .invalidation import Invalidation
 
@@ -22,7 +25,7 @@ class UIHelper(object):
         self.context = context
         self.request = request
         site = IVirtualSite(request)
-        self.root_path = site.get_root().absolute_url_path()
+        self.root_path = site.get_root_path()
         self.root_url = site.get_root_url()
         self._providers = []
 
@@ -45,7 +48,9 @@ class UIHelper(object):
             message, target_language=self.language, context=self.request)
 
     def get_content_path(self, content):
-        return content.absolute_url_path()[len(self.root_path):] or '/'
+        content_path = getMultiAdapter(
+            (content, self.request), IContentURL).url(relative=True)
+        return content_path[len(self.root_path):] or '/'
 
 
 def get_notifications(helper, data):

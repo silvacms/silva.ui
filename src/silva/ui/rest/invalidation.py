@@ -161,7 +161,7 @@ class Invalidation(object):
         self.request = request
 
     def get_path(self):
-        return IVirtualSite(self.request).get_root().absolute_url_path()
+        return IVirtualSite(self.request).get_root_path()
 
     def get_client_version(self):
         try:

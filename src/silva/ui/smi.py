@@ -8,12 +8,12 @@ from pkg_resources import iter_entry_points
 from five import grok
 from silva.core.interfaces import ISilvaObject, IVersion
 from silva.core.views import views as silvaviews
-from silva.core.views.interfaces import IVirtualSite
+from silva.core.views.interfaces import IVirtualSite, IContentURL
 from silva.core.views.httpheaders import ResponseHeaders
 from silva.fanstatic import need
 from silva.ui.interfaces import IUIService
 
-from zope.component import getUtility
+from zope.component import getUtility, getMultiAdapter
 from zope.i18n.interfaces import IUserPreferredLanguages
 from zope.publisher.interfaces.browser import IBrowserRequest
 from zope.interface import Interface
@@ -41,12 +41,14 @@ class SMI(grok.View):
 
     def update(self):
         # Redirect to the root of the SMI if we are not already
-        root = IVirtualSite(self.request).get_root()
-        root_url = absoluteURL(root, self.request)
+        site = IVirtualSite(self.request)
+        root = site.get_root()
+        root_url = site.get_root_url()
         if root != self.context:
             # Relative path of the content from the root.
-            path = self.context.absolute_url_path()[
-                len(root.absolute_url_path()):]
+            content_path = getMultiAdapter(
+                (self.context, self.request), IContentURL).url(relative=True)
+            path = content_path[len(site.get_root_path()):]
 
             raise Redirect('/'.join((root_url, 'edit')) + '#!' + path)
 

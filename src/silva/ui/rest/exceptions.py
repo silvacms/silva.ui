@@ -3,12 +3,12 @@
 # See also LICENSE.txt
 # $Id$
 
-from silva.core.views.interfaces import ISilvaURL
-from zope.component import getMultiAdapter, queryMultiAdapter
-from zope.publisher.interfaces.browser import IBrowserPublisher
 from infrae.rest import lookupREST
 from infrae.rest.interfaces import IRESTComponent
+from zope.component import getMultiAdapter, queryMultiAdapter
+from zope.publisher.interfaces.browser import IBrowserPublisher
 
+from silva.core.views.interfaces import IContentURL
 
 clean_path = lambda p: filter(None, p.split('/'))
 reversed_clean_path = lambda p: filter(None, reversed(p.split('/')))
@@ -128,5 +128,5 @@ class RedirectToContentPreview(RedirectToPreview):
 
     def get_payload(self, caller):
         self.url = getMultiAdapter(
-            (self.content, caller.request), ISilvaURL).preview()
+            (self.content, caller.request), IContentURL).preview()
         return super(RedirectToContentPreview, self).payload(caller)
