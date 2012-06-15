@@ -281,7 +281,7 @@ form {
   width: 100%;
 }
 
-.portlets .references .item a.open-screen {
+.portlets .references .item a.edit-screen {
   float: right;
   margin-right: 5px;
   cursor: pointer;
