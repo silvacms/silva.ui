@@ -5,7 +5,7 @@
 
 from Acquisition import aq_parent
 from Products.Silva.testing import FunctionalLayer, assertTriggersEvents
-from zope.publisher.browser import TestRequest
+from Products.Silva.testing import TestRequest
 from zope.component import getUtility
 from zope.intid.interfaces import IIntIds
 
@@ -54,7 +54,7 @@ class InvalidationTestCase(unittest.TestCase):
         invalidation = Invalidation(request)
         self.assertEqual(invalidation.get_path(), '/root')
         self.assertEqual(list(invalidation.get_changes()), [])
-        self.assertEqual(request.response._cookies, {})
+        self.assertEqual(request.response.cookies, {})
 
         # This didn't change.
         self.assertEqual(list(invalidation.get_changes()), [])
@@ -71,7 +71,7 @@ class InvalidationTestCase(unittest.TestCase):
         invalidation = Invalidation(request)
         self.assertEqual(invalidation.get_path(), '/root')
         self.assertEqual(list(invalidation.get_changes()), [])
-        self.assertEqual(request.response._cookies, {})
+        self.assertEqual(request.response.cookies, {})
 
         # This didn't change.
         self.assertEqual(list(invalidation.get_changes()), [])
@@ -90,7 +90,7 @@ class InvalidationTestCase(unittest.TestCase):
 
         request = TestRequest()
         invalidation = Invalidation(request)
-        self.assertEqual(request._cookies, {})
+        self.assertEqual(request.cookies, {})
         self.assertEqual(
             list(invalidation.get_changes()),
             [{'action': 'remove',
@@ -104,7 +104,7 @@ class InvalidationTestCase(unittest.TestCase):
               'position': 1}])
         # A cookie is set (still)
         self.assertEqual(
-            request.response._cookies,
+            request.response.cookies,
             {'silva.listing.invalidation': {'path': '/root', 'value': '1'}})
 
     def test_delete_asset(self):
@@ -121,7 +121,7 @@ class InvalidationTestCase(unittest.TestCase):
 
         request = TestRequest()
         invalidation = Invalidation(request)
-        self.assertEqual(request._cookies, {})
+        self.assertEqual(request.cookies, {})
         self.assertEqual(
             list(invalidation.get_changes()),
             [{'action': 'remove',
@@ -135,7 +135,7 @@ class InvalidationTestCase(unittest.TestCase):
               'position': 1}])
         # A cookie is set (still)
         self.assertEqual(
-            request.response._cookies,
+            request.response.cookies,
             {'silva.listing.invalidation': {'path': '/root', 'value': '1'}})
 
     def test_rename_content(self):
@@ -152,7 +152,7 @@ class InvalidationTestCase(unittest.TestCase):
 
         request = TestRequest()
         invalidation = Invalidation(request)
-        self.assertEqual(request._cookies, {})
+        self.assertEqual(request.cookies, {})
         # We should have two update changes
         self.assertEqual(
             list(invalidation.get_changes()),
@@ -168,7 +168,7 @@ class InvalidationTestCase(unittest.TestCase):
               'position': 1}])
         # A cookie is set (still)
         self.assertEqual(
-            request.response._cookies,
+            request.response.cookies,
             {'silva.listing.invalidation': {'path': '/root', 'value': '1'}})
 
     def test_add_content(self):
@@ -178,7 +178,7 @@ class InvalidationTestCase(unittest.TestCase):
 
         request = TestRequest()
         invalidation = Invalidation(request)
-        self.assertEqual(request._cookies, {})
+        self.assertEqual(request.cookies, {})
         self.assertEqual(
             list(invalidation.get_changes()),
             [{'action': 'add',
@@ -193,12 +193,12 @@ class InvalidationTestCase(unittest.TestCase):
               'position': -1}])
         # A cookie is set
         self.assertEqual(
-            request.response._cookies,
+            request.response.cookies,
             {'silva.listing.invalidation': {'path': '/root', 'value': '2'}})
 
         # Now if we ask the next changes, there are none
         request = TestRequest()
-        request._cookies = {'silva.listing.invalidation': '2'}
+        request.cookies = {'silva.listing.invalidation': '2'}
         invalidation = Invalidation(request)
         self.assertEqual(list(invalidation.get_changes()), [])
 
@@ -209,7 +209,7 @@ class InvalidationTestCase(unittest.TestCase):
 
         request = TestRequest()
         invalidation = Invalidation(request)
-        self.assertEqual(request._cookies, {})
+        self.assertEqual(request.cookies, {})
         self.assertEqual(
             list(invalidation.get_changes()),
             [{'action': 'add',
@@ -224,12 +224,12 @@ class InvalidationTestCase(unittest.TestCase):
               'position': -1}])
         # A cookie is set
         self.assertEqual(
-            request.response._cookies,
+            request.response.cookies,
             {'silva.listing.invalidation': {'path': '/root', 'value': '2'}})
 
         # Now if we ask the next changes, there are none
         request = TestRequest()
-        request._cookies = {'silva.listing.invalidation': '2'}
+        request.cookies = {'silva.listing.invalidation': '2'}
         invalidation = Invalidation(request)
         self.assertEqual(list(invalidation.get_changes()), [])
 
@@ -251,7 +251,7 @@ class InvalidationTestCase(unittest.TestCase):
 
         request = TestRequest()
         invalidation = Invalidation(request)
-        self.assertEqual(request._cookies, {})
+        self.assertEqual(request.cookies, {})
         self.assertEqual(
             list(invalidation.get_changes()),
             [{'action': 'add',
@@ -266,7 +266,7 @@ class InvalidationTestCase(unittest.TestCase):
               'position': 2}])
         # A cookie is set
         self.assertEqual(
-            request.response._cookies,
+            request.response.cookies,
             {'silva.listing.invalidation': {'path': '/root', 'value': '4'}})
 
     def test_add_delete_content(self):
@@ -283,7 +283,7 @@ class InvalidationTestCase(unittest.TestCase):
 
         request = TestRequest()
         invalidation = Invalidation(request)
-        self.assertEqual(request._cookies, {})
+        self.assertEqual(request.cookies, {})
         # Since the document have added and deleted, we only see an
         # update in the folder
         self.assertEqual(list(invalidation.get_changes()), [
@@ -294,7 +294,7 @@ class InvalidationTestCase(unittest.TestCase):
                  'position': 2}])
         # A cookie is set (still)
         self.assertEqual(
-            request.response._cookies,
+            request.response.cookies,
             {'silva.listing.invalidation': {'path': '/root', 'value': '5'}})
 
     def test_modify_delete_content(self):
@@ -315,7 +315,7 @@ class InvalidationTestCase(unittest.TestCase):
 
         request = TestRequest()
         invalidation = Invalidation(request)
-        self.assertEqual(request._cookies, {})
+        self.assertEqual(request.cookies, {})
         self.assertEqual(
             list(invalidation.get_changes()),
             [{'action': 'remove',
@@ -329,7 +329,7 @@ class InvalidationTestCase(unittest.TestCase):
               'position': 1},])
         # A cookie is set
         self.assertEqual(
-            request.response._cookies,
+            request.response.cookies,
             {'silva.listing.invalidation': {'path': '/root', 'value': '2'}})
 
     def test_modify_delete_asset(self):
@@ -350,7 +350,7 @@ class InvalidationTestCase(unittest.TestCase):
 
         request = TestRequest()
         invalidation = Invalidation(request)
-        self.assertEqual(request._cookies, {})
+        self.assertEqual(request.cookies, {})
         self.assertEqual(
             list(invalidation.get_changes()),
             [{'action': 'remove',
@@ -364,7 +364,7 @@ class InvalidationTestCase(unittest.TestCase):
               'position': 1},])
         # A cookie is set
         self.assertEqual(
-            request.response._cookies,
+            request.response.cookies,
             {'silva.listing.invalidation': {'path': '/root', 'value': '2'}})
 
     def test_modify_delete_folder(self):
@@ -386,7 +386,7 @@ class InvalidationTestCase(unittest.TestCase):
 
         request = TestRequest()
         invalidation = Invalidation(request)
-        self.assertEqual(request._cookies, {})
+        self.assertEqual(request.cookies, {})
         # In case of a container delete, all event inside the
         # containers must not appear, except delete of previous content.
         self.assertEqual(
@@ -406,7 +406,7 @@ class InvalidationTestCase(unittest.TestCase):
               'position': -1}])
         # A cookie is set
         self.assertEqual(
-            request.response._cookies,
+            request.response.cookies,
             {'silva.listing.invalidation': {'path': '/root', 'value': '7'}})
 
     def test_title_title_content(self):
@@ -427,7 +427,7 @@ class InvalidationTestCase(unittest.TestCase):
 
         request = TestRequest()
         invalidation = Invalidation(request)
-        self.assertEqual(request._cookies, {})
+        self.assertEqual(request.cookies, {})
         self.assertEqual(
             list(invalidation.get_changes()),
             [{'action': 'update',
@@ -437,7 +437,7 @@ class InvalidationTestCase(unittest.TestCase):
               'position': 1}])
         # A cookie is set
         self.assertEqual(
-            request.response._cookies,
+            request.response.cookies,
             {'silva.listing.invalidation': {'path': '/root', 'value': '1'}})
 
     def test_title_title_asset(self):
@@ -458,7 +458,7 @@ class InvalidationTestCase(unittest.TestCase):
 
         request = TestRequest()
         invalidation = Invalidation(request)
-        self.assertEqual(request._cookies, {})
+        self.assertEqual(request.cookies, {})
         self.assertEqual(
             list(invalidation.get_changes()),
             [{'action': 'update',
@@ -468,7 +468,7 @@ class InvalidationTestCase(unittest.TestCase):
               'position': -1}])
         # A cookie is set
         self.assertEqual(
-            request.response._cookies,
+            request.response.cookies,
             {'silva.listing.invalidation': {'path': '/root', 'value': '1'}})
 
     def test_modify_modify_asset(self):
@@ -491,7 +491,7 @@ class InvalidationTestCase(unittest.TestCase):
 
         request = TestRequest()
         invalidation = Invalidation(request)
-        self.assertEqual(request._cookies, {})
+        self.assertEqual(request.cookies, {})
         self.assertEqual(
             list(invalidation.get_changes()),
             [{'action': 'update',
@@ -501,7 +501,7 @@ class InvalidationTestCase(unittest.TestCase):
               'position': -1}])
         # A cookie is set
         self.assertEqual(
-            request.response._cookies,
+            request.response.cookies,
             {'silva.listing.invalidation': {'path': '/root', 'value': '2'}})
 
     def test_filter_func(self):
@@ -521,7 +521,7 @@ class InvalidationTestCase(unittest.TestCase):
 
         request = TestRequest()
         invalidation = Invalidation(request)
-        self.assertEqual(request._cookies, {})
+        self.assertEqual(request.cookies, {})
         # We ask only changes about container.
         self.assertEqual(
             list(invalidation.get_changes(
@@ -538,7 +538,7 @@ class InvalidationTestCase(unittest.TestCase):
               'position': -1}])
         # A cookie is set
         self.assertEqual(
-            request.response._cookies,
+            request.response.cookies,
             {'silva.listing.invalidation': {'path': '/root', 'value': '13'}})
 
 
