@@ -251,7 +251,7 @@
                                         }).done(function(form_data) {
                                             if (form_data.extra) {
                                                 return $content.render({
-                                                    data: form_data.extra,
+                                                    data: form_data.extra.content,
                                                     args: [data.get_transaction()]
                                                 });
                                             }
