@@ -54,7 +54,7 @@ class SMITransaction(object):
         # Note: this will abort any previous changes.
         transaction.get().abort()
         self.transaction = transaction.begin()
-        catalog_queue.activate(self.transaction)
+        catalog_queue.activate()
 
     def __exit__(self, t, v, tb):
         if v is None and not self.transaction.isDoomed():
