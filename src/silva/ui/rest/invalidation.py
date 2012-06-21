@@ -19,8 +19,8 @@ import transaction
 from silva.ui.interfaces import IContainerJSListing
 from silva.core.cache.memcacheutils import MemcacheSlice
 from silva.core.interfaces import IRoot, IContainer, ISilvaObject
-from silva.core.interfaces import IPublishable
-from silva.core.interfaces import IVersion
+from silva.core.interfaces import IPublishable, IVersion
+from silva.core.interfaces import IUpgradeTransaction
 from silva.core.interfaces.adapters import IOrderManager
 from silva.core.views.interfaces import IVirtualSite
 from zeam.component import getAllComponents
@@ -82,6 +82,9 @@ class InvalidationTransaction(threading.local):
             self._interfaces = get_interfaces()
             self._followed = True
 
+    def disable(self):
+        self._active = False
+
     def add_entry(self, entry):
         self._follow()
         self._entries.append(entry)
@@ -93,8 +96,11 @@ class InvalidationTransaction(threading.local):
         self._entries = []
         self._get_id = None
         self._followed = False
+        self._active = True
 
     def register_entry(self, target, action):
+        if not self._active:
+            return
         container = aq_parent(target)
         if container is None:
             # The object is not yet in the content tree.
@@ -153,6 +159,11 @@ class InvalidationTransaction(threading.local):
 
 
 invalidation_transaction = InvalidationTransaction(transaction.manager)
+
+
+@grok.subscribe(IUpgradeTransaction)
+def disable_upgrade(event):
+    invalidation_transaction.disable()
 
 
 class Invalidation(object):
