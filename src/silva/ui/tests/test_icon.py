@@ -36,6 +36,9 @@ class IconTestCase(unittest.TestCase):
         self.assertEqual(
             resolver.get_tag(identifier='default'),
             '<img height="16" width="16" src="http://localhost/root/++static++/silva.icons/silvageneric.gif" alt="default" />')
+        self.assertEqual(
+            resolver.get_tag(),
+            '<img height="16" width="16" src="http://localhost/root/++static++/silva.icons/missing.png" alt="Missing" />')
 
 
 def test_suite():
