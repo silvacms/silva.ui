@@ -46,6 +46,10 @@ div.actions ol li a:hover {
   background: #fff;
   border-color: #888;
   color: #222;
+  -moz-border-radius: 3px;
+  -ms-border-radius: 3px;
+  -o-border-radius: 3px;
+  border-radius: 3px;
 }
 
 div.actions .dropdown {
