@@ -376,7 +376,7 @@
                     var others = [];
                     var other_layouts = [];
 
-                    $.each(configuration.listing, function(i, section) {
+                    infrae.utils.each(configuration.listing, function(section) {
                         var container = by_name[section.name];
                         var $table;
 
