@@ -76,18 +76,20 @@ class InvalidationTransaction(threading.local):
         if not self._followed:
             transaction = self.transaction_manager.get()
             transaction.join(self)
-            self._get_id = getUtility(IIntIds).register
-            # We could get the interfaces after configuration and
-            # cache them forever
-            self._interfaces = get_interfaces()
+            if self._active:
+                self._get_id = getUtility(IIntIds).register
+                # We could get the interfaces after configuration and
+                # cache them forever
+                self._interfaces = get_interfaces()
             self._followed = True
 
     def disable(self):
         self._active = False
+        self._follow()
 
     def add_entry(self, entry):
-        self._follow()
         self._entries.append(entry)
+        self._follow()
 
     def set_entries(self, entries):
         self._entries = list(entries)
