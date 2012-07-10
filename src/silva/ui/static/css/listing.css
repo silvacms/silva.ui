@@ -41,6 +41,7 @@
 }
 #workspace .content .listing-header th {
   line-height: 24px;
+  color: #666;
 }
 #workspace .content .listing td,
 #workspace .content .listing-header th {
@@ -49,7 +50,8 @@
   text-align: left;
   white-space: nowrap;
   vertical-align: middle;
-  overflow :hidden;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 #workspace .content .listing td.hasdropdown {
   overflow: visible;

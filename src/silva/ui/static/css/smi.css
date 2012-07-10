@@ -155,16 +155,19 @@ div.batching a.current {
 }
 #workspace .header h2 {
   clear: both;
+  color: #666;
   font-size:1.3em;
   padding: 8px 0px 4px 0px;
   height:24px;
   overflow:hidden;
   white-space:nowrap;
+  text-overflow: ellipsis;
 }
 #workspace .header h2 ins.icon {
   background-color:transparent;
   background-image:url(../img/sprite.png);
   background-repeat:no-repeat;
+
   display:block;
   float:left;
   height:20px;
@@ -175,7 +178,18 @@ div.batching a.current {
   height: 0px;
 }
 #workspace .compact-header h2 {
-  display: none;
+  float: left;
+  clear: right;
+  padding: 6px;
+  max-width: 80%;
+}
+#workspace .compact-header .toolbar {
+  position: absolute;
+  right: 78px;
+  background: url(../img/gradient50.png) repeat-x bottom;
+}
+#workspace .compact-header .toolbar .selector {
+  float: right;
 }
 
 #workspace .header .tabs {

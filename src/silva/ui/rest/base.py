@@ -143,7 +143,7 @@ class PageREST(ActionREST):
             'ifaces': screen.get('ifaces', []),
             'title': {
                 'ifaces': ['title'],
-                'title': self.context.get_title_or_id(),
+                'title': self.context.get_title_or_id_editable(),
                 'icon': IIconResolver(self.request).get_content_url(self.context),
                 },
             'menu': {
