@@ -453,3 +453,9 @@ body .ui-dialog {
   -moz-box-shadow: #A0A0A0 0px 2px 8px;
   box-shadow: #A0A0A0 0px 2px 8px;
 }
+
+.icon.silva_dotted_horizontal {
+  background-image:url(../img/sprite.png);
+  background-position:-158px -87px!important;
+  background-repeat: no-repeat;
+}

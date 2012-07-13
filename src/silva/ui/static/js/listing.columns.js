@@ -32,7 +32,7 @@
             return {
                 render: function() {
                     if (value) {
-                        $content.addClass('moveable ui-icon ui-icon-grip-dotted-horizontal');
+                        $content.addClass('moveable icon silva_dotted_horizontal');
                     };
                 }
             };
