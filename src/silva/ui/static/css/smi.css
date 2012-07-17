@@ -271,7 +271,8 @@ div.batching a.current {
   float: right;
 }
 #workspace .header .tabs a.top-entry .subtab-icon ins {
-  background: url('../img/arrow-down.png') no-repeat;
+  background: url('../img/sprite.png') no-repeat;
+  background-position: -117px -96px;
   display: block;
   height: 26px;
 }
@@ -286,7 +287,6 @@ div.batching a.current {
   border-left: 1px solid #555;
 }
 #workspace .header .tabs a.top-screen .subtab-icon ins {
-  background-position: 0px 0px;
   height: 26px;
   width: 26px;
 }
