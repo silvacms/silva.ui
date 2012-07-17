@@ -277,11 +277,11 @@ div.batching a.current {
   height: 26px;
 }
 #workspace .header .tabs a.top-label .subtab-icon ins {
-  background-position: -8px 0px;
+  background-position: -117px -96px;
   width: 18px;
 }
 #workspace .header .tabs a.top-label.active .subtab-icon ins {
-  background-position: -8px -25px;
+  background-position: -117px -115px;
 }
 #workspace .header .tabs a.top-screen .subtab-icon {
   border-left: 1px solid #555;
