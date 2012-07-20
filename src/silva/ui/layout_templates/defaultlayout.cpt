@@ -24,6 +24,9 @@
 		  padding: 5% 10%;
 		  border-radius: 4px;
 		  background-color: white;
+		  -moz-box-shadow: 3px 3px 4px #575757;
+		  -webkit-box-shadow: 3px 3px 4px #575757;
+		  box-shadow: 3px 3px 4px #575757;
 		}
 		.main a {
 		  text-decoration: underline;
