@@ -14,6 +14,7 @@
 #workspace .toolbar .selector {
   float:left;
 }
+
 #workspace .toolbar .selector ins {
   width:20px;
   height:20px;
@@ -39,6 +40,11 @@
   width: 100%;
   border-collapse: collapse;
 }
+
+#workspace .content #form-userrole table {
+  border-collapse: separate;
+}
+
 #workspace .content .listing-header th {
   line-height: 24px;
   color: #666;

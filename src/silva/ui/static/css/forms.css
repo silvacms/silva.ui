@@ -1,3 +1,5 @@
+/* -- general form settings -- */ 
+
 form {
   color: black;
   clear: both;
@@ -7,145 +9,285 @@ form {
   position: absolute;
   top: 0;
   left: 0;
-  right: 250px;
-  border-right: 1px dotted #ccc;
+  right: 250px; 
 }
 
-.form-content h3,
-.form-content h4,
-.form-content h5 {
-  background-color: #efefef;
-  border-bottom: 1px solid #ddd;
+#form {
+  margin: 0 5px;
 }
-.form-content .form-head p {
-  border-left: 2px solid #ccc;
-  padding: 10px 8px;
-}
-.form-content .form-batch {
-  border-left: 2px solid #ccc;
-  padding: 5px 8px;
-}
-.form-content .form-head h4, .form-content .form-head h5 {
-  border-left: 2px solid #ccc;
-}
+
+/* -- header settings -- */ 
 
 #workspace .form-content h3 {
-  background-image: url('../img/gradientblack.png');
-  color: #fff;
+  border-bottom: 1px solid #222;
+  color: #222;
   font-weight: normal;
-  padding: 6px 10px 6px 10px;
-  font-size: 130%;
+  font-size: 125%;
+  margin: 15px 5px 10px 5px;
 }
 
 #workspace .form-content h4 {
-  padding: 5px 10px;
-  font-size: 120%;
+  background: #EFEFEF;
+  background: -webkit-gradient(linear, left top, left bottom, from(#F9F9F9), to(#EFEFEF)); /* for webkit browsers */
+  background: -moz-linear-gradient(top,  #F9F9F9,  #EFEFEF); /* for firefox 3.6+ */
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#F9F9F9', endColorstr='#EFEFEF'); /* for IE */
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  border-radius: 3px; 
+  font-size: 110%;
+  font-weight: normal;
+  margin: 5px;
+  padding: 1px 6px 0 6px;
+}
+
+#workspace .form-content #form-userrole h4, #workspace .form-content .form-fields-container h4 {
+  margin: 5px 0;
 }
 
 #workspace .form-content h5 {
-  padding: 5px 10px;
+  background: #999;
+  background: -webkit-gradient(linear, left top, left bottom, from(#999), to(#777)); /* for webkit browsers */
+  background: -moz-linear-gradient(top,  #999,  #777); /* for firefox 3.6+ */
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#999', endColorstr='#777'); /* for IE */
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  border-radius: 3px; 
+  color: #FFF;
   font-size: 110%;
+  margin: 5px 5px 0 5px;
+  padding: 2px 6px 0 6px;
 }
 
-#workspace .form-content {
-  background-image: url('../img/workspace_bg.png');
-  background-repeat: repeat;
+.form-content .form-head p {
+  color: #000; 
+  padding: 2px 5px;
 }
 
-.form-content .form-section,
-.form-content .form-table {
-  padding: 10px 8px;
-  border-left: 2px solid #ccc;
-  border-bottom: 1px dotted #ccc;
-}
+/* -- label settings -- */ 
 
-#workspace .form-content .form-table th,
-#workspace .form-content .form-table td {
-  text-align: left;
-  padding: 5px;
-  border-right: 1px dotted #ccc;
-  border-bottom: 1px dotted #ccc;
+form .form-label {
+  display: inline-block; 
+  vertical-align: top;
+  width: 225px;
 }
 
 .form-content .form-section .form-label label {
   font-weight: bold;
   font-size: 105%;
-}
-
-.form-content .form-section .form-label {
-  margin-bottom: 10px;
+  text-transform: capitalize;
 }
 
 .form-content .form-section .form-label p {
-  font-style: italic;
+  font-size: 90%;
+  color: #777;
+  margin-top: 3px;
 }
+
+.form-content .form-focus .form-label p {
+  color: #000;
+  margin-top: 3px;
+}
+
+/* -- form-field settings -- */ 
+
+.form-content .form-field {
+  display: inline-block;
+}
+
+#form-metadataformgroup .form-content .form-field .field {
+  color: #000;
+  width: 325px; 
+} 
+
+.form-content .form-field .field:focus {
+  border-color: #999;
+  border-style: solid;
+}
+
+.form-content .form-batch {
+  border-left: 2px solid #CCC;
+  padding: 3px 6px;
+}
+
+/* -- general form content settings -- */
+
+#form-metadatformgroup .form-content {
+  margin-bottom: 25px; 
+}
+
+.form-content .form-body .form-focus {
+  border-left: 2px solid rgba(0, 0, 0, 0.6)
+}
+
+.form-content .form-section {
+  padding: 10px 8px;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
+  margin: 3px 5px;
+}
+
+.form-content .form-fields-container .form-section, #workspace .form-content .form-fields-container .form-controls {
+  margin: 3px 0;
+}
+
+.form-fields-container {
+  margin: 0 5px 20px 5px;
+}
+
+/* -- form-section and form-footer settings -- */
+
+.form-section, .form-controls {
+  background: #FFF;
+  background: -webkit-gradient(linear, left top, left bottom, from(#fff), to(#F9F9F9)); /* for webkit browsers */
+  background: -moz-linear-gradient(top,  #fff,  #F9F9F9); /* for firefox 3.6+ */
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#FFF', endColorstr='#F9F9F9'); /* for IE */
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
+  margin: 0 5px 5px 5px;  
+  padding: 5px 0 25px 0;
+}
+
+/* -- table settings -- */ 
+
+#workspace .form-content .form-table th,
+#workspace .form-content .form-table td {
+  text-align: left;
+  padding: 2px;
+}
+
+#workspace .form-content .form-table .form-controls td {
+  background: #FFF;
+  background: -webkit-gradient(linear, left top, left bottom, from(#fff), to(#F9F9F9)); /* for webkit browsers */
+  background: -moz-linear-gradient(top,  #fff,  #F9F9F9); /* for firefox 3.6+ */
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#FFF', endColorstr='#F9F9F9'); /* for IE */
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
+}
+
+#workspace .form-content .form-table tr.form-controls td a {
+  margin: 3px 0 3px 4px; 
+}
+
+#workspace .form-table .footer-fields {
+  float: left; 
+}
+
+#workspace .form-table .footer-fields label, #workspace .form-table .footer-fields .required {
+  vertical-align: middle;
+  margin-left: 3px;
+}
+
+#workspace .form-content .form-table select {
+  margin-right: 5px;
+}
+
+/* -- acquired settings -- */ 
+
+.form-acquired-label{
+  background: rgb(70, 165, 69); 
+  color: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+  color: #FFFFFF;
+  font-size: 7px; /* fixed, prevent to grow with % on parent */
+  font-weight: bold; 
+  padding: 0 4px;
+  text-transform: uppercase;
+  vertical-align: middle; 
+}
+
+p.form-acquired {
+  color: #777;
+  font-size: 95%;
+  margin-top: 5px;
+  width: 325px;
+}
+
+.form-focus p.form-acquired {
+  color: #000;
+}
+
+/* -- acquirable and required settings -- */ 
 
 .form-content .form-required,
 .form-content .form-acquirable {
-  position: relative;
-  top: -3px;
+  border: 1px solid rgba(0, 0, 0, 0.1); 
+  border-radius: 4px;
+  color: #FFFFFF;
   display: inline-block;
-  background-color: #DE2A2A;
-  font-size: 9px; /* fixed, prevent to grow with % on parent */
+  float: right;
+  font-size: 7px; /* fixed, prevent to grow with % on parent */ 
+  font-weight: bold; 
+  margin: 2px 4px 0 4px;
+  position: relative;
+  vertical-align: 1px;
+  text-align: center;
   text-transform: uppercase;
-  padding: 2px;
-  margin-left: 5px;
-  color: white;
-  border-radius: 2px;
-  -moz-border-radius: 2px;
-  -o-border-radius: 2px;
-  -ms-border-radius: 2px;
-  -webkit-border-radius: 2px;
-}
-.form-content .form-acquirable {
-  background-color: #FF8C00;
-}
-.form-content .form-focus {
-  background-image: none !important;
-  background-color: #D8EED5 !important;
-  border-left: 2px solid #0E7F2A;
+  text-transform: uppercase;
+  width: 58px;
 }
 
-.form-content .form-field {
-  position: relative;
+.form-content .form-required {
+  background-color: rgb(222, 42, 42);
+} 
+
+.form-content .form-acquirable {
+  background-color: rgb(250, 169, 55);
 }
+
+/*.form-content .form-focus .form-required {
+  background-color: rgb(222, 42, 42);
+}*/ 
+
+
+/*.form-content .form-focus .form-acquirable {
+  background-color: rgb(250, 169, 55);
+}*/
+
+
+/* -- error message settings -- */
 
 .form-content .form-error {
-  background-image: none !important;
-  background-color: #EFAAAA !important;
-  border-left: 2px solid #DE2A2A;
+  border-left: 3px solid #DE2A2A;
 }
 
 .form-content .form-error-detail {
-  z-index: 150;
-  position: absolute;
-  top: -0.5em;
-  right: 5px;
-  width: 300px;
-  background-image: url('../img/workspace_bg.png');
-  background-repeat: repeat;
+  background: #FFF5F5;
+  border: 1px solid #DE2A2A; 
+  border-radius: 2px;
+  color: #DE2A2A; 
+  display: block; 
   padding: 4px;
-  margin: 2px 0px;
-  border: 2px solid #DE2A2A;
-  border-radius: 3px;
-  -moz-border-radius: 3px;
-  -o-border-radius: 3px;
-  -ms-border-radius: 3px;
-  -webkit-border-radius: 3px;
+  position: absolute;
+  right: -175px; 
+  width: 225px;
+  z-index: 150;  
+        -webkit-box-shadow: 4px 4px 4px #999;  
+        -moz-box-shadow: 4px 4px 4px #999;  
+        box-shadow: 4px 4px 4px #999;  
 }
 
-#workspace .form-content .form-controls {
-  border-left: 2px solid #ccc;
-  border-bottom: 2px solid #eee;
-  padding: 10px 20px 40px 10px;
+.form-content .form-error-detail:before {
+  content: ' ';  
+  border: 5px solid;
+  border-color: white #DE2A2A white white;
+  position: absolute;
+  left: -11px;  
+  top: 6px; 
+  height: 0; 
+  width: 0;
 }
-#workspace .form-table .form-controls td {
-  padding: 10px 20px 10px 10px;
-}
-#workspace .form-table .footer-fields {
-  float: left;
-  margin: 5px 12px 5px 2px;
-}
+
+.form-content .form-error-detail:after {
+  content: ' ';  
+  border: 5px solid;  
+  border-color: transparent #FFF5F5 transparent transparent;  
+  position: absolute;  
+  left: -10px;  
+  top: 6px;  
+  height: 0;  
+  width: 0;  
+}  
+
+/* -- button settings -- */ 
 
 .form-content a.form-control,
 .form-content a.form-button {
@@ -154,15 +296,15 @@ form {
   -ms-border-radius:3px;
   -o-border-radius:3px;
   -webkit-border-radius:3px;
-  background: #fff url(../img/gradient20m.png) repeat-x top;
   border-radius: 3px;
+  background: #fff url(../img/gradient20m.png) repeat-x top;
   border: 1px #777 solid;
   display: block;
   color: #000;
-  line-height: 17px;
-  margin: 5px 4px 5px 0px;
-  padding: 0 4px;
   float: left;
+  line-height: 17px;
+  margin: 0 0 0 6px;
+  padding: 0 4px;
 }
 
 .form-content a.form-control ins,
@@ -170,8 +312,41 @@ form {
   float: left;
 }
 
+/* -- alternative buttons settings -- */ 
+
+/* .form-content .form-controls #form-metadataformgroup-nonversionedcontentmetadataform-action-cancel {
+  /background: #DE2A2A;
+  background: -webkit-gradient(linear, left top, left bottom, from(#DE2A2A), to(#BD362F)); / for webkit browsers /
+  background: -moz-linear-gradient(top,  #DE2A2A,  #BD362F); / for firefox 3.6+ /
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#DE2A2A', endColorstr='#BD362F'); / for IE //
+  border: 1px solid rgba(0, 0, 0, 0.4);
+  border-radius: 14px; 
+  color: #000; 
+  display: block; 
+  float: right; 
+  font-weight: normal;
+  padding: 0 6px;
+  /text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.4)/;   
+}
+
+.form-content .form-controls #form-metadataformgroup-nonversionedcontentmetadataform-action-save {
+  background: #62C462;
+  background: -webkit-gradient(linear, left top, left bottom, from(#62C462), to(#51A351)); / for webkit browsers /
+  background: -moz-linear-gradient(top,  #62C462,  #51A351); / for firefox 3.6+ /
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#62C462', endColorstr='#51A351'); / for IE /
+  border: 1px solid rgba(0, 0, 0, 0.4);
+  border-radius: 14px; 
+  color: #FFF; 
+  display: block; 
+  float: right; 
+  font-weight: bold;
+  padding: 0 6px;
+  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.4);   
+} 
+*/
+
 .form-content a.form-control:hover,
-.form-content a.form-button:hover {
+ form-content a.form-button:hover{
   background:#fff;
   border-color:#888;
   color:#222;
@@ -193,8 +368,7 @@ form {
   clear: both;
 }
 .form-content div.field-collection-line div.field-object {
-  margin: 10px 0px;
-  border-top: 1px dotted #CCCCCC;
+  margin: 15px;
   clear: both;
 }
 .form-content .field-collection-lines div.line-actions {
@@ -207,6 +381,7 @@ form {
 .form-content .field-collection-lines td.ordering-actions {
   width: 60px;
 }
+
 .form-content button.field-collection-move-up {
   background-image:url(../img/sprite.png);
   background-position:-80px -122px!important;
@@ -216,6 +391,7 @@ form {
   border: 0px;
   float: left;
 }
+
 .form-content button.field-collection-move-down {
   background-image:url(../img/sprite.png);
   background-position:-100px -122px!important;
@@ -225,9 +401,11 @@ form {
   border: 0px;
   float: right;
 }
+
 .form-content .field-collection .multi-actions {
   clear: both;
 }
+
 .form-content  a.field-uri {
   text-decoration: underline;
 }
@@ -237,7 +415,7 @@ form {
 .portlets {
   position: absolute;
   top: 0;
-  right: 0;
+  right: 5px;
   width: 250px;
   bottom: 0px;
 }
@@ -248,7 +426,8 @@ form {
 }
 
 .portlets p {
-  padding: 5px;
+  margin: 0 5px 5px;
+  padding: 3px 5px;
 }
 
 .portlets .external-controls {
@@ -278,7 +457,7 @@ form {
 
 .portlets .references .item {
   clear: both;
-  width: 100%;
+  margin: 0 5px;
 }
 
 .portlets .references .item a.edit-screen {
