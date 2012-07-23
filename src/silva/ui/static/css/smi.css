@@ -224,15 +224,18 @@ div.batching a.current {
   display: block;
   padding: 0px 5px;
 }
-#workspace .header .tabs li ins.tab-logo {
+#workspace .header .compact-tabs li ins.tab-logo {
   background-color:transparent;
-  background-image:url(../img/gear.png);
+  background-image:url(../img/settings.png);
   background-repeat:no-repeat;
   display:block;
   float: left;
   height: 24px;
   margin: 1px 4px;
   width: 24px;
+}
+#workspace .header .compact-tabs li div.subtab-icon {
+  display: none;
 }
 #workspace .header .tabs li.sub-level a.active {
   color: white;
