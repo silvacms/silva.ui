@@ -3,6 +3,8 @@
 # See also LICENSE.txt
 # $Id$
 
+import cgi
+
 from zope.intid.interfaces import IIntIds
 from zope.component import getUtility
 
@@ -106,7 +108,7 @@ class ContentSerializer(object):
             'identifier': content.getId(),
             'path': self.rest.get_content_path(content),
             'icon': self.get_icon(content),
-            'title': previewable.get_title_or_id(),
+            'title': cgi.escape(previewable.get_title_or_id()),
             'author': author,
             'modified': modified,
             'access': self.get_access(content),

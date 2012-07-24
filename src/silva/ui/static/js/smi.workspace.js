@@ -60,7 +60,7 @@
         iface: 'title',
         factory: function($content, data, smi) {
             return {
-                jsont: '<ins class="icon"></ins>{data.title}',
+                jsont: '<ins class="icon"></ins>{data.title|html}',
                 render: function() {
                     var name = "Silva";
                     if (smi.options.theme && smi.options.theme.name) {
