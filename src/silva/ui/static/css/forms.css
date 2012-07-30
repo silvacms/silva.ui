@@ -33,6 +33,7 @@ form {
   filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#F9F9F9', endColorstr='#EFEFEF'); /* for IE */
   border: 1px solid rgba(0, 0, 0, 0.2);
   border-radius: 3px;
+  color: black;
   font-size: 110%;
   font-weight: normal;
   margin: 5px;
@@ -116,7 +117,8 @@ form .form-label {
 }
 
 .form-content .form-body .form-focus {
-  border-left: 2px solid rgba(0, 0, 0, 0.6)
+  border-left: 2px solid rgba(0, 0, 0, 0.6);
+  padding-left: 7px;
 }
 
 .form-content .form-section {
@@ -137,14 +139,8 @@ form .form-label {
 /* -- form-section and form-footer settings -- */
 
 .form-section, .form-controls {
-  background: #FFF;
-  background: -webkit-gradient(linear, left top, left bottom, from(#fff), to(#F9F9F9)); /* for webkit browsers */
-  background: -moz-linear-gradient(top,  #fff,  #F9F9F9); /* for firefox 3.6+ */
-  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#FFF', endColorstr='#F9F9F9'); /* for IE */
-  border: 1px solid rgba(0, 0, 0, 0.2);
-  border-radius: 3px;
-  margin: 0 5px 5px 5px;
-  padding: 5px 0 25px 0;
+  margin: 0 5px 15px 5px;
+  padding: 5px 0 20px 0;
 }
 
 /* -- table settings -- */
@@ -199,7 +195,6 @@ form .form-label {
 p.form-acquired {
   color: #777;
   font-size: 95%;
-  margin-top: 5px;
   width: 325px;
 }
 
@@ -218,7 +213,7 @@ p.form-acquired {
   float: right;
   font-size: 7px; /* fixed, prevent to grow with % on parent */
   font-weight: bold;
-  margin: 2px 4px 0 4px;
+  margin: 3px 6px 0 4px;
   position: relative;
   vertical-align: 1px;
   text-align: center;
@@ -244,6 +239,7 @@ form .form-error-message {
 
 .form-content .form-error {
   border-left: 3px solid #DE2A2A;
+  padding-left: 6px;
 }
 
 .form-content .form-error-detail {
@@ -266,7 +262,7 @@ form .form-error-message {
 .form-content .form-error-detail:before {
   content: ' ';
   border: 5px solid;
-  border-color: white #DE2A2A white white;
+  border-color: transparent #DE2A2A transparent transparent;
   position: absolute;
   left: -11px;
   top: 6px;
@@ -350,6 +346,114 @@ form .form-error-message {
   color:#222;
 }
 
+/* -- dialog window 'text' -- */
+
+.ui-dialog .form-fields-container .form-content .form-body .form-focus { 
+  border: 1px solid rgba(0, 0, 0, 0.2);  
+}
+
+.ui-dialog .form-fields-container .form-content .form-section .form-field { 
+   /*border: 1px solid rgba(0, 0, 0, 0.2);
+   border-radius: 3px;*/
+   display: block;
+   float: none;
+   width: 100%; 
+}
+
+.ui-dialog .form-fields-container .form-content .form-required {
+   float: left; 
+   margin-left: 10px;
+}
+
+.ui-dialog .form-fields-container .form-content .form-section .form-label {
+  display: inline-block;
+  margin-bottom: 5px;
+  float: none; 
+}
+
+.ui-dialog .form-fields-container .form-content .form-section .form-label label {
+  display: inline;
+  margin: 0;
+  float: left;
+}
+
+.ui-dialog .form-fields-container .form-content .form-section .form-error-detail {
+  left: 350px;
+}
+
+/* -- dialog window 'Site content' -- */ 
+
+.ui-dialog .ui-widget div.actions {
+  background: #FFF;
+  border: 1px solid #FFF;
+}
+
+.ui-dialog .ui-widget div.actions .last-action {
+  margin-left: 10px; 
+  border-radius: 3px;
+}  
+  
+.ui-dialog #form-field-content {
+  padding: 5px; 
+}  
+  
+.ui-dialog #form-field-content a.form-button {
+  margin: 8px 0 3px 3px; 
+}  
+
+/* -- dialog window 'TOC' -- */ 
+
+.ui-dialog .form-section .form-label {
+  margin-right: 20px; 
+  width: 300px; 
+}
+
+.ui-dialog .form-section .form-label p {
+  clear: left; 
+}
+
+.ui-dialog .ui-dialog-titlebar {
+  background: #EFEFEF;
+  background: -webkit-gradient(linear, left top, left bottom, from(#F9F9F9), to(#EFEFEF)); /* for webkit browsers */
+  background: -moz-linear-gradient(top,  #F9F9F9,  #EFEFEF); /* for firefox 3.6+ */
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#F9F9F9', endColorstr='#EFEFEF'); /* for IE */
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
+  font-size: 110%;
+  font-weight: normal;
+  margin: 5px;
+  padding: 1px 6px 0 6px;
+}
+
+.ui-dialog .ui-dialog-buttonpane {
+  border-width: 0;
+  margin: -20px 4px 0 0;
+}
+
+.ui-dialog .ui-dialog-buttonpane button, .ui-dialog .ui-widget div.actions .last-action { 
+  -khtml-border-radius:3px;
+  -moz-border-radius:3px;
+  -ms-border-radius:3px;
+  -o-border-radius:3px;
+  -webkit-border-radius:3px;
+  border-radius: 3px;
+  background: #fff url(../img/gradient20m.png) repeat-x top;
+  border: 1px #777 solid;
+  display: block;
+  color: #000;
+  float: left;
+  line-height: 17px;
+  padding: 1px 6px;
+}
+
+.ui-dialog .ui-widget div.actions div.actions-icon {
+  padding: 0;
+}
+  
+.ui-dialog .ui-button-text-only .ui-button-text {
+  padding: 0;
+}
+
 /* Collection widget CSS */
 
 .form-content input.field-collection-line-selector {
@@ -418,14 +522,20 @@ form .form-error-message {
   bottom: 0px;
 }
 
+#workspace .form-content .portlet h4 {
+  background: transparent; 
+  border-width: 0;
+  padding: 2px 0 0 5px; 
+  text-decoration: underline; 
+}
+
 @media screen and (max-width: 650px) {
   .portlets { display: none; }
   .forms { right: 0px; }
 }
 
 .portlets p {
-  margin: 0 5px 5px;
-  padding: 3px 5px;
+  margin: 0 10px;
 }
 
 .portlets .external-controls {
@@ -438,16 +548,19 @@ form .form-error-message {
   display: block;
   margin-top: 0.3em;
   border: 1px dotted black;
-  text-align: center;
+  t
+  ext-align: center;
 }
 .portlets p span.portrait {
   width: 4.5em;
   height: 6em;
 }
+
 .portlets p span.landscape {
   width: 6.5em;
   height: 3.5em;
 }
+
 .portlets p span.square {
   width: 4em;
   height: 4em;
