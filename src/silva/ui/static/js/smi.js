@@ -357,7 +357,11 @@
             var ajax_handler = function(default_handler) {
                 return function (request) {
                     try {
-                      return $.parseJSON(request.responseText).content;
+                        var payload = $.parseJSON(request.responseText);
+                        if (payload.notifications) {
+                            notifications.notifies(payload.notifications);
+                        }
+                        return payload.content;
                     } catch (e) {
                         return default_handler(request);
                     };
