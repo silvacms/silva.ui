@@ -96,13 +96,12 @@ form .form-label {
 }
 
 #form-metadataformgroup .form-content .form-field .field {
-  color: #000;
   width: 325px;
 }
 
 .form-field .field:focus {
-  border-color: #444;
-  border-style: solid;
+  border: 1px solid #444;
+  border-radius: 3px;
 }
 
 input, textarea {
@@ -266,7 +265,6 @@ form .form-error-message {
   -webkit-box-shadow: 2px 2px 3px #A0A0A0;
   -moz-box-shadow: 2px 2px 3px #A0A0A0;
   box-shadow: 2px 2px 3px #A0A0A0;
-
 }
 
 .form-content .form-error-detail:before {
@@ -303,11 +301,14 @@ form .form-error-message {
   border-radius: 3px;
   background: #fff url(../img/gradient20m.png) repeat-x top;
   border: 1px #777 solid;
-  display: block;
-  color: #000;
   float: left;
   margin: 0 0 0 6px;
   padding: 0 4px;
+}
+
+.form-content a.form-control:hover, 
+ .form-content a.form-button:hover {
+   text-decoration: underline;
 }
 
 .form-content a.form-control ins,
@@ -315,17 +316,8 @@ form .form-error-message {
   float: left;
 }
 
-a.form-control:hover,
-a.form-button:hover,
-a.ui-button:hover {
-  background: url("../img/gradient20m.png") ;
-  border-color:#888;
-  color:#222;
-}
-
-div.actions ol li a.active,
-div.actions ol li a:hover {
-  background: url("../img/gradient20m.png");
+#workspace .header .tabs a.top-entry span:hover {
+  text-decoration: underline;
 }
 
 /* -- dialog window 'text' -- */
@@ -518,8 +510,7 @@ div.actions ol li a:hover {
   display: block;
   margin-top: 0.3em;
   border: 1px dotted black;
-  t
-  ext-align: center;
+  text-align: center;
 }
 .portlets p span.portrait {
   width: 4.5em;

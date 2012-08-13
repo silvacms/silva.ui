@@ -138,7 +138,6 @@ div.batching a.current {
 .focus.highlight {
   outline: 2px #fb0 solid;
 }
-
 .message ins.ui-icon {
   float: left;
 }
@@ -152,7 +151,7 @@ div.batching a.current {
 }
 #workspace .header a {
   color:#111;
-}
+}  
 #workspace .header h2 {
   clear: both;
   color: #666;
@@ -167,7 +166,6 @@ div.batching a.current {
   background-color:transparent;
   background-image:url(../img/sprite.png);
   background-repeat:no-repeat;
-
   display:block;
   float:left;
   height:20px;
