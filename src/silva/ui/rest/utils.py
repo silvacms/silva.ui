@@ -38,7 +38,7 @@ class NavigationListing(UIREST):
         is_not_empty = len(node.objectValues(meta_types))
         info = {
             'data': {
-                'title': node.get_title_or_id(),
+                'title': node.get_title_or_id_editable(),
                 'icon': self.get_icon(node)
                 },
             'attr': {

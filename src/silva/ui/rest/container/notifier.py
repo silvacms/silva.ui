@@ -29,7 +29,7 @@ class ContentCounter(object):
 
     def _get_title(self, content):
         previewable = content.get_previewable()
-        return previewable.get_title_or_id()
+        return previewable.get_title_or_id_editable()
 
     def append(self, content):
         if not (self.size > self.max_entries):

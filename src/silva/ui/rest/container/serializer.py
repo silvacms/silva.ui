@@ -108,7 +108,7 @@ class ContentSerializer(object):
             'identifier': content.getId(),
             'path': self.rest.get_content_path(content),
             'icon': self.get_icon(content),
-            'title': cgi.escape(previewable.get_title_or_id()),
+            'title': cgi.escape(previewable.get_title_or_id_editable()),
             'author': author,
             'modified': modified,
             'access': self.get_access(content),

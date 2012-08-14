@@ -26,7 +26,7 @@ class ListingPreview(rest.REST):
 
     def GET(self):
         return self.json_response({
-            'title': self.context.get_title_or_id(),
+            'title': self.context.get_title_or_id_editable(),
             'preview': self.preview()
             })
 
