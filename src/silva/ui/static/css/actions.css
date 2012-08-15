@@ -67,8 +67,8 @@ div.actions ol li a.active {
 }
 
 div.actions ol li a:hover {
+  background: #FFF;
   color: #111;
-  text-decoration: underline;
 }
 
 div.actions .dropdown {
