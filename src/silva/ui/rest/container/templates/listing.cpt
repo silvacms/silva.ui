@@ -16,7 +16,8 @@
         </ol>
         <a class="ui-state-default"
            i18n:translate="">
-          <ins class="ui-icon ui-icon-triangle-1-n"></ins>
+          <ins class="ui-icon ui-icon-triangle-1-n"
+               i18n:name="icon"></ins>
           <span class="count"
                 i18n:name="count">0</span>
           item(s) in the clipboard
