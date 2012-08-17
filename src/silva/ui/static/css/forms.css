@@ -74,7 +74,6 @@ form .form-label {
 .form-content .form-section .form-label label {
   font-weight: bold;
   font-size: 105%;
-  text-transform: capitalize;
 }
 
 .form-content .form-section .form-label p {
@@ -112,7 +111,10 @@ input, textarea {
 input:focus, textarea:focus {
  border-radius: 3px;
  border: 1px solid #000;
- box-shadow: 0 2px 2px #A0A0A0;
+ -webkit-box-shadow: 2px 2px 3px #A0A0A0;
+ -moz-box-shadow: 2px 2px 3px #A0A0A0;
+ box-shadow: 2px 2px 3px #A0A0A0;
+
 }
 
 .form-content .form-batch {

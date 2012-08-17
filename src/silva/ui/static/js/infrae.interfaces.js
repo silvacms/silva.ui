@@ -8,6 +8,12 @@
 
     $.extend(module, {
         /**
+         * Clear the registry.
+         */
+        clear: function() {
+            interfaces = {};
+        },
+        /**
          * Register an interface
          * @param name: interface name (string)
          */
@@ -16,7 +22,7 @@
                 throw({message: 'Duplicate registration of interface ' + name});
             };
             if (!bases) {
-                bases = ['object'];
+                bases = [];
             };
             interfaces[name] = bases;
         },
