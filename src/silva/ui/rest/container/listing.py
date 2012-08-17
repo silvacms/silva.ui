@@ -180,7 +180,7 @@ class ContainerListing(Component):
 class PublishableContainerListing(ContainerListing):
     grok.name('publishables')
     grok.order(10)
-    title = _(u'Structual content(s)')
+    title = _(u'Structural content(s)')
     interface = [('container', IContainer), ('publishables', IPublishable)]
 
     @classmethod
