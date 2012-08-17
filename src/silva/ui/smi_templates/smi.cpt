@@ -35,7 +35,7 @@
       <div id="main">
         <div id="navigation">
           <div class="header">
-            <h1 i18n:translate="">
+            <h1>
               <a href="#!/"><img src="${view.logo_url}" alt="Silva" /></a>
             </h1>
           </div>
@@ -44,22 +44,19 @@
             <div class="actions">
               <ol>
                 <li>
-                  <a href="${view.root_url}/service_members/logout"
-                     i18n:translate="">
-                    <span>Logout</span>
+                  <a href="${view.root_url}/service_members/logout">
+                    <span i18n:translate="">Logout</span>
                   </a>
                 </li>
                 <li tal:condition="view.can_manage">
-                  <a href="${view.root_url}/manage_main"
-                     i18n:translate="">
-                    <span>Manage</span>
+                  <a href="${view.root_url}/manage_main">
+                    <span i18n:translate="">Manage</span>
                   </a>
                 </li>
                 <li class="last-action">
                   <a class="form-popup"
-                     href="${view.root_url}/++rest++silva.core.smi.userpreferences"
-                     i18n:translate="">
-                    <span>User preferences</span>
+                     href="${view.root_url}/++rest++silva.core.smi.userpreferences">
+                    <span i18n:translate="">User preferences</span>
                   </a>
                 </li>
               </ol>
