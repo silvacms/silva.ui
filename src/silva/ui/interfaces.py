@@ -109,6 +109,7 @@ class IUIService(ISilvaLocalService):
         description=_(u"This can be disabled in case of performance issue."),
         default=True,
         required=False)
+    test_mode = Attribute("Activate test mode.")
 
 
 # Menu items

@@ -6,11 +6,14 @@
      * @param options: configuration options.
      */
     var NotificationManager = function(options) {
-        var $container = $(options.selector);
+        var $container = $(options.selector),
+            defaults = {
+                themeState: 'feedback',
+                speed: options.speed === undefined && 'normal' || options.speed};
 
         // Default jGrowl notifications
         var default_notify = function(message) {
-            var options = {'themeState': 'feedback'};
+            var options = $.extend({}, defaults);
             if (message.category == 'error') {
                 options['themeState'] = 'error';
             };
@@ -39,7 +42,7 @@
         };
 
         // Support for webkit notificatons.
-        if (window.webkitNotifications) {
+        if (!options.standard && window.webkitNotifications) {
             var native_api = window.webkitNotifications;
 
             $.extend(api, {

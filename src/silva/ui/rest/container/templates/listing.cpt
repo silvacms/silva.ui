@@ -34,7 +34,7 @@
               i18n:translate="">
           <span class="count"
                 i18n:name="count">0</span>
-          assets(s).
+          asset(s).
         </span>
       </p>
     </div>

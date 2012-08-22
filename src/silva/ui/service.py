@@ -31,6 +31,7 @@ class UIService(SilvaService):
     background = None
     listing_preview = True
     maintenance_message = None
+    test_mode = False
 
 
 class UISettings(silvaforms.ZMIForm):

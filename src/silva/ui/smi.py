@@ -71,6 +71,7 @@ class SMI(grok.View):
         self.name = service.name
         self.listing_preview = service.listing_preview
         self.maintenance_message = service.maintenance_message
+        self.test_mode = service.test_mode
         if service.background:
             self.background = service.background
 

@@ -18,27 +18,27 @@
 
     <tal:resource tal:replace="structure provider:resources" />
 
-	<style type="text/css">
-		.main {
-		  margin: 10% 20%;
-		  padding: 5% 10%;
-		  border-radius: 4px;
-		  background-color: white;
-		  -moz-box-shadow: 3px 3px 4px #575757;
-		  -webkit-box-shadow: 3px 3px 4px #575757;
-		  box-shadow: 3px 3px 4px #575757;
-		}
-		.main a {
-		  text-decoration: underline;
-		}
-	</style>
+    <style type="text/css">
+        .main {
+          margin: 10% 20%;
+          padding: 5% 10%;
+          border-radius: 4px;
+          background-color: white;
+          -moz-box-shadow: 3px 3px 4px #575757;
+          -webkit-box-shadow: 3px 3px 4px #575757;
+          box-shadow: 3px 3px 4px #575757;
+        }
+        .main a {
+          text-decoration: underline;
+        }
+    </style>
 
   </head>
 
   <body>
-  	<div class="main">
-  		<div tal:replace="structure view.content()" />
-  	</div>
+    <div class="main">
+        <div tal:replace="structure view.content()" />
+    </div>
   </body>
 
 </html>

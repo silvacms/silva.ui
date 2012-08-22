@@ -163,8 +163,12 @@
               url: "${view.root_url}/{path}"
           },
           notifications: {
+<tal:test tal:condition="view.test_mode">
+              speed: 0,
+              standard: true,
+</tal:test>
               selector: "#notifications",
-              url: "${view.root_url}/++rest++silva.ui.poll.notifications"
+              url: "${view.root_url}/++rest++silva.ui.poll.notifications",
           },
           listing: {
               configuration: "${view.root_url}/++rest++silva.ui.listing.configuration",
