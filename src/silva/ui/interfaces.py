@@ -70,7 +70,7 @@ class ISilvaUI(ISilvaUIDependencies):
 class ISilvaUITheme(IDefaultBrowserLayer):
     """Default UI theme.
     """
-    silvaconf.resource(jqueryui.smoothness)
+    silvaconf.resource('jqueryui/jquery-ui-1.8.23.custom.css')
     silvaconf.resource('css/style.css')
     silvaconf.resource('css/smi.css')
     silvaconf.resource('css/jstree.css')
