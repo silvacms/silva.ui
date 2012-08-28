@@ -9,31 +9,49 @@ import subprocess
 import unittest
 import warnings
 
+from zope.interface.interfaces import IInterface
 from silva.fanstatic.extending import INTERFACES_RESOURCES
 
 
 class BusterTestCase(unittest.TestCase):
+    """A buster test case to run Javascript tests.
+    """
 
-    def __init__(self, filename, layer, name=None):
+    def __init__(self, filename, sources=None, name=None):
         unittest.TestCase.__init__(self)
-        self._layer = layer
         self._filename = filename
-        if name is None:
-            name = layer.__identifier__.split('.')[-1]
+        self._sources = None
         self._name = name
-        self._working = None
+        self._path = None
+        if sources is not None:
+            self.sources = sources
 
-    def _sources(self):
-        group = INTERFACES_RESOURCES.get(self._layer.__identifier__)
-        if group is not None:
-            for resource in sorted(group.resources):
-                stack = [resource.library.path]
-                if resource.dirname:
-                    stack.append(resource.dirname)
-                stack.append(resource.filename)
-                yield os.path.join(*stack)
+    @apply
+    def sources():
 
-    def _configuration(self, directory):
+        def setter(self, sources):
+            if sources is None:
+                self._sources = None
+                return
+            assert IInterface.providedBy(sources), 'Invalid source specifier.'
+            self._sources = sources
+            if not self._name:
+                self._name = sources.__identifier__.split('.')[-1]
+
+        def getter(self):
+            if self._sources is not None:
+                group = INTERFACES_RESOURCES.get(self._sources.__identifier__)
+                if group is not None:
+                    for resource in sorted(group.resources):
+                        stack = [resource.library.path]
+                        if resource.dirname:
+                            stack.append(resource.dirname)
+                        stack.append(resource.filename)
+                        yield os.path.join(*stack)
+
+        return property(getter, setter)
+
+    def _writeConfiguration(self, directory):
         with open(os.path.join(directory, 'buster.js'), 'w') as handle:
             handle.write("""
 // Generated configuration
@@ -47,19 +65,19 @@ config["{name}"] = {{
    tests: ["{filename}"]
 }};
 """.format(name=self._name,
-           sources=json.dumps(list(self._sources())),
+           sources=json.dumps(list(self.sources)),
            filename=self._filename))
 
     def setUp(self):
-        self._working = tempfile.mkdtemp()
-        self._configuration(self._working)
+        self._path = tempfile.mkdtemp()
+        self._writeConfiguration(self._path)
 
     def runTest(self):
         process = subprocess.Popen(
             ['buster', 'test', '-r', 'xml'],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            cwd=self._working)
+            cwd=self._path)
         stdout, stderr = process.communicate()
         if stderr:
             raise self.failureException(stderr)
@@ -87,8 +105,8 @@ config["{name}"] = {{
 
     def tearDown(self):
         try:
-            shutil.rmtree(self._working)
-            self._working = None
+            shutil.rmtree(self._path)
+            self._path = None
         except:
             pass
 
@@ -108,7 +126,16 @@ config["{name}"] = {{
     def __hash__(self):
         return hash(self._filename)
 
+    def __str__(self):
+        return self._filename
+
     def shortDescription(self):
         return 'Buster tests: ' + self._filename
 
 
+try:
+    import infrae.testing.testcase
+except ImportError:
+    pass
+else:
+    infrae.testing.testcase.TEST_FACTORIES['.js'] = BusterTestCase

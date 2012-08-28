@@ -1,20 +1,18 @@
 
 import unittest
-import os
 
-from . import BusterTestCase
 from ..interfaces import ISilvaUIDependencies
-from Products.Silva.testing import FunctionalLayer
+from Products.Silva.testing import FunctionalLayer, suite_from_package
 
-PATH = os.path.join(os.path.dirname(__file__), 'javascripts')
 
+def create_test(build_test_suite, name):
+    test = build_test_suite(name)
+    test.sources = ISilvaUIDependencies
+    test.layer = FunctionalLayer
+    return test
 
 def test_suite():
     suite = unittest.TestSuite()
-    test = BusterTestCase(
-        filename=os.path.join(PATH, 'infrae.interfaces.js'),
-        layer=ISilvaUIDependencies)
-    test.layer = FunctionalLayer
-    suite.addTest(test)
+    suite.addTest(suite_from_package('silva.ui.tests.javascripts', create_test))
     return suite
 
