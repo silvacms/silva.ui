@@ -443,7 +443,11 @@ ins.state.closed { background-position:-85px -105px; }
 ins.state.last_closed { background-position:-85px -105px;}
 
 /* When in table form (e.g tab publish) */
-#workspace #form td ins.state { margin: 3px 3px 0 0; }
+#form div.versioning-state-cell ins.state { margin: 3px 3px 0 0; }
+#form div.versioning-state-cell {
+  display: block;
+  padding-left: 3px;
+}
 
 /* jquery ui overrides */
 
