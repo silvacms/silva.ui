@@ -426,12 +426,24 @@ ins.silva_rssaggregator { background-position:-140px -61px!important; }
 
 
 /* Silva publication states */
-ins.state { width:10px!important; height:10px!important; }
+ins.state {
+  background-image: url(../img/sprite.png);
+  display: block;
+  float: left;
+  width:10px!important;
+  height:10px!important;
+}
+
 ins.state.draft { background-position:-5px -105px; }
+ins.state.unapproved  { background-position:-5px -105px;}
 ins.state.pending { background-position:-25px -105px; }
 ins.state.approved { background-position:-45px -105px; }
 ins.state.published { background-position:-65px -105px; }
 ins.state.closed { background-position:-85px -105px; }
+ins.state.last_closed { background-position:-85px -105px;}
+
+/* When in table form (e.g tab publish) */
+#workspace #form td ins.state { margin: 3px 3px 0 0; }
 
 /* jquery ui overrides */
 

@@ -62,11 +62,6 @@
 #workspace .content .listing td.hasdropdown {
   overflow: visible;
 }
-#workspace .content .listing td ins.state {
-  background-image: url(../img/sprite.png);
-  display: block;
-  float: left;
-}
 #workspace .content .listing td.status_public {
   padding-right: 1px;
 }
