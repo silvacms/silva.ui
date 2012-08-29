@@ -66,9 +66,10 @@ form {
 
 form .form-label {
   display: block;
+  float: left;
+  margin-right: 25px;
   vertical-align: top;
   width: 225px;
-  float: left;
 }
 
 .form-content .form-section .form-label label {
@@ -87,6 +88,10 @@ form .form-label {
   margin-top: 3px;
 }
 
+.form-content .form-section:hover .form-label p {
+  color: #000;
+}
+
 /* -- form-field settings -- */
 
 .form-content .form-field {
@@ -96,6 +101,12 @@ form .form-label {
 
 #form-metadataformgroup .form-content .form-field .field {
   width: 325px;
+  padding: 2px;
+}
+
+#form-metadataformgroup .form-content .form-field .field:hover {
+  border-color: #222;
+  border-radius: 3px;
 }
 
 .form-field .field:focus {
@@ -109,12 +120,11 @@ input, textarea {
 }
 
 input:focus, textarea:focus {
- border-radius: 3px;
- border: 1px solid #000;
- -webkit-box-shadow: 2px 2px 3px #A0A0A0;
- -moz-box-shadow: 2px 2px 3px #A0A0A0;
- box-shadow: 2px 2px 3px #A0A0A0;
-
+  border: 1px solid #000;
+  border-radius: 3px;
+   -webkit-box-shadow: 2px 2px 3px #A0A0A0;
+   -moz-box-shadow: 2px 2px 3px #A0A0A0;
+  box-shadow: 2px 2px 3px #A0A0A0;
 }
 
 .form-content .form-batch {
@@ -151,7 +161,7 @@ input:focus, textarea:focus {
 /* -- form-section and form-footer settings -- */
 
 .form-section, .form-controls {
-  margin: 0 5px 15px 5px;
+  margin: 0 5px 30px 5px;
   padding: 5px 0 20px 0;
 }
 
@@ -189,19 +199,34 @@ input:focus, textarea:focus {
   margin-right: 5px;
 }
 
-/* -- acquired settings -- */
+/* -- acquired, acquirasble and required settings -- */
 
-.form-acquired-label{
-  background: rgb(70, 165, 69);
-  color: #fff;
+.form-content .form-required, .form-content .form-acquirable, .form-acquired-label {
   border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: 4px;
   color: #FFFFFF;
-  font-size: 7px; /* fixed, prevent to grow with % on parent */
+  display: inline-block;
+  font-size: 8px; /* fixed, prevent to grow with % on parent */
   font-weight: bold;
-  padding: 0 4px;
-  text-transform: uppercase;
-  vertical-align: middle;
+  height: 10px;
+  text-align: center;
+  text-transform: capitalize;
+  vertical-align: top;
+}
+
+.form-content .form-required,
+.form-content .form-acquirable {
+  float: right;
+  width: 60px;
+}
+
+.form-content .form-required { background-color: rgb(222, 42, 42); }
+
+.form-content .form-acquirable { background-color: rgb(250, 169, 55); }
+
+.form-acquired-label{
+  background: rgb(70, 165, 69); 
+  width: 80px;
 }
 
 p.form-acquired {
@@ -210,36 +235,8 @@ p.form-acquired {
   width: 325px;
 }
 
-.form-focus p.form-acquired {
+.form-section .form-focus p.form-acquired, .form-section:hover p.form-acquired {
   color: #000;
-}
-
-/* -- acquirable and required settings -- */
-
-.form-content .form-required,
-.form-content .form-acquirable {
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  border-radius: 4px;
-  color: #FFFFFF;
-  display: inline-block;
-  float: right;
-  font-size: 7px; /* fixed, prevent to grow with % on parent */
-  font-weight: bold;
-  margin: 3px 6px 0 4px;
-  position: relative;
-  vertical-align: 1px;
-  text-align: center;
-  text-transform: uppercase;
-  text-transform: uppercase;
-  width: 58px;
-}
-
-.form-content .form-required {
-  background-color: rgb(222, 42, 42);
-}
-
-.form-content .form-acquirable {
-  background-color: rgb(250, 169, 55);
 }
 
 /* -- error message settings -- */
@@ -306,7 +303,7 @@ form .form-error-message {
   border: 1px #777 solid;
   float: left;
   margin: 0 0 0 6px;
-  padding: 0 4px;
+  padding: 1px 5px;
 }
 
 .form-content a.form-control:hover, 
@@ -331,15 +328,19 @@ form .form-error-message {
    position: relative;
 }
 
+/*.ui-dialog .form-fields-container .form-content .form-section .form-field input,
+.ui-dialog .form-fields-container .form-content .form-section .form-field input:focus,
+.ui-dialog .form-fields-container .form-content .form-section .form-field input:hover {
+  width: 300px;
+}*/
+
 .ui-dialog .form-fields-container .form-content .form-required {
-   float: left; 
-   margin-left: 10px;
+   float: right; 
 }
 
 .ui-dialog .form-fields-container .form-content .form-section .form-label {
   display: block;
   float: left;
-  margin-bottom: 5px; 
 }
 
 .ui-dialog .form-fields-container .form-content .form-section .form-label label {
@@ -404,21 +405,27 @@ form .form-error-message {
   -o-border-radius:3px;
   -webkit-border-radius:3px;
   border-radius: 3px;
-  background: #fff url(../img/gradient20m.png) repeat-x top;
+  background: #FFF;
+  background: -webkit-gradient(linear, left top, left bottom, from(#FFF), to(#DADADA)); /* for webkit browsers */
+  background: -moz-linear-gradient(top,  #FFF,  #DADADA); /* for firefox 3.6+ */
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#FFF', endColorstr='#DADADA'); /* for IE */
   border: 1px #777 solid;
-  display: block;
   color: #000;
   float: left;
-  padding: 0 6px;
+  padding: 1px 6px;
 }
 
-.ui-dialog .ui-widget div.actions div.actions-icon {
+/*.ui-dialog .ui-widget div.actions div.actions-icon {
   padding: 0;
 }
   
 .ui-dialog .ui-button-text-only .ui-button-text {
   padding: 0;
-}
+}*/
+
+li .last-action div.action-icon {
+  padding: 1px 0;
+} 
 
 /* Collection widget CSS */
 
@@ -426,7 +433,6 @@ form .form-error-message {
   height: 20px;
   width: 20px;
   border: 0px;
-  float: right;
 }
 .form-content tr.field-collection-line input.field-textline,
 .form-content tr.field-collection-line table.field-collection-header {
@@ -507,6 +513,17 @@ form .form-error-message {
 .portlets .external-controls {
   padding: 5px 20px 32px 5px;
 }
+
+/* CKEditor information orientation */
+
+#cke_dialog_contents_46 .cke_dialog_ui_input_text {
+  padding: 0; 
+}
+
+table.cke_dialog_contents td.cke_dialog_ui_vbox_child input.cke_dialog_ui_input_text {
+  height: 22px;
+}
+
 
 /* Image information orientation */
 
