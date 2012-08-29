@@ -448,6 +448,10 @@ ins.state.last_closed { background-position:-85px -105px;}
   display: block;
   padding-left: 3px;
 }
+#form div.versioning-state-cell a {
+  text-decoration: underline;
+}
+
 
 /* jquery ui overrides */
 
