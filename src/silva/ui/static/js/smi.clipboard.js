@@ -1,11 +1,10 @@
 
 (function($, infrae) {
-
-
     /**
      * Clipboard used for listing content.
      * @param notification: notification manage used to send notifications.
      */
+
     var ClipBoardManager = function(notifications) {
         var cutted_ids = [];
         var copied_ids = [];

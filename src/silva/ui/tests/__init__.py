@@ -13,6 +13,17 @@ from zope.interface.interfaces import IInterface
 from silva.fanstatic.extending import INTERFACES_RESOURCES
 
 
+@apply
+def HAVE_BUSTER():
+    process = subprocess.Popen(
+        ['buster', '--version'],
+        shell=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE)
+    stdout, stderr = process.communicate()
+    return stderr.strip != 'buster: no found'
+
+
 class BusterTestCase(unittest.TestCase):
     """A buster test case to run Javascript tests.
     """
@@ -73,6 +84,11 @@ config["{name}"] = {{
         self._writeConfiguration(self._path)
 
     def runTest(self):
+        if not HAVE_BUSTER:
+            warnings.warn(
+                u"Buster is not installed.",
+                UserWarning)
+            raise unittest.SkipTest()
         process = subprocess.Popen(
             ['buster', 'test', '-r', 'xml'],
             stdout=subprocess.PIPE,
