@@ -92,10 +92,7 @@ class ContentSerializer(object):
         elif id is None:
             id = self.get_id(content)
         previewable = content.get_previewable()
-        author = self.get_metadata(
-            previewable, 'silva-extra', 'lastauthor')
-        if author is None:
-            author = u'-'
+        author = previewable.get_last_author_info().userid()
         modified = self.get_metadata(
             previewable, 'silva-extra', 'modificationtime')
         if modified is None:

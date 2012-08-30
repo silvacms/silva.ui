@@ -15,12 +15,16 @@ from silva.fanstatic.extending import INTERFACES_RESOURCES
 
 @apply
 def HAVE_BUSTER():
-    process = subprocess.Popen(
-        ['buster', '--version'],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE)
-    stdout, stderr = process.communicate()
-    return stderr.strip() != 'buster: no found'
+    try:
+        process = subprocess.Popen(
+            ['buster', '--version'],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE)
+        stdout, stderr = process.communicate()
+    except OSError as error:
+        if error.args[0] == 2:
+            return False
+    return stdout.startswith('Buster.JS')
 
 
 class BusterTestCase(unittest.TestCase):
