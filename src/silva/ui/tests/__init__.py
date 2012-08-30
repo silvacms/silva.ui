@@ -17,11 +17,10 @@ from silva.fanstatic.extending import INTERFACES_RESOURCES
 def HAVE_BUSTER():
     process = subprocess.Popen(
         ['buster', '--version'],
-        shell=True,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE)
     stdout, stderr = process.communicate()
-    return stderr.strip != 'buster: no found'
+    return stderr.strip() != 'buster: no found'
 
 
 class BusterTestCase(unittest.TestCase):
