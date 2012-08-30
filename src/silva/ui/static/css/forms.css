@@ -119,6 +119,12 @@ input, textarea {
  border: 1px solid #777;
 }
 
+input[type="submit"] {
+  background: url("../img/gradient20m.png") repeat-x scroll center top #FFFFFF;
+  color: #000;
+  margin: 8px 2px 0 0;
+}
+
 input:focus, textarea:focus {
   border: 1px solid #000;
   border-radius: 3px;
@@ -318,7 +324,7 @@ form .form-error-message {
 
 #workspace .header .tabs li.top-level:hover {
   background: #FFF;
-  color: black;
+  color: #000;
 }
 
 /* -- dialog window 'text' -- */
