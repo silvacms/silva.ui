@@ -101,7 +101,6 @@ form .form-label {
 
 #form-metadataformgroup .form-content .form-field .field {
   width: 325px;
-  padding: 2px;
 }
 
 #form-metadataformgroup .form-content .form-field .field:hover {
@@ -114,15 +113,60 @@ form .form-label {
   border-radius: 3px;
 }
 
-input, textarea {
+/* -- approval-history settings -- */
+
+#form #approval-history .form-label {
+  float: none;
+  padding: 3px; 
+  width: 100%;
+}
+
+#form #approval-history .form-content .form-section {
+  margin: 5px;
+  padding: 0 5px 25px; 
+}
+
+#form #approval-history .form-content .form-batch {
+  border-style: none;
+}
+
+#form #approval-history .form-content .form-section .form-label label {
+  display: block; 
+}
+
+#form #approval-history .form-content ol {
+  list-style-type: none;
+  margin-left: 0;
+}
+
+#form #approval-history .label {
+  font-weight: bold;
+}
+
+#form #approval-history .form-field {
+  padding: 3px;
+}
+
+#form #approval-history div.batching a {
+  text-decoration: underline;
+}
+
+/* -- end of form-approval settings -- */ 
+
+input, textarea, select {
  border-radius: 3px;
  border: 1px solid #777;
+ padding: 2px;
 }
 
 input[type="submit"] {
   background: url("../img/gradient20m.png") repeat-x scroll center top #FFFFFF;
   color: #000;
   margin: 8px 2px 0 0;
+}
+
+input[type="submit"]:hover {
+  background: #FFF;
 }
 
 input:focus, textarea:focus {
@@ -136,6 +180,38 @@ input:focus, textarea:focus {
 .form-content .form-batch {
   border-left: 2px solid #CCC;
   padding: 3px 6px;
+}
+
+input.field-collection-add-line {
+  background-color: #F1F1F1;
+  background-image: url("../img/plus-small.png");
+  background-repeat: no-repeat;
+  background-position: 3px 1px;
+  padding: 0 0 0 17px; 
+}
+
+input.field-collection-add-line:hover {
+  background-color: #FFF;
+  background-image: url("../img/plus-small.png");
+  background-repeat: no-repeat;
+  background-position: 3px 1px;
+  padding: 0 0 0 17px;
+}
+
+input.field-collection-remove-line {
+  background-color: #F1F1F1;
+  background-image: url("../img/minus-small.png");
+  background-repeat: no-repeat;
+  background-position: 3px 1px;
+  padding: 0 0 0 17px;
+}
+
+input.field-collection-remove-line:hover {
+  background-color: #FFF;
+  background-image: url("../img/minus-small.png");
+  background-repeat: no-repeat;
+  background-position: 3px 1px;
+  padding: 0 0 0 17px;
 }
 
 /* -- general form content settings -- */
@@ -239,6 +315,7 @@ p.form-acquired {
   color: #777;
   font-size: 95%;
   width: 325px;
+  margin-top: 5px;
 }
 
 .form-section .form-focus p.form-acquired, .form-section:hover p.form-acquired {
