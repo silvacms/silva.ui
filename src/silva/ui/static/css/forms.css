@@ -283,7 +283,7 @@ input.field-collection-remove-line:hover {
 
 /* -- acquired, acquirasble and required settings -- */
 
-.form-content .form-required, .form-content .form-acquirable, .form-acquired-label {
+.form-content .form-required, .form-content .form-acquirable, .form-acquired-label, span.required {
   border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: 4px;
   color: #FFFFFF;
@@ -302,7 +302,11 @@ input.field-collection-remove-line:hover {
   width: 60px;
 }
 
-.form-content .form-required { background-color: rgb(222, 42, 42); }
+span.required {
+  width: 60px;
+}
+
+.form-content .form-required, span.required { background-color: rgb(222, 42, 42); }
 
 .form-content .form-acquirable { background-color: rgb(250, 169, 55); }
 

@@ -403,6 +403,28 @@ ins.ui-icon-arrowreturnthick-1-w {
   margin-right: 5px;
 }
 
+ins.ui-icon-check {
+  background-image:url(../img/sprite.png)!important;
+  background-position: -44px -142px;
+}
+
+ins.ui-icon-radio-on {
+  width: 12px;
+  height: 16px;
+  background-image:url(../img/sprite.png)!important;
+  background-position: -44px -142px;
+  margin-right: 5px;
+}
+
+ins.ui-icon-close {
+  width: 12px;
+  height: 16px;
+  background-image:url(../img/sprite.png)!important;
+  background-position: -64px -142px;
+  margin-right: 5px;
+}
+
+
 /* Silva Content Types - uses !important to override default jstree-icon */
 ins.silva_autotoc { background-position:-100px -41px!important; }
 ins.silva_csvsource { background-position:-120px -41px!important; }
