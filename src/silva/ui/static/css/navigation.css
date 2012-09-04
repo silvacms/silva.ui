@@ -52,7 +52,7 @@
   padding: 0;
 }
 #navigation .tree ul li a.jstree-clicked {
-  color: #666;
+  color: #111;
 }
 
 #navigation .tree ins {

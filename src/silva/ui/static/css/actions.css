@@ -64,6 +64,7 @@ div.actions ol li a.active {
   background: -webkit-gradient(linear, left top, left bottom, from(#EAEAEA), to(#FFF)); /* for webkit browsers */
   background: -moz-linear-gradient(top,  #EAEAEA,  #FFF); /* for firefox 3.6+ */
   filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#EAEAEA', endColorstr='#FFF'); /* for IE */
+  color: #111;
 }
 
 div.actions ol li a:hover {

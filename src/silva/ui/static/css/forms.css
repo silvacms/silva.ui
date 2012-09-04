@@ -308,9 +308,9 @@ span.required {
 
 .form-content .form-required, span.required { background-color: rgb(222, 42, 42); }
 
-.form-content .form-acquirable { background-color: rgb(250, 169, 55); }
+.form-content .form-acquirable { background-color: rgb(250, 169, 55); margin-top: 4px; }
 
-.form-acquired-label{
+.form-acquired-label {
   background: rgb(70, 165, 69); 
   width: 80px;
 }
@@ -318,8 +318,8 @@ span.required {
 p.form-acquired {
   color: #777;
   font-size: 95%;
+  margin-top: 4px;
   width: 325px;
-  margin-top: 5px;
 }
 
 .form-section .form-focus p.form-acquired, .form-section:hover p.form-acquired {
@@ -536,8 +536,14 @@ li .last-action div.action-icon {
 }
 .form-content .field-collection-lines div.line-actions {
   float: left;
-  width: 60px;
+  width: 25px;
 }
+
+div.line-data {
+  float: left;
+  margin-bottom: 5px;
+}
+
 .form-content .field-collection-lines td.line-actions {
   width: 20px;
 }
@@ -585,9 +591,12 @@ li .last-action div.action-icon {
 
 #workspace .form-content .portlet h4 {
   background: transparent; 
-  border-width: 0;
-  padding: 2px 0 0 5px; 
-  text-decoration: underline; 
+  border-style: solid;
+  border-width: 0 0 1px 0;
+  border-color: #111;
+  border-radius: 0;
+  display: inline-block;
+  padding: 0; 
 }
 
 @media screen and (max-width: 650px) {
@@ -596,7 +605,7 @@ li .last-action div.action-icon {
 }
 
 .portlets p {
-  margin: 0 10px;
+  margin: 0 5px;
 }
 
 .portlets .external-controls {
@@ -615,8 +624,10 @@ table.cke_dialog_contents td.cke_dialog_ui_vbox_child input.cke_dialog_ui_input_
 
 .cke_skin_silva div.cke_dialog_ui_input_text, .cke_skin_silva div.cke_dialog_ui_input_password, .cke_skin_silva 
 div.cke_dialog_ui_input_textarea {
-  padding: 0;
+  padding: 0 !important;
 }
+
+
 
 /* Image information orientation */
 
