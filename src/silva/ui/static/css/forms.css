@@ -288,7 +288,7 @@ input.field-collection-remove-line:hover {
   border-radius: 4px;
   color: #FFFFFF;
   display: inline-block;
-  font-size: 8px; /* fixed, prevent to grow with % on parent */
+  font-size: 9px; /* fixed, prevent to grow with % on parent */
   font-weight: bold;
   height: 10px;
   text-align: center;
@@ -389,13 +389,16 @@ form .form-error-message {
   background: #fff url(../img/gradient20m.png) repeat-x top;
   border: 1px #777 solid;
   float: left;
-  margin: 0 0 0 6px;
+  margin: 4px 6px 0 0;
   padding: 1px 5px;
 }
 
 .form-content a.form-control:hover, 
  .form-content a.form-button:hover {
-   background: #FFF;
+  background: #FFF;
+  background: -webkit-gradient(linear, left top, left bottom, from(#EAEAEA), to(#FFF)); /* for webkit browsers */
+  background: -moz-linear-gradient(top,  #EAEAEA,  #FFF); /* for firefox 3.6+ */
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#EAEAEA', endColorstr='#FFF'); /* for IE */
 }
 
 .form-content a.form-control ins,
@@ -405,6 +408,9 @@ form .form-error-message {
 
 #workspace .header .tabs li.top-level:hover {
   background: #FFF;
+  background: -webkit-gradient(linear, left top, left bottom, from(#EAEAEA), to(#FFF)); /* for webkit browsers */
+  background: -moz-linear-gradient(top,  #EAEAEA,  #FFF); /* for firefox 3.6+ */
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#EAEAEA', endColorstr='#FFF'); /* for IE */
   color: #000;
 }
 
@@ -502,17 +508,13 @@ form .form-error-message {
   padding: 1px 6px;
 }
 
-/*.ui-dialog .ui-widget div.actions div.actions-icon {
-  padding: 0;
+/*.ui-dialog .ui-widget div.actions div.actions-icon, .ui-dialog .ui-button-text-only .ui-button-text {
+  padding: 1px 5px 1px 12px;
 }
   
-.ui-dialog .ui-button-text-only .ui-button-text {
-  padding: 0;
-}*/
-
 li .last-action div.action-icon {
   padding: 1px 0;
-} 
+}*/ 
 
 /* Collection widget CSS */
 
@@ -608,9 +610,13 @@ li .last-action div.action-icon {
 }
 
 table.cke_dialog_contents td.cke_dialog_ui_vbox_child input.cke_dialog_ui_input_text {
-  height: 22px;
+  height: 24px;
 }
 
+.cke_skin_silva div.cke_dialog_ui_input_text, .cke_skin_silva div.cke_dialog_ui_input_password, .cke_skin_silva 
+div.cke_dialog_ui_input_textarea {
+  padding: 0;
+}
 
 /* Image information orientation */
 

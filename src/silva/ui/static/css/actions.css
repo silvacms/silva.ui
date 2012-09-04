@@ -60,14 +60,17 @@ div.actions ol li a:hover {
 }
 
 div.actions ol li a.active {
-  background: #E3EBF6;
-  background: -webkit-gradient(linear, left top, left bottom, from(#E3EBF6), to(#EBF0F2)); /* for webkit browsers */
-  background: -moz-linear-gradient(top,  #E3EBF6,  #EBF0F2); /* for firefox 3.6+ */
-  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#E3EBF6', endColorstr='#EBF0F2'); /* for IE */
+  background: #EAEAEA;
+  background: -webkit-gradient(linear, left top, left bottom, from(#EAEAEA), to(#FFF)); /* for webkit browsers */
+  background: -moz-linear-gradient(top,  #EAEAEA,  #FFF); /* for firefox 3.6+ */
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#EAEAEA', endColorstr='#FFF'); /* for IE */
 }
 
 div.actions ol li a:hover {
-  background: #FFF;
+  background: #EAEAEA;
+  background: -webkit-gradient(linear, left top, left bottom, from(#EAEAEA), to(#FFF)); /* for webkit browsers */
+  background: -moz-linear-gradient(top,  #EAEAEA,  #FFF); /* for firefox 3.6+ */
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#EAEAEA', endColorstr='#FFF'); /* for IE */
   color: #111;
 }
 
