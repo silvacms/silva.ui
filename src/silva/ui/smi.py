@@ -4,6 +4,7 @@
 # $Id$
 
 from pkg_resources import iter_entry_points
+from megrok.pagetemplate import PageTemplate
 
 from five import grok
 from silva.core.interfaces import ISilvaObject, IVersion
@@ -19,6 +20,7 @@ from zope.publisher.interfaces.browser import IBrowserRequest
 from zope.interface import Interface
 from zope.publisher.browser import applySkin
 from zope.traversing.browser import absoluteURL
+from zope.pagetemplate.interfaces import IPageTemplate
 
 from AccessControl import getSecurityManager
 from zExceptions import Redirect
@@ -83,6 +85,16 @@ class SMI(grok.View):
         self.root_url = root_url
         self.can_manage = getSecurityManager().checkPermission(
             'View Management Screens', self.context)
+
+    def render(self):
+        template = getMultiAdapter((self, self.request), IPageTemplate)
+        return template()
+
+
+class SMITemplate(PageTemplate):
+    """Default SMI template.
+    """
+    grok.view(SMI)
 
 
 class SMIResponseHeaders(ResponseHeaders):
