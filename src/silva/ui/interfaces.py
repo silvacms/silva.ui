@@ -100,7 +100,13 @@ class IUIService(ISilvaLocalService):
         required=False)
     public_url = schema.URI(
         title=_(u"Public site URL"),
-        description=_(u"Public site URL to use for preview and view mode in the SMI."),
+        description=_(u"Public site URL to use for view mode in the SMI."),
+        required=False)
+    preview_url = schema.URI(
+        title=_(u"Preview site URL"),
+        description=_(
+            u"Preview site URL to use for preview mode in the SMI. "
+            u"Authentication is required to access the preview mode."),
         required=False)
     maintenance_message = schema.Text(
         title=_(u"Maintenance UI message"),
