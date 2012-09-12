@@ -98,6 +98,10 @@ class IUIService(ISilvaLocalService):
     background = schema.TextLine(
         title=_(u"Background color"),
         required=False)
+    public_url = schema.URI(
+        title=_(u"Public site URL"),
+        description=_(u"Public site URL to use for preview and view mode in the SMI."),
+        required=False)
     maintenance_message = schema.Text(
         title=_(u"Maintenance UI message"),
         description=_(

@@ -29,6 +29,7 @@ class UIService(SilvaService):
     name = u"Silva"
     logo = None
     background = None
+    public_url = None
     listing_preview = True
     maintenance_message = None
     test_mode = False
@@ -56,6 +57,7 @@ class UISettings(silvaforms.ZMIForm):
         logo = data['logo']
         listing_preview = data['listing_preview']
         maintenance_message = data['maintenance_message']
+        public_url = data['public_url']
         if background != silvaforms.NO_VALUE:
             self.context.background = background
         else:
@@ -69,6 +71,10 @@ class UISettings(silvaforms.ZMIForm):
             self.context.maintenance_message = maintenance_message
         else:
             self.context.maintenance_message = None
+        if public_url != silvaforms.NO_VALUE:
+            self.context.public_url = public_url
+        else:
+            self.context.public_url = None
         self.context.name = name
         self.context.listing_preview = listing_preview
         self.status = u"Modification saved."

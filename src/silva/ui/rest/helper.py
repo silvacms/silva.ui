@@ -48,9 +48,9 @@ class UIHelper(object):
             message, target_language=self.language, context=self.request)
 
     def get_content_path(self, content):
-        content_path = getMultiAdapter(
-            (content, self.request), IContentURL).url(relative=True)
-        return content_path[len(self.root_path):] or '/'
+        adapter = getMultiAdapter((content, self.request), IContentURL)
+        path = adapter.url(relative=True)
+        return path[len(self.root_path):] or '/'
 
 
 def get_notifications(helper, data):
