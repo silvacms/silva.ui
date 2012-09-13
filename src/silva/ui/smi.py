@@ -13,6 +13,7 @@ from silva.core.views.interfaces import IVirtualSite, IContentURL
 from silva.core.views.httpheaders import ResponseHeaders
 from silva.fanstatic import need
 from silva.ui.interfaces import IUIService
+from silva.core.references.utils import relative_path
 
 from zope.component import getUtility, getMultiAdapter
 from zope.i18n.interfaces import IUserPreferredLanguages
@@ -47,15 +48,17 @@ class SMI(grok.View):
         settings = getUtility(IUIService)
         if settings.smi_access_root:
             root = site.get_silva_root()
-            root_url = getMultiAdapter((root, self.request), IContentURL).url()
         else:
             root = site.get_root()
-            root_url = site.get_root_url()
+        root_content_url = getMultiAdapter((root, self.request), IContentURL)
+        root_url = root_content_url.url()
         if root != self.context:
             # Relative path of the content from the root.
-            content_path = getMultiAdapter(
-                (self.context, self.request), IContentURL).url(relative=True)
-            path = content_path[len(site.get_root_path()):]
+            content_url = getMultiAdapter(
+                (self.context, self.request), IContentURL)
+            root_path = root_content_url.url(relative=True).split('/')
+            content_path = content_url.url(relative=True).split('/')
+            path = '/'.join(relative_path(root_path, content_path))
 
             raise Redirect('/'.join((root_url, 'edit')) + '#!' + path)
 

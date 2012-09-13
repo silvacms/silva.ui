@@ -56,9 +56,10 @@ class UIHelper(object):
             message, target_language=self.language, context=self.request)
 
     def get_content_path(self, content):
-        url = getMultiAdapter((content, self.request), IContentURL)
-        path = url.url(relative=True).split('/')
-        return '/'.join(relative_path(self.root_path.split('/'), path))
+        content_url = getMultiAdapter((content, self.request), IContentURL)
+        content_path = content_url.url(relative=True).split('/')
+        root_path = self.root_path.split('/')
+        return '/'.join(relative_path(root_path, content_path))
 
 def get_notifications(helper, data):
     messages = []
