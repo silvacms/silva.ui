@@ -15,6 +15,7 @@ import fanstatic
 from silva.core.messages.interfaces import IMessageService
 from silva.core.views.interfaces import IVirtualSite, IContentURL
 from silva.core.references.utils import relative_path
+from silva.ui.interfaces import IUIService
 
 from .invalidation import Invalidation
 
@@ -26,8 +27,14 @@ class UIHelper(object):
         self.context = context
         self.request = request
         site = IVirtualSite(request)
-        self.root_path = site.get_root_path()
-        self.root_url = site.get_root_url()
+        settings = getUtility(IUIService)
+        if settings.smi_access_root:
+            root = site.get_silva_root()
+        else:
+            root = site.get_root()
+        url = getMultiAdapter((root, request), IContentURL)
+        self.root_path = url.url(relative=True)
+        self.root_url = url.url()
         self._providers = []
 
     def need(self, provider):
