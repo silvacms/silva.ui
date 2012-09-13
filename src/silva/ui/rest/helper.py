@@ -14,6 +14,7 @@ import fanstatic
 
 from silva.core.messages.interfaces import IMessageService
 from silva.core.views.interfaces import IVirtualSite, IContentURL
+from silva.core.references.utils import relative_path
 
 from .invalidation import Invalidation
 
@@ -48,10 +49,9 @@ class UIHelper(object):
             message, target_language=self.language, context=self.request)
 
     def get_content_path(self, content):
-        adapter = getMultiAdapter((content, self.request), IContentURL)
-        path = adapter.url(relative=True)
-        return path[len(self.root_path):] or '/'
-
+        url = getMultiAdapter((content, self.request), IContentURL)
+        path = url.url(relative=True).split('/')
+        return '/'.join(relative_path(self.root_path.split('/'), path))
 
 def get_notifications(helper, data):
     messages = []
