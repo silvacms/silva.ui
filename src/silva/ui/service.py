@@ -8,6 +8,7 @@ from five import grok
 from silva.core import conf as silvaconf
 from silva.core.services.base import SilvaService
 from silva.ui.interfaces import IUIService
+from silva.ui.interfaces import IUIGenericSettings, IUIFolderSettings
 from silva.translations import translate as _
 from zeam.form import silva as silvaforms
 
@@ -22,31 +23,42 @@ class UIService(SilvaService):
     silvaconf.icon('service.png')
 
     manage_options = (
-        {'label': 'UI settings',
-         'action': 'manage_settings'},) + SilvaService.manage_options
+        {'label': 'UI Generic settings',
+         'action': 'manage_settings'},
+        {'label': 'UI Folder settings',
+         'action': 'manage_folder_settings'},
+        ) + SilvaService.manage_options
 
-    # Default values
+    # Default settings
     name = u"Silva"
     logo = None
     background = None
     public_url = None
     preview_url = None
-    listing_preview = True
     maintenance_message = None
     test_mode = False
     smi_access_root = False
 
+    # Default folder settings
+    folder_icon_link = True
+    folder_icon_preview = True
+    folder_identifier_link = False
+    folder_title_link = False
+    folder_modified_link = False
+    folder_author_link = False
+    folder_goto_menu = True
 
-class UISettings(silvaforms.ZMIForm):
+
+class UIGenericSettings(silvaforms.ZMIForm):
     """Update the settings.
     """
     grok.name('manage_settings')
     grok.context(IUIService)
 
-    label = u"UI settings"
-    description = u"You can from here modify SMI settings."
+    label = _(u"UI Generic settings")
+    description = _(u"You can from here modify generic SMI settings.")
     ignoreContent = False
-    fields = silvaforms.Fields(IUIService)
+    fields = silvaforms.Fields(IUIGenericSettings)
 
     @silvaforms.action(u'Save')
     def save(self):
@@ -57,7 +69,6 @@ class UISettings(silvaforms.ZMIForm):
         background = data['background']
         name = data['name']
         logo = data['logo']
-        listing_preview = data['listing_preview']
         maintenance_message = data['maintenance_message']
         public_url = data['public_url']
         preview_url = data['preview_url']
@@ -85,7 +96,18 @@ class UISettings(silvaforms.ZMIForm):
             self.context.preview_url = None
         self.context.smi_access_root = smi_access_root
         self.context.name = name
-        self.context.listing_preview = listing_preview
-        self.status = u"Modification saved."
+        self.status = _(u"Modification saved.")
         return silvaforms.SUCCESS
 
+
+class UIFolderSettings(silvaforms.ZMIForm):
+    """Update the settings.
+    """
+    grok.name('manage_folder_settings')
+    grok.context(IUIService)
+
+    label = _(u"UI Folder settings")
+    description = _(u"You can from here modify settings for folder listings.")
+    ignoreContent = False
+    fields = silvaforms.Fields(IUIFolderSettings)
+    actions = silvaforms.Actions(silvaforms.EditAction())

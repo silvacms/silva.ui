@@ -7,11 +7,13 @@ from five import grok
 from grokcore.chameleon.components import ChameleonPageTemplate
 from infrae import rest
 from zope.interface import Interface
+from zope.component import getUtility
 
 from silva.core.interfaces import IContainer
 from silva.core.interfaces import IPublishable, INonPublishable
 from silva.translations import translate as _
 from silva.ui.interfaces import IJSView, IContainerJSListing
+from silva.ui.interfaces import IUIService
 from silva.ui.rest.container.serializer import ContentSerializer
 from zeam.component import Component, getAllComponents
 
@@ -66,109 +68,151 @@ class TemplateContainerListing(rest.REST):
         return self.template.render(self)
 
 
+class FolderConfigurationGenerator(object):
+    """Helper object to build the JSON folder configuration.
+    """
+
+    def __init__(self, name, title):
+        self.name = name
+        self.title = title
+        self._columns = []
+        self._layout = {}
+
+    def add(self, column, width=None):
+        if width is not None:
+            self._layout[len(self._columns)] = width
+        self._columns.append(column)
+
+    def generate(self):
+        return {
+            'name': self.name,
+            'title': self.title,
+            'layout': {'fixed': self._layout},
+            'collapsed': True,
+            'columns': self._columns}
+
+
+def icon_column(settings, screen, cfg):
+    info = {'name': 'icon', 'view': 'icon'}
+    if settings.folder_icon_link:
+        info.update({'action': 'content'})
+    cfg.add(info, ICON_WIDTH)
+
+def workflow_column(settings, screen, cfg):
+    cfg.add({'name': 'status_public', 'view': 'workflow'}, PUBLIC_STATE_WIDTH)
+    cfg.add({'name': 'status_next', 'view': 'workflow'}, NEXT_STATE_WIDTH)
+
+def identifier_column(settings, screen, cfg):
+    info = {'name': 'identifier',
+            'caption': screen.translate(_(u'Identifier')),
+            'view': 'text',
+            'renameable':
+                {'item_match':
+                     ['not',
+                      ['and',
+                       ['equal', 'access', 'write'],
+                       ['or',
+                        ['equal', 'status_public', 'published'],
+                        ['equal', 'status_next', 'approved']]]]},
+            'filterable': True}
+    if settings.folder_identifier_link:
+        info.update({'action': 'content'})
+    cfg.add(info)
+
+def title_column(settings, screen, cfg):
+    info = {'name': 'title',
+            'caption': screen.translate(_(u'Title')),
+            'view': 'text',
+            'renameable':
+                {'item_match':
+                     ['or',
+                      ['not', ['provides', 'versioned']],
+                      ['and',
+                       ['equal', 'access', 'write'],
+                       ['equal', 'status_next', 'draft']],
+                      ['and',
+                       ['not', ['equal', 'access', 'write']],
+                       ['equal', 'status_next', 'draft', 'pending']],]},
+            'filterable': True}
+    if settings.folder_title_link:
+        info.update({'action': 'preview'})
+    cfg.add(info)
+
+def modified_column(settings, screen, cfg):
+    info = {'name': 'modified',
+            'caption': screen.translate(_(u'Modified')),
+            'view': 'text'}
+    if settings.folder_modified_link:
+        info.update({'action': 'properties',
+                     'action_match': ['not', ['equal', 'access', None]]})
+    cfg.add(info)
+
+def author_column(settings, screen, cfg):
+    info = {'name': 'author',
+            'caption': screen.translate(_(u'Author')),
+            'view': 'text'}
+    if settings.folder_author_link:
+        info.update({'action': 'publish',
+                     'action_match': ['and',
+                                      ['not', ['equal', 'access', None]],
+                                      ['provides', 'versioned']]})
+    cfg.add(info)
+
+def goto_column(settings, screen, cfg):
+    if settings.folder_goto_menu:
+        info = {'view': 'goto',
+                'index':
+                    {'screen': 'content',
+                     'caption': screen.translate(_(u"Go to"))},
+                'menu':
+                    [{'screen': 'preview',
+                      'caption': screen.translate(_(u"Preview"))},
+                 {'screen': 'properties',
+                  'caption': screen.translate(_(u"Properties")),
+                  'item_match':
+                      ['not', ['equal', 'access', None]]},
+                     {'screen': 'publish',
+                      'caption': screen.translate(_(u"Publish")),
+                      'item_match':
+                      ['and',
+                       ['not', ['equal', 'access', None]],
+                       ['provides', 'versioned']]},
+                     {'screen': 'settings/access',
+                      'caption': screen.translate(_(u"Access")),
+                      'item_match':
+                      ['and',
+                       ['equal', 'access', 'manage'],
+                       ['provides', 'container']]}]}
+        cfg.add(info, GOTO_WIDTH)
+
+def move_column(settings, screen, cfg):
+    cfg.add({'view': 'move', 'name': 'moveable'}, MOVE_WIDTH)
+
+
 class ContainerListing(Component):
     grok.implements(IContainerJSListing)
     grok.provides(IContainerJSListing)
     grok.baseclass()
     title = None
     interface = None
+    columns = [icon_column,
+               workflow_column,
+               identifier_column,
+               title_column,
+               modified_column,
+               author_column,
+               goto_column,
+               move_column]
 
     @classmethod
     def configuration(cls, screen):
-        return {
-            'name': grok.name.bind().get(cls),
-            'title': screen.translate(cls.title),
-            'layout': {
-                'fixed': {
-                    0: ICON_WIDTH,
-                    1: PUBLIC_STATE_WIDTH,
-                    2: NEXT_STATE_WIDTH,
-                    7: GOTO_WIDTH,
-                    8: MOVE_WIDTH
-                    }},
-            'collapsed': True,
-            'columns': [{
-                    'name': 'icon',
-                    'view': 'action-icon',
-                    'action': 'content'
-                    }, {
-                    'name': 'status_public',
-                    'view': 'workflow'
-                    }, {
-                    'name': 'status_next',
-                    'view': 'workflow'
-                    }, {
-                    'name': 'identifier',
-                    'caption': screen.translate(_(u'Identifier')),
-                    'view': 'text',
-                    'renameable': {
-                        'item_match': [
-                            'not', [
-                                'and',
-                                ['equal', 'access', 'write'],
-                                ['or',
-                                 ['equal', 'status_public', 'published'],
-                                 ['equal', 'status_next', 'approved']]]
-                            ]},
-                    'filterable': True
-                    }, {
-                    'name': 'title',
-                    'caption': screen.translate(_(u'Title')),
-                    'view': 'text',
-                    'renameable': {
-                        'item_match': [
-                            'or',
-                            ['not', ['provides', 'versioned']],
-                            ['and',
-                             ['equal', 'access', 'write'],
-                             ['equal', 'status_next', 'draft']],
-                            ['and',
-                             ['not', ['equal', 'access', 'write']],
-                             ['equal', 'status_next', 'draft', 'pending']],
-                            ]},
-                    'filterable': True
-                    }, {
-                    'name': 'modified',
-                    'caption': screen.translate(_(u'Modified')),
-                    'view': 'text'
-                    }, {
-                    'name': 'author',
-                    'caption': screen.translate(_(u'Author')),
-                    'view': 'text'
-                    }, {
-                    'view': 'goto',
-                    'index': {
-                        'screen': 'content',
-                        'caption': screen.translate(_(u"Go to"))
-                        },
-                    'menu': [{
-                            'screen': 'preview',
-                            'caption': screen.translate(_(u"Preview"))
-                            }, {
-                            'screen': 'properties',
-                            'caption': screen.translate(_(u"Properties")),
-                            'item_match': [
-                                'not', ['equal', 'access', None]]
-                            }, {
-                            'screen': 'publish',
-                            'caption': screen.translate(_(u"Publish")),
-                            'item_match': [
-                                'and',
-                                ['not', ['equal', 'access', None]],
-                                ['provides', 'versioned']]
-                            }, {
-                            'screen': 'settings/access',
-                            'caption': screen.translate(_(u"Access")),
-                            'item_match': [
-                                'and',
-                                ['equal', 'access', 'manage'],
-                                ['provides', 'container']]
-                            }]
-                    },{
-                    'view': 'move',
-                    'name': 'moveable'
-                    }],
-            }
+        settings = getUtility(IUIService)
+        cfg = FolderConfigurationGenerator(
+            name=grok.name.bind().get(cls),
+            title=screen.translate(cls.title))
+        for column in cls.columns:
+            column(settings, screen, cfg)
+        return cfg.generate()
 
     @classmethod
     def list(cls, container):

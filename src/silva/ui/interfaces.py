@@ -83,8 +83,43 @@ class ISilvaUITheme(IDefaultBrowserLayer):
 
 # Configuration service
 
-class IUIService(ISilvaLocalService):
-    """Configuration settings for the UI.
+
+class IUIFolderSettings(Interface):
+    """SMI Settings for the folder view.
+    """
+    folder_icon_link = schema.Bool(
+        title=_(u"Clicking on the icon goes on content edit view"),
+        default=True,
+        required=False)
+    folder_icon_preview = schema.Bool(
+        title=_(u"Enable content preview when hovering the icon"),
+        description=_(u"This can be disabled in case of performance issue."),
+        default=True,
+        required=False)
+    folder_identifier_link = schema.Bool(
+        title=_(u"Clicking on the identifier goes on the content edit view"),
+        default=False,
+        required=False)
+    folder_title_link = schema.Bool(
+        title=_(u"Clicking on the title shows the content preview"),
+        default=False,
+        required=False)
+    folder_modified_link = schema.Bool(
+        title=_(u"Clicking on the modification time goes on the content metadata"),
+        default=False,
+        required=False)
+    folder_author_link = schema.Bool(
+        title=_(u"Clicking on the author goes on the content publication information"),
+        default=False,
+        required=False)
+    folder_goto_menu = schema.Bool(
+        title=_(u"Enable goto menu"),
+        default=True,
+        required=False)
+
+
+class IUIGenericSettings(Interface):
+    """Generic SMI settings.
     """
     name = schema.TextLine(
         title=_(u"Site name"),
@@ -123,11 +158,11 @@ class IUIService(ISilvaLocalService):
             u"Disable access to the UI and display the specified HTML."),
         default=u'',
         required=False)
-    listing_preview = schema.Bool(
-        title=_(u"Enable content preview in folder listing"),
-        description=_(u"This can be disabled in case of performance issue."),
-        default=True,
-        required=False)
+
+
+class IUIService(IUIGenericSettings, IUIFolderSettings, ISilvaLocalService):
+    """Configuration settings for the UI.
+    """
     test_mode = Attribute("Activate test mode.")
 
 

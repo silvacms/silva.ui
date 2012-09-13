@@ -78,7 +78,7 @@ class SMI(grok.View):
             self.logo_url = self.static['img']['silva.png']()
         self.background =  '#7996ac'
         self.name = settings.name
-        self.listing_preview = settings.listing_preview
+        self.listing_preview = settings.folder_icon_preview
         self.maintenance_message = settings.maintenance_message
         self.test_mode = settings.test_mode
         if settings.background:

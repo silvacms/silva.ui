@@ -105,13 +105,10 @@
             };
         };
 
-        // Actions
-        $containers.delegate('tr.item a.open-screen', 'click', function(event) {
-            smi.open_screen_from_link($(event.target).parents('a.open-screen'));
-            return false;
-        });
+        // Disable click, we will use mousedown events to be compatible with drag and drop.
+        $containers.delegate('tr.item', 'click', false);
 
-        // Drop-downs
+        // Drop-downs support (for the goto menu).
         var opened_dropdown = null;
         $containers.delegate('tr.item div.dropdown', 'mouseleave', function(event) {
             if (opened_dropdown !== null) {
@@ -119,12 +116,22 @@
                 opened_dropdown = null;
             };
         });
-        $containers.delegate('tr.item div.dropdown-icon', 'click', function(event) {
+        $containers.delegate('tr.item div.dropdown-icon', 'mousedown', function(event) {
             if (opened_dropdown !== null) {
                 opened_dropdown.fadeOut('fast');
             };
             opened_dropdown = $(event.target).parents('a').next();
             opened_dropdown.fadeToggle();
+            event.preventDefault();
+            event.stopPropagation();
+            return false;
+        });
+
+        // Action, follow a link.
+        $containers.delegate('tr.item a.open-screen', 'mousedown', function(event) {
+            smi.open_screen_from_link($(event.currentTarget));
+            event.stopPropagation();
+            event.preventDefault();
             return false;
         });
 
@@ -135,10 +142,6 @@
             var target = $(event.target);
             if (target.is('input[type="text"]')) {
                 target.focus();
-                return;
-            };
-            if (target.parents('td.active').length) {
-                // Active column respond to click event. We ignore if you click in one of those.
                 return;
             };
             select_row($(this), event.shiftKey);
@@ -534,8 +537,10 @@
         });
     });
 
+    /** Support for inline preview. This is bound of the document,
+     * in order to usable by the reference widget.
+     */
     $(document).bind('load-smilisting', function(event, data) {
-        // Bind preview on the document, it will be useable by the reference popup
         var smi = data.smi;
 
         if (smi.options.listing.preview === undefined) {
