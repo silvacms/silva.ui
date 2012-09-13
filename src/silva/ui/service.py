@@ -34,6 +34,7 @@ class UIService(SilvaService):
     listing_preview = True
     maintenance_message = None
     test_mode = False
+    smi_access_root = False
 
 
 class UISettings(silvaforms.ZMIForm):
@@ -60,6 +61,7 @@ class UISettings(silvaforms.ZMIForm):
         maintenance_message = data['maintenance_message']
         public_url = data['public_url']
         preview_url = data['preview_url']
+        smi_access_root = data['smi_access_root']
         if background != silvaforms.NO_VALUE:
             self.context.background = background
         else:
@@ -81,6 +83,7 @@ class UISettings(silvaforms.ZMIForm):
             self.context.preview_url = preview_url
         else:
             self.context.preview_url = None
+        self.context.smi_access_root = smi_access_root
         self.context.name = name
         self.context.listing_preview = listing_preview
         self.status = u"Modification saved."

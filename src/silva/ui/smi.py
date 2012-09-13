@@ -44,8 +44,13 @@ class SMI(grok.View):
     def update(self):
         # Redirect to the root of the SMI if we are not already
         site = IVirtualSite(self.request)
-        root = site.get_root()
-        root_url = site.get_root_url()
+        settings = getUtility(IUIService)
+        if settings.smi_access_root:
+            root = site.get_silva_root()
+            root_url = getMultiAdapter((root, self.request), IContentURL).url()
+        else:
+            root = site.get_root()
+            root_url = site.get_root_url()
         if root != self.context:
             # Relative path of the content from the root.
             content_path = getMultiAdapter(
@@ -63,19 +68,18 @@ class SMI(grok.View):
             need(resource)
 
         # Customization from service.
-        service = getUtility(IUIService)
-        if service.logo != None:
+        if settings.logo != None:
             self.logo_url = '/'.join(
-                (absoluteURL(service, self.request), 'logo'))
+                (absoluteURL(settings, self.request), 'logo'))
         else:
             self.logo_url = self.static['img']['silva.png']()
         self.background =  '#7996ac'
-        self.name = service.name
-        self.listing_preview = service.listing_preview
-        self.maintenance_message = service.maintenance_message
-        self.test_mode = service.test_mode
-        if service.background:
-            self.background = service.background
+        self.name = settings.name
+        self.listing_preview = settings.listing_preview
+        self.maintenance_message = settings.maintenance_message
+        self.test_mode = settings.test_mode
+        if settings.background:
+            self.background = settings.background
 
         # Prepare values for template
         languages = IUserPreferredLanguages(

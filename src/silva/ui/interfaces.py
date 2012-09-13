@@ -106,8 +106,17 @@ class IUIService(ISilvaLocalService):
         title=_(u"Preview site URL"),
         description=_(
             u"Preview site URL to use for preview mode in the SMI. "
-            u"Authentication is required to access the preview mode."),
+            u"Authentication is required to access the preview mode, "
+            u"so users should be able to authenticate on this site URL."),
         required=False)
+    smi_access_root = schema.Bool(
+        title=_(u"SMI access Silva root"),
+        description=_(
+            u"By default the SMI is loaded so you can edit content in the "
+            u"current virtual host root. You might choose to load it so you "
+            u"can edit content in the Silva root instead."),
+        required=False,
+        default=False)
     maintenance_message = schema.Text(
         title=_(u"Maintenance UI message"),
         description=_(
