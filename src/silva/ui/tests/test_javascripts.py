@@ -11,6 +11,7 @@ def create_test(build_test_suite, name):
     test.layer = FunctionalLayer
     return test
 
+
 def test_suite():
     suite = unittest.TestSuite()
     suite.addTest(suite_from_package('silva.ui.tests.javascripts', create_test))

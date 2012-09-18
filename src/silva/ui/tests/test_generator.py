@@ -56,3 +56,9 @@ class GeneratorTestCase(unittest.TestCase):
             self.assertEqual(contents, [self.root.document1])
         self.assertNotEqual(messages, [])
         self.assertEqual(len(messages), 1)
+
+
+def test_suite():
+    suite = unittest.TestSuite()
+    suite.addTest(unittest.makeSuite(GeneratorTestCase))
+    return suite

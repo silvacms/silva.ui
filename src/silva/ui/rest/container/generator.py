@@ -43,5 +43,6 @@ class ContentGenerator(object):
                 self._logger(
                     _(u'${count} contents could not be found '
                       u'(they probably have been deleted).',
-                      mapping={'count': self._errors}))
+                      mapping={'count': self._errors}),
+                    type='error')
 
