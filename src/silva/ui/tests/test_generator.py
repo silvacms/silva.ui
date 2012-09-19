@@ -22,14 +22,14 @@ class GeneratorTestCase(unittest.TestCase):
 
     def test_none(self):
         messages = []
-        with ContentGenerator(messages.append) as generator:
+        with ContentGenerator(lambda m, **o: messages.append(m)) as generator:
             contents = list(generator(None))
             self.assertEqual(contents, [])
         self.assertEqual(messages, [])
 
     def test_one(self):
         messages = []
-        with ContentGenerator(messages.append) as generator:
+        with ContentGenerator(lambda m, **o: messages.append(m)) as generator:
             contents = list(generator(self.get_id(self.root.document1)))
             self.assertEqual(
                 contents,
@@ -38,7 +38,7 @@ class GeneratorTestCase(unittest.TestCase):
 
     def test_multiple(self):
         messages = []
-        with ContentGenerator(messages.append) as generator:
+        with ContentGenerator(lambda m, **o: messages.append(m)) as generator:
             contents = list(generator([
                         self.get_id(self.root.document1),
                         self.get_id(self.root.document2)]))
@@ -49,7 +49,7 @@ class GeneratorTestCase(unittest.TestCase):
 
     def test_invalid(self):
         messages = []
-        with ContentGenerator(messages.append) as generator:
+        with ContentGenerator(lambda m, **o: messages.append(m)) as generator:
             contents = list(generator([
                         'oups',
                         self.get_id(self.root.document1)]))
