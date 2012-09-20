@@ -8,6 +8,7 @@ from collections import defaultdict
 from five import grok
 from zope.component import getUtility, getMultiAdapter
 from zope.cachedescriptors.property import CachedProperty
+from zope.interface import Interface
 from zope.i18n import translate
 from zope.i18n.interfaces import IUserPreferredLanguages
 
@@ -16,12 +17,14 @@ import fanstatic
 from silva.core.messages.interfaces import IMessageService
 from silva.core.views.interfaces import IVirtualSite, IContentURL
 from silva.core.references.utils import relative_path
-from silva.ui.interfaces import IUIService, IUIPlugin
+from silva.ui.interfaces import IUIService, IUIPlugin, ISilvaUI
 
 from .invalidation import Invalidation
 
 
 class UIHelper(object):
+    """Generic method used on an UI object.
+    """
 
     def __init__(self, context, request):
         super(UIHelper, self).__init__(context, request)
@@ -63,6 +66,7 @@ class UIHelper(object):
         root_path = self.root_path.split('/')
         return '/'.join(relative_path(root_path, content_path))
 
+
 def get_notifications(helper, data):
     messages = []
     service = getUtility(IMessageService)
@@ -77,48 +81,79 @@ def get_notifications(helper, data):
     data['notifications'] = messages
 
 
-def get_resources(helper, data):
-    needed = fanstatic.get_needed()
-    if not needed.has_resources():
-        return
-    if not needed.has_base_url():
-        needed.set_base_url(helper.root_url)
-    resources = defaultdict(list)
-    url_cache = {}
-    for resource in needed.resources():
-        library = resource.library
-        library_url = url_cache.get(library.name)
-        if library_url is None:
-            library_url = url_cache[library.name] = needed.library_url(library)
-        resource_url =  '/'.join((library_url, resource.relpath))
-        resources[resource.ext[1:]].append(resource_url)
+class NotificationProvider(grok.MultiSubscription):
+    grok.implements(IUIPlugin)
+    grok.provides(IUIPlugin)
+    grok.adapts(Interface, ISilvaUI)
 
-    data['resources'] = resources
+    def __init__(self, screen, request):
+        self.screen = screen
+        self.request = request
+
+    def __call__(self, screen, data):
+        return get_notifications(screen, data)
 
 
-def get_navigation(helper, data):
-    nav_id = lambda id: 'nav' + str(id)
-    invalidation = Invalidation(helper.request)
+class ResourcesProvider(grok.MultiSubscription):
+    grok.implements(IUIPlugin)
+    grok.provides(IUIPlugin)
+    grok.adapts(Interface, ISilvaUI)
 
-    def collect():
-        for change in invalidation.get_changes(
-            filter_func=lambda change: change['listing'] == 'container'):
-            if change['action'] == 'remove':
-                yield {
-                    'action': 'remove',
-                    'info': {'target': nav_id(change['content'])}}
-            else:
-                # Action add or update
-                yield {
-                    'action': change['action'],
-                    'info': {
-                        'parent': nav_id(change['container']),
-                        'target': nav_id(change['content']),
-                        'position': change['position']}}
+    def __init__(self, screen, request):
+        self.screen = screen
+        self.request = request
 
-    changes = list(collect())
-    if changes:
-        if 'navigation' not in data:
-            data['navigation'] = {}
-        data['navigation']['invalidation'] = changes
+    def __call__(self, screen, data):
+        needed = fanstatic.get_needed()
+        if not needed.has_resources():
+            return
+        if not needed.has_base_url():
+            needed.set_base_url(screen.root_url)
+        resources = defaultdict(list)
+        url_cache = {}
+        for resource in needed.resources():
+            library = resource.library
+            library_url = url_cache.get(library.name)
+            if library_url is None:
+                library_url = url_cache[library.name] = needed.library_url(library)
+            resource_url =  '/'.join((library_url, resource.relpath))
+            resources[resource.ext[1:]].append(resource_url)
+
+        data['resources'] = resources
+
+
+class NavigationInvalidationProvider(grok.MultiSubscription):
+    grok.implements(IUIPlugin)
+    grok.provides(IUIPlugin)
+    grok.adapts(Interface, ISilvaUI)
+
+    def __init__(self, screen, request):
+        self.screen = screen
+        self.request = request
+
+    def __call__(self, screen, data):
+        nav_id = lambda id: 'nav' + str(id)
+        invalidation = Invalidation(self.request)
+
+        def collect():
+            for change in invalidation.get_changes(
+                filter_func=lambda change: change['listing'] == 'container'):
+                if change['action'] == 'remove':
+                    yield {
+                        'action': 'remove',
+                        'info': {'target': nav_id(change['content'])}}
+                else:
+                    # Action add or update
+                    yield {
+                        'action': change['action'],
+                        'info': {
+                            'parent': nav_id(change['container']),
+                            'target': nav_id(change['content']),
+                            'position': change['position']}}
+
+        changes = list(collect())
+        if changes:
+            if 'navigation' not in data:
+                data['navigation'] = {}
+            data['navigation']['invalidation'] = changes
 

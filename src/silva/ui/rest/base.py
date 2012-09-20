@@ -85,12 +85,9 @@ class ActionREST(UIREST):
     grok.require('silva.ReadSilvaContent')
 
     def GET(self):
-        self.need(helper.get_notifications)
-        self.need(helper.get_resources)
         with SMITransaction(self):
             try:
                 data = self.get_payload()
-                self.need(helper.get_navigation)
             except ActionResult as error:
                 data = error.get_payload(self)
             except RESTResult as error:
