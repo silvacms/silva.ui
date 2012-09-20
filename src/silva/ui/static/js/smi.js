@@ -76,14 +76,18 @@
             $('html').css('background-color', options.theme.background);
         };
 
-        var screen_url = new jsontemplate.Template(options.screen, {});
-        var action_url = new jsontemplate.Template(options.action, {});
-        var content_url = new jsontemplate.Template(options.workspace.url, {});
+        var screen_url = new jsontemplate.Template(options.screen, {}),
+            action_url = new jsontemplate.Template(options.action, {}),
+            content_url = new jsontemplate.Template(options.workspace.url, {});
 
-        var navigation = infrae.smi.NavigationManager(smi, options.navigation);
-        var notifications = infrae.smi.NotificationManager(options.notifications);
+        var name;
+        var plugins = {};
         var resources = infrae.views.HTMLResourceManager($(document));
         var default_error_handlers = {};
+
+        for (name in infrae.smi.plugins) {
+            plugins[name] = infrae.smi.plugins[name](smi, options);
+        };
 
         // Register the default content view.
         infrae.views.view({
@@ -112,7 +116,7 @@
 
         // Add utilities and screen open functions
         $.extend(smi, {
-            clipboard: infrae.smi.ClipBoardManager(notifications),
+            clipboard: infrae.smi.ClipBoardManager(plugins.notifications),
             /**
              * Retrieve the language used by the SMI.
              */
@@ -178,8 +182,9 @@
                     };
                     return $.ajax(query).pipe(
                         function (payload) {
-                            var delayed = $.Deferred().resolve();
-                            var result = $.Deferred();
+                            var delayed = $.Deferred().resolve(),
+                                result = $.Deferred(),
+                                name;
 
                             // Default success handler.
                             if (payload.resources != undefined) {
@@ -195,16 +200,10 @@
                                     infrae.utils.each(payload.resources.css, resources.load_css);
                                 };
                             };
-                            if (payload.navigation != undefined) {
-                                // Manage navigation.
-                                if (payload.navigation.invalidation != undefined)
-                                    navigation.invalidate(payload.navigation.invalidation);
-                                if (payload.navigation.current != undefined)
-                                    navigation.open(payload.navigation.current);
-                            };
-                            if (payload.notifications != undefined) {
-                                // Display any notification.
-                                notifications.notifies(payload.notifications);
+                            for (name in plugins) {
+                                if (plugins[name].page !== undefined) {
+                                    plugins[name].page(payload);
+                                };
                             };
                             delayed.done(function () {
                                 result.resolve(payload.content);
@@ -357,10 +356,14 @@
             var ajax_handler = function(default_handler) {
                 return function (request) {
                     try {
-                        var payload = $.parseJSON(request.responseText);
-                        if (payload.notifications) {
-                            notifications.notifies(payload.notifications);
-                        }
+                        var payload = $.parseJSON(request.responseText),
+                            name;
+
+                        for (name in plugins) {
+                            if (plugins[name].error !== undefined) {
+                                plugins[name].error(payload);
+                            };
+                        };
                         return payload.content;
                     } catch (e) {
                         return default_handler(request);
@@ -415,8 +418,8 @@
         return smi;
     };
 
-    infrae.smi = {};
+    infrae.smi = {
+        plugins:{}
+    };
 
 })(jQuery, infrae, jsontemplate);
-
-

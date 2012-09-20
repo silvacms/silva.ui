@@ -3,14 +3,15 @@
      * Folder navigation tree using JSTree plugin.
      */
     var NavigationManager = function(smi, options) {
-        var $navigation = $(options.selector);
+        var $navigation = $(options.navigation.selector);
         var $tree = $navigation.children('.tree');
-        var root_url = options.root_url;
-        var url = new jsontemplate.Template(options.url, {});
-        var parents_url = new jsontemplate.Template(options.parents_url, {});
+        var root_url = options.navigation.root_url;
+        var url = new jsontemplate.Template(options.navigation.url, {});
+        var parents_url = new jsontemplate.Template(options.navigation.parents_url, {});
 
         /**
-         * Scroll the tree container horizontally to allow for unlimited node depth.
+         * Scroll the tree container horizontally to allow for
+           unlimited node depth.
          */
         var scroll = function(node, depth) {
             return node.each(function() {
@@ -21,7 +22,11 @@
             });
         };
 
-        var uncollapse = function(parents) {
+        /**
+         * Open a node and all the require parents.
+         */
+        var open = function(parents) {
+
             function open_node_chain(remaining) {
                 var parent_node = $("#" + remaining[0]);
                 var left = remaining.slice(1);
@@ -40,11 +45,15 @@
                 };
                 return false;
             };
+
             if (!open_node_chain(parents)) {
                 $tree.jstree('deselect_all');
             };
         };
 
+        /**
+         * Remove a node from the tree.
+         */
         var remove = function(info) {
             if (info.target === undefined)
                 return;
@@ -54,6 +63,9 @@
             }
         };
 
+        /**
+         * Add a new node to the tree.
+         */
         var add = function(info) {
             if (info.parent === undefined)
                 return;
@@ -61,6 +73,26 @@
             if ($parent.length > 0) {
                 $tree.jstree('refresh', $parent);
             }
+        };
+
+        /**
+         * Apply all container invalidation to the tree: add and
+           remove modified nodes.
+         */
+        var invalidate = function(data) {
+            if (data.length > 0) {
+                infrae.utils.each(data, function(datum) {
+                    switch(datum['action']) {
+                        case 'remove':
+                        remove(datum['info']);
+                        break;
+                    case 'add':
+                    case 'update':
+                        add(datum['info']);
+                        break;
+                    }
+                });
+            };
         };
 
         // Load the tree.
@@ -116,26 +148,20 @@
         smi.shortcuts.create('navigation', $tree);
 
         return {
-            invalidate: function(data) {
-                if (data.length > 0) {
-                    infrae.utils.each(data, function(datum) {
-                        switch(datum['action']) {
-                        case 'remove':
-                            remove(datum['info']);
-                            break;
-                        case 'add':
-                        case 'update':
-                            add(datum['info']);
-                            break;
-                        }
-                    });
+            page: function(data) {
+                if (data.navigation != undefined) {
+                    // Manage navigation modifications.
+                    if (data.navigation.invalidation != undefined)
+                        invalidate(data.navigation.invalidation);
+                    if (data.navigation.current != undefined)
+                        open(data.navigation.current);
                 };
-            },
-            open: function(data) {
-                uncollapse(data);
+                return null;
             }
         };
     };
 
-    infrae.smi.NavigationManager = NavigationManager;
+    $.extend(infrae.smi.plugins, {
+        navigation: NavigationManager
+    });
 })(jQuery, infrae, jsontemplate);

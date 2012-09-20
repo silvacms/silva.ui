@@ -5,7 +5,7 @@
      * NotificationManager manage notifications
      * @param options: configuration options.
      */
-    var NotificationManager = function(options) {
+    var NotificationManager = function(smi, options) {
         var $container = $(options.selector),
             defaults = {
                 themeState: 'feedback',
@@ -38,7 +38,28 @@
              */
             notifies: function(messages) {
                 infrae.utils.each(messages, api.notify);
+            },
+            /**
+             * When a page is open, display the corresponding
+             * notifications.
+             */
+            page: function(data) {
+                if (data.notifications != undefined) {
+                    infrae.utils.each(data.notifications, api.notify);
+                };
+                return null;
+            },
+            /**
+             * When an error happens, display the corresponding
+             * notifications.
+             */
+            error: function(data) {
+                if (data.notifications != undefined) {
+                    infrae.utils.each(data.notifications, api.notify);
+                };
+                return null;
             }
+
         };
 
         // Support for webkit notificatons.
@@ -88,6 +109,9 @@
         return api;
     };
 
-    infrae.smi.NotificationManager = NotificationManager;
+    $.extend(infrae.smi.plugins, {
+        notifications: NotificationManager
+    });
+
 
 })(jQuery, infrae);
