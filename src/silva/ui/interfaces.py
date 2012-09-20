@@ -18,6 +18,8 @@ from silva.core.conf import schema as silvaschema
 from silva.translations import translate as _
 
 
+# Resources configuration for inclusion
+
 class IJSTreeResources(IDefaultBrowserLayer):
     # This is used by other packages
     silvaconf.resource(jquery.jquery)
@@ -208,6 +210,17 @@ class IViewMenu(IMenu):
 
 
 # Screens
+
+class IUIPlugin(Interface):
+    """Plugin on screens. This is a subcriber called with a given
+    screen, that can be used to include more data into the response.
+    """
+
+    def __call__(screen, data):
+        """Include extra information in the response data of the given
+        screen.
+        """
+
 
 class IUIScreen(IRESTComponent):
     """Represent a screen in the interface.

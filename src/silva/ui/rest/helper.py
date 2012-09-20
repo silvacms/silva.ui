@@ -5,6 +5,7 @@
 
 from collections import defaultdict
 
+from five import grok
 from zope.component import getUtility, getMultiAdapter
 from zope.cachedescriptors.property import CachedProperty
 from zope.i18n import translate
@@ -15,7 +16,7 @@ import fanstatic
 from silva.core.messages.interfaces import IMessageService
 from silva.core.views.interfaces import IVirtualSite, IContentURL
 from silva.core.references.utils import relative_path
-from silva.ui.interfaces import IUIService
+from silva.ui.interfaces import IUIService, IUIPlugin
 
 from .invalidation import Invalidation
 
@@ -41,7 +42,8 @@ class UIHelper(object):
         self._providers.append(provider)
 
     def needed(self):
-        return self._providers
+        return self._providers + grok.queryMultiSubscriptions(
+            (self, self.request), IUIPlugin)
 
     @CachedProperty
     def language(self):
