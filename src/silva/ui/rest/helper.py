@@ -6,18 +6,19 @@
 from collections import defaultdict
 
 from five import grok
-from zope.component import getUtility, getMultiAdapter
 from zope.cachedescriptors.property import CachedProperty
-from zope.interface import Interface
+from zope.component import getUtility, getMultiAdapter
 from zope.i18n import translate
 from zope.i18n.interfaces import IUserPreferredLanguages
+from zope.interface import Interface
+from zope.publisher.interfaces.browser import IDefaultBrowserLayer
 
 import fanstatic
 
 from silva.core.messages.interfaces import IMessageService
 from silva.core.views.interfaces import IVirtualSite, IContentURL
 from silva.core.references.utils import relative_path
-from silva.ui.interfaces import IUIService, IUIPlugin, ISilvaUI
+from silva.ui.interfaces import IUIService, IUIPlugin
 
 from .invalidation import Invalidation
 
@@ -84,7 +85,7 @@ def get_notifications(helper, data):
 class NotificationProvider(grok.MultiSubscription):
     grok.implements(IUIPlugin)
     grok.provides(IUIPlugin)
-    grok.adapts(Interface, ISilvaUI)
+    grok.adapts(Interface, IDefaultBrowserLayer)
 
     def __init__(self, screen, request):
         self.screen = screen
@@ -97,7 +98,7 @@ class NotificationProvider(grok.MultiSubscription):
 class ResourcesProvider(grok.MultiSubscription):
     grok.implements(IUIPlugin)
     grok.provides(IUIPlugin)
-    grok.adapts(Interface, ISilvaUI)
+    grok.adapts(Interface, IDefaultBrowserLayer)
 
     def __init__(self, screen, request):
         self.screen = screen
@@ -125,7 +126,7 @@ class ResourcesProvider(grok.MultiSubscription):
 class NavigationInvalidationProvider(grok.MultiSubscription):
     grok.implements(IUIPlugin)
     grok.provides(IUIPlugin)
-    grok.adapts(Interface, ISilvaUI)
+    grok.adapts(Interface, IDefaultBrowserLayer)
 
     def __init__(self, screen, request):
         self.screen = screen
