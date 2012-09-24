@@ -1,7 +1,10 @@
+# -*- coding: utf-8 -*-
+# Copyright (c) 2012  Infrae. All rights reserved.
+# See also LICENSE.txt
 from setuptools import setup, find_packages
 import os
 
-version = '3.0dev'
+version = '3.0c1'
 
 tests_require = [
     'Products.Silva [test]',
@@ -18,7 +21,7 @@ setup(name='silva.ui',
       keywords='silva management interface SMI',
       author='Infrae',
       author_email='info@infrae.com',
-      url='',
+      url='http://infrae.com/download/silva',
       license='BSD',
       package_dir={'': 'src'},
       packages=find_packages('src'),
@@ -29,6 +32,7 @@ setup(name='silva.ui',
         'Products.SilvaMetadata',
         'fanstatic > 0.11',
         'five.grok',
+        'grokcore.component',
         'grokcore.layout',
         'grokcore.view',
         'infrae.comethods',
@@ -47,8 +51,10 @@ setup(name='silva.ui',
         'silva.core.views',
         'silva.fanstatic',
         'silva.translations',
+        'zeam.component',
         'zeam.jsontemplate',
         'zeam.utils.batch >= 1.0',
+        'zope.cachedescriptors',
         'zope.component',
         'zope.i18n',
         'zope.interface',
@@ -57,6 +63,7 @@ setup(name='silva.ui',
         'zope.publisher',
         'zope.schema',
         'zope.traversing',
+        'zope.pagetemplate',
       ],
       entry_points="""
       [silva.ui.resources]
