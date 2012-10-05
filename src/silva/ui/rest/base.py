@@ -5,6 +5,7 @@
 from five import grok
 from zope.component import getUtility, getMultiAdapter
 from zope.intid.interfaces import IIntIds
+from grokcore.layout.interfaces import IPage
 from grokcore.layout.interfaces import ILayout
 
 from Acquisition import aq_parent
@@ -179,6 +180,7 @@ class PageWithTemplateREST(PageREST):
 
 
 class PageWithLayoutREST(rest.REST):
+    grok.implements(IPage)
 
     def content(self):
         raise NotImplementedError
