@@ -548,6 +548,7 @@
         };
 
         var url_template = new jsontemplate.Template(smi.options.listing.preview, {});
+        var preview_template = new jsontemplate.Template('{.section title}<h2>{title|html}</h2>{.end}{.section preview}<div class="preview">{preview}</div>{.end}<div class="type"><span>{type}</span></div>', {});
         var timer = null;
         var $target = $([]);
 
@@ -557,7 +558,7 @@
                 timer = null;
             };
             if ($target.length) {
-                $target.qtip('destroy');
+                $target.tipsy('hide');
                 $target = $([]);
             };
         };
@@ -573,21 +574,18 @@
                 $.ajax({
                     url: url_template.expand({path: info.path})
                 }).done(function(data) {
-                    if (!data.preview || !$target.is(':visible')) {
+                    if (!$target.is(':visible')) {
                         return;
                     };
-                    $target.qtip({
-                        content: {text: data.preview,
-                                  title: data.title},
-                        position: {
-                            at: 'right center',
-                            my: 'left center',
-                            viewport: $target.closest('.listing'),
-                            adjust: {method: 'shift flip'}},
-                        show: {event: false, ready: true},
-                        hide: {event: 'mouseleave'},
-                        style: 'ui-tooltip-shadow ui-tooltip-light'
+                    $target.tipsy({
+                        trigger: 'manual',
+                        html: true,
+                        title: function() {
+                            return preview_template.expand(data);
+                        },
+                        gravity: 'w'
                     });
+                    $target.tipsy('show');
                 });
             }, 1000);
         });

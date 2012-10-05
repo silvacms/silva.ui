@@ -6,7 +6,7 @@ from five import grok
 from infrae import rest
 from grokcore.chameleon.components import ChameleonPageTemplate
 
-from silva.core.interfaces import IContainer
+from silva.core.interfaces import IContainer, ISilvaObject
 from silva.core.services.utils import walk_silva_tree
 from silva.ui.rest.base import ActionREST
 from silva.ui.rest.invalidation import Invalidation
@@ -16,16 +16,17 @@ from silva.ui.rest.container.generator import ContentGenerator
 
 
 class ListingPreview(rest.REST):
-    grok.baseclass()
+    grok.context(ISilvaObject)
     grok.name('silva.ui.listing.preview')
     grok.require('silva.ReadSilvaContent')
 
     def preview(self):
-        raise NotImplementedError
+        return None
 
     def GET(self):
         return self.json_response({
             'title': self.context.get_title_or_id_editable(),
+            'type': self.context.meta_type,
             'preview': self.preview()
             })
 
