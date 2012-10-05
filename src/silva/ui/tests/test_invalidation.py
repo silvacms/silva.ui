@@ -44,9 +44,9 @@ class InvalidationTestCase(unittest.TestCase):
     def test_listing_interfaces(self):
         self.assertEqual(
             get_interfaces(),
-            [('container', IContainer),
-             ('publishables', IPublishable),
-             ('assets', INonPublishable)])
+            [('containers', IContainer, 'publishables'),
+             ('publishables', IPublishable, 'publishables'),
+             ('assets', INonPublishable, 'assets')])
 
     def test_nothing(self):
         request = TestRequest()
@@ -95,11 +95,14 @@ class InvalidationTestCase(unittest.TestCase):
             [{'action': 'remove',
               'container': self.get_id(self.root.folder),
               'content': document_id,
-              'listing': 'publishables'},
+              'listing': 'publishables',
+              'interface': 'publishables',
+              },
              {'action': 'update',
               'container': self.get_id(self.root),
               'content': self.get_id(self.root.folder),
-              'listing': 'container',
+              'listing': 'publishables',
+              'interface': 'containers',
               'position': 1}])
         # A cookie is set (still)
         self.assertEqual(
@@ -126,11 +129,13 @@ class InvalidationTestCase(unittest.TestCase):
             [{'action': 'remove',
               'container': self.get_id(self.root.folder),
               'content': file_id,
-              'listing': 'assets'},
+              'listing': 'assets',
+              'interface': 'assets'},
              {'action': 'update',
               'container': self.get_id(self.root),
               'content': self.get_id(self.root.folder),
-              'listing': 'container',
+              'listing': 'publishables',
+              'interface': 'containers',
               'position': 1}])
         # A cookie is set (still)
         self.assertEqual(
@@ -159,11 +164,13 @@ class InvalidationTestCase(unittest.TestCase):
               'container': self.get_id(self.root.folder),
               'content': self.get_id(self.root.folder.stuff),
               'listing': 'publishables',
+              'interface': 'publishables',
               'position': 2},
              {'action': 'update',
               'container': self.get_id(self.root),
               'content': self.get_id(self.root.folder),
-              'listing': 'container',
+              'listing': 'publishables',
+              'interface': 'containers',
               'position': 1}])
         # A cookie is set (still)
         self.assertEqual(
@@ -181,12 +188,14 @@ class InvalidationTestCase(unittest.TestCase):
         self.assertEqual(
             list(invalidation.get_changes()),
             [{'action': 'add',
-              'listing': 'container',
+              'listing': 'publishables',
+              'interface': 'containers',
               'container': self.get_id(self.root),
               'content': self.get_id(self.root.folder),
               'position': -1},  # XXX Position should 1
              {'action': 'update',
-              'listing': 'container',
+              'listing': 'publishables',
+              'interface': 'containers',
               'container': self.get_id(aq_parent(self.root)),
               'content': self.get_id(self.root),
               'position': -1}])
@@ -212,12 +221,14 @@ class InvalidationTestCase(unittest.TestCase):
         self.assertEqual(
             list(invalidation.get_changes()),
             [{'action': 'add',
+              'interface': 'assets',
               'listing': 'assets',
               'container': self.get_id(self.root),
               'content': self.get_id(self.root.examples_txt),
               'position': -1},
              {'action': 'update',
-              'listing': 'container',
+              'interface': 'containers',
+              'listing': 'publishables',
               'container': self.get_id(aq_parent(self.root)),
               'content': self.get_id(self.root),
               'position': -1}])
@@ -255,13 +266,15 @@ class InvalidationTestCase(unittest.TestCase):
             list(invalidation.get_changes()),
             [{'action': 'add',
               'listing': 'publishables',
+              'interface': 'publishables',
               'container': self.get_id(self.root.folder),
               'content': self.get_id(content),
               'position': -1},
              {'action': 'update',
               'container': self.get_id(self.root),
               'content': self.get_id(self.root.folder),
-              'listing': 'container',
+              'listing': 'publishables',
+              'interface': 'containers',
               'position': 2}])
         # A cookie is set
         self.assertEqual(
@@ -289,7 +302,8 @@ class InvalidationTestCase(unittest.TestCase):
                 {'action': 'update',
                  'container': self.get_id(self.root),
                  'content': self.get_id(self.root.folder),
-                 'listing': 'container',
+                 'listing': 'publishables',
+                 'interface': 'containers',
                  'position': 2}])
         # A cookie is set (still)
         self.assertEqual(
@@ -319,12 +333,14 @@ class InvalidationTestCase(unittest.TestCase):
             list(invalidation.get_changes()),
             [{'action': 'remove',
               'listing': 'publishables',
+              'interface': 'publishables',
               'container': self.get_id(self.root.folder),
               'content': content_id},
              {'action': 'update',
               'container': self.get_id(self.root),
               'content': self.get_id(self.root.folder),
-              'listing': 'container',
+              'listing': 'publishables',
+              'interface': 'containers',
               'position': 1},])
         # A cookie is set
         self.assertEqual(
@@ -354,12 +370,14 @@ class InvalidationTestCase(unittest.TestCase):
             list(invalidation.get_changes()),
             [{'action': 'remove',
               'listing': 'assets',
+              'interface': 'assets',
               'container': self.get_id(self.root.folder),
               'content': image_id},
              {'action': 'update',
               'container': self.get_id(self.root),
               'content': self.get_id(self.root.folder),
-              'listing': 'container',
+              'listing': 'publishables',
+              'interface': 'containers',
               'position': 1},])
         # A cookie is set
         self.assertEqual(
@@ -392,14 +410,17 @@ class InvalidationTestCase(unittest.TestCase):
             list(invalidation.get_changes()),
             [{'action': 'remove',
               'listing': 'publishables',
+              'interface': 'publishables',
               'container': folder_id,
               'content': document_id},
              {'action': 'remove',
-              'listing': 'container',
+              'listing': 'publishables',
+              'interface': 'containers',
               'container': self.get_id(self.root),
               'content': folder_id},
              {'action': 'update',
-              'listing': 'container',
+              'listing': 'publishables',
+              'interface': 'containers',
               'container': self.get_id(aq_parent(self.root)),
               'content': self.get_id(self.root),
               'position': -1}])
@@ -431,6 +452,7 @@ class InvalidationTestCase(unittest.TestCase):
             list(invalidation.get_changes()),
             [{'action': 'update',
               'listing': 'publishables',
+              'interface': 'publishables',
               'container': self.get_id(self.root.folder),
               'content': self.get_id(content),
               'position': 1}])
@@ -462,6 +484,7 @@ class InvalidationTestCase(unittest.TestCase):
             list(invalidation.get_changes()),
             [{'action': 'update',
               'listing': 'assets',
+              'interface': 'assets',
               'container': self.get_id(self.root.folder),
               'content': self.get_id(data_file),
               'position': -1}])
@@ -495,6 +518,7 @@ class InvalidationTestCase(unittest.TestCase):
             list(invalidation.get_changes()),
             [{'action': 'update',
               'listing': 'assets',
+              'interface': 'assets',
               'container': self.get_id(self.root.folder),
               'content': self.get_id(data_file),
               'position': -1}])
@@ -524,14 +548,16 @@ class InvalidationTestCase(unittest.TestCase):
         # We ask only changes about container.
         self.assertEqual(
             list(invalidation.get_changes(
-                    filter_func=lambda c: c['listing'] == 'container')),
+                    filter_func=lambda c: c['interface'] == 'containers')),
             [{'action': 'update',
-              'listing': 'container',
+              'listing': 'publishables',
+              'interface': 'containers',
               'container': self.get_id(self.root),
               'content': self.get_id(self.root.folder),
               'position': 1},
              {'action': 'add',
-              'listing': 'container',
+              'listing': 'publishables',
+              'interface': 'containers',
               'container': self.get_id(self.root.folder),
               'content': self.get_id(self.root.folder.images),
               'position': -1}])

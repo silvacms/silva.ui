@@ -37,9 +37,12 @@ def get_interfaces():
     """
 
     def get_interface((name, listing)):
+        identifier = grok.name.bind().get(listing)
         if not ISpecification.providedBy(listing.interface):
-            return listing.interface
-        return [(str(name), listing.interface)]
+            return map(
+                lambda (name, interface): (name, interface, identifier),
+                listing.interface)
+        return [(str(name), listing.interface, identifier)]
 
     return reduce(
         operator.add,
@@ -108,13 +111,16 @@ class InvalidationTransaction(threading.local):
             return
         self._follow()
         listing = None
-        for name, iface in self._interfaces:
-            if iface.providedBy(target):
-                listing = name
+        interface = None
+        for name, interface, identifier in self._interfaces:
+            if interface.providedBy(target):
+                listing = identifier
+                interface = name
                 break
         data = {
             'action': action,
             'listing': listing,
+            'interface': interface,
             'container': self._get_id(container),
             'content': self._get_id(target)}
         if action != 'remove':

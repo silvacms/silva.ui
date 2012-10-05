@@ -137,7 +137,7 @@ class NavigationInvalidationProvider(grok.MultiSubscription):
 
         def collect():
             for change in invalidation.get_changes(
-                filter_func=lambda change: change['listing'] == 'container'):
+                filter_func=lambda change: change['interface'] == 'containers'):
                 if change['action'] == 'remove':
                     yield {
                         'action': 'remove',

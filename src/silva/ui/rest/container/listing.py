@@ -224,7 +224,7 @@ class PublishableContainerListing(ContainerListing):
     grok.name('publishables')
     grok.order(10)
     title = _(u'Structural content(s)')
-    interface = [('container', IContainer), ('publishables', IPublishable)]
+    interface = [('containers', IContainer), ('publishables', IPublishable)]
 
     @classmethod
     def configuration(cls, screen):
