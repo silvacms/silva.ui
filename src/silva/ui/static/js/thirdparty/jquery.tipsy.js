@@ -163,8 +163,8 @@
         if (!options.live) this.each(function() { get(this); });
 
         if (options.trigger != 'manual') {
-            var eventIn  = options.trigger == 'hover' ? 'mouseenter' : 'focus',
-                eventOut = options.trigger == 'hover' ? 'mouseleave' : 'blur';
+            var eventIn  = options.trigger == 'hover' ? 'mouseenter.tipsy' : 'focus.tipsy',
+                eventOut = options.trigger == 'hover' ? 'mouseleave.tipsy' : 'blur.tipsy';
             if (options.delegate !== null) {
                 this.delegate(options.delegate, eventIn, enter);
                 this.delegate(options.delegate, eventOut, leave);

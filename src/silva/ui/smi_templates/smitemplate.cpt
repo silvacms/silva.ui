@@ -70,12 +70,16 @@
               <div class="actions admin-actions">
                 <ol>
                   <li>
-                    <a class="parent open-screen ui-state-default" href="" rel="">
+                    <a class="parent open-screen ui-state-default" href=""
+                       rel="" title="Go one level up"
+                       i18n:attributes="title">
                       <ins class="ui-icon ui-icon-arrowreturnthick-1-n"></ins>
                     </a>
                   </li>
                   <li class="last-action">
-                    <a class="fullscreen ui-state-default">
+                    <a class="fullscreen ui-state-default"
+                       title="Switch to fullscreen mode"
+                       i18n:attributes="title">
                       <ins class="ui-icon ui-icon-zoomin"></ins>
                     </a>
                   </li>

@@ -206,6 +206,7 @@
                 },
                 cleanup: function() {
                     $content.unbind('open-menu');
+                    $content.unbind('.tipsy');
                     $content.empty();
                 }
             };
@@ -259,12 +260,14 @@
                     var $parent = $content.find('a.parent');
                     var compact = $content.hasClass('compact-header');
 
+
                     // Update header
                     $metadata.children('h2').render({data: data.title, args: [smi, view]});
                     $metadata.children('#content-url').attr('href', url.expand({path: data.path}));
 
                     make_all_menu($metadata, data.menu, compact);
 
+                    $content.find('.admin-actions').tipsy({delegate: 'a'});
                     $content.children('.toolbar').render(
                         {data: data, name: 'toolbar', args: [smi, view]});
 
@@ -284,6 +287,7 @@
                     });
                 },
                 cleanup: function() {
+                    $content.find('.admin-actions').unbind('.tipsy');
                     $(window).unbind('fullscreen-resize-smi.default-header');
                 }
             };
