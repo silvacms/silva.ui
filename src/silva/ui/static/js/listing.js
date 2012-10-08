@@ -136,7 +136,7 @@
         });
 
         // Tip
-        $containers.tipsy({gravity: 'w', delegate: 'ins.state', delayIn: 1000});
+        $containers.tipsy({gravity: 'w', delegate: 'ins.state'});
 
         // Row selection with mouse
         // INFO: Binding mousedown integrate it well with column drag
@@ -583,6 +583,7 @@
                     $target.tipsy({
                         trigger: 'manual',
                         html: true,
+                        delayIn: 0,
                         title: function() {
                             return preview_template.expand(data);
                         },

@@ -194,7 +194,7 @@
 
     $.fn.tipsy.defaults = {
         className: null,
-        delayIn: 0,
+        delayIn: 750,
         delayOut: 0,
         fade: false,
         fallback: '',
