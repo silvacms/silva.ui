@@ -1,6 +1,6 @@
 /* SMI customization: extend style to add div.preview and div.type style */
 .tipsy { font-size: 11px; position: absolute; padding: 5px; z-index: 100000; }
-  .tipsy-inner { background-color: #000; color: #FFF; max-width: 200px; padding: 5px 8px 4px 8px; text-align: center; }
+  .tipsy-inner { background-color: #000; color: #FFF; max-width: 200px; padding: 5px 8px 4px 8px; text-align: left; }
   .tipsy-inner div.preview { text-align: left; }
   .tipsy-inner div.type { text-align: right; margin-top: 2px; font-style: italic; }
 

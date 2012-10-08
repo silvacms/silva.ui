@@ -10,13 +10,6 @@
         return (typeof thing == 'function') ? (thing.call(ctx)) : thing;
     };
 
-    function isElementInDOM(ele) {
-      while (ele = ele.parentNode) {
-        if (ele == document) return true;
-      }
-      return false;
-    };
-
     function Tipsy(element, options) {
         this.$element = $(element);
         this.options = options;
@@ -27,7 +20,8 @@
     Tipsy.prototype = {
         show: function() {
             var title = this.getTitle();
-            if (title && this.enabled) {
+            // The element might have been removed in the mean time
+            if (title && this.enabled && this.$element.is(':visible')) {
                 var $tip = this.tip();
 
                 $tip.find('.tipsy-inner')[this.options.html ? 'html' : 'text'](title);
@@ -114,18 +108,9 @@
 
         tip: function() {
             if (!this.$tip) {
-                this.$tip = $('<div class="tipsy"></div>').html('<div class="tipsy-arrow"></div><div class="tipsy-inner"></div>');
-                this.$tip.data('tipsy-pointee', this.$element[0]);
+                this.$tip = $('<div class="tipsy"><div class="tipsy-arrow"></div><div class="tipsy-inner"></div></div>');
             }
             return this.$tip;
-        },
-
-        validate: function() {
-            if (!this.$element[0].parentNode) {
-                this.hide();
-                this.$element = null;
-                this.options = null;
-            }
         },
 
         enable: function() { this.enabled = true; },
@@ -206,15 +191,6 @@
         opacity: 0.8,
         title: 'title',
         trigger: 'hover'
-    };
-
-    $.fn.tipsy.revalidate = function() {
-      $('.tipsy').each(function() {
-        var pointee = $.data(this, 'tipsy-pointee');
-        if (!pointee || !isElementInDOM(pointee)) {
-          $(this).remove();
-        }
-      });
     };
 
     // Overwrite this method to provide options on a per-element basis.
