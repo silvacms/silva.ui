@@ -43,6 +43,8 @@ class ColumnsContainerListing(UIREST):
                     'available': {'input_mode': True},
                     'actions': [{
                             'title': self.translate(_(u'Cancel')),
+                            'description': self.translate(
+                                _(u'Do not proceed with this action.')),
                             'icon': 'close',
                             'order': 5,
                             'action': {'input_mode': False},
@@ -61,7 +63,7 @@ class ColumnsContainerListing(UIREST):
                     'actions': [{
                             'title': self.translate(_(u'Cut')),
                             'description': self.translate(
-                                _(u'Cut items in the clipboard')),
+                                _(u'Cut the selected items onto the clipboard.')),
                             'icon': 'scissors',
                             'accesskey': ['ctrl+x'],
                             'order': 5,
@@ -73,6 +75,8 @@ class ColumnsContainerListing(UIREST):
                             'ifaces': ['content']
                             }, {
                             'title': self.translate(_(u'Copy')),
+                            'description': self.translate(
+                                _(u'Copy the selected items onto the clipboard.')),
                             'icon': 'copy',
                             'accesskey': ['ctrl+c'],
                             'order': 6,
@@ -88,6 +92,8 @@ class ColumnsContainerListing(UIREST):
                                 'clipboard_min_items': 1},
                             'actions': [{
                                     'title': self.translate(_(u'Paste')),
+                                    'description': self.translate(
+                                        _(u'Paste the items held on the clipboard.')),
                                     'icon': 'clipboard',
                                     'accesskey': ['ctrl+v'],
                                     'order': 10,
@@ -98,6 +104,8 @@ class ColumnsContainerListing(UIREST):
                                     'ifaces': ['object']
                                     }, {
                                     'title': self.translate(_(u'Paste as Ghost')),
+                                    'description': self.translate(
+                                        _(u'Paste the items held on the clipboard as Ghosts.')),
                                     'icon': 'link',
                                     'accesskey': ['ctrl+g'],
                                     'order': 20,
@@ -119,7 +127,7 @@ class ColumnsContainerListing(UIREST):
                                     'send': 'selected_ids',}},
                             'confirmation': {
                                 'title': self.translate(_(u"Confirm deletion")),
-                                'message': self.translate(_(u'Do you want to delete the selected content(s) ?'))},
+                                'message': self.translate(_(u'Do you reeally want to delete the selected content?'))},
                             'available': {
                                 'content_match': [
                                     'not', ['equal', 'access', None]],
@@ -127,6 +135,8 @@ class ColumnsContainerListing(UIREST):
                             'ifaces': ['content']
                             }, {
                             'title': self.translate(_(u'Rename')),
+                            'description': self.translate(
+                                _(u'Change the name and/or titles of the selected items.')),
                             'icon': 'pencil',
                             'accesskey': ['ctrl+r'],
                             'order': 10,
@@ -147,6 +157,8 @@ class ColumnsContainerListing(UIREST):
                             'available': {'min_items': 1},
                             'actions': [{
                                     'title': self.translate(_(u'Publish')),
+                                    'description': self.translate(
+                                        _(u'Make the selected items available to the public.')),
                                     'icon': 'check',
                                     'accesskey': ['ctrl+p'],
                                     'order': 10,
@@ -165,6 +177,8 @@ class ColumnsContainerListing(UIREST):
                                     'ifaces': ['container', 'versioned']
                                     }, {
                                     'title': self.translate(_(u'New version')),
+                                    'description': self.translate(
+                                        _(u'Create an editable version of the selected items.')),
                                     'icon': 'document',
                                     'accesskey': ['ctrl+n'],
                                     'order': 15,
@@ -184,6 +198,8 @@ class ColumnsContainerListing(UIREST):
                                     'ifaces': ['versioned']
                                     }, {
                                     'title': self.translate(_(u'Request Approval')),
+                                    'description': self.translate(
+                                        _(u'Change the status of the selected items to ready to review.')),
                                     'icon': 'check',
                                     'order': 20,
                                     'action': {
@@ -198,6 +214,8 @@ class ColumnsContainerListing(UIREST):
                                     'ifaces': ['versioned']
                                     }, {
                                     'title': self.translate(_(u'Approve for future')),
+                                    'description': self.translate(
+                                        _(u'Approve the selected items with a publication date in the future.')),
                                     'icon': 'document',
                                     'order': 25,
                                     'action': {
@@ -212,6 +230,8 @@ class ColumnsContainerListing(UIREST):
                                     'ifaces': ['versioned']
                                     },  {
                                     'title': self.translate(_(u'Reject request')),
+                                    'description': self.translate(
+                                        _(u'Change the status of the selected items back to draft.')),
                                     'icon': 'close',
                                     'order': 30,
                                     'action': {
@@ -226,6 +246,8 @@ class ColumnsContainerListing(UIREST):
                                     'ifaces': ['versioned']
                                     }, {
                                     'title': self.translate(_(u'Withdraw request')),
+                                    'description': self.translate(
+                                        _(u'Change the status of the selected items back to draft.')),
                                     'icon': 'close',
                                     'order': 30,
                                     'action': {
@@ -240,6 +262,8 @@ class ColumnsContainerListing(UIREST):
                                     'ifaces': ['versioned']
                                     }, {
                                     'title': self.translate(_(u'Revoke approval')),
+                                    'description': self.translate(
+                                        _(u'Change the status of the selected items back to draft.')),
                                     'icon': 'cancel',
                                     'order': 40,
                                     'action': {
@@ -254,6 +278,8 @@ class ColumnsContainerListing(UIREST):
                                     'ifaces': ['versioned']
                                     }, {
                                     'title': self.translate(_(u'Close')),
+                                    'description': self.translate(
+                                        _(u'Make the selected items unavailable to the public.')),
                                     'icon': 'close',
                                     'accesskey': ['ctrl+l'],
                                     'order': 50,
