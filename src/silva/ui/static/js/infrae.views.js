@@ -270,7 +270,7 @@
 
             // Local JSON
             var jsont = view.template_data && data.jsont || view.jsont;
-            if (jsont !==undefined) {
+            if (jsont !== undefined) {
                 template = template_cache[jsont];
 
                 if (template === undefined) {

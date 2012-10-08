@@ -135,6 +135,9 @@
             return false;
         });
 
+        // Tip
+        $containers.tipsy({gravity: 'w', delegate: 'ins.state', delayIn: 1000});
+
         // Row selection with mouse
         // INFO: Binding mousedown integrate it well with column drag
         // and drop and prevent browser text-selection on some browsers.

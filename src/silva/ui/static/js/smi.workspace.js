@@ -198,6 +198,7 @@
                     $.each(data.entries, function(i, info) {
                         $content.append(create(info, true));
                     });
+                    $content.tipsy({delegate: 'a'});
                     if (!tabs) {
                         // Add a class for style under IE 8
                         $content.children('li:last').addClass('last-action');
@@ -312,4 +313,3 @@
     });
 
 })(jQuery, infrae);
-

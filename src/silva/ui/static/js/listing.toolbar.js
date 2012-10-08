@@ -1,7 +1,5 @@
 
-(function($, infrae) {
-
-
+(function($, infrae, jsontemplate) {
     /**
      * Return a function that evalute a list of JSON predicate.
      * @param predicates: list of predicates to evaluate.
@@ -99,6 +97,10 @@
     });
 
 
+    // Template for a button in the toolbar
+    var button_template = new jsontemplate.Template(
+        '<li><a class="ui-state-default" {.section description}title="{description}"{.end}>{.section icon}<div class="action-icon"><ins class="ui-icon ui-icon-{icon|htmltag}"></ins></div>{.end}<span {.section icon}class="have-icon"{.end}>{title|html}</span></a></li>', {});
+
     /**
      * Create button kind-of-view that can be used to render actions.
      * @param group_definitions: list of action groups
@@ -118,16 +120,8 @@
                     button['factory'] = function($content, data) {
                         var view = {
                             render: function() {
-                                var $action = $('<li><a class="ui-state-default"><span>' +
-                                                definition.title + '</span></a></li>');
-                                var $trigger = $action.children('a');
+                                var $action = $(button_template.expand(definition));
 
-                                if (definition.icon) {
-                                    $trigger.children('span').addClass('have-icon');
-                                    $trigger.prepend(
-                                        '<div class="action-icon"><ins class="ui-icon ui-icon-' +
-                                            definition.icon + '"></ins></div>');
-                                };
                                 if (view.action != undefined) {
                                     var action = function() {
                                         if (definition.confirmation)
@@ -136,10 +130,10 @@
                                             view.action();
                                         return false;
                                     };
-
-                                    $trigger.bind('click', action);
-                                    if (definition.accesskey)
+                                    $action.children('a').bind('click', action);
+                                    if (definition.accesskey) {
                                         shortcuts.bind('listing', 'actions', definition.accesskey, action);
+                                    };
                                 };
                                 $content.append($action);
                             }
@@ -320,6 +314,7 @@
                 var $actions = $('<div class="actions"><ol></ol></div>');
                 var $container = $actions.children('ol');
 
+                $actions.tipsy({delegate: 'a'});
                 infrae.ui.selection.disable($actions);
                 group.render($container, {every: data});
                 var $last = $container.children('li:last');
@@ -478,4 +473,4 @@
 
     });
 
-})(jQuery, infrae);
+})(jQuery, infrae, jsontemplate);

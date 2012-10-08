@@ -98,8 +98,20 @@ def icon_column(settings, screen, cfg):
     cfg.add(info, ICON_WIDTH)
 
 def workflow_column(settings, screen, cfg):
-    cfg.add({'name': 'status_public', 'view': 'workflow'}, PUBLIC_STATE_WIDTH)
-    cfg.add({'name': 'status_next', 'view': 'workflow'}, NEXT_STATE_WIDTH)
+    status = {'published': screen.translate(
+            _(u"This item is published to the public")),
+              'closed': screen.translate(
+            _(u"This item is not accessible to the public")),
+              'pending': screen.translate(
+            _(u"This item is waiting approval for publication")),
+              'draft': screen.translate(
+            _(u"This item is a working copy and not accessible to the public")),
+              'approved': screen.translate(
+            _(u"This item is approved for publication, but not yet available to the public"))}
+    info = {'name': 'status_public', 'view': 'workflow', 'status': status}
+    cfg.add(info, PUBLIC_STATE_WIDTH)
+    info = {'name': 'status_next', 'view': 'workflow', 'status': status}
+    cfg.add(info, NEXT_STATE_WIDTH)
 
 def identifier_column(settings, screen, cfg):
     info = {'name': 'identifier',

@@ -119,6 +119,24 @@
     });
 })(jQuery, infrae);
 
+(function ($, infrae) {
+    // Support for tipsy
+    var TipManager = function(smi, options) {
+        return {
+            page: function(data) {
+                // Clear existing tips when a page is open.
+                $('.tipsy').remove();
+                return null;
+            }
+        };
+    };
+
+    $.extend(infrae.smi.plugins, {
+        tip: TipManager
+    });
+
+})(jQuery, infrae);
+
 (function ($) {
     // Support for fullscreen mode
 

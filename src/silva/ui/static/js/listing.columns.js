@@ -86,7 +86,8 @@
 
                 return {
                     state: state,
-                    jsont: '<ins class="{state|htmltag}"></ins>',
+                    description: column.status[value],
+                    jsont: '<ins class="{state|htmltag}" title="{description|htmltag}"></ins>',
                     render: function() {
                         $content.addClass(column.name);
                     }

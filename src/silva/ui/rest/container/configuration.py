@@ -60,6 +60,8 @@ class ColumnsContainerListing(UIREST):
                     'available': {'input_mode': False},
                     'actions': [{
                             'title': self.translate(_(u'Cut')),
+                            'description': self.translate(
+                                _(u'Cut items in the clipboard')),
                             'icon': 'scissors',
                             'accesskey': ['ctrl+x'],
                             'order': 5,

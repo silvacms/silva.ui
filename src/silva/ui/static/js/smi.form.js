@@ -234,6 +234,10 @@
                             return false;
                         });
 
+                        // Tip
+                        $form.tipsy({delegate: 'a.form-control'});
+                        $form.tipsy({delegate: 'a.form-button'});
+
                         // Set submit URL for helper
                         $form.attr('data-form-url', smi.get_screen_url());
 
