@@ -272,7 +272,7 @@
 			if ( $('div.jGrowl-notification:parent', self.element).size() > 1 &&
 				 $('div.jGrowl-closer', self.element).size() == 0 && this.defaults.closer != false ) {
 				$(this.defaults.closerTemplate).addClass('jGrowl-closer ui-corner-all').addClass(this.defaults.theme)
-					.appendTo(self.element).animate(this.defaults.animateOpen, this.defaults.speed, this.defaults.easing)
+					.appendTo(self.element).animate(o.animateOpen, o.openDuration, o.easing)
 					.bind("click.jGrowl", function() {
 						$(this).siblings().trigger("jGrowl.beforeClose");
 

@@ -6,10 +6,10 @@
      * @param options: configuration options.
      */
     var NotificationManager = function(smi, options) {
-        var $container = $(options.selector),
+        var $container = $(options.notifications.selector),
             defaults = {
                 themeState: 'feedback',
-                speed: options.speed === undefined && 'normal' || options.speed};
+                speed: options.notifications.speed === undefined && 'normal' || options.notifications.speed};
 
         // Default jGrowl notifications
         var default_notify = function(message) {
@@ -63,7 +63,7 @@
         };
 
         // Support for webkit notificatons.
-        if (!options.standard && window.webkitNotifications) {
+        if (!options.notifications.standard && window.webkitNotifications) {
             var native_api = window.webkitNotifications;
 
             $.extend(api, {
@@ -92,7 +92,7 @@
 
         // Listen to pull notification events.
         $(document).bind('refresh-feedback-smi', function() {
-            $.getJSON(options.url, function(messages) {
+            $.getJSON(options.notifications.url, function(messages) {
                 if (messages.notifications) {
                     api.notifies(messages.notifications);
                 };
