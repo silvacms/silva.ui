@@ -11,22 +11,21 @@
 
 /* Toolbar */
 
-#workspace .toolbar .selector {
+#workspace .listing-header .selector {
   float:left;
 }
 
-#workspace .toolbar .selector ins {
+#workspace .listing-header .selector ins {
   width:20px;
   height:20px;
-  margin-top: 5px;
   display: block;
   background-image:url(../img/sprite.png);
 }
-#workspace .toolbar .selector ins.none { background-position:-0px -120px; }
-#workspace .toolbar .selector ins.single { background-position:-40px -120px; }
-#workspace .toolbar .selector ins.partial { background-position:-40px -120px; }
-#workspace .toolbar .selector ins.all { background-position:-20px -120px; }
-#workspace .toolbar .selector ins.disabled { background-position:-60px -120px; }
+#workspace .listing-header .selector ins.none { background-position:-0px -120px; }
+#workspace .listing-header .selector ins.single { background-position:-40px -120px; }
+#workspace .listing-header .selector ins.partial { background-position:-40px -120px; }
+#workspace .listing-header .selector ins.all { background-position:-20px -120px; }
+#workspace .listing-header .selector ins.disabled { background-position:-60px -120px; }
 
 #workspace .toolbar .filter {
   float: right;

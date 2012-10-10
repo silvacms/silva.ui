@@ -3,11 +3,58 @@
 (function($, infrae, jsontemplate) {
 
     /**
+     * Manage a selector that can unselect / select all
+     * element in a listing, and view selection status.
+     * @param $selector: JQuery object representing the selector
+     * @param listing: managed listing
+     */
+    var render_multi_selector = function($selector, listing, shortcuts) {
+        var status = 'none';
+
+        var set_status = function(new_status) {
+            $selector.removeClass(status);
+            $selector.addClass(new_status);
+            status = new_status;
+        };
+
+        // Update selector style on selection change
+        listing.events.status(function() {
+            if (this.selection.length == 0) {
+                set_status('none');
+            } else if (this.selection.length == this.length) {
+                set_status('all');
+            } else if (this.selection.length == 1) {
+                set_status('single');
+            } else {
+                set_status('partial');
+            };
+        });
+
+        var switch_status = function() {
+            if (status == 'none') {
+                listing.select_all();
+            } else {
+                listing.unselect_all();
+            };
+            return false;
+        };
+        var clear_status = function() {
+            listing.unselect_all();
+            return false;
+        };
+
+        // Clicking on the selector change the selection.
+        $selector.bind('click', switch_status);
+        shortcuts.bind('listing', null, ['ctrl+a'], switch_status);
+        shortcuts.bind('listing', null, ['esc'], clear_status);
+    };
+
+    /**
      * Render/bind top listing header.
      * @param $content: listing JQuery element.
      * @param configuration: listing configuration.
      */
-    var render_listing_header = function($content, configuration) {
+    var render_listing_header = function($content, configuration, listing, shortcuts) {
         var first_configuration = configuration.listing[0];
         var $table = $content.find('div.listing-header table');
         var $header = $table.find('tr');
@@ -16,9 +63,13 @@
                        Array(first_configuration.columns.length + 1).join("<col></col>") +
                        "</colgroup>");
 
-        $.each(first_configuration.columns, function(i, column) {
+        $.each(first_configuration.columns, function(index, column) {
             var $cell = $('<th></th>');
 
+            if (!index) {
+                $cell.html('<div class="selector"><ins class="none"></ins></div>');
+                render_multi_selector($cell.find('ins'), listing, shortcuts);
+            };
             if (column.caption) {
                 $cell.text(column.caption);
             };
@@ -473,7 +524,7 @@
                         smi.shortcuts.create('listing', $content, true);
 
                         // Render header
-                        render_listing_header($content, configuration);
+                        render_listing_header($content, configuration, listing, smi.shortcuts);
 
                         // Create containers
                         var promises = [];
