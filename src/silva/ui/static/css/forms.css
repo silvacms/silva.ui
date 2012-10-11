@@ -72,23 +72,27 @@ form .form-label {
   width: 225px;
 }
 
-.form-content .form-section .form-label label {
+.form-content .form-section .form-label label,
+.form-content .form-section .form-checkbox label {
   font-weight: bold;
   font-size: 105%;
 }
 
-.form-content .form-section .form-label p {
+.form-content .form-section .form-label p,
+.form-content .form-section .form-checkbox p {
   font-size: 90%;
   color: #777;
   margin-top: 3px;
 }
 
-.form-content .form-focus .form-label p {
+.form-content .form-focus .form-label p,
+.form-content .form-focus .form-checkbox p {
   color: #000;
   margin-top: 3px;
 }
 
-.form-content .form-section:hover .form-label p {
+.form-content .form-section:hover .form-label p,
+.form-content .form-section:hover .form-checkbox p {
   color: #000;
 }
 
@@ -175,6 +179,10 @@ input:focus, textarea:focus {
    -webkit-box-shadow: 2px 2px 3px #A0A0A0;
    -moz-box-shadow: 2px 2px 3px #A0A0A0;
   box-shadow: 2px 2px 3px #A0A0A0;
+}
+
+.form-checkbox input {
+  margin: 0px 4px 4px 0px;
 }
 
 .form-content .form-batch {

@@ -42,7 +42,8 @@ class TemplateToolbarContainerListing(rest.REST):
         return {}
 
     def namespace(self):
-        return {'rest': self}
+        return {'rest': self,
+                'request': self.request}
 
     def GET(self):
         return self.template.render(self)

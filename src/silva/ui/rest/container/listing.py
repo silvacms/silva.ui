@@ -61,7 +61,8 @@ class TemplateContainerListing(rest.REST):
         return {}
 
     def namespace(self):
-        return {'rest': self}
+        return {'rest': self,
+                'request': self.context}
 
     def GET(self):
         return self.template.render(self)
