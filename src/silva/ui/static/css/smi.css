@@ -151,7 +151,7 @@ div.batching a.current {
 }
 #workspace .header a {
   color:#111;
-}  
+}
 #workspace .header h2 {
   clear: both;
   color: #666;
@@ -309,7 +309,7 @@ div.batching a.current {
 }
 
 #workspace .header .actions {
-  margin: 5px;
+  margin: 5px 5px 5px 0px;
 }
 #workspace .header .compact-tabs {
   display: none;
