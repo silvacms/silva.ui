@@ -118,6 +118,8 @@ class ColumnsContainerListing(UIREST):
                             'ifaces': ['object']
                             }, {
                             'title': self.translate(_(u'Delete')),
+                            'description': self.translate(
+                                _(u'Remove the selected items permanently.')),
                             'icon': 'trash',
                             'accesskey': ['ctrl+d'],
                             'order': 9,
@@ -279,7 +281,7 @@ class ColumnsContainerListing(UIREST):
                                     }, {
                                     'title': self.translate(_(u'Close')),
                                     'description': self.translate(
-                                        _(u'Make the selected items unavailable to the public.')),
+                                        _(u'Unpublish the selected items.')),
                                     'icon': 'close',
                                     'accesskey': ['ctrl+l'],
                                     'order': 50,
