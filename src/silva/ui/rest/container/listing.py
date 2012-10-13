@@ -100,15 +100,15 @@ def icon_column(settings, screen, cfg):
 
 def workflow_column(settings, screen, cfg):
     status = {'published': screen.translate(
-            _(u"This item is published to the public")),
+            _(u"Published: this item is published and viewable by the public.")),
               'closed': screen.translate(
-            _(u"This item is not accessible to the public")),
+            _(u"Closed: this item is not accessible to the public.")),
               'pending': screen.translate(
-            _(u"This item is waiting approval for publication")),
+            _(u"Pending: this item is waiting for approval.")),
               'draft': screen.translate(
-            _(u"This item is a working copy and not accessible to the public")),
+            _(u"Draft: this item is a working copy.")),
               'approved': screen.translate(
-            _(u"This item is approved for publication, but not yet available to the public"))}
+            _(u"Approved: this item is approved for publication at a later time."))}
     info = {'name': 'status_public', 'view': 'workflow', 'status': status}
     cfg.add(info, PUBLIC_STATE_WIDTH)
     info = {'name': 'status_next', 'view': 'workflow', 'status': status}
@@ -236,7 +236,7 @@ class ContainerListing(Component):
 class PublishableContainerListing(ContainerListing):
     grok.name('publishables')
     grok.order(10)
-    title = _(u'Structural content(s)')
+    title = _(u'Structural content')
     interface = [('containers', IContainer), ('publishables', IPublishable)]
 
     @classmethod
@@ -264,7 +264,7 @@ class PublishableContainerListing(ContainerListing):
 class NonPublishableContainerListing(ContainerListing):
     grok.name('assets')
     grok.order(100)
-    title = _(u'Asset(s)')
+    title = _(u'Assets')
     interface = INonPublishable
 
     @classmethod
