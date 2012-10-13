@@ -56,7 +56,7 @@
                 <li class="last-action">
                   <a class="form-popup"
                      href="${view.root_url}/++rest++silva.core.smi.userpreferences">
-                    <span i18n:translate="">User preferences</span>
+                    <span i18n:translate="">Preferences</span>
                   </a>
                 </li>
               </ol>
@@ -71,16 +71,16 @@
                 <ol>
                   <li>
                     <a class="parent open-screen ui-state-default" href=""
-                       rel="" title="Go one level up"
+                       rel="" title="Go one level up."
                        i18n:attributes="title">
-                      <ins class="ui-icon ui-icon-arrowreturnthick-1-n"></ins>
+                      <ins class="ui-icon ui-icon-arrowthick-1-nw"></ins>
                     </a>
                   </li>
                   <li class="last-action">
                     <a class="fullscreen ui-state-default"
-                       title="Switch to fullscreen mode"
+                       title="Switch to fullscreen mode."
                        i18n:attributes="title">
-                      <ins class="ui-icon ui-icon-zoomin"></ins>
+                      <ins class="ui-icon ui-icon-arrow-4-diag"></ins>
                     </a>
                   </li>
                 </ol>
@@ -124,7 +124,7 @@
                   return {
                     ifaces: ['message'],
                     title: '<tal:msg i18n:translate="">An application error happened</tal:msg>',
-                    message: '<tal:msg i18n:translate="">An error happened. Please consult your webmaster for more information.</tal:msg>'
+                    message: '<tal:msg i18n:translate="">An error happened. Please consult with your webmaster for more information.</tal:msg>'
                   };
               },
               401: function (request) {
