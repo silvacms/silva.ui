@@ -533,10 +533,12 @@ li .last-action div.action-icon {
 /* Collection widget CSS */
 
 .form-content input.field-collection-line-selector {
-  height: 20px;
-  width: 20px;
+  float: right; 
+  height: 20px; width: 20px;
   border: 0px;
+  margin-right: 6px;
 }
+
 .form-content tr.field-collection-line input.field-textline,
 .form-content tr.field-collection-line table.field-collection-header {
   width: 100%;
@@ -550,7 +552,7 @@ li .last-action div.action-icon {
 }
 .form-content .field-collection-lines div.line-actions {
   float: left;
-  width: 25px;
+  width: 60px;
 }
 
 div.line-data {
