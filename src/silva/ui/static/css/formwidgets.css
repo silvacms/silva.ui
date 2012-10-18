@@ -56,6 +56,7 @@
     border: solid 1px #CCC;
     background: #FFF;
 }
+
 .ui-multiselect ul {
     -moz-user-select: none;
     position: relative;

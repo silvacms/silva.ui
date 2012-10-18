@@ -250,10 +250,17 @@ input.field-collection-remove-line:hover {
 
 /* -- form-section and form-footer settings -- */
 
-.form-section, .form-controls {
+form .form-footer {
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  border-radius: 3px; 
+  height: 30px;
+  margin: 0 5px; 
+}
+
+/*.form-section, .form-controls {
   margin: 0 5px 30px 5px;
   padding: 5px 0 20px 0;
-}
+}*/
 
 /* -- table settings -- */
 
@@ -397,7 +404,7 @@ form .form-error-message {
   background: #fff url(../img/gradient20m.png) repeat-x top;
   border: 1px #777 solid;
   float: left;
-  margin: 4px 6px 0 0;
+  margin: 5px 0 0 6px;
   padding: 1px 5px;
 }
 
@@ -513,7 +520,6 @@ form .form-error-message {
   border: 1px #777 solid;
   color: #000;
   float: left;
-  padding: 1px 6px;
 }
 
 /*.ui-dialog .ui-widget div.actions div.actions-icon, .ui-dialog .ui-button-text-only .ui-button-text {
@@ -634,8 +640,6 @@ table.cke_dialog_contents td.cke_dialog_ui_vbox_child input.cke_dialog_ui_input_
 div.cke_dialog_ui_input_textarea {
   padding: 0 !important;
 }
-
-
 
 /* Image information orientation */
 
