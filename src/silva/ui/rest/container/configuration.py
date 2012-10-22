@@ -199,7 +199,7 @@ class ColumnsContainerListing(UIREST):
                                             ]},
                                     'ifaces': ['versioned']
                                     }, {
-                                    'title': self.translate(_(u'Request Approval')),
+                                    'title': self.translate(_(u'Request approval')),
                                     'description': self.translate(
                                         _(u'Change the status of the selected items to ready to review.')),
                                     'icon': 'check',
