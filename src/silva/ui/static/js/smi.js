@@ -212,23 +212,26 @@
                             return result;
                         },
                         function (request) {
-                            if (error_handlers === undefined) {
-                                // If not specified, fallback on the default error handlers.
-                                error_handlers = default_error_handlers;
-                            }
-                            // Fetch the error handler and execute it
-                            var handler = error_handlers[request.status];
-                            if (handler === undefined) {
-                                handler = error_handlers[500];
-                            };
-                            var result_handler = handler(request);
-                            // No result, direct fail. Promise, return it, otherwise render it.
-                            if (result_handler) {
-                                if (result_handler.promise !== undefined) {
-                                    return result_handler;
+                            if (!smi.options.testing) {
+                                // During testing disable error handlers.
+                                if (error_handlers === undefined) {
+                                    // If not specified, fallback on the default error handlers.
+                                    error_handlers = default_error_handlers;
+                                }
+                                // Fetch the error handler and execute it
+                                var handler = error_handlers[request.status];
+                                if (handler === undefined) {
+                                    handler = error_handlers[500];
                                 };
-                                return $(document).render(
-                                    {data: result_handler, args: [smi], reject: [request]});
+                                var result_handler = handler(request);
+                                // No result, direct fail. Promise, return it, otherwise render it.
+                                if (result_handler) {
+                                    if (result_handler.promise !== undefined) {
+                                        return result_handler;
+                                    };
+                                    return $(document).render(
+                                        {data: result_handler, args: [smi], reject: [request]});
+                                };
                             };
                             return $.Deferred().reject(request);
                         });

@@ -110,6 +110,9 @@
             name: "${view.name}",
             background: "${view.background}"
           },
+<tal:test tal:condition="view.test_mode">
+          testing: true,
+</tal:test>
           screen: "${view.root_url}/{path}/++rest++silva.ui/{screen}",
           action:"${view.root_url}/{path}/++rest++silva.ui.actions.{action}",
           error_messages: {
