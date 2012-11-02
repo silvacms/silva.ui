@@ -167,7 +167,19 @@
                         var $form = $(this);
                         var form_prefix = $form.attr('name');
 
+                        var confirmation = function($control) {
+                            var confirmation = $control.attr('data-confirmation');
+                            if (confirmation !== undefined) {
+                                return confirm(confirmation);
+                            }
+                            return true;
+                        };
+
                         var submit = function($control) {
+                            if (!confirmation($control)) {
+                                return false;
+                            }
+
                             $form.trigger('serialize-smiform', {form: $form, container: $content_form});
 
                             var values = $form.serializeArray();
@@ -191,6 +203,7 @@
                                 return false;
                             }
                         };
+
                         var default_submit = function() {
                             return submit($form.find('.form-controls a.default-form-control'));
                         };
