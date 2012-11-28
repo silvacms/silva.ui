@@ -167,19 +167,25 @@
                         var $form = $(this);
                         var form_prefix = $form.attr('name');
 
-                        var confirmation = function($control) {
-                            var confirmation = $control.attr('data-confirmation');
-                            if (confirmation !== undefined) {
-                                return confirm(confirmation);
-                            }
-                            return true;
+                        var make_submit = function($control) {
+                            var message = $control.attr('data-confirmation');
+
+                            if (message !== undefined) {
+                                // If there is a message, ask confirmation before triggering the action.
+                                return function () {
+                                    infrae.ui.ConfirmationDialog({message:message}).pipe(function() {
+                                        return submit($control);
+                                    });
+                                    return false;
+                                };
+                            };
+                            // Trigger directly the action.
+                            return function () {
+                                return submit($control);
+                            };
                         };
 
                         var submit = function($control) {
-                            if (!confirmation($control)) {
-                                return false;
-                            }
-
                             $form.trigger('serialize-smiform', {form: $form, container: $content_form});
 
                             var values = $form.serializeArray();
@@ -203,25 +209,18 @@
                             };
                         };
 
-                        var default_submit = function() {
-                            return submit($form.find('.form-controls a.default-form-control'));
-                        };
-
                         // Bind default submit and refresh
-                        $form.bind('submit', default_submit);
+                        $form.bind('submit', make_submit($form.find('.form-controls a.default-form-control')));
 
                         // Bind click submit
                         $form.find('.form-controls a.form-control').each(function () {
-                            var $control = $(this);
-                            var shortcut = $control.attr('data-form-shortcut');
+                            var $control = $(this),
+                                shortcut = $control.attr('data-form-shortcut'),
+                                handler = make_submit($control);
 
-                            $control.bind('click', function() {
-                                return submit($control);
-                            });
+                            $control.bind('click', handler);
                             if (shortcut) {
-                                smi.shortcuts.bind('form', null, [shortcut], function() {
-                                    return submit($control);
-                                });
+                                smi.shortcuts.bind('form', null, [shortcut], handler);
                             };
                         });
                         $form.find('.form-controls a.form-button').each(function () {
