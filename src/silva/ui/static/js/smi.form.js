@@ -197,11 +197,10 @@
                                 $control.attr(
                                     'href',
                                     [smi.get_screen_url(), '?', $.param(values)].join(''));
-                                return;
                             } else {
                                 smi.ajax.send_to_opened(values);
                                 return false;
-                            }
+                            };
                         };
 
                         var default_submit = function() {

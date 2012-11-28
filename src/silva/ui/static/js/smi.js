@@ -422,7 +422,7 @@
     };
 
     infrae.smi = {
-        plugins:{}
+        plugins: {}
     };
 
 })(jQuery, infrae, jsontemplate);
