@@ -6,6 +6,17 @@
 
 (function($) {
 
+    var getTip = function() {
+        var $tip = $('<div class="tipsy"><div class="tipsy-arrow"></div><div class="tipsy-inner"></div></div>');
+
+        $('body').append($tip);
+
+        getTip = function() {
+            return $tip;
+        };
+        return $tip;
+    };
+
     function maybeCall(thing, ctx) {
         return (typeof thing == 'function') ? (thing.call(ctx)) : thing;
     };
@@ -22,11 +33,11 @@
             var title = this.getTitle();
             // The element might have been removed in the mean time
             if (title && this.enabled && this.$element.is(':visible')) {
-                var $tip = this.tip();
+                var $tip = getTip();
 
                 $tip.find('.tipsy-inner')[this.options.html ? 'html' : 'text'](title);
                 $tip[0].className = 'tipsy'; // reset classname in case of dynamic gravity
-                $tip.remove().css({top: 0, left: 0, visibility: 'hidden', display: 'block'}).prependTo(document.body);
+                $tip.css({top: 0, left: 0, visibility: 'hidden', display: 'block'});
 
                 var pos = $.extend({}, this.$element.offset(), {
                     width: this.$element[0].offsetWidth,
@@ -81,10 +92,10 @@
 
         hide: function() {
             if (this.options.fade) {
-                this.tip().stop().fadeOut(function() { $(this).remove(); });
+                getTip().stop().fadeOut();
             } else {
-                this.tip().remove();
-            }
+                getTip().hide();
+            };
         },
 
         fixTitle: function() {
@@ -93,7 +104,6 @@
                 $e.attr('original-title', $e.attr('title') || '').removeAttr('title');
             }
         },
-
         getTitle: function() {
             var title, $e = this.$element, o = this.options;
             this.fixTitle();
@@ -105,14 +115,6 @@
             title = ('' + title).replace(/(^\s*|\s*$)/, "");
             return title || o.fallback;
         },
-
-        tip: function() {
-            if (!this.$tip) {
-                this.$tip = $('<div class="tipsy"><div class="tipsy-arrow"></div><div class="tipsy-inner"></div></div>');
-            }
-            return this.$tip;
-        },
-
         enable: function() { this.enabled = true; },
         disable: function() { this.enabled = false; },
         toggleEnabled: function() { this.enabled = !this.enabled; }

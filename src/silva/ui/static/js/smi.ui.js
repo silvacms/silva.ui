@@ -125,7 +125,7 @@
         return {
             page: function(data) {
                 // Clear existing tips when a page is open.
-                $('.tipsy').remove();
+                $('.tipsy').hide();
                 return null;
             }
         };

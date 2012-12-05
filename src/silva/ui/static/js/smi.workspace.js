@@ -67,7 +67,9 @@
                         name = smi.options.theme.name;
                     };
                     infrae.ui.icon($content.children('ins'), data.icon);
-                    $('head > title').html(name + " - " + data.title);
+                    if (!$.browser.msie) {
+                        $('head > title').html(name + " - " + data.title);
+                    };
                 }
             };
         }
