@@ -21,6 +21,8 @@
   height: 16px;
   padding: 2px;
   width: 1.4em;
+    -webkit-border-radius: 0px 3px 3px 0px;
+    -moz-border-radius: 0px 3px 3px 0px;
   border-radius: 0px 3px 3px 0px;
   border: 1px solid #999;
   background: #fff url(../img/gradient20m.png) repeat-x top;
@@ -33,8 +35,8 @@
   max-height: 125px;
   overflow-y: auto;
   overflow-x: hidden;
-  -webkit-box-shadow: #A0A0A0 0px 2px 8px;
-  -moz-box-shadow: #A0A0A0 0px 2px 8px;
+   -webkit-box-shadow: #A0A0A0 0px 2px 8px;
+   -moz-box-shadow: #A0A0A0 0px 2px 8px;
   box-shadow: #A0A0A0 0px 2px 8px;
   -moz-user-select: none;
 }

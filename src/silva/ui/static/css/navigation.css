@@ -8,11 +8,8 @@
   left: 0;
   width: 280px;
   background: #fff;
-  -khtml-box-shadow: #1c2e3d 0 3px 10px;
-  -moz-box-shadow: #1c2e3d 0 3px 10px;
-  -ms-box-shadow: #1c2e3d 0 3px 10px;
-  -o-box-shadow: #1c2e3d 0 3px 10px;
-  -webkit-box-shadow: #1c2e3d 0 3px 10px;
+    -webkit-box-shadow: #1c2e3d 0 3px 10px;
+    -moz-box-shadow: #1c2e3d 0 3px 10px;
   box-shadow: #1c2e3d 0 3px 10px;
 }
 

@@ -69,11 +69,8 @@
 }
 #workspace .content .listing tr.item input {
   width: 100%;
-  -khtml-border-radius:3px 3px 3px 3px;
-  -moz-border-radius:3px 3px 3px 3px;
-  -ms-border-radius:3px 3px 3px 3px;
-  -o-border-radius:3px 3px 3px 3px;
-  -webkit-border-radius:3px 3px 3px 3px;
+    -webkit-border-radius:3px 3px 3px 3px;
+    -moz-border-radius:3px 3px 3px 3px;
   border-radius:3px 3px 3px 3px;
   border:1px #999 solid;
   padding: 2px;
@@ -175,18 +172,15 @@
 }
 
 #workspace .listing-footer .clipboard-info .clipboard-content {
-  -khtml-border-radius:3px 3px 0px 0px;
-  -moz-border-radius:3px 3px 0px 0px;
-  -ms-border-radius:3px 3px 0px 0px;
-  -o-border-radius:3px 3px 0px 0px;
-  -webkit-border-radius:3px 3px 0px 0px;
+   -webkit-border-radius:3px 3px 0px 0px;
+   -o-border-radius:3px 3px 0px 0px;
+  border-radius:3px 3px 0px 0px;
   position:absolute;
   width: 200px;
   bottom: 25px;
   right: 0px;
   display:block;
   background:#fff;
-  border-radius:3px 3px 0px 0px;
   border:1px #999 solid;
   margin-left: 0px;
   list-style:none;
