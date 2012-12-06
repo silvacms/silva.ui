@@ -33,7 +33,6 @@ form {
   background-image: -o-linear-gradient(top,  #F9F9F9,  #EFEFEF); 
   background-image: -ms-linear-gradient(top,  #F9F9F9,  #EFEFEF); 
   background-image: linear-gradient(top,  #F9F9F9,  #EFEFEF);  
-  background-repeat:repeat-x;filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#F9F9F9', endColorstr='#EFEFEF', GradientType=0);
   border: 1px solid rgba(0, 0, 0, 0.2);
   border-radius: 3px;
   color: black;
@@ -55,7 +54,6 @@ form {
   background-image: -ms-linear-gradient(top,  #999,  #777); 
   background-image: -moz-linear-gradient(top,  #999,  #777); 
   background-image: linear-gradient(top,  #999,  #777);  
-  background-repeat:repeat-x;filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#999', endColorstr='#777', GradientType=0);
   border: 1px solid rgba(0, 0, 0, 0.2);
   border-radius: 3px;
   color: #FFF;
@@ -285,7 +283,6 @@ form .form-footer {
   background-image: -ms-linear-gradient(top,  #FFF,  #F9F9F9); 
   background-image: -moz-linear-gradient(top,  #FFF,  #F9F9F9); 
   background-image: linear-gradient(top,  #fff,  #F9F9F9); 
-  background-repeat:repeat-x;filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#FFF', endColorstr='#F9F9F9', GradientType=0);
   border: 1px solid rgba(0, 0, 0, 0.2);
   border-radius: 3px;
 }
@@ -428,7 +425,6 @@ form .form-error-message {
   background-image: -ms-linear-gradient(top,  #EAEAEA,  #FFF); 
   background-image: -moz-linear-gradient(top,  #EAEAEA,  #FFF); 
   background-image: linear-gradient(top,  #EAEAEA,  #FFF); 
-  background-repeat:repeat-x;filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#EAEAEA', endColorstr='#FFF', GradientType=0);
 }
 
 .form-content a.form-control ins,
@@ -444,7 +440,6 @@ form .form-error-message {
   background-image: -ms-linear-gradient(top,  #EAEAEA,  #FFF); 
   background-image: -moz-linear-gradient(top,  #EAEAEA,  #FFF); 
   background-image: linear-gradient(top,  #EAEAEA,  #FFF); 
-  background-repeat:repeat-x;filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#EAEAEA', endColorstr='#FFF', GradientType=0);
   color: #000;
 }
 
@@ -526,7 +521,6 @@ form .form-error-message {
   background-image: -ms-linear-gradient(top,  #FFF,  #DADADA); 
   background-image: -moz-linear-gradient(top,  #FFF,  #DADADA); 
   background-image: linear-gradient(top,  #FFF,  #DADADA); 
-  background-repeat:repeat-x;filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#FFF', endColorstr='#DADADA', GradientType=0);
   border: 1px #777 solid;
   color: #000;
   float: left;
