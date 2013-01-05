@@ -8,7 +8,7 @@
   </dl>
   <div class="listing-footer">
     <div class="listing-footer-loading">
-      <p i18n:translate="">Loading folder content ...</p>
+      <p i18n:translate="">Loading folder content...</p>
     </div>
     <div class="listing-footer-content">
       <div class="clipboard-info">
@@ -20,7 +20,7 @@
                i18n:name="icon"></ins>
           <span class="count"
                 i18n:name="count">0</span>
-          item(s) in the clipboard
+          item(s) on the clipboard
         </a>
       </div>
       <p class="counters">
@@ -28,7 +28,7 @@
               i18n:translate="">
           <span class="count"
                 i18n:name="count">0</span>
-          structural(s) content(s),
+          structural item(s),
         </span>
         <span class="assets"
               i18n:translate="">

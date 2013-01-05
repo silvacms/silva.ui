@@ -102,7 +102,7 @@ def workflow_column(settings, screen, cfg):
     status = {'published': screen.translate(
             _(u"Published: this item is published and viewable by the public.")),
               'closed': screen.translate(
-            _(u"Closed: this item is not accessible to the public.")),
+            _(u"Closed: this item is no longer accessible to the public.")),
               'pending': screen.translate(
             _(u"Pending: this item is waiting for approval.")),
               'draft': screen.translate(
@@ -164,10 +164,8 @@ def author_column(settings, screen, cfg):
             'caption': screen.translate(_(u'Author')),
             'view': 'text'}
     if settings.folder_author_link:
-        info.update({'action': 'publish',
-                     'action_match': ['and',
-                                      ['not', ['equal', 'access', None]],
-                                      ['provides', 'versioned']]})
+        info.update({'action': 'settings',
+                     'action_match': ['not', ['equal', 'access', None]]})
     cfg.add(info)
 
 def goto_column(settings, screen, cfg):
@@ -236,7 +234,7 @@ class ContainerListing(Component):
 class PublishableContainerListing(ContainerListing):
     grok.name('publishables')
     grok.order(10)
-    title = _(u'Structural content')
+    title = _(u'Structural items')
     interface = [('containers', IContainer), ('publishables', IPublishable)]
 
     @classmethod
