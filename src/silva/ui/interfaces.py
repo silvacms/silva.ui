@@ -89,38 +89,38 @@ class IUIFolderSettings(Interface):
     """SMI Settings for the folder view.
     """
     folder_icon_link = schema.Bool(
-        title=_(u"Clicking on the icon goes to the content/edit view"),
+        title=_(u"Clicking on the icon goes to the content/edit view."),
         default=True,
         required=False)
     folder_icon_preview = schema.Bool(
-        title=_(u"Enable content preview when hovering over the icon"),
+        title=_(u"Enable content preview when hovering over the icon."),
         description=_(u"This can be disabled in case of performance issues."),
         default=True,
         required=False)
     folder_identifier_link = schema.Bool(
-        title=_(u"Clicking on the identifier goes to the content/edit view"),
+        title=_(u"Clicking on the identifier goes to the content/edit view."),
         default=True,
         required=False)
     folder_title_link = schema.Bool(
-        title=_(u"Clicking on the title shows the preview"),
+        title=_(u"Clicking on the title shows the preview."),
         default=True,
         required=False)
     folder_modified_link = schema.Bool(
-        title=_(u"Clicking on the modification time goes to properties"),
+        title=_(u"Clicking on the modification time goes to properties."),
         default=True,
         required=False)
     folder_author_link = schema.Bool(
-        title=_(u"Clicking on the author goes to settings"),
+        title=_(u"Clicking on the author name goes to settings."),
         default=True,
         required=False)
     folder_goto_menu = schema.Bool(
-        title=_(u"Enable goto menu"),
+        title=_(u"Enable goto menu."),
         default=False,
         required=False)
 
 
 class IUIGenericSettings(Interface):
-    """Generic SMI settings.
+    """Generic SMI Settings.
     """
     name = schema.TextLine(
         title=_(u"Site name"),
