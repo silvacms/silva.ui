@@ -89,33 +89,33 @@ class IUIFolderSettings(Interface):
     """SMI Settings for the folder view.
     """
     folder_icon_link = schema.Bool(
-        title=_(u"Clicking on the icon goes on content edit view"),
+        title=_(u"Clicking on the icon goes to the content/edit view"),
         default=True,
         required=False)
     folder_icon_preview = schema.Bool(
-        title=_(u"Enable content preview when hovering the icon"),
-        description=_(u"This can be disabled in case of performance issue."),
+        title=_(u"Enable content preview when hovering over the icon"),
+        description=_(u"This can be disabled in case of performance issues."),
         default=True,
         required=False)
     folder_identifier_link = schema.Bool(
-        title=_(u"Clicking on the identifier goes on the content edit view"),
-        default=False,
+        title=_(u"Clicking on the identifier goes to the content/edit view"),
+        default=True,
         required=False)
     folder_title_link = schema.Bool(
-        title=_(u"Clicking on the title shows the content preview"),
-        default=False,
+        title=_(u"Clicking on the title shows the preview"),
+        default=True,
         required=False)
     folder_modified_link = schema.Bool(
-        title=_(u"Clicking on the modification time goes on the content metadata"),
-        default=False,
+        title=_(u"Clicking on the modification time goes to properties"),
+        default=True,
         required=False)
     folder_author_link = schema.Bool(
-        title=_(u"Clicking on the author goes on the content publication information"),
-        default=False,
+        title=_(u"Clicking on the author goes to settings"),
+        default=True,
         required=False)
     folder_goto_menu = schema.Bool(
         title=_(u"Enable goto menu"),
-        default=True,
+        default=False,
         required=False)
 
 
@@ -124,12 +124,12 @@ class IUIGenericSettings(Interface):
     """
     name = schema.TextLine(
         title=_(u"Site name"),
-        description=_(u"Appears in the title tag of the SMI."),
+        description=_(u"Appears in the HTML title tag of the SMI."),
         default=u"Silva",
         required=True)
     logo = silvaschema.Bytes(
         title=_(u"Logo"),
-        description=_(u"Logo that appear at the top left of the SMI."),
+        description=_(u"Logo that appears at the top left of the SMI."),
         required=False)
     background = schema.TextLine(
         title=_(u"Background color"),

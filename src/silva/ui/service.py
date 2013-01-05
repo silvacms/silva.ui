@@ -54,8 +54,8 @@ class UIGenericSettings(silvaforms.ZMIForm):
     grok.name('manage_settings')
     grok.context(IUIService)
 
-    label = _(u"UI Generic settings")
-    description = _(u"You can from here modify generic SMI settings.")
+    label = _(u"UI Generic Settings")
+    description = _(u"Here you can modify the generic SMI settings.")
     ignoreContent = False
     fields = silvaforms.Fields(IUIGenericSettings)
 
@@ -63,7 +63,7 @@ class UIGenericSettings(silvaforms.ZMIForm):
     def save(self):
         data, errors = self.extractData()
         if errors:
-            self.status = _(u"There were errors.")
+            self.status = _(u"Sorry, there were errors.")
             return silvaforms.FAILURE
         background = data['background']
         name = data['name']
@@ -105,8 +105,8 @@ class UIFolderSettings(silvaforms.ZMIForm):
     grok.name('manage_folder_settings')
     grok.context(IUIService)
 
-    label = _(u"UI Folder settings")
-    description = _(u"You can from here modify settings for folder listings.")
+    label = _(u"UI Folder Settings")
+    description = _(u"Here you can modify the settings for folder listings.")
     ignoreContent = False
     fields = silvaforms.Fields(IUIFolderSettings)
     actions = silvaforms.Actions(silvaforms.EditAction())
