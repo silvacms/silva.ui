@@ -28,7 +28,7 @@
          tal:condition="view.maintenance_message">
       <div class="message"
            tal:content="structure view.maintenance_message">
-        Maintenance message.
+        Maintenance message...
       </div>
     </div>
     <tal:smi tal:condition="not view.maintenance_message">
@@ -72,6 +72,7 @@
                   <li>
                     <a class="parent open-screen ui-state-default" href=""
                        rel="" title="Go one level up."
+                       accesskey="`"
                        i18n:attributes="title">
                       <ins class="ui-icon ui-icon-arrowthick-1-nw"></ins>
                     </a>
