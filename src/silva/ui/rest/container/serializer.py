@@ -11,6 +11,7 @@ from silva.core.interfaces import IContainer, ISilvaObject
 from silva.core.interfaces import IPublishable, INonPublishable
 from silva.core.interfaces import IVersionedObject
 from silva.core.interfaces.adapters import IIconResolver
+from silva.translations import translate as _
 
 from AccessControl import getSecurityManager
 from Products.SilvaMetadata.interfaces import IMetadataService
@@ -91,20 +92,28 @@ class ContentSerializer(object):
         elif id is None:
             id = self.get_id(content)
         previewable = content.get_previewable()
-        author = previewable.get_last_author_info().userid()
-        modified = self.get_metadata(
-            previewable, 'silva-extra', 'modificationtime')
-        if modified is None:
-            modified = u'-'
+        if previewable is not None:
+            icon = self.get_icon(content)
+            title = cgi.escape(previewable.get_title_or_id_editable())
+            author = previewable.get_last_author_info().userid()
+            modified = self.get_metadata(
+                previewable, 'silva-extra', 'modificationtime')
+            if modified is None:
+                modified = u'-'
+            else:
+                modified = self.format_date(modified)
         else:
-            modified = self.format_date(modified)
+            icon = self.get_icon(None)
+            title = '<i>{0}</i>'.format(self.rest.translate(_('Broken content')))
+            author = u'-'
+            modified = u'-'
         data = {
             'ifaces': content_ifaces(content),
             'id': id,
             'identifier': content.getId(),
             'path': self.rest.get_content_path(content),
-            'icon': self.get_icon(content),
-            'title': cgi.escape(previewable.get_title_or_id_editable()),
+            'icon': icon,
+            'title': title,
             'author': author,
             'modified': modified,
             'access': self.get_access(content),
