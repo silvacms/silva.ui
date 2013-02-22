@@ -65,25 +65,29 @@
             return {
                 render: function() {
                     var promises = [];
-                    var promise = null;
+
+                    var wait = function(promise) {
+                        if (promise !== null) {
+                            promises.push(promise);
+                        }
+                    };
 
                     for (var action in data.actions) {
                         switch(action) {
                         case 'remove':
-                            promise = transaction.listing.remove(data.actions.remove);
+                            wait(transaction.clipboard.remove(data.actions.remove));
+                            wait(transaction.listing.remove(data.actions.remove));
                             break;
                         case 'update':
-                            promise = transaction.listing.update(data.actions.update);
+                            wait(transaction.clipboard.update(data.actions.update));
+                            wait(transaction.listing.update(data.actions.update));
                             break;
                         case 'add':
-                            promise = transaction.listing.add(data.actions.add);
+                            wait(transaction.listing.add(data.actions.add));
                             break;
                         case 'clear_clipboard':
-                            promise = transaction.clipboard.clear(true);
+                            wait(transaction.clipboard.clear());
                             break;
-                        };
-                        if (promise !== null) {
-                            promises.push(promise);
                         };
                     };
                     if (promises.length) {

@@ -413,6 +413,15 @@
                                         transaction.require(events.status.invoke);
                                         return null;
                                     },
+                                    update: function(data) {
+                                        smi.clipboard.update(data);
+                                        transaction.require(events.status.invoke);
+                                    },
+                                    remove: function(data) {
+                                        smi.clipboard.remove(data);
+                                        transaction.require(events.status.invoke);
+                                        return null;
+                                    },
                                     clear: function() {
                                         smi.clipboard.clear();
                                         return null;
