@@ -178,8 +178,8 @@ class Invalidation(object):
     def __init__(self, request):
         self.request = request
 
-    def get_path(self):
-        return IVirtualSite(self.request).get_root_path()
+    def get_cookie_path(self):
+        return IVirtualSite(self.request).get_top_level_path()
 
     def get_client_version(self):
         try:
@@ -190,7 +190,7 @@ class Invalidation(object):
 
     def set_client_version(self, version):
         response = self.request.response
-        response.setCookie(NAMESPACE, str(version), path=self.get_path())
+        response.setCookie(NAMESPACE, str(version), path=self.get_cookie_path())
 
     def get_changes(self, filter_func=lambda x: True):
         storage = MemcacheSlice(NAMESPACE)

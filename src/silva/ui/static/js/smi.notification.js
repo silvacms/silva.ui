@@ -66,28 +66,44 @@
         if (!options.notifications.standard && window.webkitNotifications) {
             var native_api = window.webkitNotifications;
 
-            $.extend(api, {
-                notify: function(message) {
-                    var status = native_api.checkPermission();
+            var is_api_enabled = function(now) {
+                var status = native_api.checkPermission();
 
-                    if (status == 0) {
-                        var notification = native_api.createNotification('', message.message, '');
-                        if (message.autoclose) {
-                            notification.ondisplay = function () {
-                                setTimeout(function() {
-                                    notification.cancel();
-                                }, message.autoclose);
+                if (status == 0) {
+                    // This is authorized
+                    return true;
+                } else if (status == 1) {
+                    try {
+                        // Hopyfully we will get it. Safari requires a callback.
+                        native_api.requestPermission(function(){});
+                        return now === true;
+                    } catch (error) {
+                        // Don't use native notifications.
+                        return false;
+                    };
+                };
+                return false;
+            };
+
+            if(is_api_enabled(true)) {
+                $.extend(api, {
+                    notify: function(message) {
+                        if (is_api_enabled(false)) {
+                            var notification = native_api.createNotification('', message.message, '');
+                            if (message.autoclose) {
+                                notification.ondisplay = function () {
+                                    setTimeout(function() {
+                                        notification.cancel();
+                                    }, message.autoclose);
+                                };
                             };
-                        };
-                        notification.show();
-                    } else {
-                        if (status == 1) {
-                            native_api.requestPermission();
-                        };
-                        default_notify(message);
+                            notification.show();
+                        } else {
+                            default_notify(message);
+                        }
                     }
-                }
-            });
+                });
+            }
         };
 
         // Listen to pull notification events.
