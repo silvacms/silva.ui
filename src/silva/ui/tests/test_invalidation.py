@@ -51,7 +51,7 @@ class InvalidationTestCase(unittest.TestCase):
     def test_nothing(self):
         request = TestRequest()
         invalidation = Invalidation(request)
-        self.assertEqual(invalidation.get_path(), '/root')
+        self.assertEqual(invalidation.get_cookie_path(), '/root')
         self.assertEqual(list(invalidation.get_changes()), [])
         self.assertEqual(request.response.cookies, {})
 
@@ -68,7 +68,7 @@ class InvalidationTestCase(unittest.TestCase):
         # No changes where recorded since the transaction failed.
         request = TestRequest()
         invalidation = Invalidation(request)
-        self.assertEqual(invalidation.get_path(), '/root')
+        self.assertEqual(invalidation.get_cookie_path(), '/root')
         self.assertEqual(list(invalidation.get_changes()), [])
         self.assertEqual(request.response.cookies, {})
 
