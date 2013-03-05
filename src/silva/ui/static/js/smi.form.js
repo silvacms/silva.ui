@@ -171,9 +171,14 @@
                             var message = $control.attr('data-confirmation');
 
                             if (message !== undefined) {
-                                // If there is a message, ask confirmation before triggering the action.
+                                var title = $control.attr('data-confirmation-title');
+
+                                // If there is a message, ask confirmation before triggering the action
+                                if (!title) {
+                                    title = 'Please confirm';
+                                };
                                 return function () {
-                                    infrae.ui.ConfirmationDialog({message:message}).pipe(function() {
+                                    infrae.ui.ConfirmationDialog({title:title, message:message}).pipe(function() {
                                         return submit($control);
                                     });
                                     return false;
