@@ -1,10 +1,16 @@
 Changes
 =======
 
-3.0 (unreleased)
+3.0 (2013/03/06)
 ----------------
 
-* ...
+* Update some labels,
+
+* Use new top level methods from ``IVirtualSite`` to set cookies,
+
+* Invalidate clipboard content as well (if you are in the same folder),
+
+* Various little bug fixes.
 
 3.0c2 (2012/12/12)
 ------------------

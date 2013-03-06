@@ -18,4 +18,4 @@ Code repository
 You can find the code of this extension in Mercurial:
 https://hg.infrae.com/silva.ui
 
-.. _Silva developer documentation: http://docs.infrae.com/silva/
+.. _Silva developer documentation: http://docs.silvacms.org/latest/
