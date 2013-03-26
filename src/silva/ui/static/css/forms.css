@@ -532,10 +532,14 @@ form .form-error-message {
   background: #fff url(../img/gradient20m.png) repeat-x top;
   border: 1px #777 solid;
   float: left;
+}
+
+.ui-dialog .ui-dialog-buttonpane button {
   margin: 5px 0 0 6px;
   padding: 1px 5px;
 }
 
+.ui-dialog .ui-widget div.actions .last-action :hover,
 .ui-dialog .ui-dialog-buttonpane button:hover {
   background-color: #FFF;
   background-image: -webkit-gradient(linear, left top, left bottom, from(#EAEAEA), to(#FFF));
