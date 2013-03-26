@@ -47,7 +47,7 @@
                 var actualWidth = $tip[0].offsetWidth,
                     actualHeight = $tip[0].offsetHeight,
                     gravity = maybeCall(this.options.gravity, this.$element[0]);
-
+                console.log(this, gravity);
                 var tp;
                 switch (gravity.charAt(0)) {
                     case 'n':
@@ -135,6 +135,7 @@
         function get(ele) {
             var tipsy = $.data(ele, 'tipsy');
             if (!tipsy) {
+                console.log(options);
                 tipsy = new Tipsy(ele, $.fn.tipsy.elementOptions(ele, options));
                 $.data(ele, 'tipsy', tipsy);
             }
@@ -177,22 +178,6 @@
         };
         return this;
 
-    };
-
-    $.fn.tipsy.defaults = {
-        className: null,
-        delayIn: 750,
-        delayOut: 0,
-        fade: false,
-        fallback: '',
-        gravity: 'n',
-        delegate: null,
-        html: false,
-        live: false,
-        offset: 0,
-        opacity: 0.8,
-        title: 'title',
-        trigger: 'hover'
     };
 
     // Overwrite this method to provide options on a per-element basis.
@@ -239,7 +224,23 @@
 			if ($(window).height() + $(document).scrollTop() - $this.offset().top < margin) dir.ns = 's';
 
 			return dir.ns + (dir.ew ? dir.ew : '');
-		}
-	};
+		};
+     };
+
+    $.fn.tipsy.defaults = {
+        className: null,
+        delayIn: 750,
+        delayOut: 0,
+        fade: false,
+        fallback: '',
+        gravity: $.fn.tipsy.autoBounds(100, 'sw'),
+        delegate: null,
+        html: false,
+        live: false,
+        offset: 0,
+        opacity: 0.8,
+        title: 'title',
+        trigger: 'hover'
+    };
 
 })(jQuery);
