@@ -421,8 +421,8 @@ form .form-error-message {
 
 .form-content a.form-control,
 .form-content a.form-button {
-    -webkit-border-radius:3px;
-    -moz-border-radius:3px;
+  -webkit-border-radius:3px;
+  -moz-border-radius:3px;
   border-radius: 3px;
   background: #fff url(../img/gradient20m.png) repeat-x top;
   border: 1px #777 solid;
@@ -432,7 +432,7 @@ form .form-error-message {
 }
 
 .form-content a.form-control:hover,
- .form-content a.form-button:hover {
+.form-content a.form-button:hover {
   background-color: #FFF;
   background-image: -webkit-gradient(linear, left top, left bottom, from(#EAEAEA), to(#FFF));
   background-image: -moz-linear-gradient(top,  #EAEAEA,  #FFF);
@@ -524,20 +524,30 @@ form .form-error-message {
   clear: left;
 }
 
-.ui-dialog .ui-dialog-buttonpane button, .ui-dialog .ui-widget div.actions .last-action {
-    -webkit-border-radius:3px;
-    -moz-border-radius:3px;
+.ui-dialog .ui-dialog-buttonpane button,
+.ui-dialog .ui-widget div.actions .last-action {
+  -webkit-border-radius:3px;
+  -moz-border-radius:3px;
   border-radius: 3px;
-  background-color: #FFF;
-  background-image: -webkit-gradient(linear, left top, left bottom, from(#FFF), to(#FFF));
-  background-image: -moz-linear-gradient(top,  #FFF,  #DADADA);
-  background-image: -o-linear-gradient(top,  #FFF,  #DADADA);
-  background-image: -ms-linear-gradient(top,  #FFF,  #DADADA);
-  background-image: -moz-linear-gradient(top,  #FFF,  #DADADA);
-  background-image: linear-gradient(top,  #FFF,  #DADADA);
+  background: #fff url(../img/gradient20m.png) repeat-x top;
   border: 1px #777 solid;
-  color: #000;
   float: left;
+  margin: 5px 0 0 6px;
+  padding: 1px 5px;
+}
+
+.ui-dialog .ui-dialog-buttonpane button:hover {
+  background-color: #FFF;
+  background-image: -webkit-gradient(linear, left top, left bottom, from(#EAEAEA), to(#FFF));
+  background-image: -moz-linear-gradient(top,  #EAEAEA,  #FFF);
+  background-image: -o-linear-gradient(top,  #EAEAEA,  #FFF);
+  background-image: -ms-linear-gradient(top,  #EAEAEA,  #FFF);
+  background-image: -moz-linear-gradient(top,  #EAEAEA,  #FFF);
+  background-image: linear-gradient(top,  #EAEAEA,  #FFF);
+}
+
+.ui-dialog .ui-dialog-buttonpane button .ui-button-text {
+  padding: 2px;
 }
 
 /* Collection widget CSS */
