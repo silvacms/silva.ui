@@ -47,7 +47,6 @@
                 var actualWidth = $tip[0].offsetWidth,
                     actualHeight = $tip[0].offsetHeight,
                     gravity = maybeCall(this.options.gravity, this.$element[0]);
-                console.log(this, gravity);
                 var tp;
                 switch (gravity.charAt(0)) {
                     case 'n':
@@ -135,7 +134,6 @@
         function get(ele) {
             var tipsy = $.data(ele, 'tipsy');
             if (!tipsy) {
-                console.log(options);
                 tipsy = new Tipsy(ele, $.fn.tipsy.elementOptions(ele, options));
                 $.data(ele, 'tipsy', tipsy);
             }
