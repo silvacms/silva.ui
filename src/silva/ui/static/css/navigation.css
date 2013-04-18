@@ -26,7 +26,7 @@
 #navigation .tree {
   position:absolute;
   top:60px;
-  bottom:26px;
+  bottom:0px;
   left:0;
   right:0;
   overflow:auto;
@@ -67,12 +67,3 @@
   }
 }
 
-#navigation .footer {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 25px;
-  background: #fff url(../img/gradient25.png) repeat-x top;
-  border-top: 1px #999 solid;
-}

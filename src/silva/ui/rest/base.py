@@ -18,7 +18,7 @@ from silva.core.interfaces.adapters import IIconResolver
 from silva.core.services import task_queue
 
 from ..interfaces import IUIScreen
-from ..menu import ContentMenu, ViewMenu, ActionMenu
+from ..menu import ContentMenu, ViewMenu, ActionMenu, UserMenu
 from ..smi import set_smi_skin
 from .exceptions import PageResult, ActionResult, RESTResult
 from .exceptions import RESTRedirectHandler
@@ -33,7 +33,7 @@ class SMITransaction(object):
         # Follow Zope 2 information to appear in the undo log.
         note = []
         if (ISilvaObject.providedBy(screen.context) or
-            IVersion.providedBy(screen.context)):
+                IVersion.providedBy(screen.context)):
             note.append('/'.join(screen.context.getPhysicalPath()))
         else:
             note.append('/')
@@ -141,15 +141,17 @@ class PageREST(ActionREST):
             'title': {
                 'ifaces': ['title'],
                 'title': self.context.get_title_or_id_editable(),
-                'icon': IIconResolver(self.request).get_content_url(self.context),
-                },
+                'icon': IIconResolver(
+                    self.request).get_content_url(self.context),
+            },
             'menu': {
                 'content': self.get_metadata_menu(ContentMenu),
                 'view': self.get_metadata_menu(ViewMenu),
                 'actions': self.get_metadata_menu(ActionMenu),
-                },
+                'user': self.get_metadata_menu(UserMenu),
+            },
             'path': self.get_content_path(self.context),
-            }
+        }
         if not IRoot.providedBy(self.context):
             metadata['up'] = self.get_content_path(aq_parent(self.context))
         return {'content': {'ifaces': ['screen'],

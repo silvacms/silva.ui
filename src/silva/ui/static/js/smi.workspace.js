@@ -115,10 +115,14 @@
                         $link.attr('target', info.target);
                     };
                 };
-                if (info.icon && !tabs) {
+                if (info.icon) {
+                    var icon_class = 'tab-icon';
+                    if (info.action) {
+                        icon_class = 'action-icon';
+                    }
                     $link.addClass('ui-state-default');
                     $link.prepend(
-                        '<div class="action-icon"><ins class="ui-icon ui-icon-' +
+                        '<div class="'+ icon_class + '"><ins class="ui-icon ui-icon-' +
                             info.icon + '"></ins></div>');
                 };
                 if (info.active) {
@@ -129,6 +133,9 @@
                 };
                 if (info.accesskey) {
                     $link.attr('accesskey', info.accesskey);
+                };
+                if (info.popup) {
+                    $link.addClass('form-popup');
                 };
                 if (info.entries) {
                     var $container = $('<ol class="subtabs"></ol>');
@@ -227,7 +234,9 @@
                     $menu.hide();
                 };
             };
-            var make_all_menu = function($metadata, data, compact) {
+            var make_all_menu = function($metadata, data, compact) { 
+                make_menu($metadata.children('.user-menu'), data.user);
+                        
                 // Mode pas compact
                 if (!compact) {
                     make_menu($metadata.find('.view-actions'), data.view);
@@ -249,7 +258,6 @@
                             ifaces: ['menu'],
                             entries: [{
                                 logo: "tab-options",
-                                active: true,
                                 entries: entries
                             }]
                         });

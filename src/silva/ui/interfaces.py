@@ -208,7 +208,12 @@ class IViewMenu(IMenu):
     """
 
 
+class IUserMenu(IMenu):
+    """Menu that contains links useful for the user.
+    """
+
 # Screens
+
 
 class IUIPlugin(Interface):
     """Plugin on screens. This is a subcriber called with a given

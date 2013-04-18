@@ -9,7 +9,7 @@ html {
   left: 10%;
   width: 80%;
   height: 200px;
-     -webkit-box-shadow:#1c2e3d 0 3px 10px;
+    -webkit-box-shadow:#1c2e3d 0 3px 10px;
     -moz-box-shadow:#1c2e3d 0 3px 10px;
   box-shadow:#1c2e3d 0 3px 10px;
   background:#fff;
@@ -171,7 +171,7 @@ div.batching a.current {
 }
 #workspace .compact-header .toolbar {
   position: absolute;
-  right: 78px;
+  right: 200px;
   background: url(../img/gradient50.png) repeat-x bottom;
 }
 #workspace .compact-header .toolbar .selector {
@@ -209,18 +209,16 @@ div.batching a.current {
   padding: 0px 5px;
 }
 #workspace .header .compact-tabs li ins.tab-logo {
-  background-color:transparent;
-  background-image:url(../img/settings.png);
-  background-repeat:no-repeat;
-  display:block;
+  background-color: transparent;
+  background-image: url('../img/menu_lines_icon.png');
+  background-repeat: no-repeat;
+  display: block;
   float: left;
-  height: 24px;
-  margin: 1px 4px;
-  width: 24px;
+  height: 18px;
+  width: 18px;
+  margin: 4px;
 }
-#workspace .header .compact-tabs li div.subtab-icon {
-  display: none;
-}
+
 #workspace .header .tabs li.sub-level a.active {
   color: white;
   background-color:#4d96e6;
@@ -311,6 +309,35 @@ div.batching a.current {
 #workspace .header .admin-actions li a {
   padding: 2px 2px;
 }
+
+/*  
+ *  User settings menu
+ */
+#workspace .header .metadata .user-menu {
+  float: right;
+  margin-left: 10px;
+}
+
+#workspace .header .metadata .user-menu li {
+  margin: 0;
+}
+
+#workspace .header .metadata .user-menu .top-level ins.tab-user {  
+  background-color: transparent;
+  background-image: url('../img/member_icon_transp_bg_bw.png');
+  background-repeat: no-repeat;
+  display: block;
+  float: left;
+  height: 18px;
+  width: 18px;
+  margin: 4px;
+}
+
+#workspace .header .metadata .user-menu .top-level div.tab-icon {
+  float: left;      
+}
+
+
 
 /* Main working content space */
 #workspace .content {
@@ -406,6 +433,34 @@ ins.ui-icon-close {
   background-image:url(../img/sprite.png)!important;
   background-position: -64px -142px;
   margin-right: 5px;
+}
+
+.user-menu ins.ui-icon {
+  background-image: url('../jqueryui/images/ui-icons_222222_256x240.png')!important;
+  width: 12px;
+  height: 12px;
+  margin-right: 5px;   
+  margin-top: 5px;
+}
+
+.user-menu ins.ui-icon-preferences {
+  background-position: -178px -113px;
+}
+
+.user-menu ins.ui-icon-about {
+  background-position: -18px -146px;
+}
+
+.user-menu ins.ui-icon-manage {
+  background-position: -226px -98px;
+}
+
+.user-menu ins.ui-icon-services {
+  background-position: -114px -98px;
+}
+
+.user-menu ins.ui-icon-logout {
+  background-position: -3px -177px;
 }
 
 

@@ -40,28 +40,6 @@
             </h1>
           </div>
           <div class="tree"></div>
-          <div class="footer">
-            <div class="actions">
-              <ol>
-                <li>
-                  <a href="${view.root_url}/service_members/logout">
-                    <span i18n:translate="">Logout</span>
-                  </a>
-                </li>
-                <li tal:condition="view.can_manage">
-                  <a href="${view.root_url}/manage_main">
-                    <span i18n:translate="">Manage</span>
-                  </a>
-                </li>
-                <li class="last-action">
-                  <a class="form-popup"
-                     href="${view.root_url}/++rest++silva.core.smi.userpreferences">
-                    <span i18n:translate="">Preferences</span>
-                  </a>
-                </li>
-              </ol>
-            </div>
-          </div>
         </div>
         <div id="smi-handle"></div>
         <div id="workspace">
@@ -87,6 +65,8 @@
                 </ol>
               </div>
               <ol class="tabs content-tabs"></ol>
+              <ol class="tabs user-menu"></ol>
+              <ol class="tabs compact-tabs"></ol>
               <div class="actions view-actions">
                 <ol></ol>
               </div>
@@ -94,7 +74,6 @@
                 <ins class="icon loading"></ins>
                 <tal:msg i18n:translate="">Loading...</tal:msg>
               </h2>
-              <ol class="tabs compact-tabs"></ol>
               <a href="#" id="content-url"></a>
             </div>
             <div class="toolbar">

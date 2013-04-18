@@ -10,8 +10,9 @@ from zope.interface.interfaces import IInterface
 
 from silva.ui.interfaces import IUIScreen
 from silva.ui.interfaces import IMenuItem, IMenu
-from silva.ui.interfaces import IActionMenu, IViewMenu, IContentMenu
+from silva.ui.interfaces import IActionMenu, IViewMenu, IContentMenu, IUserMenu
 from infrae.rest.interfaces import IRESTComponent
+
 
 def get_menu_items(menu, content):
     security = getSecurityManager()
@@ -32,7 +33,7 @@ class MenuEntries(list):
 
     def describe(self, page):
         actives = [page]
-        active  = page.__parent__
+        active = page.__parent__
         while IRESTComponent.providedBy(active):
             actives.append(active)
             active = active.__parent__
@@ -58,6 +59,10 @@ class ViewMenu(Menu):
 
 class ActionMenu(Menu):
     grok.implements(IActionMenu)
+
+
+class UserMenu(Menu):
+    grok.implements(IUserMenu)
 
 
 class MenuItem(grok.MultiSubscription):
@@ -90,7 +95,11 @@ class MenuItem(grok.MultiSubscription):
         return None
 
     def describe(self, page, path, actives):
-        data = {'name': page.translate(self.name)}
+        data = {}
+        if self.name is not None:
+            data['name'] = page.translate(self.name)
+        elif self.logo is not None:
+            data['logo'] = self.logo
         if self.screen is not None:
             is_screen = False
             if IRESTComponent.implementedBy(self.screen):
@@ -122,6 +131,7 @@ class MenuItem(grok.MultiSubscription):
 class LinkMenuItem(MenuItem):
     grok.baseclass()
     target = '_blank'
+    popup = False
 
     def get_url(self, context, request):
         raise NotImplementedError
@@ -135,6 +145,10 @@ class LinkMenuItem(MenuItem):
             data['description'] = page.translate(self.description)
         if self.accesskey is not None:
             data['accesskey'] = self.accesskey
+        if self.icon is not None:
+            data['icon'] = self.icon
+        if self.popup:
+            data['popup'] = True
         return data
 
 

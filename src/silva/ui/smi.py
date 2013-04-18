@@ -70,12 +70,12 @@ class SMI(grok.View):
             need(resource)
 
         # Customization from service.
-        if settings.logo != None:
+        if settings.logo is not None:
             self.logo_url = '/'.join(
                 (absoluteURL(settings, self.request), 'logo'))
         else:
             self.logo_url = self.static['img']['silva.png']()
-        self.background =  '#7996ac'
+        self.background = '#7996ac'
         self.name = settings.name
         self.listing_preview = settings.folder_icon_preview
         self.maintenance_message = settings.maintenance_message
