@@ -295,12 +295,14 @@ div.batching a.current {
 }
 #workspace .header .compact-tabs {
   display: none;
-  float: right;
-  margin-left: 10px;
+  position: absolute;
+  top: 0;
+  right: 56px;
 }
 #workspace .header .view-actions {
-  margin: 5px 5px 0px 5px;
-  float:right;
+  position: absolute; 
+  top: 0;
+  right: 61px;
   display: none;
 }
 #workspace .header .admin-actions {
@@ -314,15 +316,16 @@ div.batching a.current {
  *  User settings menu
  */
 #workspace .header .metadata .user-menu {
-  float: right;
-  margin-left: 10px;
+    position: absolute;
+    top: 0;
+    right: 10px;
 }
 
 #workspace .header .metadata .user-menu li {
   margin: 0;
 }
 
-#workspace .header .metadata .user-menu .top-level ins.tab-user {  
+#workspace .header .metadata .user-menu .top-level .tab-user {  
   background-color: transparent;
   background-image: url('../img/member_icon_transp_bg_bw.png');
   background-repeat: no-repeat;
@@ -333,7 +336,7 @@ div.batching a.current {
   margin: 4px;
 }
 
-#workspace .header .metadata .user-menu .top-level div.tab-icon {
+#workspace .header .metadata .user-menu .top-level .tab-icon {
   float: left;      
 }
 

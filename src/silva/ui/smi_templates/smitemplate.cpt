@@ -65,8 +65,6 @@
                 </ol>
               </div>
               <ol class="tabs content-tabs"></ol>
-              <ol class="tabs user-menu"></ol>
-              <ol class="tabs compact-tabs"></ol>
               <div class="actions view-actions">
                 <ol></ol>
               </div>
@@ -74,6 +72,8 @@
                 <ins class="icon loading"></ins>
                 <tal:msg i18n:translate="">Loading...</tal:msg>
               </h2>
+              <ol class="tabs compact-tabs"></ol>
+              <ol class="tabs user-menu"></ol>
               <a href="#" id="content-url"></a>
             </div>
             <div class="toolbar">
