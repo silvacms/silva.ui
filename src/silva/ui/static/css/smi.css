@@ -3,24 +3,6 @@ html {
   overflow: hidden;
 }
 
-#maintenance {
-  position: absolute;
-  top: 20%;
-  left: 10%;
-  width: 80%;
-  height: 200px;
-    -webkit-box-shadow:#1c2e3d 0 3px 10px;
-    -moz-box-shadow:#1c2e3d 0 3px 10px;
-  box-shadow:#1c2e3d 0 3px 10px;
-  background:#fff;
-  bottom:0px;
-  cursor: move;
-}
-
-#maintenance .message {
-  padding: 2em;
-}
-
 a {
   text-decoration: none;
   cursor: pointer;
@@ -51,6 +33,26 @@ input, textarea {
   display: none;
 }
 
+/* Maintenance message and about text */
+#smi-text {
+  position: absolute;
+  top: 20%;
+  left: 15%;
+  width: 70%;
+  height: 60%;
+  -webkit-box-shadow:#1c2e3d 0 3px 10px;
+  -moz-box-shadow:#1c2e3d 0 3px 10px;
+  box-shadow:#1c2e3d 0 3px 10px;
+  background:#fff;
+  bottom:0px;
+  cursor: move;
+  z-index: 800;
+}
+#smi-text .smi-text-content {
+  padding: 2em;
+}
+
+/* Notification messages */
 div.jGrowl {
   z-index: 13000;
 }
@@ -59,6 +61,7 @@ div.jGrowl div.error {
   background-color: #cc0000;
 }
 
+/* Batches */
 div.batching a, div.batching span {
   display: block;
   float: left;

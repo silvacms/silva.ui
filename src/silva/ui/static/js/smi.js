@@ -60,7 +60,7 @@
     $.fn.SMI = function(options) {
         var smi = {
             objection: null,// Objection when to open a screen or execute an action
-            ready: infrae.deferred.StackCallbacks(),// Flag indicating if something is loading
+            ready: infrae.deferred.SemaphoreCallbacks(),// Flag indicating if something is loading
             options: options,
             opened: Screen('content'), // Currently opened screen
             opening: Screen('content'),// Screen being currently opened
@@ -382,6 +382,12 @@
 
         $(document).delegate('a.open-action', 'click', function(event) {
             smi.open_action_from_link($(this));
+            return false;
+        });
+        $(document).delegate('a.text-overlay', 'click', function(event) {
+            smi.ajax.query($(this).attr('href')).pipe(function(payload) {
+                return $(document).render({data: payload, args: [smi]});
+            });
             return false;
         });
 

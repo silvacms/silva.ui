@@ -24,9 +24,9 @@
       <img src="${imgs_url}/loader.gif" alt="Loading data from server"
            i18n:attributes="alt" />
     </div>
-    <div id="maintenance"
+    <div id="smi-text"
          tal:condition="view.maintenance_message">
-      <div class="message"
+      <div class="smi-text-content"
            tal:content="structure view.maintenance_message">
         Maintenance message...
       </div>

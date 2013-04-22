@@ -65,7 +65,7 @@
          * time, then a counter reach zero. You can increment and
          * decrement that counter.
          */
-        StackCallbacks: function() {
+        SemaphoreCallbacks: function() {
             var value = 0;
             var callbacks = [];
             var last_args = undefined;

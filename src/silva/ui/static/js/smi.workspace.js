@@ -29,6 +29,34 @@
         }
     });
 
+    var text_template = new jsontemplate.Template(
+        '<div id="smi-text"><div class="smi-text-content">{html}</div></div>>', {});
+
+    infrae.views.view({
+        iface: 'text-overlay',
+        factory: function($content, data, smi) {
+            var $text = $(text_template.expand(data)),
+                $overlay = $('<div class="ui-widget-overlay"></div>');
+
+            var clear = function(event) {
+                if (!$(event.target).is('a')) {
+                    $text.remove();
+                    $overlay.remove();
+                    return false;
+                };
+            };
+
+            return {
+                render: function() {
+                    $overlay.click(clear);
+                    $text.click(clear);
+                    $('body').append($overlay);
+                    $('body').append($text);
+                }
+            };
+        }
+    });
+
     infrae.views.view({
         iface: 'view',
         factory: function($content, data, smi) {
@@ -134,8 +162,8 @@
                 if (info.accesskey) {
                     $link.attr('accesskey', info.accesskey);
                 };
-                if (info.popup) {
-                    $link.addClass('form-popup');
+                if (info.trigger) {
+                    $link.addClass(info.trigger);
                 };
                 if (info.entries) {
                     var $container = $('<ol class="subtabs"></ol>');
@@ -234,9 +262,9 @@
                     $menu.hide();
                 };
             };
-            var make_all_menu = function($metadata, data, compact) { 
+            var make_all_menu = function($metadata, data, compact) {
                 make_menu($metadata.children('.user-menu'), data.user);
-                        
+
                 // Mode pas compact
                 if (!compact) {
                     make_menu($metadata.find('.view-actions'), data.view);

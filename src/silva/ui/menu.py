@@ -131,7 +131,7 @@ class MenuItem(grok.MultiSubscription):
 class LinkMenuItem(MenuItem):
     grok.baseclass()
     target = '_blank'
-    popup = False
+    trigger = None
 
     def get_url(self, context, request):
         raise NotImplementedError
@@ -147,8 +147,8 @@ class LinkMenuItem(MenuItem):
             data['accesskey'] = self.accesskey
         if self.icon is not None:
             data['icon'] = self.icon
-        if self.popup:
-            data['popup'] = True
+        if self.trigger:
+            data['trigger'] = self.trigger
         return data
 
 
