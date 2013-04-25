@@ -199,8 +199,8 @@
                         close(true);
                     });
                     
-                    $.each(info.entries, function(i, entry) {
-                        $container.append(create(entry));
+                    $container.bind('click', function () {
+                        close(true);
                     });
 
                     $trigger.bind(top_level ? 'click' : 'mouseenter', function () {
