@@ -39,7 +39,7 @@ input, textarea {
   top: 20%;
   left: 15%;
   width: 70%;
-  height: 60%;
+  height: 250px;
   -webkit-box-shadow:#1c2e3d 0 3px 10px;
   -moz-box-shadow:#1c2e3d 0 3px 10px;
   box-shadow:#1c2e3d 0 3px 10px;
@@ -49,7 +49,7 @@ input, textarea {
   z-index: 800;
 }
 #smi-text .smi-text-content {
-  padding: 2em;
+  padding: 1em;
 }
 
 /* Notification messages */
@@ -174,7 +174,7 @@ div.batching a.current {
 }
 #workspace .compact-header .toolbar {
   position: absolute;
-  right: 200px;
+  right: 150px;
   background: url(../img/gradient50.png) repeat-x bottom;
 }
 #workspace .compact-header .toolbar .selector {
@@ -218,9 +218,9 @@ div.batching a.current {
   display: block;
   float: left;
   height: 18px;
-  width: 18px;
-  margin: 4px;
-}
+  width: 24px;  
+  margin: 5px 0 3px 4px;
+} 
 
 #workspace .header .tabs li.sub-level a.active {
   color: white;
@@ -231,6 +231,7 @@ div.batching a.current {
   color: white;
   text-shadow: #373737 1px 1px 1px;
 }
+
 #workspace .header .tabs li.top-level {
     -webkit-border-radius:0 0 3px 3px;
     -moz-border-radius:0 0 3px 3px;
@@ -328,22 +329,21 @@ div.batching a.current {
   margin: 0;
 }
 
-#workspace .header .metadata .user-menu .top-level .tab-user {  
+#workspace .header .metadata .user-menu .tab-logo {  
   background-color: transparent;
   background-image: url('../img/member_icon_transp_bg_bw.png');
   background-repeat: no-repeat;
   display: block;
   float: left;
   height: 18px;
-  width: 18px;
+  width: 24px;  
   margin: 4px;
+  margin-right: 0;
 }
 
 #workspace .header .metadata .user-menu .top-level .tab-icon {
   float: left;      
 }
-
-
 
 /* Main working content space */
 #workspace .content {
@@ -469,6 +469,51 @@ ins.ui-icon-close {
   background-position: -3px -177px;
 }
 
+
+/*** ABOUT overlay ***/
+
+#about-overlay-title h1 {
+    font-size: 150%;
+    margin-bottom: 10px;
+}
+
+#about-overlay-content p {
+    font-size: 110%;
+    margin-bottom: 9px;
+    text-align: justify;
+}
+
+#about-overlay-content p.silva-version {
+    font-style: italic;
+}
+
+#about-overlay-content p img{
+    float:left;
+    margin-right: 1em;
+    margin-top: 3px;
+}
+
+#about-overlay-content a {
+    color: green;
+    font-weight: bold;
+    text-decoration: underline;
+}
+
+#about-overlay-content h2 {
+    font-size: 130%;
+}
+
+#about-overlay-footer {
+    position: absolute;
+    bottom: 1em;
+    right: 3em;
+}
+
+#about-overlay-footer a {
+    color: green;
+    font-weight: bold;
+    text-decoration: underline;
+}
 
 /* Silva Content Types - uses !important to override default jstree-icon */
 ins.silva_autotoc { background-position:-100px -41px!important; }

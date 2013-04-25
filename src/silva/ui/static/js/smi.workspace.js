@@ -30,7 +30,7 @@
     });
 
     var text_template = new jsontemplate.Template(
-        '<div id="smi-text"><div class="smi-text-content">{html}</div></div>>', {});
+        '<div id="smi-text"><div class="smi-text-content">{html}</div></div>', {});
 
     infrae.views.view({
         iface: 'text-overlay',
@@ -197,6 +197,10 @@
 
                     $container.bind('mouseleave', function () {
                         close(true);
+                    });
+                    
+                    $.each(info.entries, function(i, entry) {
+                        $container.append(create(entry));
                     });
 
                     $trigger.bind(top_level ? 'click' : 'mouseenter', function () {
