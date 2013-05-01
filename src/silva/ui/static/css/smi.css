@@ -174,7 +174,7 @@ div.batching a.current {
 }
 #workspace .compact-header .toolbar {
   position: absolute;
-  right: 150px;
+  right: 120px;
   background: url(../img/gradient50.png) repeat-x bottom;
 }
 #workspace .compact-header .toolbar .selector {
