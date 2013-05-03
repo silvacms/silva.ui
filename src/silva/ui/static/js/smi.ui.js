@@ -184,7 +184,7 @@
 (function ($) {
     // jQueryUI styling: this changes icon style on hover
     $(document).ready(function(){
-        $('a.ui-state-default').live('mouseenter', function() {
+        $(document).on('mouseenter', 'a.ui-state-default', function() {
             var $context = $(this);
 
             if ($context.parents('.ui-dialog').length == 0) {
@@ -192,7 +192,7 @@
                 $context.addClass('ui-state-active');
             }
         });
-        $('a.ui-state-active').live('mouseleave', function() {
+        $(document).on('mouseleave', 'a.ui-state-active', function() {
             var $context = $(this);
 
             if ($context.parents('.ui-dialog').length == 0) {

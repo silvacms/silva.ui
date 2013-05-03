@@ -163,7 +163,7 @@
                                             }, payload);
                                             break;
                                         }
-                                        data.query(definition.action.rest.action, payload).pipe(
+                                        data.query(definition.action.rest.action, payload).then(
                                             function (result) {
                                                 return $content.render({
                                                     data: result,
@@ -213,7 +213,7 @@
                                             return data.query(
                                                 definition.action.input.action,
                                                 payload
-                                            ).pipe(function (result) {
+                                            ).then(function (result) {
                                                 return $content.render({
                                                     data: result,
                                                     args: [transaction]
@@ -400,7 +400,8 @@
     $(document).bind('load-smilisting', function(event, data) {
         var configuration = data.configuration;
         var smi = data.smi;
-        var render_actions = build_actions_renderer(configuration.actions, smi.shortcuts);
+        var shortcuts = smi.shortcuts;
+        var render_actions = build_actions_renderer(configuration.actions, shortcuts);
 
         infrae.views.view({
             iface: 'listing',
@@ -409,11 +410,8 @@
                 return {
                     html_url: smi.options.listing.templates.toolbar,
                     render: function() {
-                        var shortcuts = smi.shortcuts;
-
                         // Render actions
                         render_actions($content, listing);
-
                         // Render filter
                         render_filter($content.find('.filter input'), shortcuts, listing);
                     },

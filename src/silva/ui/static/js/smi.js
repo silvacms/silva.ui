@@ -180,7 +180,7 @@
                         query['type'] = 'POST';
                         query['data'] = data;
                     };
-                    return $.ajax(query).pipe(
+                    return $.ajax(query).then(
                         function (payload) {
                             var delayed = $.Deferred().resolve(),
                                 result = $.Deferred(),
@@ -191,7 +191,7 @@
                                 // Resources. If there are Javascript, we delay the execution of
                                 // the callback up until the javascript are loaded.
                                 if (payload.resources.js) {
-                                    delayed = delayed.pipe(function() {
+                                    delayed = delayed.then(function() {
                                         return $.when.apply(
                                             $, infrae.utils.map(payload.resources.js, resources.load_js));
                                     });
@@ -255,7 +255,7 @@
                     deferred.done(function () {
                         smi.objection = null;
                     });
-                    return deferred.pipe(
+                    return deferred.then(
                         callback,
                         function() {
                             // request.status == 417 means Expectation failed.
@@ -269,7 +269,7 @@
                  */
                 lock: function(callback) {
                     smi.ready.use();
-                    return callback().pipe(
+                    return callback().then(
                         function () {
                             smi.ready.release(200);
                             return {};
@@ -314,12 +314,12 @@
                             return smi.ajax.query(
                                 smi.get_screen_url(smi.opening),
                                 data,
-                                error_handlers).pipe(
+                                error_handlers).then(
                                     function (payload) {
                                         smi.opened.copy(smi.opening);
                                         return $(document).render({data: payload, args: [smi]});
                                     });
-                        }).pipe(
+                        }).then(
                             null,
                             function (request) {
                                 // In case of error, revert the screen if needed.
@@ -346,7 +346,7 @@
                         };
                         return smi.ajax.query(
                             action_url.expand({path: path, action: action}),
-                            {path: smi.opened.path, screen: smi.opened.screen}).pipe(
+                            {path: smi.opened.path, screen: smi.opened.screen}).then(
                                 function (payload) {
                                     return $(document).render({data: payload, args: [smi]});
                                 });
@@ -385,7 +385,7 @@
             return false;
         });
         $(document).delegate('a.text-overlay', 'click', function(event) {
-            smi.ajax.query($(this).attr('href')).pipe(function(payload) {
+            smi.ajax.query($(this).attr('href')).then(function(payload) {
                 return $(document).render({data: payload, args: [smi]});
             });
             return false;

@@ -365,7 +365,7 @@
                                             };
                                         };
                                         if (promises.length) {
-                                            return $.when.apply(null, promises).pipe(function (lines) {
+                                            return $.when.apply(null, promises).then(function (lines) {
                                                 var $added = $(lines);
 
                                                 if ($added.length) {
@@ -384,7 +384,7 @@
                                                 var line = get_dom_line(data['id']);
                                                 $(line).data('smilisting-line').update(data);
                                                 return line;
-                                            }).pipe(function(lines) {
+                                            }).then(function(lines) {
                                                 transaction.require(events.status.invoke);
                                                 return $(lines);
                                             });
@@ -599,63 +599,6 @@
             }
         });
     });
-
-    /** Support for inline preview. This is bound of the document,
-     * in order to usable by the reference widget.
-     */
-    $(document).bind('load-smilisting', function(event, data) {
-        var smi = data.smi;
-
-        if (smi.options.listing.preview === undefined) {
-            return;
-        };
-
-        var url_template = new jsontemplate.Template(smi.options.listing.preview, {});
-        var preview_template = new jsontemplate.Template('{.section title}<h2>{title|html}</h2>{.end}{.section preview}<div class="preview">{preview}</div>{.end}<div class="type"><span>{type}</span></div>', {});
-        var timer = null;
-        var $target = $([]);
-
-        var clear_preview = function () {
-            if (timer !== null) {
-                clearTimeout(timer);
-                timer = null;
-            };
-            if ($target.length) {
-                $target.tipsy('hide');
-                $target = $([]);
-            };
-        };
-
-        $('.listing tr.item a.preview-icon').live('mouseenter', function(event) {
-            clear_preview();
-            $target = $(event.target);
-            timer = setTimeout(function () {
-                var info = $target.closest('tr.item').data('smilisting');
-                if (info === undefined) {
-                    return;
-                };
-                $.ajax({
-                    url: url_template.expand({path: info.path})
-                }).done(function(data) {
-                    if (!$target.is(':visible')) {
-                        return;
-                    };
-                    $target.tipsy({
-                        trigger: 'manual',
-                        html: true,
-                        delayIn: 0,
-                        title: function() {
-                            return preview_template.expand(data);
-                        },
-                        gravity: 'w'
-                    });
-                    $target.tipsy('show');
-                });
-            }, 1000);
-        });
-        $('.listing tr.item a.preview-icon').live('mouseleave', clear_preview);
-    });
-
 
     $(document).bind('load-smiplugins', function(event, smi) {
         $.ajax({

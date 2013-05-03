@@ -20,7 +20,7 @@
             $.jGrowl(message.message, options);
         };
 
-        $('#jGrowl').live('click', function(event) {
+        $(document).on('click', '#jGrowl', function(event) {
             $(this).jGrowl('close');
             event.stopPropagation();
             event.preventDefault();

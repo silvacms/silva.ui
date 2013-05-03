@@ -66,6 +66,7 @@ class ISilvaUI(ISilvaUIDependencies):
     silvaconf.resource('js/listing.items.js')
     silvaconf.resource('js/listing.toolbar.js')
     silvaconf.resource('js/listing.footer.js')
+    silvaconf.resource('js/listing.preview.js')
 
 
 class ISilvaUITheme(IDefaultBrowserLayer):
@@ -145,6 +146,12 @@ class IUIGenericSettings(Interface):
             u"Authentication is required to access the preview mode, "
             u"so users should be able to authenticate on this site URL."),
         required=False)
+    preview_resolutions = schema.List(
+        title=_(u"Resolutions available for preview"),
+        description=_(u"List of resolution to which the preview area will be"
+                      u"resized to."),
+        value_type=schema.TextLine(),
+        required=True)
     smi_access_root = schema.Bool(
         title=_(u"SMI access Silva root"),
         description=_(

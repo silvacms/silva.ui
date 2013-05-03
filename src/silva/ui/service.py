@@ -34,6 +34,7 @@ class UIService(SilvaService):
     background = None
     public_url = None
     preview_url = None
+    preview_resolutions = ['800x600', '1024x768', '1200x900']
     maintenance_message = None
     test_mode = False
     smi_access_root = False

@@ -11,6 +11,10 @@
 
 /* Toolbar */
 
+#workspace .listing-header .filter {
+  display: none;
+}
+
 #workspace .listing-header .selector {
   float:left;
 }
@@ -26,13 +30,6 @@
 #workspace .listing-header .selector ins.partial { background-position:-40px -120px; }
 #workspace .listing-header .selector ins.all { background-position:-20px -120px; }
 #workspace .listing-header .selector ins.disabled { background-position:-60px -120px; }
-
-#workspace .toolbar .filter {
-  float: right;
-  margin: 4px;
-  display: none;
-}
-
 
 /* Listing */
 #workspace .content table {

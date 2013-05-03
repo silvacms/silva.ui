@@ -1,5 +1,5 @@
 <tal:toolbar i18n:domain="silva">
-  <div class="filter">
+  <div class="view-toolbar filter">
     <input type="search" placeholder="Filter ..."
            i18n:attributes="placeholder" />
   </div>

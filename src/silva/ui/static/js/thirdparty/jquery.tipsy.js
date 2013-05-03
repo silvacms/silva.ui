@@ -161,8 +161,7 @@
             }
         };
 
-        if (!options.live) this.each(function() { get(this); });
-
+        this.each(function() { get(this); });
         if (options.trigger != 'manual') {
             var eventIn  = options.trigger == 'hover' ? 'mouseenter.tipsy' : 'focus.tipsy',
                 eventOut = options.trigger == 'hover' ? 'mouseleave.tipsy' : 'blur.tipsy';
@@ -170,8 +169,7 @@
                 this.delegate(options.delegate, eventIn, enter);
                 this.delegate(options.delegate, eventOut, leave);
             } else {
-                var binder = options.live ? 'live' : 'bind';
-                this[binder](eventIn, enter)[binder](eventOut, leave);
+                this.on(eventIn, enter).on(eventOut, leave);
             };
         };
         return this;
@@ -234,7 +232,6 @@
         gravity: $.fn.tipsy.autoBounds(100, 'sw'),
         delegate: null,
         html: false,
-        live: false,
         offset: 0,
         opacity: 0.8,
         title: 'title',

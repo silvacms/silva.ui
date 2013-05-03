@@ -125,7 +125,7 @@
 
         $.extend(view, factory.apply($content, args));
 
-        // finish to render the view using the given template
+        // Finish to render the view using the given template
         var render = function(template) {
             if (!view.template_append) {
                 // Clean content if needed (call cleanup callback)
@@ -134,13 +134,14 @@
                 if (view.cleanup || view.iframe) {
                     // Install new cleanup callback
                     $content.one('cleanup-infrae-views', function() {
-                        if (view.cleanup)
+                        if (view.cleanup) {
                             view.cleanup();
+                        };
                         if (view.iframe) {
                             $(window).unbind('resize.infrae-views-iframe');
                             $(window).unbind('workspace-resize-smi.infrae-views-iframe');
                             $content.removeClass('iframe-view');
-                        }
+                        };
                     });
                 };
             };
@@ -175,9 +176,16 @@
                 };
                 var $iframe = $('<iframe src="">');
 
+                // We need to provide view access to those. This isn't the best but it works.
+                view.$iframe = $iframe;
+
                 var resize = function() {
-                    $iframe.height($content.innerHeight());
-                    $iframe.width($content.innerWidth());
+                    var height = $content.innerHeight(),
+                        width = $content.innerWidth();
+                    if (!view.resize_iframe || !view.resize_iframe(width, height))  {
+                        $iframe.height(height);
+                        $iframe.width(width);
+                    };
                 };
                 resize();
                 $(window).bind('resize.infrae-views-iframe', resize);
@@ -199,7 +207,7 @@
 
                     if (template.indexOf('<html') < 0 &&
                         template.indexOf('<HTML') < 0) {
-                        // no html tags, add missing html tag
+                        // No html tags, add missing html tag
                         template = '<html><body>' + template + '</body></html>';
                     };
                     iframe_document.write(template);
@@ -242,7 +250,7 @@
                 return $.ajax({
                     type: 'GET',
                     url: jsont_url
-                }).pipe(function (payload) {
+                }).then(function (payload) {
                     var template = new jsontemplate.Template(payload, {});
                     template_cache[jsont_url] = template;
                     return render(template.expand(data));
@@ -262,7 +270,7 @@
                 return $.ajax({
                     type: 'GET',
                     url: html_url
-                }).pipe(function (payload) {
+                }).then(function (payload) {
                     template_cache[html_url] = payload;
                     return render(payload);
                 });
@@ -375,7 +383,7 @@
                     type: 'GET',
                     url: url,
                     dataType: 'json'
-                }).pipe(function(data) {
+                }).then(function(data) {
                     return render_best_view($content, data, options);
                 });
             };

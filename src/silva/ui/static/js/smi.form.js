@@ -104,7 +104,7 @@
     };
 
     // Bind form helpers: focus changes, cleanup error, load widgets JS
-    $('.form-content').live('load-smiform', function(event, data) {
+    $(document).on('load-smiform', '.form-content', function(event, data) {
         var $container = data.container || $(this);
         var $form = data.form || $container.find('form');
 
@@ -178,7 +178,7 @@
                                     title = 'Please confirm';
                                 };
                                 return function () {
-                                    infrae.ui.ConfirmationDialog({title:title, message:message}).pipe(function() {
+                                    infrae.ui.ConfirmationDialog({title:title, message:message}).then(function() {
                                         return submit($control);
                                     });
                                     return false;

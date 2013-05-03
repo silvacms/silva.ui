@@ -80,6 +80,7 @@ class SMI(grok.View):
         self.listing_preview = settings.folder_icon_preview
         self.maintenance_message = settings.maintenance_message
         self.test_mode = settings.test_mode
+        self.preview_resolutions = list(settings.preview_resolutions)
         if settings.background:
             self.background = settings.background
 

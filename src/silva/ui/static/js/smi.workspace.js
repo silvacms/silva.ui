@@ -2,15 +2,78 @@
 (function($, infrae) {
 
     // Generic views.
-
     infrae.views.view({
         iface: 'preview',
         name: 'content',
         factory: function($content, data, smi) {
+            var resolution_fixed = false,
+                resolution_height = 0,
+                resolution_width = 0,
+                max_height = 0,
+                max_width = 0;
+
+            var resize = function($iframe) {
+                $iframe.height(Math.min(max_height, resolution_height));
+                $iframe.width(Math.min(max_width, resolution_width));
+            };
             return {
                 template_data: true,
                 template_nocache: true,
                 iframe: true,
+                resize_iframe: function(width, height) {
+                    max_width = width;
+                    max_height = height;
+                    if (resolution_fixed) {
+                        resize(this.$iframe);
+                        return true;
+                    };
+                    return false;
+                },
+                set_resolution: function(width, height) {
+                    resolution_fixed = true;
+                    resolution_height = height;
+                    resolution_width = width;
+                    resize(this.$iframe);
+                },
+                clear_resolution: function() {
+                    resolution_fixed = false;
+                    this.$iframe.trigger('resize');
+                },
+                cleanup: function() {
+                    $content.empty();
+                }
+            };
+        }
+    });
+
+    infrae.views.view({
+        iface: 'preview',
+        name: 'toolbar',
+        factory: function($content, data, smi, view) {
+            var actions = data.menu.actions,
+                resolutions = smi.options.preview ? smi.options.preview.resolutions : [],
+                have_actions = actions && actions.entries.length;
+            return {
+                jsont: '{.section have_actions}<div class="actions content-toolbar"><ol></ol></div>{.end}{.section resolutions}<div class="view-toolbar resolution-preview"><select><option value="-">-</option>{.repeated section @}<option value={@|htmltag}>{@}</option>{.end}</select></div>{.end}',
+                have_actions: have_actions,
+                resolutions: resolutions,
+                render: function() {
+                    if (have_actions) {
+                        $content.find('.content-toolbar ol').render({data: actions});
+                    };
+                    if (resolutions.length) {
+                        $content.find('.resolution-preview select').on('change', function() {
+                            var value = $(this).attr('value'),
+                                resolution = value.match(/(\d*)x(\d*)/);
+
+                            if (resolution) {
+                                view.set_resolution(resolution[1], resolution[2]);
+                            } else {
+                                view.clear_resolution();
+                            };
+                        });
+                    }
+                },
                 cleanup: function() {
                     $content.empty();
                 }
@@ -198,7 +261,7 @@
                     $container.bind('mouseleave', function () {
                         close(true);
                     });
-                    
+
                     $container.bind('click', function () {
                         close(true);
                     });
@@ -240,6 +303,7 @@
                         $content.append(create(info, true));
                     });
                     $content.tipsy({delegate: 'a'});
+                    infrae.ui.selection.disable($content);
                     if (!tabs) {
                         // Add a class for style under IE 8
                         $content.children('li:last').addClass('last-action');
@@ -340,19 +404,18 @@
         iface: 'object',
         name: 'toolbar',
         factory: function($content, data) {
+            var actions = data.menu.actions,
+                have_actions = actions && actions.entries.length;
             return {
+                jsont: '{.section have_actions}<div class="actions content-toolbar"><ol></ol></div>{.end}',
+                have_actions: have_actions,
                 render: function() {
-                    var actions = data.menu.actions;
-
-                    if (actions && actions.entries.length) {
-                        $content.html('<div class="actions content-actions"><ol></ol></div>');
-                        infrae.ui.selection.disable($content);
-                        $content.find('.content-actions ol').render({data: actions});
+                    if (have_actions) {
+                        $content.find('.content-toolbar ol').render({data: actions});
                     };
                 },
                 cleanup: function() {
                     $content.empty();
-                    infrae.ui.selection.enable($content);
                 }
             };
         }

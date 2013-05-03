@@ -149,6 +149,9 @@
               selector: "#workspace",
               url: "${view.root_url}/{path}"
           },
+          preview: {
+              resolutions: [<tal:resolution tal:repeat="resolution view.preview_resolutions">'${resolution}'<tal:coma tal:condition="not repeat.resolution.end">,</tal:coma></tal:resolution>]
+          },
           notifications: {
 <tal:test tal:condition="view.test_mode">
               speed: 0,

@@ -162,7 +162,14 @@ div.batching a.current {
   height:20px;
   margin-right:4px;
   width:20px;
+
 }
+#workspace .header .toolbar .view-toolbar {
+  float: right;
+  margin: 4px;
+}
+
+/* Compact header is applied in fullscreen mode */
 #workspace .compact-header {
   height: 0px;
 }
@@ -218,9 +225,9 @@ div.batching a.current {
   display: block;
   float: left;
   height: 18px;
-  width: 24px;  
+  width: 24px;
   margin: 5px 0 3px 4px;
-} 
+}
 
 #workspace .header .tabs li.sub-level a.active {
   color: white;
@@ -236,7 +243,7 @@ div.batching a.current {
     -webkit-border-radius:0 0 3px 3px;
     -moz-border-radius:0 0 3px 3px;
   border-radius:0 0 3px 3px;
-    -webkit-box-shadow:inset 0 0 2px #aaa;    
+    -webkit-box-shadow:inset 0 0 2px #aaa;
     -moz-box-shadow:inset 0 0 2px #aaa;
   box-shadow: inset 0 0 2px #aaa;
   background:url('../img/gradient-tab.png') repeat-x;
@@ -304,7 +311,7 @@ div.batching a.current {
   right: 56px;
 }
 #workspace .header .view-actions {
-  position: absolute; 
+  position: absolute;
   top: 0;
   right: 61px;
   display: none;
@@ -316,7 +323,7 @@ div.batching a.current {
   padding: 2px 2px;
 }
 
-/*  
+/*
  *  User settings menu
  */
 #workspace .header .metadata .user-menu {
@@ -329,20 +336,20 @@ div.batching a.current {
   margin: 0;
 }
 
-#workspace .header .metadata .user-menu .tab-logo {  
+#workspace .header .metadata .user-menu .tab-logo {
   background-color: transparent;
   background-image: url('../img/member_icon_transp_bg_bw.png');
   background-repeat: no-repeat;
   display: block;
   float: left;
   height: 18px;
-  width: 24px;  
+  width: 24px;
   margin: 4px;
   margin-right: 0;
 }
 
 #workspace .header .metadata .user-menu .top-level .tab-icon {
-  float: left;      
+  float: left;
 }
 
 /* Main working content space */
@@ -361,18 +368,7 @@ div.batching a.current {
 #workspace .iframe-view {
   overflow-x: inherit;
   overflow-y: inherit;
-}
-
-/*
- * Dialog disclaimer
- */
-
-.ui-dialog .disclaimer p {
-  margin: 0.8em;
-}
-
-.ui-dialog .disclaimer li {
-  margin: 0.2em;
+  text-align: center;
 }
 
 /*
@@ -445,7 +441,7 @@ ins.ui-icon-close {
   background-image: url('../jqueryui/images/ui-icons_222222_256x240.png')!important;
   width: 12px;
   height: 12px;
-  margin-right: 5px;   
+  margin-right: 5px;
   margin-top: 5px;
 }
 

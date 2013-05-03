@@ -77,7 +77,7 @@
                         position -= 1;
                     };
                     callback([{name: 'content', value: data['id']},
-                              {name: 'position', value: position}]).pipe(function (success) {
+                              {name: 'position', value: position}]).then(function (success) {
                                   if (!success) {
                                       // The moving failed. Restore the row position.
                                       if (position < original) {
