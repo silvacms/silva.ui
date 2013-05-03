@@ -45,7 +45,7 @@ input, textarea {
   box-shadow:#1c2e3d 0 3px 10px;
   background:#fff;
   bottom:0px;
-  cursor: move;
+  cursor: default;
   z-index: 800;
 }
 #smi-text .smi-text-content {
