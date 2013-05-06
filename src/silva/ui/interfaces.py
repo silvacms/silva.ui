@@ -86,6 +86,15 @@ class ISilvaUITheme(IDefaultBrowserLayer):
 # Configuration service
 
 
+class IPreviewResolution(Interface):
+    title = schema.TextLine(
+        title=_(u'Title'),
+        required=True)
+    resolution = schema.TextLine(
+        title=_(u'Resolution'),
+        required=False)
+
+
 class IUIFolderSettings(Interface):
     """SMI Settings for the folder view.
     """
@@ -146,11 +155,15 @@ class IUIGenericSettings(Interface):
             u"Authentication is required to access the preview mode, "
             u"so users should be able to authenticate on this site URL."),
         required=False)
+    preview_use_resolutions = schema.Bool(
+        title=_(u"Preview can be seen in different resolutions"),
+        default=True,
+        required=True)
     preview_resolutions = schema.List(
         title=_(u"Resolutions available for preview"),
         description=_(u"List of resolution to which the preview area will be"
                       u"resized to."),
-        value_type=schema.TextLine(),
+        value_type=schema.Object(IPreviewResolution),
         required=True)
     smi_access_root = schema.Bool(
         title=_(u"SMI access Silva root"),

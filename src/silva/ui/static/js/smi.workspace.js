@@ -54,7 +54,7 @@
                 resolutions = smi.options.preview ? smi.options.preview.resolutions : [],
                 have_actions = actions && actions.entries.length;
             return {
-                jsont: '{.section have_actions}<div class="actions content-toolbar"><ol></ol></div>{.end}{.section resolutions}<div class="view-toolbar resolution-preview"><select><option value="-">-</option>{.repeated section @}<option value={@|htmltag}>{@}</option>{.end}</select></div>{.end}',
+                jsont: '{.section have_actions}<div class="actions content-toolbar"><ol></ol></div>{.end}{.section resolutions}<div class="view-toolbar resolution-preview"><select>{.repeated section @}<option value={resolution|htmltag}>{name}</option>{.end}</select></div>{.end}',
                 have_actions: have_actions,
                 resolutions: resolutions,
                 render: function() {

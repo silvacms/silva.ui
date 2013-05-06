@@ -150,7 +150,7 @@
               url: "${view.root_url}/{path}"
           },
           preview: {
-              resolutions: [<tal:resolution tal:repeat="resolution view.preview_resolutions">'${resolution}'<tal:coma tal:condition="not repeat.resolution.end">,</tal:coma></tal:resolution>]
+              resolutions: [<tal:resolution tal:repeat="resolution view.preview_resolutions">{name: '${resolution.title}', resolution: '${resolution.resolution}'}<tal:coma tal:condition="not repeat.resolution.end">,</tal:coma></tal:resolution>]
           },
           notifications: {
 <tal:test tal:condition="view.test_mode">

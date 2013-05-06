@@ -3,15 +3,30 @@
 # See also LICENSE.txt
 
 from five import grok
+from zope.component import IFactory
 
 from silva.core import conf as silvaconf
 from silva.core.services.base import SilvaService
-from silva.ui.interfaces import IUIService
+from silva.ui.interfaces import IUIService, IPreviewResolution
 from silva.ui.interfaces import IUIGenericSettings, IUIFolderSettings
 from silva.translations import translate as _
 from zeam.form import silva as silvaforms
 
 from OFS.Image import Image as ZopeImage
+
+
+class PreviewResolution(object):
+    grok.implements(IPreviewResolution)
+
+    def __init__(self, title, resolution):
+        self.title = title
+        self.resolution = resolution
+
+grok.global_utility(
+    PreviewResolution,
+    provides=IFactory,
+    name=IPreviewResolution.__identifier__,
+    direct=True)
 
 
 class UIService(SilvaService):
@@ -34,7 +49,11 @@ class UIService(SilvaService):
     background = None
     public_url = None
     preview_url = None
-    preview_resolutions = ['800x600', '1024x768', '1200x900']
+    preview_use_resolutions = True
+    preview_resolutions = [
+        PreviewResolution('Fullscreen', None),
+        PreviewResolution('Small', '800x600'),
+        PreviewResolution('Regular', '1024x768')]
     maintenance_message = None
     test_mode = False
     smi_access_root = False
@@ -72,6 +91,8 @@ class UIGenericSettings(silvaforms.ZMIForm):
         maintenance_message = data['maintenance_message']
         public_url = data['public_url']
         preview_url = data['preview_url']
+        preview_use_resolutions = data['preview_use_resolutions']
+        preview_resolutions = data['preview_resolutions']
         smi_access_root = data['smi_access_root']
         if background != silvaforms.NO_VALUE:
             self.context.background = background
@@ -82,18 +103,22 @@ class UIGenericSettings(silvaforms.ZMIForm):
                 self.context.logo = ZopeImage('logo', 'SMI Logo', logo)
         else:
             self.context.logo = None
-        if maintenance_message != silvaforms.NO_VALUE:
+        if maintenance_message is not silvaforms.NO_VALUE:
             self.context.maintenance_message = maintenance_message
         else:
             self.context.maintenance_message = None
-        if public_url != silvaforms.NO_VALUE:
+        if public_url is not silvaforms.NO_VALUE:
             self.context.public_url = public_url
         else:
             self.context.public_url = None
-        if preview_url != silvaforms.NO_VALUE:
+        if preview_url is not silvaforms.NO_VALUE:
             self.context.preview_url = preview_url
         else:
             self.context.preview_url = None
+        self.context.preview_use_resolutions = preview_use_resolutions
+        if preview_resolutions is silvaforms.NO_VALUE:
+            preview_resolutions = []
+        self.context.preview_resolutions = preview_resolutions
         self.context.smi_access_root = smi_access_root
         self.context.name = name
         self.status = _(u"Modification saved.")
