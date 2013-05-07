@@ -218,7 +218,8 @@ div.batching a.current {
   display: block;
   padding: 0px 5px;
 }
-#workspace .header .compact-tabs li ins.tab-logo {
+#workspace .header .compact-tabs li ins.tab-logo,
+#workspace .header .user-menu li ins.tab-logo {
   background-color: transparent;
   background-image: url('../img/menu_lines_icon.png');
   background-repeat: no-repeat;
@@ -227,6 +228,16 @@ div.batching a.current {
   height: 18px;
   width: 24px;
   margin: 5px 0 3px 4px;
+}
+
+#workspace .header .user-menu li ins.tab-logo {
+  background-image: url('../img/member_icon_transp_bg_bw.png'); 
+  margin: 4px; 
+  margin-right: 0;
+}
+
+#workspace .header li div.tab-icon {
+  float: left;     
 }
 
 #workspace .header .tabs li.sub-level a.active {
@@ -304,12 +315,18 @@ div.batching a.current {
 #workspace .header .actions {
   margin: 5px 5px 5px 0px;
 }
-#workspace .header .compact-tabs {
+#workspace .header .compact-tabs,
+#workspace .header .user-menu {
   display: none;
   position: absolute;
   top: 0;
   right: 56px;
 }
+
+#workspace .header .user-menu {
+  right: 0px;
+}
+
 #workspace .header .view-actions {
   position: absolute;
   top: 0;
@@ -321,35 +338,6 @@ div.batching a.current {
 }
 #workspace .header .admin-actions li a {
   padding: 2px 2px;
-}
-
-/*
- *  User settings menu
- */
-#workspace .header .metadata .user-menu {
-    position: absolute;
-    top: 0;
-    right: 10px;
-}
-
-#workspace .header .metadata .user-menu li {
-  margin: 0;
-}
-
-#workspace .header .metadata .user-menu .tab-logo {
-  background-color: transparent;
-  background-image: url('../img/member_icon_transp_bg_bw.png');
-  background-repeat: no-repeat;
-  display: block;
-  float: left;
-  height: 18px;
-  width: 24px;
-  margin: 4px;
-  margin-right: 0;
-}
-
-#workspace .header .metadata .user-menu .top-level .tab-icon {
-  float: left;
 }
 
 /* Main working content space */
@@ -437,7 +425,8 @@ ins.ui-icon-close {
   margin-right: 5px;
 }
 
-.user-menu ins.ui-icon {
+.user-menu ins.ui-icon,
+.compact-tabs ins.ui-icon {
   background-image: url('../jqueryui/images/ui-icons_222222_256x240.png')!important;
   width: 12px;
   height: 12px;
