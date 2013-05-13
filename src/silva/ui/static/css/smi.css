@@ -454,52 +454,6 @@ ins.ui-icon-close {
   background-position: -3px -177px;
 }
 
-
-/*** ABOUT overlay ***/
-
-#about-overlay-title h1 {
-    font-size: 150%;
-    margin-bottom: 10px;
-}
-
-#about-overlay-content p {
-    font-size: 110%;
-    margin-bottom: 9px;
-    text-align: justify;
-}
-
-#about-overlay-content p.silva-version {
-    font-style: italic;
-}
-
-#about-overlay-content p img{
-    float:left;
-    margin-right: 1em;
-    margin-top: 3px;
-}
-
-#about-overlay-content a {
-    color: green;
-    font-weight: bold;
-    text-decoration: underline;
-}
-
-#about-overlay-content h2 {
-    font-size: 130%;
-}
-
-#about-overlay-footer {
-    position: absolute;
-    bottom: 1em;
-    right: 3em;
-}
-
-#about-overlay-footer a {
-    color: green;
-    font-weight: bold;
-    text-decoration: underline;
-}
-
 /* Silva Content Types - uses !important to override default jstree-icon */
 ins.silva_autotoc { background-position:-100px -41px!important; }
 ins.silva_csvsource { background-position:-120px -41px!important; }
