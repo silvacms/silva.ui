@@ -14,6 +14,8 @@
 
     <link rel="shortcut icon" href="${imgs_url}/silva.ico" />
     <link rel="apple-touch-icon" href="${imgs_url}/apple-touch-icon.png" />
+    <link rel="copyright" title="Copyright"
+          href="http://silvacms.org/copyright" />
 
     <tal:resource tal:replace="structure provider:resources" />
 
