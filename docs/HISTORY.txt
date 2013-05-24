@@ -4,7 +4,11 @@ Changes
 3.0.1 (unreleased)
 ------------------
 
-* ...
+* Add a user menu.
+
+* Add preview resolutions feature.
+
+* Various CSS changes.
 
 3.0 (2013/03/06)
 ----------------
