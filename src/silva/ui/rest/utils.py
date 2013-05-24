@@ -2,6 +2,8 @@
 # Copyright (c) 2010-2013 Infrae. All rights reserved.
 # See also LICENSE.txt
 
+import operator
+
 from five import grok
 from zope.component import getUtility
 from zope.intid.interfaces import IIntIds
@@ -25,6 +27,54 @@ class NotificationPoll(UIREST):
         return self.json_response(data)
 
 
+# class NavigationListing(UIREST):
+#     grok.context(IContainer)
+#     grok.name('silva.ui.navigation')
+
+#     def update(self):
+#         self.get_icon = IIconResolver(self.request).get_content_url
+#         self.get_id = getUtility(IIntIds).register
+
+#     def get_node_info(self, node, meta_types):
+#         is_not_empty = len(node.objectValues(meta_types))
+#         info = {
+#             'data': {
+#                 'title': node.get_title_or_id_editable(),
+#                 'icon': self.get_icon(node)
+#                 },
+#             'attr': {
+#                 'id': 'nav' + str(self.get_id(node)),
+#                 },
+#             'metadata': {'path': self.get_content_path(node)}}
+#         if is_not_empty:
+#             info['state'] = "closed"
+#         return info
+
+#     def GET(self):
+#         self.update()
+
+#         meta_types = meta_types_for_interface(IContainer)
+#         children = []
+#         for child in self.context.get_ordered_publishables(IContainer):
+#             children.append(self.get_node_info(child, meta_types))
+
+#         return self.json_response(children)
+
+
+# class RootNavigationListing(NavigationListing):
+#     grok.context(IContainer)
+#     grok.name('silva.ui.navigation.root')
+
+#     def GET(self):
+#         self.update()
+
+#         interfaces = meta_types_for_interface(IContainer)
+#         root_info = self.get_node_info(self.context, interfaces)
+#         return self.json_response(root_info)
+
+
+
+
 class NavigationListing(UIREST):
     grok.context(IContainer)
     grok.name('silva.ui.navigation')
@@ -33,30 +83,51 @@ class NavigationListing(UIREST):
         self.get_icon = IIconResolver(self.request).get_content_url
         self.get_id = getUtility(IIntIds).register
 
-    def get_node_info(self, node, meta_types):
-        is_not_empty = len(node.objectValues(meta_types))
-        info = {
-            'data': {
+    def find(self, node, nodes=None):
+
+        def find_(identifier, node):
+            children = map(
+                lambda node: (self.get_id(node), node),
+                node.get_ordered_publishables(IContainer))
+            yield identifier, node, children
+            if identifier in nodes:
+                for identifier, node in children:
+                    for entry in find_(identifier, node):
+                        yield entry
+
+        for entry in find_(self.get_id(node), node):
+            yield entry
+
+    def list(self, node, nodes=None):
+        for identifier, node, children in self.find(node, nodes):
+            info = {
                 'title': node.get_title_or_id_editable(),
-                'icon': self.get_icon(node)
-                },
-            'attr': {
-                'id': 'nav' + str(self.get_id(node)),
-                },
-            'metadata': {'path': self.get_content_path(node)}}
-        if is_not_empty:
-            info['state'] = "closed"
-        return info
+                'id': identifier,
+                'state': 'item',
+                'loaded': True,
+                'icon': self.get_icon(node),
+                'path': self.get_content_path(node)}
+            if children:
+                loaded = nodes is not None and identifier in nodes
+                info['children'] = map(operator.itemgetter(0), children)
+                info['state'] = 'open' if loaded else 'closed'
+                info['loaded'] = loaded
+            yield info
 
     def GET(self):
         self.update()
+        info = list(self.list(self.context))
+        return self.json_response(info)
 
-        meta_types = meta_types_for_interface(IContainer)
-        children = []
-        for child in self.context.get_ordered_publishables(IContainer):
-            children.append(self.get_node_info(child, meta_types))
-
-        return self.json_response(children)
+    def POST(self):
+        self.update()
+        nodes = self.request.form.get('recurse')
+        if not isinstance(nodes, list):
+            nodes = [int(nodes)]
+        else:
+            nodes = map(int, nodes)
+        info = list(self.list(self.context, nodes=nodes))
+        return self.json_response(info)
 
 
 class RootNavigationListing(NavigationListing):
@@ -65,9 +136,6 @@ class RootNavigationListing(NavigationListing):
 
     def GET(self):
         self.update()
-
-        interfaces = meta_types_for_interface(IContainer)
-        root_info = self.get_node_info(self.context, interfaces)
-        return self.json_response(root_info)
-
+        info = list(self.list(self.context, [self.get_id(self.context)]))
+        return self.json_response(info)
 

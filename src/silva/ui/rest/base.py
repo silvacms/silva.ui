@@ -109,15 +109,12 @@ class PageREST(ActionREST):
     grok.require('silva.ReadSilvaContent')
 
     def get_navigation(self):
-        service = getUtility(IIntIds)
+        get_id = getUtility(IIntIds).register
         parents = []
         content = self.context.get_container()
 
-        def identifier(content):
-            return 'nav' + str(service.register(content))
-
         while content:
-            parents.append(identifier(content))
+            parents.append(get_id(content))
             if IRoot.providedBy(content):
                 break
             content = aq_parent(content)

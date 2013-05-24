@@ -136,7 +136,6 @@ class NavigationInvalidationProvider(grok.MultiSubscription):
         self.request = request
 
     def __call__(self, screen, data):
-        nav_id = lambda id: 'nav' + str(id)
         invalidation = Invalidation(self.request)
 
         def collect():
@@ -145,14 +144,14 @@ class NavigationInvalidationProvider(grok.MultiSubscription):
                 if change['action'] == 'remove':
                     yield {
                         'action': 'remove',
-                        'info': {'target': nav_id(change['content'])}}
+                        'info': {'target': change['content']}}
                 else:
                     # Action add or update
                     yield {
                         'action': change['action'],
                         'info': {
-                            'parent': nav_id(change['container']),
-                            'target': nav_id(change['content']),
+                            'parent': change['container'],
+                            'target': change['content'],
                             'position': change['position']}}
 
         changes = list(collect())

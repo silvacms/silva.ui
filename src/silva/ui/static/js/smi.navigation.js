@@ -7,7 +7,6 @@
         var $tree = $navigation.children('.tree');
         var root_url = options.navigation.root_url;
         var url = new jsontemplate.Template(options.navigation.url, {});
-        var parents_url = new jsontemplate.Template(options.navigation.parents_url, {});
 
         /**
          * Scroll the tree container horizontally to allow for
