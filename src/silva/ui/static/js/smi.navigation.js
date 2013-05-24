@@ -1,159 +1,240 @@
+
 (function($, infrae, jsontemplate) {
-    /**
-     * Folder navigation tree using JSTree plugin.
-     */
-    var NavigationManager = function(smi, options) {
-        var $navigation = $(options.navigation.selector);
-        var $tree = $navigation.children('.tree');
-        var root_url = options.navigation.root_url;
-        var url = new jsontemplate.Template(options.navigation.url, {});
 
-        /**
-         * Scroll the tree container horizontally to allow for
-           unlimited node depth.
+    var Node = function(nodes, $node, data) {
+        /** API to modify the state of one node:
+         *  - nodes is the object controlling all the dom,
+         *  - $node the jQuery object mapped to the DOM,
+         *  - data is object representing the internal state of the node.
          */
-        var scroll = function(node, depth) {
-            return node.each(function() {
-                if(depth < 0) {
-                    depth = 0;
-                }
-                $tree.scrollLeft(21 * depth);
-            });
-        };
+        var api = {
+            expand: function() {
+                var promise = $.Deferred().resolve(data);
 
-        /**
-         * Open a node and all the require parents.
-         */
-        var open = function(parents) {
-
-            function open_node_chain(remaining) {
-                var parent_node = $("#" + remaining[0]);
-                var left = remaining.slice(1);
-                if (parent_node.length > 0) {
-                    if (left.length > 0) {
-                        $tree.jstree('open_node',
-                            parent_node, function(){ open_node_chain(left); });
-                    } else {
-                        $tree.jstree('open_node',
-                            parent_node,
-                            function(){
-                                $tree.jstree('select_node', parent_node, true);
-                            });
-                    };
-                    return true;
-                };
-                return false;
-            };
-
-            if (!open_node_chain(parents)) {
-                $tree.jstree('deselect_all');
-            };
-        };
-
-        /**
-         * Remove a node from the tree.
-         */
-        var remove = function(info) {
-            if (info.target === undefined)
-                return;
-            var $node = $('#' + info.target, $tree);
-            if ($node.length > 0) {
-                $tree.jstree('delete_node', $node);
-            }
-        };
-
-        /**
-         * Add a new node to the tree.
-         */
-        var add = function(info) {
-            if (info.parent === undefined)
-                return;
-            var $parent = $('#' + info.parent, $tree);
-            if ($parent.length > 0) {
-                $tree.jstree('refresh', $parent);
-            }
-        };
-
-        /**
-         * Apply all container invalidation to the tree: add and
-           remove modified nodes.
-         */
-        var invalidate = function(data) {
-            if (data.length > 0) {
-                infrae.utils.each(data, function(datum) {
-                    switch(datum['action']) {
-                        case 'remove':
-                        remove(datum['info']);
-                        break;
-                    case 'add':
-                    case 'update':
-                        add(datum['info']);
-                        break;
-                    }
-                });
-            };
-        };
-
-        // Load the tree.
-        $tree.jstree({
-            ui: {
-                select_limit: 1
-            },
-            core: {
-                animation: 100
-            },
-            plugins: ["json_data", "ui", "hotkeys"],
-            json_data: {
-                ajax: {
-                    url: function (node) {
-                        if (node == -1) {
-                            return root_url;
+                // Expand one node if it is closed.
+                if (data.state == 'closed')  {
+                    $node.removeClass('nav-closed');
+                    $node.addClass('nav-open');
+                    if (data.children) {
+                        if (!data.loaded) {
+                            promise = nodes.fetch(data.path, [data.id]);
                         };
-                        return url.expand({path: node.data('jstree').path});
-                    }
-                }
+                        promise = promise.then(function () {
+                            var $child = nodes.render(data.children);
+
+                            $child.hide();
+                            $node.append($child);
+                            $child.slideDown(150);
+                            return data;
+                        });
+                    };
+                    data.state = 'open';
+                };
+                return promise;
+            },
+            collapse: function() {
+                // Collapse one node if it is opened.
+                if (data.state == 'open') {
+                    $node.removeClass('nav-open');
+                    $node.addClass('nav-closed');
+                    $node.children('ul').remove();
+                    data.state = 'closed';
+
+                    var close = function(data) {
+                        for (var i=0, len=data.children.length; i < len ; i++) {
+                            var child = nodes.get_data(data.children[i]);
+
+                            if (child !== null && child.state == 'open') {
+                                child.state = 'closed';
+                                close(child);
+                            };
+                        };
+                    };
+                    close(data);
+                };
+            },
+            toggle: function() {
+                // Toggle a node.
+                if (data.state == 'open') {
+                    api.collapse();
+                } else if (data.state == 'closed') {
+                    api.expand();
+                };
             }
+        };
+        return api;
+    };
+
+    var Nodes = function($root, url) {
+        /**
+         * API to access and modify the state of multiple navigation nodes.
+         * - $root is a jQuery object where the node will be rendered,
+         * - url is a template to fetch information from the server.
+         */
+        var render = new jsontemplate.Template(
+            '<li id="nav-{id}" class="nav-{state|htmltag}" data-path="{path|htmltag}"><ins class="icon nav-status" /><a>{.section icon}<ins class="icon {@|htmltag}" />{.end}{.section url}<ins class="icon" style="background:url(\'{@|htmltag}\') no-repeat center center;" />{.end}{title}</a></li>'),
+            nodes = {},
+            dom_node_id_to_id = /nav-(\d+)/;
+
+        var api = {
+            fetch: function(path, ids) {
+                // Fetch node information from the server.
+                var data = [];
+
+                for (var i=0, len=ids.length; i < len; i++) {
+                    data.push({name: 'recurse', value: ids[i]});
+                };
+                return $.ajax({
+                    url: url.expand({path: path}),
+                    type: 'POST',
+                    data: data,
+                    dataType: 'json'
+                }).then(api.add);
+            },
+            add: function(additions) {
+                // Add new nodes to the list of nodes.
+                var added = [];
+
+                for (var i=0, len=additions.length; i < len; i++) {
+                    nodes[additions[i].id] = additions[i];
+                    added.push(additions[i].id);
+                };
+                return added;
+            },
+            get_data: function(id) {
+                return nodes[id];
+            },
+            get_dom: function(id) {
+                return $root.find('#nav-' + id);
+            },
+            get_node: function($node) {
+                // Find the node API corresponding to one node.
+                var match = $node.attr('id').match(dom_node_id_to_id);
+
+                if (match) {
+                    var id = +match[1];
+                    if (nodes[id] !== undefined) {
+                        return Node(api, $node, nodes[id]);
+                    };
+                };
+                return null;
+            },
+            render: function(ids) {
+                // Render a list of nodes from their ids as a single
+                // non-attached dom object.
+                var $nodes = $('<ul />');
+
+                for (var i=0, len=ids.length; i < len; i++) {
+                    var node = nodes[ids[i]],
+                        $node = $(render.expand(node));
+
+                    if (node.children && node.state == 'open') {
+                        $node.append(api.render(node.children));
+                    };
+                    $nodes.append($node);
+                };
+                return $nodes;
+            },
+            expand: function(ids) {
+                // From the navigation render and expand the given nodes.
+                var node = {id: ids[0], path: '', state: 'item', loaded: true, children: [ids[0]]},
+                    next = undefined,
+                    open = null,
+                    deferred = null;
+
+                // For each node check if they are loaded.
+                for (var index=0, len=ids.length; index < len; index++) {
+                    next = nodes[ids[index]];
+                    if (next === undefined) {
+                        // Load the missing nodes.
+                        var requires = [node.id];
+
+                        for (; index < len; index++) {
+                            requires.push(ids[index]);
+                        };
+                        if (open === null) {
+                            open = node;
+                        };
+                        deferred = api.fetch(node.path, requires);
+                        break;
+                    };
+                    node = next;
+                    if (open === null && node.state == 'closed') {
+                        // The node is here but check if it is open.
+                        open = node;
+                    };
+                };
+                if (deferred === null && !node.loaded) {
+                    // All the nodes are here, but check if the last node is loaded.
+                    if (open === null) {
+                        open = node;
+                    };
+                    deferred = api.fetch(node.path, [node.id]);
+                };
+                if (open !== null) {
+                    if (deferred === null) {
+                        // We don't need to fetch data.
+                        deferred = $.Deferred().resolve([]);
+                    };
+                    return deferred.then(function() {
+                        var $node = api.get_dom(open.id),
+                            $child = api.render(open.children);
+
+                        open.state = 'open';
+                        $child.hide();
+                        if ($node.length) {
+                            // Add the child under the closed node.
+                            $node.removeClass('nav-closed');
+                            $node.addClass('nav-open');
+                            $node.append($child);
+                        } else {
+                            // There is no rendered node, add the root.
+                            $child.children('li').addClass('nav-root');
+                            $root.append($child);
+                        };
+                        $child.slideDown(150);
+                        return open;
+                    });
+                };
+                return $.Deferred().resolve();
+            }
+        };
+        return api;
+    };
+
+    var NavigationManager = function(smi, options) {
+        var $root = $(options.navigation.selector).children('.tree'),
+            url = jsontemplate.Template(options.navigation.url, {}),
+            $current = null,
+            nodes = Nodes($root, url);
+
+
+        $root.delegate('a', 'click', function() {
+            var $node = $(this).parent();
+
+            smi.open_screen($node.data('path'));
         });
 
-        // Bind JStree event to set the autoscroll.
-        $tree.bind("select_node.jstree", function(event, data) {
-            scroll($(this), data.rslt.obj.parents('ul').length - 2);
+        $root.delegate('ins.nav-status', 'click', function() {
+            nodes.get_node($(this).parent()).toggle();
         });
-        $tree.bind("open_node.jstree", function(event, data) {
-            scroll($(this), data.rslt.obj.parents('ul').length - 2);
-        });
-        $tree.bind("close_node.jstree", function(event, data) {
-            scroll($(this), data.rslt.obj.parents('ul').length - 3);
-        });
-
-        // Open view on click
-        $tree.delegate('a', 'click', function(event) {
-            smi.open_screen($(this).parent().data('jstree').path);
-            return false;
-        });
-
-        // Disable text selection on tree
-        infrae.ui.selection.disable($navigation);
-
-        // Listen to smi.blur and focus to activate/disable shortcuts.
-        $tree.jstree('disable_hotkeys');
-        $navigation.bind('blur-keyboard', function() {
-            $tree.jstree('disable_hotkeys');
-        });
-        $navigation.bind('focus-keyboard', function() {
-            $tree.jstree('enable_hotkeys');
-            $tree.focus();
-        });
-        smi.shortcuts.create('navigation', $tree);
 
         return {
             page: function(data) {
                 if (data.navigation != undefined) {
-                    // Manage navigation modifications.
-                    if (data.navigation.invalidation != undefined)
-                        invalidate(data.navigation.invalidation);
-                    if (data.navigation.current != undefined)
-                        open(data.navigation.current);
+                    if (data.navigation.current != undefined) {
+                        var current = data.navigation.current;
+
+                        if ($current !== null) {
+                            $current.removeClass('nav-current');
+                        };
+                        nodes.expand(current).then(function() {
+                            var $node = nodes.get_dom(current[current.length - 1]);
+
+                            $node.addClass('nav-current');
+                            $current = $node;
+                        });
+                    };
                 };
                 return null;
             }
@@ -163,4 +244,5 @@
     $.extend(infrae.smi.plugins, {
         navigation: NavigationManager
     });
+
 })(jQuery, infrae, jsontemplate);

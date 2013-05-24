@@ -11,8 +11,6 @@ from zope.intid.interfaces import IIntIds
 from silva.core.interfaces.adapters import IIconResolver
 from silva.core.interfaces import IContainer
 
-from Products.Silva.ExtensionRegistry import meta_types_for_interface
-
 from .base import UIREST
 from .helper import get_notifications
 
@@ -27,54 +25,6 @@ class NotificationPoll(UIREST):
         return self.json_response(data)
 
 
-# class NavigationListing(UIREST):
-#     grok.context(IContainer)
-#     grok.name('silva.ui.navigation')
-
-#     def update(self):
-#         self.get_icon = IIconResolver(self.request).get_content_url
-#         self.get_id = getUtility(IIntIds).register
-
-#     def get_node_info(self, node, meta_types):
-#         is_not_empty = len(node.objectValues(meta_types))
-#         info = {
-#             'data': {
-#                 'title': node.get_title_or_id_editable(),
-#                 'icon': self.get_icon(node)
-#                 },
-#             'attr': {
-#                 'id': 'nav' + str(self.get_id(node)),
-#                 },
-#             'metadata': {'path': self.get_content_path(node)}}
-#         if is_not_empty:
-#             info['state'] = "closed"
-#         return info
-
-#     def GET(self):
-#         self.update()
-
-#         meta_types = meta_types_for_interface(IContainer)
-#         children = []
-#         for child in self.context.get_ordered_publishables(IContainer):
-#             children.append(self.get_node_info(child, meta_types))
-
-#         return self.json_response(children)
-
-
-# class RootNavigationListing(NavigationListing):
-#     grok.context(IContainer)
-#     grok.name('silva.ui.navigation.root')
-
-#     def GET(self):
-#         self.update()
-
-#         interfaces = meta_types_for_interface(IContainer)
-#         root_info = self.get_node_info(self.context, interfaces)
-#         return self.json_response(root_info)
-
-
-
-
 class NavigationListing(UIREST):
     grok.context(IContainer)
     grok.name('silva.ui.navigation')
@@ -84,6 +34,7 @@ class NavigationListing(UIREST):
         self.get_id = getUtility(IIntIds).register
 
     def find(self, node, nodes=None):
+        # We should problaby used a catalog here
 
         def find_(identifier, node):
             children = map(
@@ -105,8 +56,12 @@ class NavigationListing(UIREST):
                 'id': identifier,
                 'state': 'item',
                 'loaded': True,
-                'icon': self.get_icon(node),
                 'path': self.get_content_path(node)}
+            icon = self.get_icon(node)
+            if '.' in icon:
+                info['url'] = icon
+            else:
+                info['icon'] = icon
             if children:
                 loaded = nodes is not None and identifier in nodes
                 info['children'] = map(operator.itemgetter(0), children)
@@ -127,15 +82,5 @@ class NavigationListing(UIREST):
         else:
             nodes = map(int, nodes)
         info = list(self.list(self.context, nodes=nodes))
-        return self.json_response(info)
-
-
-class RootNavigationListing(NavigationListing):
-    grok.context(IContainer)
-    grok.name('silva.ui.navigation.root')
-
-    def GET(self):
-        self.update()
-        info = list(self.list(self.context, [self.get_id(self.context)]))
         return self.json_response(info)
 

@@ -23,7 +23,7 @@ class IJSTreeResources(IDefaultBrowserLayer):
     # This is used by other packages
     silvaconf.resource(jquery.jquery)
     silvaconf.resource('js/thirdparty/jquery.jstree.js')
-    #silvaconf.resource('css/jstree.css')
+    silvaconf.resource('css/jstree.css')
 
 
 class ISilvaUIDependencies(IDefaultBrowserLayer):
@@ -54,8 +54,7 @@ class ISilvaUI(ISilvaUIDependencies):
     silvaconf.resource('js/thirdparty/jquery.tipsy.js')
     silvaconf.resource('js/thirdparty/jquery.tipsy.css')
     silvaconf.resource('js/smi.js')
-    #silvaconf.resource('js/smi.navigation.js')
-    silvaconf.resource('js/smi.navigation2.js')
+    silvaconf.resource('js/smi.navigation.js')
     silvaconf.resource('js/smi.workspace.js')
     silvaconf.resource('js/smi.notification.js')
     silvaconf.resource('js/smi.clipboard.js')
@@ -77,8 +76,7 @@ class ISilvaUITheme(IDefaultBrowserLayer):
     silvaconf.resource('css/style.css')
     silvaconf.resource('css/smi.css')
     silvaconf.resource('css/jstree.css')
-    #silvaconf.resource('css/navigation.css')
-    silvaconf.resource('css/navigation2.css')
+    silvaconf.resource('css/navigation.css')
     silvaconf.resource('css/actions.css')
     silvaconf.resource('css/forms.css')
     silvaconf.resource('css/formwidgets.css')
