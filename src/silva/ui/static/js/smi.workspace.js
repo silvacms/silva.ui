@@ -158,9 +158,8 @@
                         name = smi.options.theme.name;
                     };
                     infrae.ui.icon($content.children('ins'), data.icon);
-                    if (!$.browser.msie) {
-                        $('head > title').html(name + " - " + data.title);
-                    };
+                    // XXX Need a check for IE.
+                    $('head > title').html(name + " - " + data.title);
                 }
             };
         }
