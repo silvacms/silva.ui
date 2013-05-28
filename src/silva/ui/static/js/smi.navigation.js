@@ -89,17 +89,98 @@
                     type: 'POST',
                     data: data,
                     dataType: 'json'
-                }).then(api.add);
-            },
-            add: function(additions) {
-                // Add new nodes to the list of nodes.
-                var added = [];
+                }).then(function (additions) {
+                    // Add new nodes to the list of nodes.
+                    var added = [];
 
-                for (var i=0, len=additions.length; i < len; i++) {
-                    nodes[additions[i].id] = additions[i];
-                    added.push(additions[i].id);
+                    for (var i=0, len=additions.length; i < len; i++) {
+                        nodes[additions[i].id] = additions[i];
+                        added.push(additions[i].id);
+                    };
+                    return added;
+                });
+            },
+            add: function(id, container_id, position) {
+                var container = api.get_data(container_id);
+
+                if (container !== undefined) {
+                    var $container = api.get_dom(container_id);
+
+                    if (container.children === undefined) {
+                        container.children = [];
+                    };
+                    if (position < 0) {
+                        container.children.push(id);
+                    } else {
+                        container.children.splice(position, 0, id);
+                    };
+                    if (container.state == 'open') {
+                        api.fetch(container.path, [container.id, id]).then(function () {
+                            var $node = api.render([id]).children('li'),
+                                $list = $container.children('ul');
+
+                            // There is always at least 1 node.
+                            if (position > 0) {
+                                $node.after($list.children('li').index(position - 1));
+                            } else if (!position) {
+                                $list.prepand($node);
+                            } else {
+                                $list.append($node);
+                            };
+                        });
+                    } else if (container.state == 'item') {
+                        container.state = 'closed';
+                        if ($container.length) {
+                            $container.removeClass('nav-item');
+                            $container.addClass('nav-closed');
+                        };
+                    };
                 };
-                return added;
+
+            },
+            remove: function(id, container_id) {
+                var container = api.get_data(container_id);
+
+                if (nodes[id] !== undefined) {
+                    // Remove the node if it exists.
+                    var $node = api.get_dom(id);
+                    var remove = function(id) {
+                        var node = nodes[id];
+                        if (node !== undefined) {
+                            if (node.children) {
+                                for (var i=0, len=node.children.length; i<len; i++) {
+                                    remove(node.children[i]);
+                                };
+                            };
+                            delete nodes[id];
+                        };
+                    };
+
+                    $node.remove();
+                    remove(id);
+                };
+                if (container !== undefined) {
+                    // Remove the node if from the children ids.
+                    var index = $.inArray(id, container.children);
+
+                    if (index > -1) {
+                        container.children.splice(index, 1);
+                        if (!container.children.length) {
+                            // We removed all the nodes
+                            var $container = api.get_dom(container_id);
+
+                            if (container.state == 'open') {
+                                $container.removeClass('nav-open');
+                                $container.addClass('nav-item');
+                                $container.children('ul').remove();
+                            } else {
+                                $container.removeClass('nav-closed');
+                            }
+                            $container.addClass('nav-item');
+                            container.state = 'item';
+                        };
+                    };
+                };
             },
             get_data: function(id) {
                 return nodes[id];
@@ -221,8 +302,24 @@
 
         return {
             page: function(data) {
-                if (data.navigation != undefined) {
-                    if (data.navigation.current != undefined) {
+                if (data.navigation !== undefined) {
+                    if (data.navigation.invalidation !== undefined) {
+                        var records = data.navigation.invalidation;
+
+                         if (records.length > 0) {
+                             infrae.utils.each(records, function(record) {
+                                 switch(record['action']) {
+                                 case 'add':
+                                     nodes.add(record.id, record.container, record.position);
+                                     break;
+                                 case 'remove':
+                                     nodes.remove(record.id, record.container);
+                                     break;
+                                 };
+                             });
+                         };
+                    };
+                    if (data.navigation.current !== undefined) {
                         var current = data.navigation.current;
 
                         if ($current !== null) {

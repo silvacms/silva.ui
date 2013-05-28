@@ -144,15 +144,15 @@ class NavigationInvalidationProvider(grok.MultiSubscription):
                 if change['action'] == 'remove':
                     yield {
                         'action': 'remove',
-                        'info': {'target': change['content']}}
+                        'id': change['content'],
+                        'container': change['container']}
                 else:
                     # Action add or update
                     yield {
                         'action': change['action'],
-                        'info': {
-                            'parent': change['container'],
-                            'target': change['content'],
-                            'position': change['position']}}
+                        'id': change['content'],
+                        'container': change['container'],
+                        'position': change['position']}
 
         changes = list(collect())
         if changes:
