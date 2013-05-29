@@ -20,6 +20,7 @@ from silva.core.cache.memcacheutils import MemcacheSlice
 from silva.core.interfaces import IRoot, IContainer, ISilvaObject
 from silva.core.interfaces import IPublishable, IVersion
 from silva.core.interfaces import IUpgradeTransaction
+from silva.core.interfaces import IContentOrderChangedEvent
 from silva.core.interfaces.adapters import IOrderManager
 from silva.core.views.interfaces import IVirtualSite
 from zeam.component import getAllComponents
@@ -102,7 +103,7 @@ class InvalidationTransaction(threading.local):
         self._followed = False
         self._active = True
 
-    def register_entry(self, target, action):
+    def register_entry(self, target, action, position=None):
         if not self._active:
             return
         container = aq_parent(target)
@@ -124,15 +125,16 @@ class InvalidationTransaction(threading.local):
             'container': self._get_id(container),
             'content': self._get_id(target)}
         if action != 'remove':
-            order = IOrderManager(container, None)
-            if order is not None:
-                position = order.get_position(target) + 1
-                if not position:
-                    if not (IPublishable.providedBy(target) and
-                            target.is_default()):
-                        position = -1
-            else:
-                position = -1
+            if position is None:
+                order = IOrderManager(container, None)
+                if order is not None:
+                    position = order.get_position(target) + 1
+                    if not position:
+                        if not (IPublishable.providedBy(target) and
+                                target.is_default()):
+                            position = -1
+                else:
+                    position = -1
             data['position'] = position
         self.add_entry(data)
 
@@ -248,6 +250,12 @@ def register_title_update(target, event):
     if 'maintitle' in event.changes:
         invalidation_transaction.register_entry(
             target, 'update')
+
+
+@grok.subscribe(ISilvaObject, IContentOrderChangedEvent)
+def register_order_update(target, event):
+    invalidation_transaction.register_entry(
+        target, 'update', position=event.new_position + 1)
 
 
 @grok.subscribe(IVersion, IMetadataModifiedEvent)

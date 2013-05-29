@@ -159,4 +159,3 @@ class NavigationInvalidationProvider(grok.MultiSubscription):
             if 'navigation' not in data:
                 data['navigation'] = {}
             data['navigation']['invalidation'] = changes
-

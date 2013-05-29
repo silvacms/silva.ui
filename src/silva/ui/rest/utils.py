@@ -33,7 +33,7 @@ class NavigationListing(UIREST):
         self.get_icon = IIconResolver(self.request).get_content_url
         self.get_id = getUtility(IIntIds).register
 
-    def find(self, node, nodes=None):
+    def find(self, node, nodes):
         # We should problaby used a catalog here
 
         def find_(identifier, node):
@@ -49,7 +49,7 @@ class NavigationListing(UIREST):
         for entry in find_(self.get_id(node), node):
             yield entry
 
-    def list(self, node, nodes=None):
+    def list(self, node, nodes):
         for identifier, node, children in self.find(node, nodes):
             info = {
                 'title': node.get_title_or_id_editable(),
@@ -71,16 +71,16 @@ class NavigationListing(UIREST):
 
     def GET(self):
         self.update()
-        info = list(self.list(self.context))
+        info = list(self.list(self.context, []))
         return self.json_response(info)
 
     def POST(self):
         self.update()
-        nodes = self.request.form.get('recurse')
+        nodes = self.request.form.get('recurse', [])
         if not isinstance(nodes, list):
             nodes = [int(nodes)]
         else:
             nodes = map(int, nodes)
-        info = list(self.list(self.context, nodes=nodes))
+        info = list(self.list(self.context, nodes))
         return self.json_response(info)
 

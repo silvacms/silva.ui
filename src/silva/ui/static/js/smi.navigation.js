@@ -77,28 +77,23 @@
             dom_node_id_to_id = /nav-(\d+)/;
 
         var api = {
-            fetch: function(path, ids) {
-                // Fetch node information from the server.
-                var data = [];
+            get_data: function(id) {
+                return nodes[id];
+            },
+            get_dom: function(id) {
+                return $root.find('#nav-' + id);
+            },
+            get_node: function($node) {
+                // Find the node API corresponding to one node.
+                var match = $node.attr('id').match(dom_node_id_to_id);
 
-                for (var i=0, len=ids.length; i < len; i++) {
-                    data.push({name: 'recurse', value: ids[i]});
-                };
-                return $.ajax({
-                    url: url.expand({path: path}),
-                    type: 'POST',
-                    data: data,
-                    dataType: 'json'
-                }).then(function (additions) {
-                    // Add new nodes to the list of nodes.
-                    var added = [];
-
-                    for (var i=0, len=additions.length; i < len; i++) {
-                        nodes[additions[i].id] = additions[i];
-                        added.push(additions[i].id);
+                if (match) {
+                    var id = +match[1];
+                    if (nodes[id] !== undefined) {
+                        return Node(api, $node, nodes[id]);
                     };
-                    return added;
-                });
+                };
+                return null;
             },
             add: function(id, container_id, position) {
                 var container = api.get_data(container_id);
@@ -121,7 +116,7 @@
 
                             // There is always at least 1 node.
                             if (position > 0) {
-                                $node.after($list.children('li').index(position - 1));
+                                $list.children('li:nth(' + (position - 1) + ')').after($node);
                             } else if (!position) {
                                 $list.prepand($node);
                             } else {
@@ -135,6 +130,48 @@
                             $container.addClass('nav-closed');
                         };
                     };
+                };
+
+            },
+            update: function(id, container_id, position) {
+                var container = api.get_data(container_id),
+                    node = api.get_data(id);
+
+                if (container !== undefined && container.children !== undefined) {
+                    var index = $.inArray(id, container.children);
+
+                    if (index != position) {
+                        var $container = api.get_dom(container_id),
+                            $node = api.get_dom(id);
+
+                        container.children.splice(index, 1);
+                        container.children.splice(position, 0, id);
+                        if ($container.length && $node.length) {
+                            var $list = $container.children('ul');
+
+                            $node.detach();
+                            if (position) {
+                                $list.children('li:nth(' + (position - 1) + ')').after($node);
+                            } else {
+                                $list.prepend($node);
+                            };
+                        };
+                    };
+                };
+                if (node !== undefined) {
+                    // Update information from the server, replace the
+                    // node link (if the title of icon changed).
+                    api.fetch(node.path, []).then(function() {
+                        var updated = api.get_data(id),
+                            $node = api.get_dom(id);
+
+                        updated.state = node.state;
+                        updated.loaded = node.loaded;
+                        if ($node.length) {
+                            var $updated = $(render.expand(updated)).children('a');
+                            $node.children('a').replaceWith($updated);
+                        };
+                    });
                 };
 
             },
@@ -159,7 +196,7 @@
                     $node.remove();
                     remove(id);
                 };
-                if (container !== undefined) {
+                if (container !== undefined && container.children !== undefined) {
                     // Remove the node if from the children ids.
                     var index = $.inArray(id, container.children);
 
@@ -182,23 +219,28 @@
                     };
                 };
             },
-            get_data: function(id) {
-                return nodes[id];
-            },
-            get_dom: function(id) {
-                return $root.find('#nav-' + id);
-            },
-            get_node: function($node) {
-                // Find the node API corresponding to one node.
-                var match = $node.attr('id').match(dom_node_id_to_id);
+            fetch: function(path, ids) {
+                // Fetch node information from the server.
+                var data = [];
 
-                if (match) {
-                    var id = +match[1];
-                    if (nodes[id] !== undefined) {
-                        return Node(api, $node, nodes[id]);
-                    };
+                for (var i=0, len=ids.length; i < len; i++) {
+                    data.push({name: 'recurse', value: ids[i]});
                 };
-                return null;
+                return $.ajax({
+                    url: url.expand({path: path}),
+                    type: 'POST',
+                    data: data,
+                    dataType: 'json'
+                }).then(function (additions) {
+                    // Add new nodes to the list of nodes.
+                    var added = [];
+
+                    for (var i=0, len=additions.length; i < len; i++) {
+                        nodes[additions[i].id] = additions[i];
+                        added.push(additions[i].id);
+                    };
+                    return added;
+                });
             },
             render: function(ids) {
                 // Render a list of nodes from their ids as a single
@@ -310,7 +352,10 @@
                              infrae.utils.each(records, function(record) {
                                  switch(record['action']) {
                                  case 'add':
-                                     nodes.add(record.id, record.container, record.position);
+                                     nodes.add(record.id, record.container, +record.position);
+                                     break;
+                                 case 'update':
+                                     nodes.update(record.id, record.container, +record.position);
                                      break;
                                  case 'remove':
                                      nodes.remove(record.id, record.container);
