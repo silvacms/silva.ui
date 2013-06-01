@@ -143,6 +143,7 @@ class IUIGenericSettings(Interface):
         required=False)
     background = schema.TextLine(
         title=_(u"Background color"),
+        description=_(u"Defines the color behind the SMI workspace."),
         required=False)
     public_url = schema.URI(
         title=_(u"Public site URL"),
@@ -151,24 +152,24 @@ class IUIGenericSettings(Interface):
     preview_url = schema.URI(
         title=_(u"Preview site URL"),
         description=_(
-            u"Preview site URL to use for preview mode in the SMI. "
+            u"Preview site URL to use for preview mode in the SMI."
             u"Authentication is required to access the preview mode, "
-            u"so users should be able to authenticate on this site URL."),
+            u"so users must be able to authenticate on this URL."),
         required=False)
     preview_use_resolutions = schema.Bool(
-        title=_(u"Preview can be seen in different resolutions"),
+        title=_(u"Preview can be changed to different resolutions"),
         default=True,
         required=True)
     preview_resolutions = schema.List(
         title=_(u"Resolutions available for preview"),
-        description=_(u"List of resolution to which the preview area will be"
+        description=_(u"List of resolutions to which the preview area can be "
                       u"resized to."),
         value_type=schema.Object(IPreviewResolution),
         required=True)
     smi_access_root = schema.Bool(
         title=_(u"SMI access Silva root"),
         description=_(
-            u"By default the SMI is loaded so you can edit content in the "
+            u"By default the SMI is loaded so you can only edit content in the "
             u"current virtual host root. You might choose to load it so you "
             u"can edit content in the Silva root instead."),
         required=False,
