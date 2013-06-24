@@ -2,10 +2,12 @@
 # Copyright (c) 2012-2013 Infrae. All rights reserved.
 # See also LICENSE.txt
 
+from AccessControl.security import checkPermission
+
 from collections import defaultdict
 
 from five import grok
-from zope.cachedescriptors.property import CachedProperty
+from zope.cachedescriptors.property import Lazy
 from zope.component import getUtility, getMultiAdapter
 from zope.i18n import translate
 from zope.i18n.interfaces import IUserPreferredLanguages
@@ -31,15 +33,6 @@ class UIHelper(object):
         super(UIHelper, self).__init__(context, request)
         self.context = context
         self.request = request
-        site = IVirtualSite(request)
-        settings = getUtility(IUIService)
-        if settings.smi_access_root:
-            root = site.get_silva_root()
-        else:
-            root = site.get_root()
-        url = getMultiAdapter((root, request), IContentURL)
-        self.root_path = url.url(relative=True)
-        self.root_url = url.url()
         self._providers = []
 
     def need(self, provider):
@@ -49,7 +42,35 @@ class UIHelper(object):
         return self._providers + grok.queryMultiSubscriptions(
             (self, self.request), IUIPlugin)
 
-    @CachedProperty
+    def _get_root_content_url(self):
+        # Redirect to the root of the SMI if we are not already
+        site = IVirtualSite(self.request)
+        settings = getUtility(IUIService)
+        if settings.smi_access_root:
+            top_level = site.get_silva_root()
+        else:
+            top_level = site.get_root()
+
+        # We lookup for the highest container where we have access
+        root = self.context.get_container()
+        while root != top_level:
+            parent = root.get_real_container()
+            if (parent is None or
+                not checkPermission('silva.ReadSilvaContent', parent)):
+                # We don't have access at that level
+                break
+            root = parent
+        return getMultiAdapter((root, self.request), IContentURL)
+
+    @Lazy
+    def root_url(self):
+        return self._get_root_content_url().url()
+
+    @Lazy
+    def root_path(self):
+        return self._get_root_content_url().url(relative=True)
+
+    @Lazy
     def language(self):
         adapter = IUserPreferredLanguages(self.request)
         languages = adapter.getPreferredLanguages()
