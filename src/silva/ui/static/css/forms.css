@@ -325,7 +325,8 @@ form .form-footer {
   background-position: -80px -20px!important;
   background-repeat: none;
   background-color: transparent;
-  padding-left: 24px;
+  width: 20px;
+  height: 20px;
 }
 
 /* -- acquired, acquirasble and required settings -- */
