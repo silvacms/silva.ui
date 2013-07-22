@@ -327,6 +327,7 @@ form .form-footer {
   background-color: transparent;
   width: 20px;
   height: 20px;
+  float: left;
 }
 
 /* -- acquired, acquirasble and required settings -- */
