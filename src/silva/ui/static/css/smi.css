@@ -396,6 +396,12 @@ ins.form_check {
   background-position: -44px -142px;
 }
 
+ins.form_warning {
+  width: 12px;
+  height: 16px;
+  background-position: -80px -20px;
+}
+
 ins.ui-icon-arrowreturnthick-1-w {
   width: 12px;
   height: 16px;
