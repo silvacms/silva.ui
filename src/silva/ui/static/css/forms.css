@@ -318,6 +318,16 @@ form .form-footer {
   margin-right: 5px;
 }
 
+/* -- warning -- */
+
+.form-content .field-warning {
+  background-image: url(../img/sprite.png);
+  background-position: -80px -20px!important;
+  background-repeat: none;
+  background-color: transparent;
+  padding-left: 24px;
+}
+
 /* -- acquired, acquirasble and required settings -- */
 
 .form-content .form-required, .form-content .form-acquirable, .form-acquired-label, span.required {
