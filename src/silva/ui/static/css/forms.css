@@ -209,33 +209,33 @@ input:focus, textarea:focus {
 
 input.field-collection-add-line {
   background-color: #F1F1F1;
-  background-image: url("../img/plus-small.png");
+  background-image: url("../img/sprite.png");
   background-repeat: no-repeat;
-  background-position: 3px 1px;
+  background-position: 0 -181px;
   padding: 0 0 0 17px;
 }
 
 input.field-collection-add-line:hover {
   background-color: #FFF;
-  background-image: url("../img/plus-small.png");
+  background-image: url("../img/sprite.png");
   background-repeat: no-repeat;
-  background-position: 3px 1px;
+  background-position: 0 -181px;
   padding: 0 0 0 17px;
 }
 
 input.field-collection-remove-line {
   background-color: #F1F1F1;
-  background-image: url("../img/minus-small.png");
+  background-image: url("../img/sprite.png");
   background-repeat: no-repeat;
-  background-position: 3px 1px;
+  background-position: 0 -161px;
   padding: 0 0 0 17px;
 }
 
 input.field-collection-remove-line:hover {
   background-color: #FFF;
-  background-image: url("../img/minus-small.png");
+  background-image: url("../img/sprite.png");
   background-repeat: no-repeat;
-  background-position: 3px 1px;
+  background-position: 0 -161px;
   padding: 0 0 0 17px;
 }
 
