@@ -50,6 +50,7 @@ class UIService(SilvaService):
     public_url = None
     preview_url = None
     preview_use_resolutions = True
+    notifications_life = 4000
     preview_resolutions = [
         PreviewResolution('Fullscreen', None),
         PreviewResolution('Small', '800x600'),
