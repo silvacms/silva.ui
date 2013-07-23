@@ -157,6 +157,7 @@
               speed: 0,
               standard: true,
 </tal:test>
+              life: "${view.notifications_life}",
               selector: "#notifications",
               url: "${view.root_url}/++rest++silva.ui.poll.notifications",
           },

@@ -95,8 +95,6 @@ def get_notifications(helper, data):
     for message in service.receive_all(helper.request):
         info = {'message': helper.translate(message.content),
                 'category': message.namespace}
-        if message.namespace != 'error':
-           info['autoclose'] = 4000
         messages.append(info)
     if not messages:
         return
@@ -181,4 +179,3 @@ class NavigationInvalidationProvider(grok.MultiSubscription):
             if 'navigation' not in data:
                 data['navigation'] = {}
             data['navigation']['invalidation'] = changes
-

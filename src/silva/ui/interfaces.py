@@ -166,6 +166,13 @@ class IUIGenericSettings(Interface):
                       u"resized to."),
         value_type=schema.Object(IPreviewResolution),
         required=True)
+    notifications_life = schema.Int(
+        title=_(u"Time notifications last"),
+        description=_(
+            u"Defines the time notifications messages last (in milliseconds). "
+            u"A SMI page refresh is needed after changing this."),
+        min=0,
+        required=False)
     smi_access_root = schema.Bool(
         title=_(u"SMI access Silva root"),
         description=_(

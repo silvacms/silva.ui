@@ -9,6 +9,7 @@
         var $container = $(options.notifications.selector),
             defaults = {
                 themeState: 'feedback',
+                life: options.notifications.life,
                 speed: options.notifications.speed === undefined && 'normal' || options.notifications.speed};
 
         // Default jGrowl notifications
@@ -62,17 +63,40 @@
 
         };
 
-        // Support for webkit notificatons.
-        if (!options.notifications.standard && window.webkitNotifications) {
-            var native_api = window.webkitNotifications;
+        // Support for notifications.
+        // Safari has the webkitNotifications object defined as Chrome has.
+        if (!options.notifications.standard && window.webkitNotifications ) {
+            // Check if user is using Chrome browser.
+            var using_chrome = (function() {
+                if (navigator.userAgent.indexOf("Chrome") > -1) {
+                    return true;
+                }
+                else {
+                    return false;
+                }
+            })();
 
+            var native_api;
+            if (using_chrome) {
+                // WebKit API
+                native_api = window.webkitNotifications;
+            }
+            else {
+                // W3C-Safari API.
+                native_api = window.Notification;
+            }
             var is_api_enabled = function(now) {
-                var status = native_api.checkPermission();
-
-                if (status == 0) {
+                var status;
+                if (using_chrome) {
+                    status = native_api.checkPermission();
+                }
+                else {
+                    status = native_api.permission;
+                }
+                if (status == 0 || status === 'granted') {
                     // This is authorized
                     return true;
-                } else if (status == 1) {
+                } else if (status == 1 || status === 'default') {
                     try {
                         // Hopyfully we will get it. Safari requires a callback.
                         native_api.requestPermission(function(){});
@@ -89,14 +113,27 @@
                 $.extend(api, {
                     notify: function(message) {
                         if (is_api_enabled(false)) {
-                            var notification = native_api.createNotification('', message.message, '');
-                            if (message.autoclose) {
-                                notification.ondisplay = function () {
+                            var notification;
+                            if (using_chrome) {
+                                notification = native_api.createNotification('', message.message, '');
+                            }
+                            else {
+                                notification = new Notification('', {'body': message.message});
+                            }
+                            if (options.notifications.life) {
+                                var close_after = function () {
                                     setTimeout(function() {
                                         notification.cancel();
-                                    }, message.autoclose);
+                                    }, options.notifications.life);
                                 };
-                            };
+                                if (using_chrome) {
+                                    notification.ondisplay = close_after;
+                                }
+                                else {
+                                    notification.onshow = close_after;
+                                }
+                             }
+
                             notification.show();
                         } else {
                             default_notify(message);

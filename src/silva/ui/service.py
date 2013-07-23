@@ -93,7 +93,12 @@ class UIGenericSettings(silvaforms.ZMIForm):
         preview_url = data['preview_url']
         preview_use_resolutions = data['preview_use_resolutions']
         preview_resolutions = data['preview_resolutions']
+        notifications_life = data['notifications_life']
         smi_access_root = data['smi_access_root']
+        if notifications_life is not silvaforms.NO_VALUE:
+            self.context.notifications_life = notifications_life
+        else:
+            self.context.notifications_life = 4000
         if background != silvaforms.NO_VALUE:
             self.context.background = background
         else:

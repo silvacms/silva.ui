@@ -56,7 +56,7 @@ class SMI(grok.View):
         while root != top_level:
             parent = root.get_real_container()
             if (parent is None or
-                not checkPermission('silva.ReadSilvaContent', parent)):
+                    not checkPermission('silva.ReadSilvaContent', parent)):
                 # We don't have access at that level
                 break
             root = parent
@@ -93,6 +93,7 @@ class SMI(grok.View):
         self.maintenance_message = settings.maintenance_message
         self.test_mode = settings.test_mode
         self.preview_resolutions = []
+        self.notifications_life = settings.notifications_life
         if settings.preview_use_resolutions:
             self.preview_resolutions = list(settings.preview_resolutions)
         if settings.background:
