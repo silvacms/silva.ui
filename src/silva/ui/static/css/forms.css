@@ -179,7 +179,7 @@ input, textarea, select {
 }
 
 input[type="submit"] {
-  background: url("../img/gradient20m.png") repeat-x scroll center top #FFFFFF;
+  background: url("../img/gradient20m.png") repeat-x scroll center bottom #FFFFFF;
   color: #000;
   margin: 8px 2px 0 0;
 }
@@ -424,7 +424,7 @@ form .form-error-message {
   -webkit-border-radius:3px;
   -moz-border-radius:3px;
   border-radius: 3px;
-  background: #fff url(../img/gradient20m.png) repeat-x top;
+  background: #fff url(../img/gradient20m.png) repeat-x bottom;
   border: 1px #777 solid;
   float: left;
   margin: 5px 0 0 6px;
@@ -529,7 +529,7 @@ form .form-error-message {
   -webkit-border-radius:3px;
   -moz-border-radius:3px;
   border-radius: 3px;
-  background: #fff url(../img/gradient20m.png) repeat-x top;
+  background: #fff url(../img/gradient20m.png) repeat-x bottom;
   border: 1px #777 solid;
   float: left;
 }
