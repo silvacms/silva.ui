@@ -2,119 +2,150 @@
 
 (function($, infrae) {
 
-    // This is not really usefull, we could take this as a parameter.
-    $.fn.invoke = function() {
-        return Array.prototype.splice.call(arguments, 0, 1)[0].apply(this, arguments);
-    };
+    /**
+     * Scroll the whole field (i.e. its title, description and all
+     * input widgets) into the $content area.
+     */
+    var scroll_field_into_view = function($content, $field) {
+        var $section = $field.closest('.form-section');
 
-    // Scroll field into view.
-    var scroll_field_into_view = function($field) {
-        if (!$field.length) {
+        if (!$section.length) {
             return;
         };
 
-        var top = $field.position().top;
-        var height = $field.outerHeight();
-        var $container = $(this);
-        var target, limit;
+        var section_top = $section.position().top,
+            section_height = $section.outerHeight(),
+            section_bottom = section_top + section_height,
+            content_top = $content.scrollTop(),
+            content_height = $content.innerHeight(),
+            content_bottom = content_top + content_height;
 
-        if (top < 25) {
-            target = $container.scrollTop() - 25 + top;
-            infrae.ui.scroll($container, 'fast', 'absolute', target);
-        } else {
-            limit = $container.innerHeight() - height - 25;
-            if (top > limit) {
-                target = $container.scrollTop() + (top - limit);
-                infrae.ui.scroll($container, 'fast', 'absolute', target);
-            };
+        if ((section_top - 25) < content_top) {
+            infrae.ui.scroll($content, 'fast', 'absolute', section_top - 25);
+        } else if (content_bottom < (section_bottom + 25)) {
+            infrae.ui.scroll($content, 'fast', 'absolute', section_bottom - content_height + 25);
         };
     };
 
-    // Unfocus all field.
-    var unfocus_form_fields = function() {
-        $(this).find('.form-section').removeClass('form-focus');
+    /**
+     * Unfocus every form fields in the given $content area.
+     */
+    var unfocus_form_fields = function($content) {
+        $content.find('.form-section').removeClass('form-focus');
     };
 
-    // Focus form field.
-    var focus_form_field = function($field, no_input_focus) {
+    /**
+     * Focus the given form $field in the given $content
+     * area. Optionally send a focus event to the form widget
+     * contained in this field.
+     */
+    var focus_form_field = function($content, $field, no_input_focus) {
         var $section = $field.closest('.form-section');
 
         if ($section.is('.form-focus')) {
             return;
         };
-        $(this).invoke(unfocus_form_fields);
+        unfocus_form_fields($content);
         $section.addClass('form-focus');
         if (!no_input_focus) {
             $section.find('.field:first').focus();
         };
     };
-    var focus_first_form_field = function() {
-        var $forms = $(this);
-        var $field = $forms.find('.form-error:first').find('.field:first');
+
+    /**
+     * Focus the first required field or the first field with an error
+     * in the given $content area. It will scroll in place for the
+     * field.
+     *
+     * This is called when the form is initialized.
+     */
+    var focus_first_form_field = function($content) {
+        var $field = $content.find('.form-error:first').find('.field:first');
 
         if (!$field.length){
-            $field = $forms.find('.field-required:first');
-            if (!$field.length)
-                $field = $forms.find('.field:first');
+            $field = $content.find('.field-required:first');
+            if (!$field.length) {
+                $field = $content.find('.field:first');
+            }
         };
         if ($field.length) {
-            $forms.invoke(focus_form_field, $field);
-            $forms.invoke(scroll_field_into_view, $field.closest('.form-section'));
+            focus_form_field($content, $field);
+            scroll_field_into_view($content, $field);
         };
     };
-    var focus_next_form_field = function() {
-        var $forms = $(this);
-        var $focused = $forms.find('.form-focus');
-        var $field = $focused.next();
+
+    /**
+     * Inside the given $content area find and focus the next field
+     *  located after the currently focused one.
+     *
+     * This is called by the keyboard shortcuts handler (ctrl+down).
+     */
+    var focus_next_form_field = function($content) {
+        var $focused = $content.find('.form-focus'),
+            $field = $focused.next(),
+            $next_body, $next_form;
 
         if (!$field.length) {
-            var $next_body = $focused.closest('.form-body').nextAll('.form-body');
+            // We didn't find a field in this form, try the next form.
+            $next_body = $focused.closest('.form-body').nextAll('.form-body');
+
             if ($next_body.length)
                 $field = $next_body.find('.form-section:first');
             else {
-                var $next_form = $focused.closest('form').nextAll('form');
+                $next_form = $focused.closest('form').nextAll('form');
+
                 if ($next_form.length)
                     $field = $next_form.find('.form-section:first');
                 else
-                    $field = $forms.find('.form-section:first');
+                    $field = $content.find('.form-section:first');
             };
         };
-        $forms.invoke(focus_form_field, $field);
-        $forms.invoke(scroll_field_into_view, $field);
+        focus_form_field($content, $field);
+        scroll_field_into_view($content, $field);
     };
-    var focus_previous_form_field = function() {
-        var $forms = $(this);
-        var $focused = $forms.find('.form-focus');
-        var $field = $focused.prev();
+
+    /**
+     * Inside the given $content area find and focus the previous
+     * field located before the currently focused one.
+     *
+     * This is called by the keyboard shortcuts handler (ctrl+up).
+     */
+    var focus_previous_form_field = function($content) {
+        var $focused = $content.find('.form-focus'),
+            $field = $focused.prev(),
+            $prev_body, $prev_form;
 
         if (!$field.length) {
-            var $prev_body = $focused.closest('.form-body').prevAll('.form-body');
+            $prev_body = $focused.closest('.form-body').prevAll('.form-body');
+
             if ($prev_body.length)
                 $field = $prev_body.find('.form-section:last');
             else {
-                var $prev_form = $focused.closest('form').prevAll('form');
+                $prev_form = $focused.closest('form').prevAll('form');
+
                 if ($prev_form.length)
                     $field = $prev_form.find('.form-section:last');
                 else
-                    $field = $forms.find('.form-section:last');
+                    $field = $content.find('.form-section:last');
             };
         };
-        $forms.invoke(focus_form_field, $field);
-        $forms.invoke(scroll_field_into_view, $field);
+        focus_form_field($content, $field);
+        scroll_field_into_view($content, $field);
     };
 
     // Bind form helpers: focus changes, cleanup error, load widgets JS
     $(document).on('load-smiform', '.form-content', function(event, data) {
-        var $container = data.container || $(this);
-        var $form = data.form || $container.find('form');
+        var $container = data.container || $(this),
+            $content = data.$content || $container,
+            $form = data.form || $container.find('form');
 
         // Bind form focus
         var focus_form_event = function (event) {
-            var $target = $(event.target);
-            var $section = $target.closest('.form-section');
-            var is_cancelable = $target.is('input') || $target.is('a');
+            var $target = $(event.target),
+                $section = $target.closest('.form-section'),
+                is_cancelable = $target.is('input') || $target.is('a');
 
-            $container.invoke(focus_form_field, $section, is_cancelable);
+            focus_form_field($content, $section, is_cancelable);
             if (!is_cancelable) {
                 event.stopPropagation();
             };
@@ -129,7 +160,7 @@
         });
 
         // Focus the first field of the first form.
-        $container.invoke(focus_first_form_field);
+        focus_first_form_field($content);
         // Load the widgets.
         $form.trigger('loadwidget-smiform', data);
     });
@@ -138,32 +169,32 @@
         iface: 'form',
         name: 'content',
         factory: function($content, data, smi) {
-            var $content_form = null;
-            var $forms = $([]);
+            var $container = null,
+                $form = $([]);
 
             return {
                 template_data: true,
                 render: function() {
                     // Add content
                     if (data.portlets) {
-                        var $content_portlets = $('<div class="portlets form-content"></div>');
+                        var $portlets = $('<div class="portlets form-content"></div>');
 
-                        $content_form = $('<div class="forms form-content"></div>');
-                        $content_portlets.html(data.portlets);
-                        $content.append($content_form);
-                        $content.append($content_portlets);
+                        $container = $('<div class="forms form-content"></div>');
+                        $portlets.html(data.portlets);
+                        $content.append($container);
+                        $content.append($portlets);
                     } else {
-                        $content_form = $content;
-                        $content_form.addClass('form-content');
+                        $container = $content;
+                        $container.addClass('form-content');
                     };
                     // Find forms.
-                    $content_form.html(data.forms);
-                    $forms = $content_form.find('form');
+                    $container.html(data.forms);
+                    $form = $container.find('form');
 
-                    smi.shortcuts.create('form', $content_form, true);
+                    smi.shortcuts.create('form', $container, true);
 
                     // Initialize each form.
-                    $forms.each(function() {
+                    $form.each(function() {
                         var $form = $(this);
                         var form_prefix = $form.attr('name');
 
@@ -191,7 +222,7 @@
                         };
 
                         var submit = function($control) {
-                            $form.trigger('serialize-smiform', {form: $form, container: $content_form});
+                            $form.trigger('serialize-smiform', {form: $form, container: $container});
 
                             var values = $form.serializeArray();
                             var is_link = false;
@@ -259,22 +290,22 @@
 
                     });
                     // Send an event form loaded to init specific JS field
-                    $content_form.trigger('load-smiform', {form: $forms, container: $content_form});
+                    $container.trigger('load-smiform', {form: $form, container: $container, $content: $content});
 
                     // Shortcuts field navigation
                     smi.shortcuts.bind('form', null, ['ctrl+down', 'ctrl+shift+down'], function() {
-                        $content_form.invoke(focus_next_form_field);
+                        focus_next_form_field($content);
                         return false;
                     });
                     smi.shortcuts.bind('form', null, ['ctrl+up', 'ctrl+shift+up'], function() {
-                        $content_form.invoke(focus_previous_form_field);
+                        focus_previous_form_field($content);
                         return false;
                     });
                 },
                 cleanup: function() {
                     // Send cleanup event
-                    if ($content_form !== null) {
-                        $content_form.trigger('clean-smiform', {form: $forms, container: $content_form});
+                    if ($container !== null) {
+                        $container.trigger('clean-smiform', {form: $form, container: $container});
                     };
                     // Cleanup
                     smi.shortcuts.remove('form');
