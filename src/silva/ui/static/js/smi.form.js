@@ -4,7 +4,7 @@
 
     /**
      * Scroll the whole field (i.e. its title, description and all
-     * input widgets) into the $content area.
+     * input widgets) into view inside the $content area.
      */
     var scroll_field_into_view = function($content, $field) {
         var $section = $field.closest('.form-section');
@@ -133,7 +133,12 @@
         scroll_field_into_view($content, $field);
     };
 
-    // Bind form helpers: focus changes, cleanup error, load widgets JS
+    /**
+     * Initialize a form upon an event. The form can be defined here
+     * with the form view, but can be a popup or an add form inside a
+     * reference widget too. This will bind focus events and
+     * initialize widgets.
+     */
     $(document).on('load-smiform', '.form-content', function(event, data) {
         var $container = data.container || $(this),
             $content = data.$content || $container,
@@ -170,7 +175,8 @@
         name: 'content',
         factory: function($content, data, smi) {
             var $container = null,
-                $form = $([]);
+                $form = $([]),
+                objection = null;
 
             return {
                 template_data: true,
@@ -187,72 +193,88 @@
                         $container = $content;
                         $container.addClass('form-content');
                     };
-                    // Find forms.
+                    // Find forms
                     $container.html(data.forms);
-                    $form = $container.find('form');
-
                     smi.shortcuts.create('form', $container, true);
 
                     // Initialize each form.
+                    $form = $container.find('form');
                     $form.each(function() {
                         var $form = $(this);
                         var form_prefix = $form.attr('name');
 
-                        var make_submit = function($control) {
-                            var message = $control.attr('data-confirmation');
+                        var submit = function($control) {
+                            return function() {
+                                var queue = $.Deferred(),
+                                    submission = queue,
+                                    have_control = $control !== undefined && $control.length,
+                                    message = undefined,
+                                    is_link = false;
 
-                            if (message !== undefined) {
-                                var title = $control.attr('data-confirmation-title');
+                                var serialize = function() {
+                                    var values;
 
-                                // If there is a message, ask confirmation before triggering the action
-                                if (!title) {
-                                    title = 'Please confirm';
+                                    $form.trigger('serialize-smiform', {form: $form, container: $container});
+                                    values = $form.serializeArray();
+                                    if (have_control) {
+                                        values.push({
+                                            name: $control.attr('name'),
+                                            value: $control.text()
+                                        });
+                                    };
+                                    return values;
                                 };
-                                return function () {
-                                    infrae.ui.ConfirmationDialog({title:title, message:message}).then(function() {
-                                        return submit($control);
+
+                                if (have_control) {
+                                    message = $control.attr('data-confirmation');
+                                    is_link = $control.hasClass('link-control');
+                                };
+                                if (is_link) {
+                                    // If action is a link control, it will open in a different target.
+                                    $control.attr(
+                                        'href',
+                                        [smi.get_screen_url(), '?', $.param(serialize())].join(''));
+                                } else {
+                                    if (message !== undefined) {
+                                        var title = $control.attr('data-confirmation-title');
+
+                                        // If there is a message, ask confirmation before triggering the action
+                                        if (!title) {
+                                            title = 'Please confirm';
+                                        };
+                                        queue = queue.then(function() {
+                                            return infrae.ui.ConfirmationDialog({title:title, message:message});
+                                        });
+                                    };
+                                    queue.then(function() {
+                                        if (objection !== null) {
+                                            var result = objection();
+                                            if (result) {
+                                                return result.done(function() {
+                                                    objection = null;
+                                                });
+                                            };
+                                        };
+                                        return $.Deferred().resolve();
+                                    }, function() {
+                                        return $.Deferred().reject();
+                                    }).then(function () {
+                                        return smi.ajax.send_to_opened(serialize());
                                     });
+                                    submission.resolve();
                                     return false;
                                 };
-                            };
-                            // Trigger directly the action.
-                            return function () {
-                                return submit($control);
-                            };
-                        };
-
-                        var submit = function($control) {
-                            $form.trigger('serialize-smiform', {form: $form, container: $container});
-
-                            var values = $form.serializeArray();
-                            var is_link = false;
-
-                            if ($control !== undefined && $control.length) {
-                                values.push({
-                                    name: $control.attr('name'),
-                                    value: $control.text()
-                                });
-                                is_link = $control.hasClass('link-control');
-                            };
-                            if (is_link) {
-                                // If action is a link control, it will open in a different target.
-                                $control.attr(
-                                    'href',
-                                    [smi.get_screen_url(), '?', $.param(values)].join(''));
-                            } else {
-                                smi.ajax.send_to_opened(values);
-                                return false;
                             };
                         };
 
                         // Bind default submit and refresh
-                        $form.bind('submit', make_submit($form.find('.form-controls a.default-form-control')));
+                        $form.bind('submit', submit($form.find('.form-controls a.default-form-control')));
 
                         // Bind click submit
                         $form.find('.form-controls a.form-control').each(function () {
                             var $control = $(this),
                                 shortcut = $control.attr('data-form-shortcut'),
-                                handler = make_submit($control);
+                                handler = submit($control);
 
                             $control.bind('click', handler);
                             if (shortcut) {
@@ -271,11 +293,12 @@
                             };
                         });
                         $form.delegate('.form-controls a.form-popup', 'click', function () {
-                            var $control = $(this);
+                            var $control = $(this),
+                                handler = submit();
 
                             $control.SMIFormPopup().done(function (data) {
                                 if (data.extra && data.extra.refresh == form_prefix) {
-                                    submit();
+                                    handler();
                                 };
                             });
                             return false;
@@ -290,7 +313,13 @@
 
                     });
                     // Send an event form loaded to init specific JS field
-                    $container.trigger('load-smiform', {form: $form, container: $container, $content: $content});
+                    $container.trigger('load-smiform', {
+                        form: $form,
+                        container: $container,
+                        $content: $content,
+                        set_objection: function(deferred) {
+                            objection = deferred;
+                        }});
 
                     // Shortcuts field navigation
                     smi.shortcuts.bind('form', null, ['ctrl+down', 'ctrl+shift+down'], function() {
