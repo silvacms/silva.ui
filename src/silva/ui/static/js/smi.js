@@ -3,8 +3,9 @@
     var HASH_REGEXP = /#([^!]*)!?(.*)/;
 
     /**
-     * Screen location. This permit you define the default screen
-       location, test for a location, or open a location.
+     * Screen location, i.e. content path and opened screen. This
+     * permit you define the default screen location, test if you are
+     * already at given a location or open a location.
      */
     var Screen = function(default_screen) {
         var api = {
@@ -130,6 +131,8 @@
             },
             /**
              * Return a given screen URL.
+             *
+             * @param screen: optional screen to compute the URL.
              */
             get_screen_url: function(screen) {
                 if (!screen) {
