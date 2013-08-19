@@ -32,7 +32,8 @@ class ISilvaUIDependencies(IDefaultBrowserLayer):
     Every Silva UI plugin should depend on those resources.
     """
     silvaconf.resource(jqueryui.jqueryui)
-    silvaconf.resource(jqueryui.jqueryui_i18n)
+    # This creates bugs in Internet Explorer (due to wrong deps).
+    # silvaconf.resource(jqueryui.jqueryui_i18n)
     silvaconf.resource(jsontemplate.jsontemplate)
     silvaconf.resource('js/infrae.js')
     silvaconf.resource('js/infrae.deferred.js')
