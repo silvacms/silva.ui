@@ -14,8 +14,7 @@ from zope.i18n.interfaces import IUserPreferredLanguages
 from zope.interface import Interface
 from zope.publisher.interfaces.browser import IDefaultBrowserLayer
 
-import fanstatic
-
+from silva.fanstatic import get_inclusion, get_needed
 from silva.core.messages.interfaces import IMessageService
 from silva.core.views.interfaces import IVirtualSite, IContentURL
 from silva.core.references.utils import relative_path
@@ -123,13 +122,13 @@ class ResourcesProvider(grok.MultiSubscription):
         self.request = request
 
     def __call__(self, screen, data):
-        needed = fanstatic.get_needed()
+        needed = get_needed()
         if not needed.has_resources():
             return
         if not needed.has_base_url():
             needed.set_base_url(screen.root_url)
         urls = defaultdict(list)
-        for resource in fanstatic.Inclusion(needed).resources:
+        for resource in get_inclusion(needed).resources:
             library_url = needed.library_url(resource.library)
             resource_url =  '/'.join((library_url, resource.relpath))
             urls[resource.ext[1:]].append(resource_url)
