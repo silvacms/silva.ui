@@ -62,11 +62,11 @@ class UIService(SilvaService):
     # Default folder settings
     folder_icon_link = True
     folder_icon_preview = True
-    folder_identifier_link = False
-    folder_title_link = False
-    folder_modified_link = False
-    folder_author_link = False
-    folder_goto_menu = True
+    folder_identifier_link = True
+    folder_title_link = True
+    folder_modified_link = True
+    folder_author_link = True
+    folder_goto_menu = False
 
 
 class UIGenericSettings(silvaforms.ZMIForm):
