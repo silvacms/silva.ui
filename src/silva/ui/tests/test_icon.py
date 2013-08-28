@@ -20,6 +20,30 @@ class IconTestCase(unittest.TestCase):
         self.root = self.layer.get_application()
         self.layer.login('author')
 
+    def test_icon_resolver(self):
+        """Test adapter to retrieve icon urls'.
+        """
+        request = TestRequest(layers=[ISilvaUITheme])
+        resolver = queryAdapter(request, IIconResolver)
+        self.assertTrue(verifyObject(IIconResolver, resolver))
+
+        # Class are return instead of URLs for a direct access to the sprite.
+        self.assertEqual(
+            resolver.get_content_url(self.root),
+            'silva_root')
+        self.assertEqual(
+            resolver.get_content_url(None),
+            'http://localhost/root/++static++/silva.icons/missing.png')
+        self.assertEqual(
+            resolver.get_identifier_url('Silva Root'),
+            'silva_root')
+        self.assertEqual(
+            resolver.get_identifier_url(None),
+            'http://localhost/root/++static++/silva.icons/missing.png')
+        self.assertEqual(
+            resolver.get_identifier_url('best content in the world'),
+            'http://localhost/root/++static++/silva.icons/generic.gif')
+
     def test_icon_tag(self):
         """SMI skin define a custom policy for icon.
         """
@@ -38,7 +62,7 @@ class IconTestCase(unittest.TestCase):
             '<ins class="icon silva_root"></ins>')
         self.assertEqual(
             resolver.get_tag(identifier='default'),
-            '<img height="16" width="16" src="http://localhost/root/++static++/silva.icons/silvageneric.gif" alt="default" />')
+            '<img height="16" width="16" src="http://localhost/root/++static++/silva.icons/generic.gif" alt="default" />')
         self.assertEqual(
             resolver.get_tag(),
             '<img height="16" width="16" src="http://localhost/root/++static++/silva.icons/missing.png" alt="Missing" />')

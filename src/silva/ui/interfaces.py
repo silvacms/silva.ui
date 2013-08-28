@@ -33,7 +33,7 @@ class ISilvaUIDependencies(IDefaultBrowserLayer):
     """
     silvaconf.resource(jqueryui.jqueryui)
     # This creates bugs in Internet Explorer (due to wrong deps).
-    # silvaconf.resource(jqueryui.jqueryui_i18n)
+    silvaconf.resource(jqueryui.jqueryui_i18n)
     silvaconf.resource(jsontemplate.jsontemplate)
     silvaconf.resource('js/infrae.js')
     silvaconf.resource('js/infrae.deferred.js')
