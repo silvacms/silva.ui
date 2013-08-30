@@ -94,23 +94,22 @@ class ContentNotifier(object):
     """
 
     def __init__(self, request):
-        self.__send = getUtility(IMessageService).send
+        self._send = getUtility(IMessageService).send
         self.request = request
 
         adapter = IUserPreferredLanguages(self.request)
         languages = adapter.getPreferredLanguages()
         if languages:
-            self.__language = languages[0]
+            self._language = languages[0]
         else:
-            self.__language = 'en'
+            self._language = 'en'
 
     def translate(self, message):
         return translate(
-            message, target_language=self.__language, context=self.request)
-
+            message, target_language=self._language, context=self.request)
 
     def notify(self, message, type=u""):
-        self.__send(message, self.request, namespace=type)
+        self._send(message, self.request, namespace=type)
 
     @cofunction
     def __call__(self, parent, success_msg, failed_msg):

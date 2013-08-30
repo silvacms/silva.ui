@@ -15,7 +15,7 @@ from infrae import rest
 from infrae.rest.interfaces import IRESTComponent
 from silva.core.interfaces import IRoot, ISilvaObject, IVersion
 from silva.core.interfaces.adapters import IIconResolver
-from silva.core.services import task_queue
+from silva.core.services import CatalogingTask
 
 from ..interfaces import IUIScreen
 from ..menu import ContentMenu, ViewMenu, ActionMenu, UserMenu
@@ -54,7 +54,7 @@ class SMITransaction(object):
         # Note: this will abort any previous changes.
         transaction.get().abort()
         self.transaction = transaction.begin()
-        task_queue.activate()
+        CatalogingTask.get().activate()
 
     def __exit__(self, t, v, tb):
         if v is None and not self.transaction.isDoomed():
@@ -125,7 +125,7 @@ class PageREST(ActionREST):
         parents.reverse()
         return {'current': parents}
 
-    def get_metadata_menu(self, menu):
+    def get_menu_entries(self, menu):
         entries = menu.get_entries(self.context).describe(self)
         if not entries:
             return None
@@ -145,10 +145,10 @@ class PageREST(ActionREST):
                     self.request).get_content_url(self.context),
             },
             'menu': {
-                'content': self.get_metadata_menu(ContentMenu),
-                'view': self.get_metadata_menu(ViewMenu),
-                'actions': self.get_metadata_menu(ActionMenu),
-                'user': self.get_metadata_menu(UserMenu),
+                'content': self.get_menu_entries(ContentMenu),
+                'view': self.get_menu_entries(ViewMenu),
+                'actions': self.get_menu_entries(ActionMenu),
+                'user': self.get_menu_entries(UserMenu),
             },
             'path': self.get_content_path(self.context),
         }

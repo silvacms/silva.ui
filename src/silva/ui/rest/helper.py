@@ -136,7 +136,7 @@ class ResourcesProvider(grok.MultiSubscription):
         data['resources'] = urls
 
 
-class NavigationInvalidationProvider(grok.MultiSubscription):
+class NavigationProvider(grok.MultiSubscription):
     grok.implements(IUIPlugin)
     grok.provides(IUIPlugin)
     grok.adapts(Interface, IDefaultBrowserLayer)
