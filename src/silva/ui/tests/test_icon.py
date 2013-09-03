@@ -42,7 +42,7 @@ class IconTestCase(unittest.TestCase):
             'http://localhost/root/++static++/silva.icons/missing.png')
         self.assertEqual(
             resolver.get_identifier_url('best content in the world'),
-            'http://localhost/root/++static++/silva.icons/generic.gif')
+            'http://localhost/root/++static++/silva.icons/generic.png')
 
     def test_icon_tag(self):
         """SMI skin define a custom policy for icon.
@@ -62,7 +62,7 @@ class IconTestCase(unittest.TestCase):
             '<ins class="icon silva_root"></ins>')
         self.assertEqual(
             resolver.get_tag(identifier='default'),
-            '<img height="16" width="16" src="http://localhost/root/++static++/silva.icons/generic.gif" alt="default" />')
+            '<img height="16" width="16" src="http://localhost/root/++static++/silva.icons/generic.png" alt="default" />')
         self.assertEqual(
             resolver.get_tag(),
             '<img height="16" width="16" src="http://localhost/root/++static++/silva.icons/missing.png" alt="Missing" />')
