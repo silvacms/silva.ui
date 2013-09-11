@@ -75,7 +75,7 @@ class ContentSerializer(object):
         formatter = locale.dates.getFormatter('dateTime', 'short')
         self.format_date = lambda d: formatter.format(d.asdatetime())
         self.format_author = lambda a: a.userid()
-        if not getUtility(IMemberService).get_display_usernames():
+        if getUtility(IMemberService).get_display_usernames():
             self.format_author = lambda a: a.fullname()
 
     def get_access(self, content):
