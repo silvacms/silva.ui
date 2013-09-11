@@ -11,6 +11,7 @@ from silva.core.interfaces import IContainer, ISilvaObject
 from silva.core.interfaces import IPublishable, INonPublishable
 from silva.core.interfaces import IVersionedObject
 from silva.core.interfaces.adapters import IIconResolver
+from silva.core.services.interfaces import IMemberService
 from silva.translations import translate as _
 
 from AccessControl import getSecurityManager
@@ -73,6 +74,9 @@ class ContentSerializer(object):
         locale = self.request.locale
         formatter = locale.dates.getFormatter('dateTime', 'short')
         self.format_date = lambda d: formatter.format(d.asdatetime())
+        self.format_author = lambda a: a.userid()
+        if not getUtility(IMemberService).get_display_usernames():
+            self.format_author = lambda a: a.fullname()
 
     def get_access(self, content):
         for access, permission in [
@@ -95,7 +99,7 @@ class ContentSerializer(object):
         if previewable is not None:
             icon = self.get_icon(content)
             title = cgi.escape(previewable.get_title_or_id_editable())
-            author = previewable.get_last_author_info().userid()
+            author = self.format_author(previewable.get_last_author_info())
             modified = self.get_metadata(
                 previewable, 'silva-extra', 'modificationtime')
             if modified is None:
