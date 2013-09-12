@@ -379,8 +379,10 @@
 
                     // Update parent link
                     if (data.up != null) {
-                        $parent.attr('href', data.up ||'/');
-                        $parent.attr('rel', smi.opened.tab);
+                        if (data.up.path) {
+                            $parent.attr('href', data.up.path);
+                        };
+                        $parent.attr('rel', data.up.screen || smi.opened.tab);
                         $parent.removeClass('ui-state-disabled');
                         $parent.addClass('ui-state-default');
                     } else {

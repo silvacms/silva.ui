@@ -125,6 +125,9 @@ class PageREST(ActionREST):
         parents.reverse()
         return {'current': parents}
 
+    def get_menu_parent(self):
+        return {'path': self.get_content_path(aq_parent(self.context))}
+
     def get_menu_entries(self, menu):
         entries = menu.get_entries(self.context).describe(self)
         if not entries:
@@ -153,7 +156,7 @@ class PageREST(ActionREST):
             'path': self.get_content_path(self.context),
         }
         if not IRoot.providedBy(self.context):
-            metadata['up'] = self.get_content_path(aq_parent(self.context))
+            metadata['up'] = self.get_menu_parent()
         return {'content': {'ifaces': ['screen'],
                             'metadata': metadata,
                             'screen': screen},
