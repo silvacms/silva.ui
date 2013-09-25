@@ -195,12 +195,13 @@
                                 // the callback up until the javascript are loaded.
                                 if (payload.resources.js) {
                                     delayed = delayed.then(function() {
-                                        return $.when.apply(
-                                            $, infrae.utils.map(payload.resources.js, resources.load_js));
+                                        return resources.load_js(payload.resources.js);
                                     });
                                 };
                                 if (payload.resources.css) {
-                                    infrae.utils.each(payload.resources.css, resources.load_css);
+                                    delayed = delayed.then(function() {
+                                        return resources.load_css(payload.resources.css);
+                                    });
                                 };
                             };
                             for (name in plugins) {

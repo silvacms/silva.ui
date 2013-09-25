@@ -1,10 +1,79 @@
 
 (function ($, infrae, jsontemplate) {
+    var BUNDLE_RE = /^:bundle:/;
 
     // Disable all ajax caching, for IE 8.
     $.ajaxSetup({
         cache:false
     });
+
+    var HTMLResourceTracker = function() {
+        var urls = [];
+
+        var analyze_url = function(original) {
+            var parts = original.split('/'),
+                last = parts[parts.length - 1];
+
+            if (last.match(BUNDLE_RE)) {
+                parts.pop();
+
+                var files = last.substr(8).split(';'),
+                    prefix = parts.join('/'),
+                    result = [],
+                    i;
+
+                for (i=0; i < files.length; i++) {
+                    result.push({url: [prefix, files[i]].join('/'),
+                                 file: files[i],
+                                 prefix: prefix});
+                };
+                return result;
+            };
+            return [{url: original, file: null, prefix: original}];
+        };
+
+        return {
+            register: function(new_url) {
+                var new_urls = analyze_url(new_url),
+                    i;
+
+                for (i=0; i < new_urls.length; i++) {
+                    if ($.inArray(new_urls[i].url, urls) < 0) {
+                        urls.push(new_urls[i].url);
+                    };
+                };
+            },
+            validate: function(new_url) {
+                // This can probably be optimized.
+                var new_urls = analyze_url(new_url),
+                    missing_urls = {},
+                    result = [],
+                    i, prefix, files;
+
+                for (i=0; i < new_urls.length; i++) {
+                    if ($.inArray(new_urls[i].url, urls) < 0) {
+                        prefix = new_urls[i].prefix;
+                        if (missing_urls[prefix] === undefined) {
+                            missing_urls[prefix] = [];
+                        };
+                        missing_urls[prefix].push(new_urls[i]);
+                    };
+                };
+                for (prefix in missing_urls) {
+                    if (missing_urls[prefix].length == 1 && missing_urls[prefix][0].file === null) {
+                        result.push(missing_urls[prefix][0].url);
+                    } else {
+                        files = [];
+                        for (i=0; i < missing_urls[prefix].length; i++) {
+                            files.push(missing_urls[prefix][i].file);
+                        };
+                        result.push([prefix, ':bundle:' + files.join(';')].join('/'));
+                    };
+                };
+                return result;
+            }
+        };
+    };
 
     var module = {
         /**
@@ -12,76 +81,71 @@
          */
         HTMLResourceManager: function($document) {
             var data = {
-                css: [],
-                js: []
+                css: HTMLResourceTracker(),
+                js: HTMLResourceTracker()
             };
             var root = $document.get(0);
             var head = root.getElementsByTagName('head')[0];
 
             var resources = {
                 /**
-                 * Return true if the given Javascript is already loaded.
-                 * @param script: url of the Javascript file.
+                 * Load given JS files.
+                 * @param script: list containing urls of the JS files.
                  */
-                is_js_loaded: function(script) {
-                    return $.inArray(script, data.js) > -1;
-                },
-                /**
-                 * Return true if the given CSS is already loaded.
-                 * @param css: url of the CSS file.
-                 */
-                is_css_loaded: function(css) {
-                    return $.inArray(css, data.css) > -1;
-                },
-                /**
-                 * Load a given JS file.
-                 * @param script: url of the JS file.
-                 */
-                load_js: function(script) {
-                    var done = $.Deferred();
+                load_js: function(scripts) {
+                    var urls = infrae.utils.map_concat(scripts, data.js.validate);
 
-                    if (!resources.is_js_loaded(script)) {
-                        // We don't use jQuery here, as does strange things with scripts.
-                        var script_tag = root.createElement('script');
+                    if (urls.length) {
+                        return $.when.apply($, infrae.utils.map(urls, function(url) {
+                            // We don't use jQuery here, as does strange things with scripts.
+                            var script_tag = root.createElement('script'),
+                                promise = $.Deferred();
 
-                        script_tag.async = 'async';
-                        script_tag.type = 'text/javascript';
-                        if (script_tag.readyState) {
-                            script_tag.onreadystatechange = function () {
-                                if (script_tag.readyState == "loaded" ||
-                                    script_tag.readyState == "complete") {
-                                    script_tag.onreadystatechange = null;
-                                    done.resolve();
+                            script_tag.async = 'async';
+                            script_tag.type = 'text/javascript';
+                            if (script_tag.readyState) {
+                                script_tag.onreadystatechange = function () {
+                                    if (script_tag.readyState == "loaded" ||
+                                        script_tag.readyState == "complete") {
+                                        script_tag.onreadystatechange = null;
+                                        promise.resolve();
+                                    };
+                                };
+                            } else {
+                                script_tag.onload = function() {
+                                    promise.resolve();
                                 };
                             };
-                        } else {
-                            script_tag.onload = function() {
-                                done.resolve();
-                            };
-                        };
-                        script_tag.src = script;
-                        head.appendChild(script_tag);
-                        data.js.push(script);
-                        return done;
+                            script_tag.src = url;
+                            head.appendChild(script_tag);
+                            data.js.register(url);
+                            return promise;
+                        }));
                     };
-                    return done.resolve();
+                    return $.Deferred().resolve();
                 },
                 /**
-                 * Load a given CSS file.
-                 * @param css: url of the CSS file.
+                 * Load given CSS files.
+                 * @param css: list containing urls of the CSS files.
                  */
-                load_css: function(css) {
-                    if (!resources.is_css_loaded(css)) {
-                        // We don't use jQuery here, as does strange things with links.
-                        var link_tag = root.createElement('link');
+                load_css: function(csses) {
+                    var urls = infrae.utils.map_concat(csses, data.css.validate);
 
-                        link_tag.rel = 'stylesheet';
-                        link_tag.type = 'text/css';
-                        link_tag.href = css;
-                        head.appendChild(link_tag);
+                    if (urls.length) {
+                        return $.when.apply($, infrae.utils.map(urls, function(url) {
+                            // We don't use jQuery here, as does strange things with links.
+                            var link_tag = root.createElement('link');
 
-                        data.css.push(css);
+                            link_tag.rel = 'stylesheet';
+                            link_tag.type = 'text/css';
+                            link_tag.href = url;
+                            head.appendChild(link_tag);
+                            data.css.register(url);
+                            // We should use load event here too.
+                            return $.Deferred().resolve();
+                        }));
                     };
+                    return $.Deferred().resolve();
                 }
             };
 
@@ -89,8 +153,8 @@
                 $('script').each(function () {
                     var src = $(this).attr('src');
 
-                    if (src != undefined && ! resources.is_js_loaded(src)) {
-                        data.js.push(src);
+                    if (src != undefined) {
+                        data.js.register(src);
                     };
                 });
                 $('link').each(function () {
@@ -98,8 +162,8 @@
 
                     if ($link.attr('rel') == 'stylesheet' && $link.attr('type') == 'text/css') {
                         var src = $link.attr('href');
-                        if (src != undefined && !resources.is_css_loaded(src)) {
-                            data.css.push(src);
+                        if (src != undefined) {
+                            data.css.register(src);
                         };
                     };
                 });
