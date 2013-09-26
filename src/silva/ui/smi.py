@@ -23,6 +23,7 @@ from zope.traversing.browser import absoluteURL
 from zope.pagetemplate.interfaces import IPageTemplate
 
 from AccessControl import getSecurityManager
+from AccessControl.security import checkPermission
 from zExceptions import Redirect
 
 
@@ -46,9 +47,20 @@ class SMI(grok.View):
         site = IVirtualSite(self.request)
         settings = getUtility(IUIService)
         if settings.smi_access_root:
-            root = site.get_silva_root()
+            top_level = site.get_silva_root()
         else:
-            root = site.get_root()
+            top_level = site.get_root()
+
+        # We lookup for the highest container where we have access
+        root = self.context.get_container()
+        while root != top_level:
+            parent = root.get_real_container()
+            if (parent is None or
+                    not checkPermission('silva.ReadSilvaContent', parent)):
+                # We don't have access at that level
+                break
+            root = parent
+
         root_content_url = getMultiAdapter((root, self.request), IContentURL)
         root_url = root_content_url.url()
         if root != self.context:
@@ -81,6 +93,7 @@ class SMI(grok.View):
         self.maintenance_message = settings.maintenance_message
         self.test_mode = settings.test_mode
         self.preview_resolutions = []
+        self.notifications_life = settings.notifications_life
         if settings.preview_use_resolutions:
             self.preview_resolutions = list(settings.preview_resolutions)
         if settings.background:

@@ -242,7 +242,7 @@
                     } else if (initial) {
                         // Add a message no lines.
                         api.$table.append(
-                            '<tr class="empty"><td colpsan="' + configuration.columns.length + '">There is no items here.</td></tr>');
+                            '<tr class="empty"><td colpsan="' + configuration.columns.length + '">There are no items here.</td></tr>');
                     };
                     deferred.resolve([]);
                     return deferred.promise();

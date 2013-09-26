@@ -231,13 +231,13 @@ div.batching a.current {
 }
 
 #workspace .header .user-menu li ins.tab-logo {
-  background-image: url('../img/member_icon_transp_bg_bw.png'); 
-  margin: 4px; 
+  background-image: url('../img/member_icon_transp_bg_bw.png');
+  margin: 4px;
   margin-right: 0;
 }
 
 #workspace .header li div.tab-icon {
-  float: left;     
+  float: left;
 }
 
 #workspace .header .tabs li.sub-level a.active {
@@ -394,6 +394,12 @@ ins.form_check {
   width: 12px;
   height: 16px;
   background-position: -44px -142px;
+}
+
+ins.form_warning {
+  width: 12px;
+  height: 16px;
+  background-position: -84px -142px;
 }
 
 ins.ui-icon-arrowreturnthick-1-w {

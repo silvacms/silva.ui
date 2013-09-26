@@ -172,7 +172,7 @@
         ConfirmationDialog: function(data) {
             var deferred = $.Deferred();
             var $message = $('<div></div>');
-            var configuration = {autoOpen: false, modal: true, buttons: {}};
+            var configuration = {autoOpen: false, modal: true, buttons: {}, zIndex: 12000};
 
             if (data.title) {
                 $message.attr('title', data.title);

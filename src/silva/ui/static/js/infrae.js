@@ -119,6 +119,17 @@
             };
             return result;
         },
+        map_concat: function(array, callback, result) {
+            var index, len;
+
+            if (result === undefined) {
+                result = [];
+            };
+            for (index=0, len=array.length; index < len; index++) {
+                result = result.concat(callback(array[index]));
+            };
+            return result;
+        },
         lazy_map: function(array, callback, result) {
             var index = 0;
             var len = array.length;
@@ -159,4 +170,3 @@
 
     infrae.utils = module;
 })(infrae, jQuery);
-
