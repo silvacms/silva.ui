@@ -1,12 +1,27 @@
 Changes
 =======
 
-3.0.2 (unreleased)
+3.0.2 (2013/10/09)
 ------------------
 
-* ...
+* Support to get a configurable delay in the expiration of the
+  notification messages.
 
-3.0.1 (unreleased)
+* Support for latest version of fanstatic (1.0).
+
+* If the service members asks to display the username instead of
+  identifiers, do it as well in folder listings.
+
+* If the user logged in in the SMI doesn't have access to the root of
+  the site, redirect him to the first folder he has access to.
+
+* Update icons and icon API.
+
+* Various Javascript fixes and additional hooks.
+
+* Various CSS impovements.
+
+3.0.1 (2013/05/24)
 ------------------
 
 * Add a user menu.

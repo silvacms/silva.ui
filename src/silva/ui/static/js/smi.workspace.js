@@ -1,5 +1,5 @@
 
-(function($, infrae) {
+(function($, jsontemplate, infrae) {
 
     // Generic views.
     infrae.views.view({
@@ -423,4 +423,4 @@
         }
     });
 
-})(jQuery, infrae);
+})(jQuery, jsontemplate, infrae);
