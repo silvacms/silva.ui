@@ -7,6 +7,7 @@ from zope.component import getUtility, getMultiAdapter
 from zope.intid.interfaces import IIntIds
 from grokcore.layout.interfaces import IPage
 from grokcore.layout.interfaces import ILayout
+from grokcore.component.interfaces import IContext
 
 from Acquisition import aq_parent
 from AccessControl import getSecurityManager
@@ -66,7 +67,7 @@ class SMITransaction(object):
 
 
 class Screen(rest.REST):
-    grok.context(ISilvaObject)
+    grok.context(IContext)
     grok.name('silva.ui')
 
 
@@ -125,6 +126,9 @@ class PageREST(ActionREST):
         parents.reverse()
         return {'current': parents}
 
+    def get_menu_title(self):
+        return self.context.get_title_or_id_editable()
+
     def get_menu_parent(self):
         return {'path': self.get_content_path(aq_parent(self.context))}
 
@@ -143,7 +147,7 @@ class PageREST(ActionREST):
             'ifaces': screen.get('ifaces', []),
             'title': {
                 'ifaces': ['title'],
-                'title': self.context.get_title_or_id_editable(),
+                'title': self.get_menu_title(),
                 'icon': IIconResolver(
                     self.request).get_content_url(self.context),
             },
