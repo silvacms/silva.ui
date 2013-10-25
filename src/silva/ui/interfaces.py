@@ -13,6 +13,7 @@ from zeam import jsontemplate
 
 from silva.core import conf as silvaconf
 from silva.core.interfaces import ISilvaLocalService
+from silva.core.interfaces import ISilvaConfigurableService
 from silva.core.conf import schema as silvaschema
 from silva.translations import translate as _
 
@@ -190,7 +191,8 @@ class IUIGenericSettings(Interface):
         required=False)
 
 
-class IUIService(IUIGenericSettings, IUIFolderSettings, ISilvaLocalService):
+class IUIService(IUIGenericSettings, IUIFolderSettings,
+                 ISilvaLocalService, ISilvaConfigurableService):
     """Configuration settings for the UI.
     """
     test_mode = Attribute("Activate test mode.")

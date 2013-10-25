@@ -9,6 +9,7 @@ from silva.core import conf as silvaconf
 from silva.core.services.base import SilvaService
 from silva.ui.interfaces import IUIService, IPreviewResolution
 from silva.ui.interfaces import IUIGenericSettings, IUIFolderSettings
+from silva.ui.menu import MenuItem, ContentMenu
 from silva.translations import translate as _
 from zeam.form import silva as silvaforms
 
@@ -30,16 +31,16 @@ grok.global_utility(
 
 
 class UIService(SilvaService):
-    meta_type = 'Silva UI Service'
+    meta_type = 'Silva SMI Service'
     grok.implements(IUIService)
     grok.name('service_ui')
     silvaconf.default_service()
     silvaconf.icon('service.png')
 
     manage_options = (
-        {'label': 'UI Generic settings',
+        {'label': 'SMI Generic settings',
          'action': 'manage_settings'},
-        {'label': 'UI Folder settings',
+        {'label': 'SMI Folder settings',
          'action': 'manage_folder_settings'},
         ) + SilvaService.manage_options
 
@@ -69,22 +70,15 @@ class UIService(SilvaService):
     folder_goto_menu = False
 
 
-class UIGenericSettings(silvaforms.ZMIForm):
-    """Update the settings.
-    """
-    grok.name('manage_settings')
-    grok.context(IUIService)
 
-    label = _(u"UI Generic Settings")
-    description = _(u"Here you can modify the generic SMI settings.")
-    ignoreContent = False
-    fields = silvaforms.Fields(IUIGenericSettings)
+class SaveUIGenericSettingsAction(silvaforms.Action):
+    identifier = 'save'
+    title = _('Save')
 
-    @silvaforms.action(u'Save')
-    def save(self):
-        data, errors = self.extractData()
+    def __call__(self, form):
+        data, errors = form.extractData()
         if errors:
-            self.status = _(u"Sorry, there were errors.")
+            form.status = _(u"Sorry, there were errors.")
             return silvaforms.FAILURE
         background = data['background']
         name = data['name']
@@ -97,38 +91,51 @@ class UIGenericSettings(silvaforms.ZMIForm):
         notifications_life = data['notifications_life']
         smi_access_root = data['smi_access_root']
         if notifications_life is not silvaforms.NO_VALUE:
-            self.context.notifications_life = notifications_life
+            form.context.notifications_life = notifications_life
         else:
-            self.context.notifications_life = 4000
+            form.context.notifications_life = 4000
         if background != silvaforms.NO_VALUE:
-            self.context.background = background
+            form.context.background = background
         else:
-            self.context.background = None
+            form.context.background = None
         if logo != silvaforms.NO_VALUE:
             if logo != silvaforms.NO_CHANGE:
-                self.context.logo = ZopeImage('logo', 'SMI Logo', logo)
+                form.context.logo = ZopeImage('logo', 'SMI Logo', logo)
         else:
-            self.context.logo = None
+            form.context.logo = None
         if maintenance_message is not silvaforms.NO_VALUE:
-            self.context.maintenance_message = maintenance_message
+            form.context.maintenance_message = maintenance_message
         else:
-            self.context.maintenance_message = None
+            form.context.maintenance_message = None
         if public_url is not silvaforms.NO_VALUE:
-            self.context.public_url = public_url
+            form.context.public_url = public_url
         else:
-            self.context.public_url = None
+            form.context.public_url = None
         if preview_url is not silvaforms.NO_VALUE:
-            self.context.preview_url = preview_url
+            form.context.preview_url = preview_url
         else:
-            self.context.preview_url = None
-        self.context.preview_use_resolutions = preview_use_resolutions
+            form.context.preview_url = None
+        form.context.preview_use_resolutions = preview_use_resolutions
         if preview_resolutions is silvaforms.NO_VALUE:
             preview_resolutions = []
-        self.context.preview_resolutions = preview_resolutions
-        self.context.smi_access_root = smi_access_root
-        self.context.name = name
-        self.status = _(u"Modification saved.")
+        form.context.preview_resolutions = preview_resolutions
+        form.context.smi_access_root = smi_access_root
+        form.context.name = name
+        form.status = _(u"Modification saved.")
         return silvaforms.SUCCESS
+
+
+class UIGenericSettings(silvaforms.ZMIForm):
+    """Update the settings.
+    """
+    grok.name('manage_settings')
+    grok.context(IUIService)
+
+    label = _(u"Generic SMI Settings")
+    description = _(u"Here you can modify the generic SMI settings.")
+    ignoreContent = False
+    fields = silvaforms.Fields(IUIGenericSettings)
+    actions = silvaforms.Actions(SaveUIGenericSettingsAction())
 
 
 class UIFolderSettings(silvaforms.ZMIForm):
@@ -137,8 +144,50 @@ class UIFolderSettings(silvaforms.ZMIForm):
     grok.name('manage_folder_settings')
     grok.context(IUIService)
 
-    label = _(u"UI Folder Settings")
+    label = _(u"Folder SMI Settings")
     description = _(u"Here you can modify the settings for folder listings.")
     ignoreContent = False
     fields = silvaforms.Fields(IUIFolderSettings)
     actions = silvaforms.Actions(silvaforms.EditAction())
+
+
+class UIGenericConfiguration(silvaforms.ConfigurationForm):
+    """Update the settings.
+    """
+    grok.name('admin')
+    grok.context(IUIService)
+
+    label = _(u"Generic SMI Settings")
+    description = _(u"Here you can modify the generic SMI settings.")
+    fields = silvaforms.Fields(IUIGenericSettings)
+    actions = silvaforms.Actions(
+        silvaforms.CancelAction(),
+        SaveUIGenericSettingsAction())
+
+
+class UIGenericSettingsMenu(MenuItem):
+    grok.adapts(ContentMenu, IUIService)
+    grok.order(10)
+    name = _('Generic SMI Settings')
+    screen = UIGenericConfiguration
+
+
+class UIFolderConfiguration(silvaforms.ConfigurationForm):
+    """Update the settings.
+    """
+    grok.name('admin-folder')
+    grok.context(IUIService)
+
+    label = _(u"SMI Folder Settings")
+    description = _(u"Here you can modify the settings for folder listings.")
+    fields = silvaforms.Fields(IUIFolderSettings)
+    actions = silvaforms.Actions(
+        silvaforms.CancelAction(),
+        silvaforms.EditAction())
+
+
+class UIFolderSettingsMenu(MenuItem):
+    grok.adapts(ContentMenu, IUIService)
+    grok.order(15)
+    name = _('Folder SMI Settings')
+    screen = UIFolderConfiguration
