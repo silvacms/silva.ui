@@ -161,7 +161,7 @@ class UIGenericConfiguration(silvaforms.ConfigurationForm):
     description = _(u"Here you can modify the generic SMI settings.")
     fields = silvaforms.Fields(IUIGenericSettings)
     actions = silvaforms.Actions(
-        silvaforms.CancelAction(),
+        silvaforms.CancelConfigurationAction(),
         SaveUIGenericSettingsAction())
 
 
@@ -182,7 +182,7 @@ class UIFolderConfiguration(silvaforms.ConfigurationForm):
     description = _(u"Here you can modify the settings for folder listings.")
     fields = silvaforms.Fields(IUIFolderSettings)
     actions = silvaforms.Actions(
-        silvaforms.CancelAction(),
+        silvaforms.CancelConfigurationAction(),
         silvaforms.EditAction())
 
 
