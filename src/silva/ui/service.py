@@ -53,14 +53,80 @@ class UIService(SilvaService):
     preview_use_resolutions = True
     notifications_life = 4000
     preview_resolutions = [
-        PreviewResolution('Fullscreen', None),
-        PreviewResolution('Small', '800x600'),
-        PreviewResolution('Regular', '1024x768')]
+        PreviewResolution(
+            'Fullscreen', None),
+        PreviewResolution(
+            'Monitor SVGA 4:3 width (800)', '800x600'),
+        PreviewResolution(
+            'Monitor XGA 4:3 width (1024)', '1024x768'),
+        PreviewResolution(
+            'Monitor WXGA 16:10 width (1280)', '1280x800'),
+        PreviewResolution(
+            'Monitor WXGA+ 16:10 width (1440)', '1440x900'),
+        PreviewResolution(
+            'Monitor WSXGA+ 16:10 width (1680)', '1680x1050'),
+        PreviewResolution(
+            'Monitor Full HD 16:9 width (1920)', '1920x1080'),
+        PreviewResolution(
+            'Monitor WQHD 16:9 width (2560)', '2560x1440'),
+        PreviewResolution(
+            'Apple iPhone 3GS portrait width (320)', '320x480'),
+        PreviewResolution(
+            'Apple iPhone 4/4S portrait width (640)', '640x960'),
+        PreviewResolution(
+            'Apple iPhone 5/5C/5S portrait width (640)', '640x1136'),
+        PreviewResolution(
+            'Samsung Galaxy S2 portrait width (480)', '480x800'),
+        PreviewResolution(
+            'Samsung Galaxy S3/Nexus portrait width (720)', '720x1280'),
+        PreviewResolution(
+            'Samsung Galaxy S4/Note 3 portrait width (1080)', '1080x1920'),
+        PreviewResolution(
+            'Samsung Galaxy Note portrait width (800)', '800x1280'),
+        PreviewResolution(
+            'Samsung Google Nexus S portrait width (480)', '480x800'),
+        PreviewResolution(
+            'Sony Xperia P portrait width (540)', '540x960'),
+        PreviewResolution(
+            'Sony Xperia S Nexus portrait width (720)', '720x1280'),
+        PreviewResolution(
+            'Sony Xperia Z Nexus portrait width (1080)', '1080x1920'),
+        PreviewResolution(
+            'LG Nexus 4 portrait width (768)', '768x1280'),
+        PreviewResolution(
+            'LG Optimus L5 portrait width (320)', '320x480'),
+        PreviewResolution(
+            'LG Optimus L7 portrait width (480)', '480x800'),
+        PreviewResolution(
+            'HTC Desire Z portrait width (480)', '480x800'),
+        PreviewResolution(
+            'HTC Google Nexus One portrait width (480)', '480x800'),
+        PreviewResolution(
+            'HTC One portrait width (1080)', '1080x1920'),
+        PreviewResolution(
+            'Nokia Lumia 620/720/820 portrait width (480)', '480x800'),
+        PreviewResolution(
+            'Nokia Lumia 920 portrait width (768)', '768x1280'),
+        PreviewResolution(
+            'Apple iPad2/Mini landscape width (1024)', '1024x768'),
+        PreviewResolution(
+            'Apple iPad 3/4/Air/Mini 2 landscape width (2048)', '2048x1536'),
+        PreviewResolution(
+            'Sony Xperia Tablet Z landscape width (1920)', '1920x1200'),
+        PreviewResolution(
+            'Asus Google Nexus 7 landscape width (1280)', '1280x800'),
+        PreviewResolution(
+            'Asus Google Nexus 7 II landscape width (1920)', '1920x1200'),
+        PreviewResolution(
+            'Samsung Galaxy Tab 2/3 7.0 landscape width (1024)', '1024x600'),
+        PreviewResolution(
+            'Samsung Galaxy Tab 2/3 10.1 landscape width (1280)', '1280x800')]
+
     maintenance_message = None
     test_mode = False
     smi_access_root = False
     smi_link_zmi = True
-  
+
     # Default folder settings
     folder_icon_link = True
     folder_icon_preview = True
@@ -119,7 +185,7 @@ class SaveUIGenericSettingsAction(silvaforms.Action):
         form.context.preview_use_resolutions = preview_use_resolutions
         if preview_resolutions is silvaforms.NO_VALUE:
             preview_resolutions = []
-        form.context.smi_link_zmi = smi_link_zmi    
+        form.context.smi_link_zmi = smi_link_zmi
         form.context.preview_resolutions = preview_resolutions
         form.context.smi_access_root = smi_access_root
         form.context.name = name
