@@ -59,7 +59,8 @@ class UIService(SilvaService):
     maintenance_message = None
     test_mode = False
     smi_access_root = False
-
+    smi_link_zmi = True
+  
     # Default folder settings
     folder_icon_link = True
     folder_icon_preview = True
@@ -68,7 +69,6 @@ class UIService(SilvaService):
     folder_modified_link = True
     folder_author_link = True
     folder_goto_menu = False
-
 
 
 class SaveUIGenericSettingsAction(silvaforms.Action):
@@ -90,6 +90,7 @@ class SaveUIGenericSettingsAction(silvaforms.Action):
         preview_resolutions = data['preview_resolutions']
         notifications_life = data['notifications_life']
         smi_access_root = data['smi_access_root']
+        smi_link_zmi = data['smi_link_zmi']
         if notifications_life is not silvaforms.NO_VALUE:
             form.context.notifications_life = notifications_life
         else:
@@ -118,6 +119,7 @@ class SaveUIGenericSettingsAction(silvaforms.Action):
         form.context.preview_use_resolutions = preview_use_resolutions
         if preview_resolutions is silvaforms.NO_VALUE:
             preview_resolutions = []
+        form.context.smi_link_zmi = smi_link_zmi    
         form.context.preview_resolutions = preview_resolutions
         form.context.smi_access_root = smi_access_root
         form.context.name = name

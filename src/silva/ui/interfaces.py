@@ -183,6 +183,12 @@ class IUIGenericSettings(Interface):
             u"can edit content in the Silva root instead."),
         required=False,
         default=False)
+    smi_link_zmi = schema.Bool(
+        title=_(u"SMI provides links to ZMI for manager"),
+        description=_(u"The user settings provides links to access the"
+                      u"underlying ZMI interface and services."),
+        required=False,
+        default=True)
     maintenance_message = schema.Text(
         title=_(u"Maintenance UI message"),
         description=_(
