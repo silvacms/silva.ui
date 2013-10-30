@@ -181,17 +181,15 @@
             return {
                 template_data: true,
                 render: function() {
+                    $container = $('<div class="forms form-content"></div>');
+                    $content.append($container);
+
                     // Add content
                     if (data.portlets) {
                         var $portlets = $('<div class="portlets form-content"></div>');
-
-                        $container = $('<div class="forms form-content"></div>');
                         $portlets.html(data.portlets);
-                        $content.append($container);
+                        $container.addClass("forms-two-columns");
                         $content.append($portlets);
-                    } else {
-                        $container = $content;
-                        $container.addClass('form-content');
                     };
                     // Find forms
                     $container.html(data.forms);

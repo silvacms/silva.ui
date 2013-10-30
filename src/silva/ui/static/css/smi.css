@@ -440,6 +440,11 @@ ins.ui-icon-close {
   margin-top: 5px;
 }
 
+
+.user-menu ins.ui-icon-configuration {
+  background-position: -195px -115px;
+}
+
 .user-menu ins.ui-icon-preferences {
   background-position: -178px -113px;
 }

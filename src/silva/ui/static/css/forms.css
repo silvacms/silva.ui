@@ -1,19 +1,19 @@
 /* -- general form settings -- */
 
-form {
+#workspace form {
   color: black;
   clear: both;
 }
 
-.forms {
+#workspace .forms {
+  margin: 0px 10px;
+}
+
+#workspace .forms-two-columns {
   position: absolute;
   top: 0;
   left: 0;
   right: 250px;
-}
-
-#form {
-  margin: 0 5px;
 }
 
 /* -- header settings -- */
@@ -23,7 +23,7 @@ form {
   color: #222;
   font-weight: normal;
   font-size: 125%;
-  margin: 15px 5px 10px 5px;
+  margin: 15px 0px 10px 0px;
 }
 
 #workspace .form-content h4 {
@@ -40,12 +40,8 @@ form {
   color: black;
   font-size: 110%;
   font-weight: normal;
-  margin: 5px;
+  margin: 5px 5px 5px 0px;
   padding: 1px 6px 0 6px;
-}
-
-#workspace .form-content #form-userrole h4, #workspace .form-content .form-fields-container h4 {
-  margin: 5px 0;
 }
 
 #workspace .form-content h5 {
@@ -62,11 +58,11 @@ form {
   border-radius: 3px;
   color: #FFF;
   font-size: 110%;
-  margin: 5px 5px 0 5px;
+  margin: 5px 5px 5px 0px;
   padding: 2px 6px 0 6px;
 }
 
-.form-content .form-head p {
+#workspace .form-content .form-head p {
   color: #000;
   padding: 2px 5px;
 }
@@ -207,43 +203,8 @@ input:focus, textarea:focus {
   padding: 3px 6px;
 }
 
-input.field-collection-add-line {
-  background-color: #F1F1F1;
-  background-image: url("../img/sprite.png");
-  background-repeat: no-repeat;
-  background-position: 0 -181px;
-  padding: 0 0 0 17px;
-}
-
-input.field-collection-add-line:hover {
-  background-color: #FFF;
-  background-image: url("../img/sprite.png");
-  background-repeat: no-repeat;
-  background-position: 0 -181px;
-  padding: 0 0 0 17px;
-}
-
-input.field-collection-remove-line {
-  background-color: #F1F1F1;
-  background-image: url("../img/sprite.png");
-  background-repeat: no-repeat;
-  background-position: 0 -161px;
-  padding: 0 0 0 17px;
-}
-
-input.field-collection-remove-line:hover {
-  background-color: #FFF;
-  background-image: url("../img/sprite.png");
-  background-repeat: no-repeat;
-  background-position: 0 -161px;
-  padding: 0 0 0 17px;
-}
 
 /* -- general form content settings -- */
-
-#form-metadatformgroup .form-content {
-  margin-bottom: 25px;
-}
 
 .form-content .form-body .form-focus {
   border-left: 2px solid rgba(0, 0, 0, 0.6);
@@ -259,10 +220,6 @@ input.field-collection-remove-line:hover {
   margin: 3px 5px;
 }
 
-.form-fields-container {
-  margin: 0 5px 20px 5px;
-}
-
 /* -- form-section and form-footer settings -- */
 
 form .form-footer {
@@ -271,7 +228,7 @@ form .form-footer {
     -moz-border-radius: 3px;
   border-radius: 3px;
   height: 30px;
-  margin: 0 5px;
+  margin: 0px 5px 20px 5px;
 }
 
 /*.form-section, .form-controls {
@@ -554,66 +511,6 @@ form .form-error-message {
   padding: 2px;
 }
 
-/* Collection widget CSS */
-
-.form-content input.field-collection-line-selector {
-  float: right;
-  height: 20px; width: 20px;
-  border: 0px;
-  margin-right: 6px;
-}
-
-.form-content tr.field-collection-line input.field-textline,
-.form-content tr.field-collection-line table.field-collection-header {
-  width: 100%;
-}
-.form-content div.field-collection-line {
-  clear: both;
-}
-.form-content div.field-collection-line div.field-object {
-  margin: 15px;
-  clear: both;
-}
-.form-content .field-collection-lines div.line-actions {
-  float: left;
-  width: 60px;
-}
-
-div.line-data {
-  float: left;
-  margin-bottom: 5px;
-}
-
-.form-content .field-collection-lines td.line-actions {
-  width: 20px;
-}
-.form-content .field-collection-lines td.ordering-actions {
-  width: 60px;
-}
-
-.form-content button.field-collection-move-up {
-  background-image:url(../img/sprite.png);
-  background-position:-80px -122px!important;
-  background-color: transparent;
-  height: 20px;
-  width: 20px;
-  border: 0px;
-  float: left;
-}
-
-.form-content button.field-collection-move-down {
-  background-image:url(../img/sprite.png);
-  background-position:-100px -122px!important;
-  background-color: transparent;
-  height: 20px;
-  width: 20px;
-  border: 0px;
-  float: right;
-}
-
-.form-content .field-collection .multi-actions {
-  clear: both;
-}
 
 .form-content  a.field-uri {
   text-decoration: underline;
@@ -621,15 +518,15 @@ div.line-data {
 
 /* Portlets */
 
-.portlets {
+#workspace .portlets {
   position: absolute;
   top: 0;
   right: 5px;
-  width: 250px;
+  width: 240px;
   bottom: 0px;
 }
 
-#workspace .form-content .portlet h4 {
+#workspace .portlet h4 {
   background: transparent;
   border-style: solid;
   border-width: 0 0 1px 0;
@@ -639,19 +536,20 @@ div.line-data {
   border-radius: 0;
   display: inline-block;
   padding: 0;
+  margin: 5px 0 5px 0;
+}
+
+#workspace .portlet {
+  margin: 5px 0px;
+}
+
+#workspace .portlet .external-controls {
+  padding: 5px 20px 32px 5px;
 }
 
 @media screen and (max-width: 650px) {
-  .portlets { display: none; }
-  .forms { right: 0px; }
-}
-
-.portlets p {
-  margin: 0 5px;
-}
-
-.portlets .external-controls {
-  padding: 5px 20px 32px 5px;
+  #workspace .portlets { display: none; }
+  #workspace .forms-two-columns { right: 0px; }
 }
 
 /* CKEditor information orientation */
