@@ -1,6 +1,21 @@
 
 (function($, jsontemplate, infrae) {
 
+    var SCROLLBARS_SIZE = 0;
+    $(document).ready(function() {
+        SCROLLBARS_SIZE = (function() {
+            var $scroll_div = $('<div style="width:100px; height:50px; position:absolute; top:-9999px; left:-9999px; visibility:hidden; overflow:hidden;"><div style="width:100%; height:100px;"></div></div>');
+            $('body').append($scroll_div);
+
+            var outer_width = $scroll_div[0].offsetWidth;
+            $scroll_div.css('overflow', 'scroll');
+            sb_width = outer_width - $scroll_div[0].clientWidth;
+
+            $scroll_div.remove();
+            return sb_width;
+        })();
+    });
+
     // Generic views.
     infrae.views.view({
         iface: 'preview',
@@ -32,7 +47,7 @@
                 set_resolution: function(width, height) {
                     resolution_fixed = true;
                     resolution_height = height;
-                    resolution_width = width;
+                    resolution_width = +width + SCROLLBARS_SIZE;
                     resize(this.$iframe);
                 },
                 clear_resolution: function() {
@@ -378,7 +393,7 @@
                         {data: data, name: 'toolbar', args: [smi, view]});
 
                     // Update parent link
-                    if (data.up != null) {
+                    if (data.up) {
                         if (data.up.path) {
                             $parent.attr('href', data.up.path);
                         };
