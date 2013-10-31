@@ -69,7 +69,7 @@
 
 /* -- label settings -- */
 
-form .form-label {
+.form-content .form-label {
   display: block;
   float: left;
   margin-right: 25px;
@@ -222,7 +222,7 @@ input:focus, textarea:focus {
 
 /* -- form-section and form-footer settings -- */
 
-form .form-footer {
+.form-content .form-footer {
   border: 1px solid rgba(0, 0, 0, 0.2);
     -webkit-border-radius: 3px;
     -moz-border-radius: 3px;
@@ -324,7 +324,7 @@ p.form-acquired {
 
 /* -- error message settings -- */
 
-form .form-error-message {
+.form-content .form-error-message {
   position: relative;
   float: left;
 }
