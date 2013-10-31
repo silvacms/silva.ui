@@ -162,7 +162,7 @@
 }
 .form-content .field-collection-lines div.line-actions {
   float: left;
-  width: 60px;
+  width: 70px;
 }
 
 div.line-data {
@@ -174,7 +174,7 @@ div.line-data {
   width: 20px;
 }
 .form-content .field-collection-lines td.ordering-actions {
-  width: 60px;
+  width: 70px;
 }
 
 .form-content button.field-collection-move-up {
