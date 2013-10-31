@@ -181,7 +181,12 @@
             return {
                 template_data: true,
                 render: function() {
+                    if (!data.forms) {
+                        return;
+                    };
+
                     $container = $('<div class="forms form-content"></div>');
+                    $container.html(data.forms);
                     $content.append($container);
 
                     // Add content
@@ -191,8 +196,8 @@
                         $container.addClass("forms-two-columns");
                         $content.append($portlets);
                     };
+
                     // Find forms
-                    $container.html(data.forms);
                     smi.shortcuts.create('form', $container, true);
 
                     // Initialize each form.
@@ -333,12 +338,12 @@
                     // Send cleanup event
                     if ($container !== null) {
                         $container.trigger('clean-smiform', {form: $form, container: $container});
+
+                        // Cleanup
+                        smi.shortcuts.remove('form');
+                        $content.undelegate('.form-section', 'focusin');
+                        $content.undelegate('.form-section', 'click');
                     };
-                    // Cleanup
-                    smi.shortcuts.remove('form');
-                    $content.undelegate('.form-section', 'focusin');
-                    $content.undelegate('.form-section', 'click');
-                    $content.removeClass('form-content');
                     $content.empty();
                 }
             };

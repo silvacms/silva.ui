@@ -5,6 +5,7 @@
 import martian
 from grokcore.view.meta.views import TemplateGrokker
 from silva.ui.rest.base import PageWithTemplateREST
+from silva.ui.rest.base import FormWithTemplateREST
 
 
 class PageTemplateGrokker(TemplateGrokker):
@@ -12,6 +13,17 @@ class PageTemplateGrokker(TemplateGrokker):
 
     def has_render(self, factory):
         return factory.payload != PageWithTemplateREST.payload
+
+    def has_no_render(self, factory):
+        # always has a render method
+        return False
+
+
+class FormTemplateGrokker(TemplateGrokker):
+    martian.component(FormWithTemplateREST)
+
+    def has_render(self, factory):
+        return factory.payload != FormWithTemplateREST.payload
 
     def has_no_render(self, factory):
         # always has a render method

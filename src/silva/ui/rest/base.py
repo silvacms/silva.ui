@@ -170,6 +170,7 @@ class PageREST(ActionREST):
 class PageWithTemplateREST(PageREST):
     grok.baseclass()
 
+
     def default_namespace(self):
         return {}
 
@@ -186,6 +187,27 @@ class PageWithTemplateREST(PageREST):
         self.update()
         return {'ifaces': ['form'],
                 'html': self.template.render(self)}
+
+
+class FormWithTemplateREST(PageREST):
+    grok.baseclass()
+
+    def default_namespace(self):
+        return {}
+
+    def namespace(self):
+        return {'rest': self,
+                'context': self.context,
+                'request': self.request,
+                'target_language': self.language}
+
+    def update(self):
+        pass
+
+    def payload(self):
+        self.update()
+        return {'ifaces': ['form'],
+                'forms': self.template.render(self)}
 
 
 class PageWithLayoutREST(rest.REST):
