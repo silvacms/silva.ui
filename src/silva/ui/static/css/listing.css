@@ -99,6 +99,10 @@
   float: left;
 }
 
+#workspace .content .listing td img {
+  float: left;
+}
+
 #workspace .content .listing dd.collapsed {
   display: none;
 }
