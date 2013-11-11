@@ -596,21 +596,22 @@ div.cke_dialog_ui_input_textarea {
 
 .portlets .references .item {
   clear: both;
-  margin: 0 5px;
+  margin: 2px 5px;
 }
 
 .portlets .references .item a.edit-screen {
   float: right;
-  margin-right: 5px;
   cursor: pointer;
-}
-
-.portlets .references .item p {
-  margin-left: 20px;
 }
 
 .portlets .references .item img {
   float: left;
-  margin: 5px;
+  margin-right: 9px;
   cursor: inherit;
 }
+
+.portlets .references .item p {
+  margin-left: 20px;
+  padding-top: 2px;
+}
+
