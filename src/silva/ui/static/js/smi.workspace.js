@@ -2,15 +2,17 @@
 (function($, jsontemplate, infrae) {
 
     var SCROLLBARS_SIZE = 0;
+
     $(document).ready(function() {
         SCROLLBARS_SIZE = (function() {
-            var $scroll_div = $('<div style="width:100px; height:50px; position:absolute; top:-9999px; left:-9999px; visibility:hidden; overflow:hidden;"><div style="width:100%; height:100px;"></div></div>');
-            $('body').append($scroll_div);
+            var $scroll_div = $('<div style="width:100px; height:50px; position:absolute; top:-9999px; left:-9999px; visibility:hidden; overflow:hidden;"><div style="width:100%; height:100px;"></div></div>'),
+                outer_width,
+                sb_width;
 
-            var outer_width = $scroll_div[0].offsetWidth;
+            $('body').append($scroll_div);
+            outer_width = $scroll_div[0].offsetWidth;
             $scroll_div.css('overflow', 'scroll');
             sb_width = outer_width - $scroll_div[0].clientWidth;
-
             $scroll_div.remove();
             return sb_width;
         })();
@@ -397,7 +399,7 @@
                         if (data.up.path) {
                             $parent.attr('href', data.up.path);
                         };
-                        $parent.attr('rel', data.up.screen || smi.opened.tab);
+                        $parent.attr('rel', data.up.screen || smi.opening.screen);
                         $parent.removeClass('ui-state-disabled');
                         $parent.addClass('ui-state-default');
                     } else {

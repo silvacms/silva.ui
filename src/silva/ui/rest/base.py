@@ -143,6 +143,7 @@ class PageREST(ActionREST):
             screen = self.payload()
         except PageResult as error:
             screen = error.get_payload(self)
+        navigation = self.get_navigation()
         metadata = {
             'ifaces': screen.get('ifaces', []),
             'title': {
@@ -161,10 +162,11 @@ class PageREST(ActionREST):
         }
         if not IRoot.providedBy(self.context):
             metadata['up'] = self.get_menu_parent()
+            navigation['screen'] = metadata['up'].get('screen')
         return {'content': {'ifaces': ['screen'],
                             'metadata': metadata,
                             'screen': screen},
-                'navigation': self.get_navigation()}
+                'navigation': navigation}
 
 
 class PageWithTemplateREST(PageREST):

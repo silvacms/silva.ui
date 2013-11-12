@@ -3,11 +3,12 @@
      * Folder navigation tree using JSTree plugin.
      */
     var NavigationManager = function(smi, options) {
-        var $navigation = $(options.navigation.selector);
-        var $tree = $navigation.children('.tree');
-        var root_url = options.navigation.root_url;
-        var url = new jsontemplate.Template(options.navigation.url, {});
-        var parents_url = new jsontemplate.Template(options.navigation.parents_url, {});
+        var $navigation = $(options.navigation.selector),
+            $tree = $navigation.children('.tree'),
+            screen = 'content',
+            root_url = options.navigation.root_url,
+            url = new jsontemplate.Template(options.navigation.url, {}),
+            parents_url = new jsontemplate.Template(options.navigation.parents_url, {});
 
         /**
          * Scroll the tree container horizontally to allow for
@@ -129,7 +130,7 @@
 
         // Open view on click
         $tree.delegate('a', 'click', function(event) {
-            smi.open_screen($(this).parent().data('jstree').path);
+            smi.open_screen($(this).parent().data('jstree').path, screen);
             return false;
         });
 
@@ -151,10 +152,17 @@
             page: function(data) {
                 if (data.navigation != undefined) {
                     // Manage navigation modifications.
-                    if (data.navigation.invalidation != undefined)
+                    if (data.navigation.invalidation != undefined) {
                         invalidate(data.navigation.invalidation);
-                    if (data.navigation.current != undefined)
+                    };
+                    if (data.navigation.current != undefined) {
                         open(data.navigation.current);
+                    }
+                    if (data.navigation.screen) {
+                        screen = data.navigation.screen;
+                    } else {
+                        screen = smi.opening.screen;
+                    };
                 };
                 return null;
             }
