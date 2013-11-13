@@ -16,6 +16,7 @@ ICON_SPRITE = icon.IconSprite(
         'Silva File': 'silva_file',
         'Silva Find': 'silva_find',
         'Silva Folder': 'silva_folder',
+        'Silva Ghost Asset': 'silva_ghostasset',
         'Silva Ghost Folder': 'silva_ghostfolder',
         'Silva Ghost': 'silva_ghost',
         'Silva Image': 'silva_image',
