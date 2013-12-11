@@ -15,7 +15,7 @@ documentation`_.
 Code repository
 ===============
 
-You can find the code of this extension in Mercurial:
-https://hg.infrae.com/silva.ui
+You can find the code of this extension in Git:
+https://github.com/silvacms/silva.ui
 
 .. _Silva developer documentation: http://docs.silvacms.org/latest/

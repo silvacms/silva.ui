@@ -12,7 +12,7 @@ tests_require = [
 
 setup(name='silva.ui',
       version=version,
-      description="Management interface for Silva",
+      description="Components for the user-interface to manage Silva CMS",
       long_description=open("README.txt").read() + "\n" +
                        open(os.path.join("docs", "HISTORY.txt")).read(),
       classifiers=[
@@ -21,7 +21,7 @@ setup(name='silva.ui',
       keywords='silva management interface SMI',
       author='Infrae',
       author_email='info@infrae.com',
-      url='http://infrae.com/download/silva',
+      url='https://github.com/silvacms/silva.ui',
       license='BSD',
       package_dir={'': 'src'},
       packages=find_packages('src'),
