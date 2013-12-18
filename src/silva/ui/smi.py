@@ -19,7 +19,6 @@ from zope.i18n.interfaces import IUserPreferredLanguages
 from zope.publisher.interfaces.browser import IBrowserRequest
 from zope.interface import Interface
 from zope.publisher.browser import applySkin
-from zope.traversing.browser import absoluteURL
 from zope.pagetemplate.interfaces import IPageTemplate
 
 from AccessControl import getSecurityManager
@@ -81,10 +80,11 @@ class SMI(grok.View):
             resource = load_entry.load()
             need(resource)
 
-        # Customization from service.
+        # Customization from service
         if settings.logo is not None:
-            self.logo_url = '/'.join(
-                (absoluteURL(settings, self.request), 'logo'))
+            settings_content_url = getMultiAdapter(
+                (settings, self.request), IContentURL)
+            self.logo_url = '/'.join((settings_content_url.url(), 'logo'))
         else:
             self.logo_url = self.static['img']['silva.png']()
         self.background = '#7996ac'
