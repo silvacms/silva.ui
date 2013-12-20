@@ -1,10 +1,17 @@
 Changes
 =======
 
-3.0.3 (unreleased)
+3.0.3 (2013/12/20)
 ------------------
 
-* ...
+* Make possible to configure the UI settings from SMI.
+
+* Add an option to display or not links to the ZMI.
+
+* Add support for UI component on non-Silva content.
+
+* Clean and improve CSS regarding forms and listing. This fixes
+  multiple issues.
 
 3.0.2 (2013/10/09)
 ------------------
